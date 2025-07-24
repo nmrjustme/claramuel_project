@@ -1,0 +1,290 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use App\Models\User;
+use App\Models\FacilityBookingLog;
+use App\Models\Facility;
+use App\Models\Breakfast;
+use App\Models\FacilitySummary;
+use App\Models\FacilityBookingDetails;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
+// This is the excel package
+use App\Exports\BookingsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Response;
+
+class BookingController extends Controller
+{
+    public function store(Request $request)
+    {
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+            'checkin_date' => 'required|date',
+            'checkout_date' => 'required|date|after:checkin_date',
+            'facilities' => 'required|array',
+            'facilities.*.facility_id' => 'required|exists:facilities,id',
+            'facilities.*.price' => 'required|numeric|min:0',
+            'facilities.*.nights' => 'required|integer|min:1',
+            'facilities.*.total_price' => 'required|numeric|min:0',
+            'breakfast_included' => 'sometimes|boolean',
+            'breakfast_price' => 'required_if:breakfast_included,true|numeric|min:0',
+            'total_price' => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Parse dates explicitly with timezone
+        $timezone = config('app.timezone', 'Asia/Manila');
+        $checkinDate = Carbon::parse($request->checkin_date, $timezone)
+            ->setTimezone('UTC')
+            ->startOfDay();
+        $checkoutDate = Carbon::parse($request->checkout_date, $timezone)
+            ->setTimezone('UTC')
+            ->startOfDay();
+
+        // Verify dates after parsing
+        if ($checkinDate >= $checkoutDate) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Check-out date must be after check-in date'
+            ], 422);
+        }
+
+        // Start database transaction
+        DB::beginTransaction();
+
+        try {
+            // Create or update user (email is no longer unique)
+            $user = User::create([
+                'firstname' => $request->firstname,
+                'lastname' => $request->lastname,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role' => 'customer',
+            ]);
+
+            // Create booking log with confirmation token
+            $bookingLog = FacilityBookingLog::create([
+                'user_id' => $user->id,
+                'booking_date' => now(),
+                'confirmation_token' => Str::random(60),
+            ]);
+
+            // Get active breakfast price if included
+            $breakfastId = null;
+            if ($request->breakfast_included) {
+                $breakfast = Breakfast::where('status', 'Active')->first();
+                if ($breakfast) {
+                    $breakfastId = $breakfast->id;
+                }
+            }
+
+            // Process each facility
+            foreach ($request->facilities as $facilityData) {
+                $facility = Facility::findOrFail($facilityData['facility_id']);
+
+                // Create facility summary
+                $facilitySummary = FacilitySummary::create([
+                    'facility_id' => $facility->id,
+                    'breakfast_id' => $breakfastId,
+                    'facility_booking_log_id' => $bookingLog->id,
+                ]);
+
+                // Calculate price including breakfast if applicable
+                $facilityPrice = $facilityData['total_price'];
+                if ($request->breakfast_included) {
+                    $facilityPrice += ($request->breakfast_price / count($request->facilities));
+                }
+
+                // Create booking details
+                FacilityBookingDetails::create([
+                    'facility_summary_id' => $facilitySummary->id,
+                    'facility_booking_log_id' => $bookingLog->id,
+                    'checkin_date' => $checkinDate->format('Y-m-d'),
+                    'checkout_date' => $checkoutDate->format('Y-m-d'),
+                    'total_price' => $facilityPrice,
+                ]);
+            }
+
+            // Commit transaction
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'booking_id' => $bookingLog->id,
+                'message' => 'Booking created successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Booking failed:', [
+                'message' => $e->getMessage(),
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+                'dates' => [
+                    'checkin' => $checkinDate->format('Y-m-d H:i:s'),
+                    'checkout' => $checkoutDate->format('Y-m-d H:i:s')
+                ]
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function WaitConfirmation(Request $request)
+    {
+        $email = $request->query('email');
+        return view('customer_pages.wait_for_confirmation', ['email' => $email]);
+    }
+    
+    public function index(Request $request)
+    {
+        $status = $request->input('status', 'paid');
+        $page = $request->input('page', 1);
+        $perPage = $request->input('per_page', 10);
+        
+        $query = FacilityBookingLog::with([
+                'user', 
+                'details', 
+                'payments',
+                'summaries'
+            ])
+            ->orderBy('confirmed_at', 'desc');
+        
+        // Filter based on payment status
+        if ($status === 'paid') {
+            $query->whereHas('payments', function($q) {
+                $q->where('status', 'paid')
+                  ->where('amount', '>', 0);
+            })->whereDoesntHave('payments', function($q) {
+                $q->where('status', '!=', 'paid');
+            });
+        } elseif ($status === 'advance_paid') {
+            $query->whereHas('payments', function($q) {
+                $q->where('status', 'advance_paid');
+            })->whereDoesntHave('payments', function($q) {
+                $q->where('status', 'paid');
+            });
+        } elseif ($status === 'under_verification') {
+            $query->where('status', 'pending_confirmation');
+        } elseif ($status === 'rejected') {
+            $query->where('status', 'rejected');
+        }
+        
+        $total = $query->count();
+        $bookings = $query->skip(($page - 1) * $perPage)
+                         ->take($perPage)
+                         ->get();
+        
+        return response()->json([
+            'data' => $bookings,
+            'total' => $total,
+            'from' => ($page - 1) * $perPage + 1,
+            'to' => min($page * $perPage, $total),
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'last_page' => ceil($total / $perPage)
+        ]);
+    }
+    
+    public function Export(Request $request)
+    {
+        try {
+            $status = $request->query('status', 'paid');
+            
+            $validStatuses = ['paid', 'not_paid', 'advance_paid', 'pending_confirmation', 'rejected', 'request', 'cancelled'];
+            if (!in_array($status, $validStatuses)) {
+                $status = 'paid';
+            }
+            
+            // Early check for data existence
+            if (!FacilityBookingLog::whereHas('payments', fn($q) => $q->where('status', $status))->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No bookings found for export',
+                ], 404);
+            }
+            
+            $filename = 'bookings_' . $status . '_' . now()->format('Y-m-d') . '.xlsx';
+            
+            return Excel::download(new BookingsExport($status), $filename);
+            
+        } catch (\Exception $e) {
+            \Log::error('Export failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate Excel file',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
+    public function nextCheckin()
+    {
+        try {
+            $nextBooking = FacilityBookingLog::with(['user', 'details'])
+                ->where('checked_in_at', '>', now()->toDateTimeString())
+                ->orderBy('checked_in_at')
+                ->first();
+
+            if ($nextBooking) {
+                $checkinDate = Carbon::parse($nextBooking->details[0]->checkin_date);
+                $daysUntil = now()->diffInDays($checkinDate);
+                
+                return response()->json([
+                    'success' => true,
+                    'data' => $nextBooking,
+                    'days_until' => $daysUntil
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => null,
+                'message' => 'No upcoming check-ins found'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching next check-in',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function show(FacilityBookingLog $booking)
+    {
+        $booking->load(['user', 'details', 'payments', 'summaries']);
+        
+        return response()->json([
+            'data' => $booking
+        ]);
+    }
+}
