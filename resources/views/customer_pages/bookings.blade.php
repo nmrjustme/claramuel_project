@@ -577,7 +577,7 @@
             </div>
             
             <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-dark mb-2">Available Accommodation</h3>
+                <h3 class="text-lg font-semibold text-dark mb-2">Available Accommodations</h3>
                 
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <div class="flex items-center">
