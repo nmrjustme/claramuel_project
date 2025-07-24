@@ -10,3 +10,4 @@ CHANGELOG.md export-ignore
 public/video/commercials.mp4 filter=lfs diff=lfs merge=lfs -text
 public/video/commercials.mp filter=lfs diff=lfs merge=lfs -text
 welcomeVideo.mp4 filter=lfs diff=lfs merge=lfs -text
+public/video/welcomeVideo.mp4 filter=lfs diff=lfs merge=lfs -text
