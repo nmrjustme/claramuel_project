@@ -242,8 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
             text: 'PAID'
         },
         'advance_paid': {
-            class: 'bg-blue-600',
-            text: 'ADVANCE PAID'
+            class: 'bg-green-600',
+            text: 'PAID'
         },
         'under_verification': {
             class: 'bg-yellow-600',
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="text-sm text-gray-900">${formatDate(booking.details[0]?.checkout_date)}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">${formatCurrency(booking.details[0]?.total_price || 0)}</div>
+                                <div class="text-sm text-gray-900">${formatCurrency((booking.details[0]?.total_price * 0.5) || 0)}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">${booking.payments?.length > 0 ? (booking.user?.firstname || 'Payment Gateway') : 'N/A'}</div> 
@@ -399,80 +399,166 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Function to load booking summary
-    function loadBookingSummary(bookingId) {
-        fetch(`/get/show/bookings/${bookingId}`, {
-            method: 'GET',
-            headers: headers,
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
-        })
-        .then(data => {
+    async function loadBookingSummary(bookingId) {
+        try {
+            // Fetch booking data
+            const response = await fetch(`/get/show/bookings/${bookingId}`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
             const booking = data.data;
             const detail = booking.details[0];
             const statusInfo = getBookingStatus(booking);
-            
+
             // Calculate payment summary
             const totalPaid = booking.payments?.reduce((sum, payment) => 
                 sum + parseFloat(payment.amount), 0) || 0;
             const totalAmount = detail?.total_price || 0;
-            
+            const balance = totalAmount - totalPaid;
+
+            // Generate room list HTML
+            const roomListHtml = booking.summaries?.length 
+                ? booking.summaries.map(summary => {
+                    const room = summary.facility;
+                    return room ? `
+                        <li class="text-sm text-gray-700">
+                            ${room.name} — ${formatCurrency(room.price)}
+                        </li>` : '';
+                }).join('')
+                : '<li class="text-sm text-gray-600">No room info available</li>';
+
+            // Generate the HTML template
             const html = `
-                <div class="mb-4 text-center">
-                    <span class="px-4 py-2 inline-flex text-lg leading-5 font-semibold rounded-full ${statusInfo.class} text-white mb-2">
-                        ${statusInfo.text}
-                    </span>
-                    <h3 class="text-lg font-semibold text-gray-800">${booking.reference}</h3>
-                    <h4 class="text-md font-medium text-gray-800">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</h4>
-                    <p class="text-sm text-gray-600">${booking.user?.email || 'N/A'}</p>
-                    <p class="text-sm text-gray-600">${booking.user?.phone || 'N/A'}</p>
-                </div>
-                
-                <div class="border-t border-gray-200 pt-3 mb-4">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-600">Check-in:</span>
-                        <span class="text-sm font-medium text-gray-800">${formatDate(detail?.checkin_date)}</span>
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <!-- Status & Guest Info -->
+                    <div class="mb-6 text-center">
+                        <div class="px-4 py-2 inline-flex text-lg leading-5 font-semibold rounded-full ${statusInfo.class} text-white mb-3">
+                            ${statusInfo.text}
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">${booking.reference}</h3>
+                        <div class="mt-2">
+                            <h4 class="text-md font-medium text-gray-800">
+                                ${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}
+                            </h4>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <i class="fas fa-envelope mr-1"></i> ${booking.user?.email || 'N/A'}
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-phone mr-1"></i> ${booking.user?.phone || 'N/A'}
+                            </p>
+                        </div>
                     </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-600">Check-out:</span>
-                        <span class="text-sm font-medium text-gray-800">${formatDate(detail?.checkout_date)}</span>
+
+                    <!-- Room Information -->
+                    <div class="border-t border-gray-200 pt-4 mb-4">
+                        <h5 class="text-md font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-hotel mr-2 text-blue-500"></i>
+                            Room(s) Booked
+                        </h5>
+                        <ul class="space-y-2 pl-5 list-disc">
+                            ${roomListHtml}
+                        </ul>
                     </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-600">Nights:</span>
-                        <span class="text-sm font-medium text-gray-800">${getNights(detail?.checkin_date, detail?.checkout_date)}</span>
+
+                    <!-- Stay Details -->
+                    <div class="border-t border-gray-200 pt-4 mb-4">
+                        <h5 class="text-md font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="far fa-calendar-alt mr-2 text-blue-500"></i>
+                            Stay Details
+                        </h5>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 flex items-center">
+                                    <i class="fas fa-sign-in-alt mr-2 text-gray-400"></i> Check-in:
+                                </span>
+                                <span class="text-sm font-medium text-gray-800">
+                                    ${formatDate(detail?.checkin_date)}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 flex items-center">
+                                    <i class="fas fa-sign-out-alt mr-2 text-gray-400"></i> Check-out:
+                                </span>
+                                <span class="text-sm font-medium text-gray-800">
+                                    ${formatDate(detail?.checkout_date)}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 flex items-center">
+                                    <i class="fas fa-moon mr-2 text-gray-400"></i> Nights:
+                                </span>
+                                <span class="text-sm font-medium text-gray-800">
+                                    ${getNights(detail?.checkin_date, detail?.checkout_date)}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="border-t border-gray-200 pt-3">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-600">Total Amount:</span>
-                        <span class="text-sm font-medium text-red-600">${formatCurrency(totalAmount)}</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-600">Amount Paid:</span>
-                        <span class="text-sm font-medium text-green-600">${formatCurrency(totalPaid)}</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm text-gray-600">Balance:</span>
-                        <span class="text-sm font-medium ${totalAmount - totalPaid > 0 ? 'text-red-600' : 'text-green-600'}">
-                            ${formatCurrency(totalAmount - totalPaid)}
-                        </span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-sm text-gray-600">Payment Method:</span>
-                        <span class="text-sm font-medium text-gray-800">${booking.payments?.[0]?.method || 'N/A'}</span>
+                    
+                    <!-- Payment Summary -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <h5 class="text-md font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-receipt mr-2 text-blue-500"></i>
+                            Payment Summary
+                        </h5>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Total Amount:</span>
+                                <span class="text-sm font-medium text-gray-800">
+                                    ${formatCurrency(totalAmount)}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Amount Paid:</span>
+                                <span class="text-sm font-medium text-green-600">
+                                    ${formatCurrency(totalPaid)}
+                                </span>
+                            </div>
+                            <div class="flex justify-between border-t border-gray-100 pt-2">
+                                <span class="text-sm font-semibold text-gray-700">Balance:</span>
+                                <span class="text-sm font-semibold ${balance > 0 ? 'text-red-600' : 'text-green-600'}">
+                                    ${formatCurrency(Math.abs(balance))}
+                                    ${balance > 0 ? '(Due)' : '(Overpaid)'}
+                                </span>
+                            </div>
+                            <div class="flex justify-between mt-4 pt-2 border-t border-gray-100">
+                                <span class="text-sm text-gray-600">Payment Method:</span>
+                                <span class="text-sm font-medium text-gray-800">
+                                    ${booking.payments?.[0]?.method || 'N/A'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
             
+            // Insert HTML into DOM
             document.getElementById('booking-summary').innerHTML = html;
-        })
-        .catch(error => {
+
+        } catch (error) {
             toastr.error('Failed to load booking details');
             console.error('Error:', error);
-        });
+            document.getElementById('booking-summary').innerHTML = `
+                <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                Failed to load booking details. Please try again later.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
     }
     
     // Helper functions

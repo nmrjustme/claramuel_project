@@ -60,7 +60,7 @@ class BookingsExport implements FromCollection, WithHeadings, WithMapping
             $booking->id, // Using booking ID as reservation code
             $detail ? $detail->checkin_date->format('Y-m-d') : 'N/A',
             $detail ? $detail->checkout_date->format('Y-m-d') : 'N/A',
-            $detail ? '₱' . number_format($detail->total_price, 2) : 'N/A',
+            $detail ? '₱' . number_format(($detail->total_price * 0.5), 2) : 'N/A',
             $payment ? ($payment->user->firstname ?? 'Payment Gateway') : 'N/A',
             $facilities
         ];

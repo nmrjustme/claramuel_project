@@ -24,8 +24,8 @@ class BookingsController extends Controller
         $this->facilities = Facility::with([
             'images' => function($query) {
                 $query->select('id', 'fac_id', 'image as path')
-                      ->orderBy('id')
-                      ->limit(1);
+                    ->orderBy('id')
+                    ->limit(1);
             },
             'discounts' // Using a relationship for better performance
         ])

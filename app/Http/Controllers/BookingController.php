@@ -173,29 +173,37 @@ class BookingController extends Controller
             ->orderBy('confirmed_at', 'desc');
         
         // Filter based on payment status
-        if ($status === 'paid') {
+        if ($status === 'paid') 
+        {
             $query->whereHas('payments', function($q) {
                 $q->where('status', 'paid')
                   ->where('amount', '>', 0);
             })->whereDoesntHave('payments', function($q) {
                 $q->where('status', '!=', 'paid');
             });
-        } elseif ($status === 'advance_paid') {
+        } 
+        elseif ($status === 'advance_paid') 
+        {
             $query->whereHas('payments', function($q) {
                 $q->where('status', 'advance_paid');
             })->whereDoesntHave('payments', function($q) {
                 $q->where('status', 'paid');
             });
-        } elseif ($status === 'under_verification') {
-            $query->where('status', 'pending_confirmation');
-        } elseif ($status === 'rejected') {
+        } 
+        elseif ($status === 'under_verification') 
+        {
+            $query->whereHas('payments', function($q) {
+                $q->where('status', 'under_verification');
+            });
+        } 
+        elseif ($status === 'rejected') {
             $query->where('status', 'rejected');
         }
         
         $total = $query->count();
         $bookings = $query->skip(($page - 1) * $perPage)
-                         ->take($perPage)
-                         ->get();
+                        ->take($perPage)
+                        ->get();
         
         return response()->json([
             'data' => $bookings,
@@ -281,7 +289,7 @@ class BookingController extends Controller
     
     public function show(FacilityBookingLog $booking)
     {
-        $booking->load(['user', 'details', 'payments', 'summaries']);
+        $booking->load(['user', 'details', 'payments', 'summaries.facility']);
         
         return response()->json([
             'data' => $booking

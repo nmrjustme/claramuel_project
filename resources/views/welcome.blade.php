@@ -93,7 +93,7 @@
             playsinline 
             poster="{{ url('imgs/hero-fallback.jpg') }}"
             style="object-position: center center; filter: brightness(1.2) contrast(1.2);">
-            <source src="{{ url('video/commercials.mp4') }}" type="video/mp4">
+            <source src="{{ url('video/commercial.mp4') }}" type="video/mp4">
         </video>
     </div>
     
