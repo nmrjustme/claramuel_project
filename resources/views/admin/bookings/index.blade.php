@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Bookings')
+
 @php
     $active = 'bookings';
 @endphp

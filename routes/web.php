@@ -156,57 +156,73 @@ Route::middleware(['auth'])->group(function () {
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
         header('X-Accel-Buffering: no');
-    
+
         echo "retry: 10000\n\n";
-    
+
         config(['session.driver' => 'array']);
         set_time_limit(0);
         ob_implicit_flush(true);
-    
+
         $lastEventId = (int)(request()->header('Last-Event-ID') ?? FacilityBookingLog::max('id') ?? 0);
         $lastUpdateTime = request()->input('last_update') ?? now()->subDay()->toDateTimeString();
-    
+
+        // Add connection timeout and limit
+        $maxExecutionTime = 300; // 5 minutes
+        $startTime = time();
+
         try {
             while (true) {
-                // Get new bookings since last event
+                // Check if connection is still alive
+                if (connection_aborted() || (time() - $startTime) > $maxExecutionTime) {
+                    break;
+                }
+                
+                // Get new bookings with limit
                 $newBookings = FacilityBookingLog::with(['user', 'details', 'payments'])
                     ->where('id', '>', $lastEventId)
                     ->orderBy('id', 'asc')
+                    ->limit(100) // Add limit to prevent huge data transfers
                     ->get();
-    
-                // Get updated bookings since last update time
+
+                // Get updated bookings with limit and time constraint
                 $updatedBookings = FacilityBookingLog::with(['user', 'details', 'payments'])
                     ->where('updated_at', '>', $lastUpdateTime)
                     ->where('id', '<=', $lastEventId)
+                    ->limit(100) // Add limit
                     ->get();
-    
+
                 if ($newBookings->isNotEmpty() || $updatedBookings->isNotEmpty()) {
                     $currentEventId = $newBookings->last()->id ?? $lastEventId;
                     $currentUpdateTime = now()->toDateTimeString();
-    
+
                     $data = [
                         'bookings' => [
                             'new' => $newBookings->toArray(),
                             'updated' => $updatedBookings->toArray(),
                         ],
                         'lastUpdate' => $currentUpdateTime,
-                        'playSound' => true
+                        'playSound' => $newBookings->isNotEmpty() // Only play sound for new bookings
                     ];
-    
+                    
                     echo "id: {$currentEventId}\n";
                     echo "event: update\n";
                     echo 'data: ' . json_encode($data) . "\n\n";
-    
+
                     $lastEventId = $currentEventId;
                     $lastUpdateTime = $currentUpdateTime;
                 }
-    
+
                 @ob_flush();
                 flush();
-    
-                if (connection_aborted()) break;
-    
-                sleep(5);
+
+                // Clear memory
+                unset($newBookings, $updatedBookings, $data);
+                
+                // Sleep but check for connection abort more frequently
+                for ($i = 0; $i < 5; $i++) {
+                    if (connection_aborted()) break 2;
+                    sleep(1);
+                }
             }
         } catch (\Throwable $e) {
             Log::error('SSE error', ['error' => $e->getMessage()]);
@@ -215,9 +231,10 @@ Route::middleware(['auth'])->group(function () {
             @ob_flush();
             flush();
         }
-    
+
         exit;
     });
+    
     // calendar
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/bookings/calendar', [BookingCalendarController::class, 'getCalendarData'])->name('admin.calendar.getDate');
@@ -242,21 +259,6 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/payments/verify-qr', [PaymentsController::class, 'verifyQrCode'])
         ->name('payments.verify-qr');
-    Route::get('/test-qr', function() {
-        return QrCode::size(200)->generate('Test QR Code');
-    });
-    
-    Route::get('/qr_testing', function () {
-            $data = json_encode([
-                'payment_id' => 1,
-                'reference' => 'ABC123',
-                'token' => 'demo_token',
-                'expires_at' => now()->addDays(1)->toDateTimeString()
-            ], JSON_UNESCAPED_SLASHES);
-        
-            return response(QrCode::format('png')->size(300)->generate($data))
-                   ->header('Content-Type', 'image/png');
-    });
     
     Route::post('/admin/payments/verify/{payment_id}', [PaymentsController::class, 'verifyScannedPayment'])
     ->name('admin.payments.verify');

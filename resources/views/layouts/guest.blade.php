@@ -27,7 +27,7 @@
         @endif
         
         @if(View::hasSection('auth') && !View::hasSection('content') && !View::hasSection('profile'))
-            <body class="font-sans antialiased bg-gray-600">
+            <body class="font-sans antialiased bg-red-50">
                 <div class="h-screen flex items-center justify-center">
                     <div class="w-full max-w-4xl flex flex-col lg:flex-row bg-white rounded-lg shadow-lg overflow-hidden">
                         @yield('auth')
@@ -37,7 +37,7 @@
         @endif
         
         @if(View::hasSection('profile') && !View::hasSection('auth') && !View::hasSection('content') && !View::hasSection('admin_profile'))
-            <body class="font-sans antialiased bg-gray-600">
+            <body class="font-sans antialiased bg-gray-700">
                 <div class="py-12">
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                             @yield('profile')

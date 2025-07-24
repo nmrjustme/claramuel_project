@@ -1725,30 +1725,6 @@ function markAllAsRead() {
     });
 }
 
-// Mark single booking as read
-function markBookingAsRead(bookingId) {
-    return fetch(`/api/inquiries/mark-read/${bookingId}`, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const bookingRow = document.querySelector(`.booking-row[data-id="${bookingId}"]`);
-            if (bookingRow) {
-                bookingRow.classList.remove('unread-booking');
-            }
-            
-            updateNewBookingsCount(data.newCount || 0);
-            return data;
-        }
-        throw new Error(data.message || 'Failed to mark as read');
-    });
-}
-
 // UI helper functions
 function showLoadingState(containerId, message) {
     const container = document.getElementById(containerId);
@@ -1782,7 +1758,6 @@ function showErrorState(containerId, error) {
         `;
     }
 }
-
 
 // View payment details
 function viewPaymentDetails(bookingId) {
