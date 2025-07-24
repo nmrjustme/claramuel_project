@@ -9,7 +9,7 @@ class AdminPaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payments::with(['bookingLog.user'])
+        $query = Payments::with(['bookingLog.user', 'bookingLog.details'])
             ->whereNotNull('reference_no')
             ->orderBy('id', 'desc');
 

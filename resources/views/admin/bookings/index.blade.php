@@ -77,10 +77,10 @@
                 </div>
             </div>
             
-            <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
+            <div class="bg-white rounded-lg shadow-md sticky top-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Booking Summary</h2>
-                <div class="border-t border-gray-200 pt-4" id="booking-summary">
-                    <div class="text-center py-8 text-gray-400">
+                <div class="border-t border-gray-200" id="booking-summary">
+                    <div class="text-center text-gray-400">
                         Select a booking to view details
                     </div>
                 </div>
