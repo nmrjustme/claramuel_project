@@ -160,9 +160,9 @@
                                 <div class="flex justify-between text-xs text-gray-500">
                                     @if ($breakfastPrice)
                                         <span>Breakfast Included:</span>
-                                        <span>₱{{ number_format($breakfastPrice, 2) }}/morning(s)</span>
+                                        <span>₱{{ number_format($breakfastPrice->price, 2) }}/morning(s)</span>
                                     @else
-                                        <span>Not included</span>
+                                        <span>Breakfast not included</span>
                                     @endif
                                 </div>     
                                     
@@ -173,7 +173,7 @@
                                 <div class="flex justify-between text-sm mt-1">
                                     <span>Subtotal:</span>
                                     @if ($breakfastPrice)
-                                        <span class="font-medium">₱{{ number_format((($facility['price']+ $breakfastPrice) * $nights ), 2) }}</span>
+                                        <span class="font-medium">₱{{ number_format((($facility['price']+ $breakfastPrice->price) * $nights ), 2) }}</span>
                                     @else
                                         <span class="font-medium">₱{{ number_format($facility['price'] * $nights, 2) }}</span>
                                     @endif

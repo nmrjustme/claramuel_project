@@ -78,10 +78,21 @@
 
     function processQRCode(qrData) {
         try {
+            
+            if (!qrData || qrData.trim() === "") {
+                console.error("❌ QR data is empty.");
+                resultContainer.innerHTML = "❌ Invalid QR code. No data found.";
+                isProcessing = false;
+                setTimeout(() => requestAnimationFrame(scanQR), 2000);
+                return;
+            }
+    
+            // ✅ Log QR data to console
+            console.log("📦 QR Data:", qrData);
             const data = { qr_data: qrData };
             resultContainer.innerHTML = "<div class='spinner'></div> Verifying...";
             
-            fetch('/verify-qr-code', {
+            fetch('/verify-qr-codes', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

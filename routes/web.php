@@ -24,8 +24,10 @@ use App\Http\Controllers\BookingCalendarController;
 use App\Http\Controllers\BookCottageController;
 use App\Http\Controllers\AdminPaymentController;
 use App\Http\Controllers\CheckinController;
-use App\Http\Controllers\BookingLogController
-;
+use App\Http\Controllers\BookingLogController;
+    
+use App\Events\NewBookingRequest;
+
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -76,6 +78,23 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+
+
+    Route::get('/test-broadcast', function () {
+        // Get the most recent booking for testing
+        $booking = FacilityBookingLog::with('user')->latest()->first();
+        
+        if (!$booking) {
+            return 'No bookings found to broadcast. ';
+        }
+
+        // Fire the event
+        event(new NewBookingRequest($booking));
+        
+        return 'New booking event broadcasted!' . $booking->id;
+    });
+    
+    
     Route::get('/admin_dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard/stats', [AdminController::class, 'getStats']);
     Route::get('/admin/dashboard/occupied-facilities', [AdminController::class, 'getOccupiedFacilities']);
@@ -272,7 +291,7 @@ Route::middleware(['auth'])->group(function () {
     });
     
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
-    Route::post('/verify-qr-code', [CheckinController::class, 'verifyQrCode']);
+    Route::post('/verify-qr-codes', [CheckinController::class, 'verifyQrCode']);
     Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
     
 });

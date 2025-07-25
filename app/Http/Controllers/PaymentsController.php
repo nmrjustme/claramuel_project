@@ -32,9 +32,9 @@ class PaymentsController extends Controller
         $booking->load(['user', 'details', 'summaries.facility', 'payments']); 
         
         $verified_at = $booking->verified_at;
-        $user_firstname = $booking->user->firstname ?? 'No user found'; // user firstname
-        $total_price = $booking->details->sum('total_price') ?? 0; // total price
-        $half_of_total_price = ($total_price * 0.5) ?? 0; // 50% of the total price
+        $user_firstname = $booking->user->firstname ?? 'No user found';
+        $total_price = $booking->details->sum('total_price') ?? 0;
+        $half_of_total_price = ($total_price * 0.5) ?? 0;
         $reference = $booking->reference ?? 'No reference found';
         
         $facilities = $booking->summaries->map(function ($summary) {
@@ -44,13 +44,14 @@ class PaymentsController extends Controller
             ];
         });
         
-        $breakfastSummary = $booking->summaries->firstWhere('breakfast_id', true); // Adjust the key
-        $breakfastPrice = optional($breakfastSummary->breakfast)->price ?? null;
+        // Improved breakfast summary handling
+        $breakfastPrice = $booking->summaries->first()->breakfast ?? 0;
+
         
         $firstDetail = $booking->details->first();
         
-        // Corrected: Use $booking instead of $bookingLog
-        $paymentStatus = $booking->payments->first()->status;
+        // Safer payment status check
+        $paymentStatus = $booking->payments->first()->status ?? null;
         
         if ($firstDetail && $firstDetail->checkin_date && $firstDetail->checkout_date) {
             $checkin = Carbon::parse($firstDetail->checkin_date);

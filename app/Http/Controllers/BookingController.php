@@ -88,6 +88,7 @@ class BookingController extends Controller
                 'confirmation_token' => Str::random(60),
             ]);
 
+
             // Get active breakfast price if included
             $breakfastId = null;
             if ($request->breakfast_included) {
@@ -100,7 +101,7 @@ class BookingController extends Controller
             // Process each facility
             foreach ($request->facilities as $facilityData) {
                 $facility = Facility::findOrFail($facilityData['facility_id']);
-
+                
                 // Create facility summary
                 $facilitySummary = FacilitySummary::create([
                     'facility_id' => $facility->id,
@@ -131,7 +132,6 @@ class BookingController extends Controller
             // After booking creation
             event(new NewBookingRequest($bookingLog));
             
-
             return response()->json([
                 'success' => true,
                 'booking_id' => $bookingLog->id,
@@ -150,7 +150,7 @@ class BookingController extends Controller
                     'checkout' => $checkoutDate->format('Y-m-d H:i:s')
                 ]
             ]);
-
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Booking failed: ' . $e->getMessage()
