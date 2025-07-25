@@ -7,12 +7,32 @@
 @endphp
 
 @section('content')
+<style>
+.sticky-container {
+    position: sticky;
+    top: 1.5rem; /* top-6 in Tailwind = 1.5rem */
+    max-height: calc(100vh - 2rem); /* Prevents overflow */
+    overflow-y: auto; /* Allows scrolling if content is too tall */
+}
+</style>
 <div class="container mx-auto px-4 py-6">
     <div class="flex flex-col lg:flex-row gap-6">
         <!-- Main Content -->
         <div class="lg:w-3/4">
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h1 class="text-2xl font-bold text-gray-800 mb-6">Bookings</h1>
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                    <h1 class="text-2xl font-bold text-gray-800">Bookings</h1>
+                    
+                    <!-- Search Bar -->
+                    <div class="relative w-full md:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <input id="search-input" type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Search bookings...">
+                    </div>
+                </div>
                 
                 <!-- Status Tabs -->
                 <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
@@ -62,26 +82,39 @@
                 </div>
             </div>
         </div>
-        
         <!-- Booking Summary Sidebar -->
         <div class="lg:w-1/4">
-            <!-- Next Check-in Section -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Next Check-in</h3>
-                <p class="text-gray-600 mb-4" id="next-checkin-time">Loading...</p>
-                <div class="bg-gray-50 p-4 rounded">
-                    <p class="font-medium text-gray-800" id="next-checkin-date">-</p>
-                    <p class="text-gray-600" id="next-checkin-nights">-</p>
-                    <p class="font-medium text-gray-800 mt-2" id="next-checkin-guest">-</p>
-                    <p class="text-gray-600" id="next-checkin-phone">-</p>
+            <!-- Sticky Wrapper (makes both sections stick together) -->
+            <div class="sticky top-6 space-y-6">
+                <!-- Next Check-in Section -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Next Check-in</h3>
+                    <p class="text-gray-600 mb-4" id="next-checkin-time">Loading...</p>
+                    <div class="bg-gray-50 p-4 rounded">
+                        <p class="font-medium text-gray-800" id="next-checkin-date">-</p>
+                        <p class="text-gray-600" id="next-checkin-nights">-</p>
+                        <p class="font-medium text-gray-800 mt-2" id="next-checkin-guest">-</p>
+                        <p class="text-gray-600" id="next-checkin-phone">-</p>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="bg-white rounded-lg shadow-md sticky top-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Booking Summary</h2>
-                <div class="border-t border-gray-200" id="booking-summary">
-                    <div class="text-center text-gray-400">
-                        Select a booking to view details
+                
+                <!-- Booking Summary -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-gradient-to-r from-red-600 to-red-800 p-4 text-white">
+                        <h2 class="text-xl font-bold flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                            </svg>
+                            Booking Summary
+                        </h2>
+                    </div>
+                    <div class="p-0" id="booking-summary">
+                        <div class="text-center py-10 px-4 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <p>Select a booking to view details</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -109,16 +142,34 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
     let totalPages = 1;
     const perPage = 10;
+    let searchQuery = '';
     
     // Load initial data
     loadBookings(currentStatus, currentPage);
     loadNextCheckin();
+    
+    // Search input handler with debounce
+    const searchInput = document.getElementById('search-input');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchQuery = this.value.trim();
+        
+        // Debounce the search to avoid too many requests
+        searchTimeout = setTimeout(() => {
+            currentPage = 1;
+            loadBookings(currentStatus, currentPage);
+        }, 500);
+    });
     
     // Tab click handler
     document.querySelectorAll('[data-status]').forEach(tab => {
         tab.addEventListener('click', function() {
             currentStatus = this.dataset.status;
             currentPage = 1;
+            searchQuery = ''; // Reset search when changing tabs
+            searchInput.value = ''; // Clear search input
             
             // Update active tab
             document.querySelectorAll('[data-status]').forEach(t => {
@@ -167,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         excelBtn.disabled = true;
     
-        fetch(`/admin/bookings/export?status=${status}`, {
+        fetch(`/admin/bookings/export?status=${status}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -243,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         'advance_paid': {
             class: 'bg-green-600',
-            text: 'PAID'
+            text: '50% PAID'
         },
         'under_verification': {
             class: 'bg-yellow-600',
@@ -258,12 +309,16 @@ document.addEventListener('DOMContentLoaded', function() {
             text: 'NOT PAID'
         }
     };
+
     // Function to load bookings
     function loadBookings(status, page = 1) {
         const url = new URL(`/get/admin/bookings`, window.location.origin);
         url.searchParams.append('status', status);
         url.searchParams.append('page', page);
         url.searchParams.append('per_page', perPage);
+        if (searchQuery) {
+            url.searchParams.append('search', searchQuery);
+        }
         
         fetch(url, {
             method: 'GET',
@@ -295,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const statusInfo = getBookingStatus(booking);
                     
                     html += `
-                        <tr class="booking-row cursor-pointer hover:bg-gray-200" data-booking-id="${booking.id}">
+                        <tr class="booking-row cursor-pointer hover:bg-gray-50" data-booking-id="${booking.id}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class} text-white">
                                     ${statusInfo.text}
@@ -305,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="text-sm text-gray-900">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">${booking.reference}</div>
+                                <div class="text-sm text-gray-900 font-medium">${booking.reference}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">${formatDate(booking.details[0]?.checkin_date)}</div>
@@ -314,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="text-sm text-gray-900">${formatDate(booking.details[0]?.checkout_date)}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">${formatCurrency((booking.details[0]?.total_price * 0.5) || 0)}</div>
+                                <div class="text-sm text-gray-900 font-medium">${formatCurrency((booking.details[0]?.total_price * 0.5) || 0)}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">${booking.payments?.length > 0 ? (booking.user?.firstname || 'Payment Gateway') : 'N/A'}</div> 
@@ -331,6 +386,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.addEventListener('click', function() {
                     const bookingId = this.dataset.bookingId;
                     loadBookingSummary(bookingId);
+                    
+                    // Highlight selected row
+                    document.querySelectorAll('.booking-row').forEach(r => {
+                        r.classList.remove('bg-red-50');
+                    });
+                    this.classList.add('bg-red-50');
                 });
             });
         })
@@ -339,8 +400,9 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
         });
     }
+    
     function getBookingStatus(booking) {
-        // If booking has explicit status (for rejected or pending)
+        // First check explicit booking status
         if (booking.status === 'rejected') return STATUS_CONFIG.rejected;
         if (booking.status === 'pending_confirmation') return STATUS_CONFIG.under_verification;
         
@@ -351,8 +413,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalAmount = booking.details?.reduce((sum, detail) => 
             sum + parseFloat(detail.total_price), 0) || 0;
         
+        if (totalPaid <= 0) return STATUS_CONFIG.not_paid;
         if (totalPaid >= totalAmount) return STATUS_CONFIG.paid;
-        if (totalPaid > 0) return STATUS_CONFIG.advance_paid;
+        if (totalPaid > 0 && totalPaid < totalAmount) return STATUS_CONFIG.advance_paid;
         
         return STATUS_CONFIG.not_paid;
     }
@@ -428,72 +491,90 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? booking.summaries.map(summary => {
                     const room = summary.facility;
                     return room ? `
-                        <li class="text-sm text-gray-700">
-                            ${room.name} — ${formatCurrency(room.price)}
+                        <li class="flex justify-between py-2 border-b border-gray-100 last:border-0">
+                            <span class="text-sm text-gray-700">${room.name}</span>
+                            <span class="text-sm font-medium text-gray-800">${formatCurrency(room.price)}</span>
                         </li>` : '';
                 }).join('')
-                : '<li class="text-sm text-gray-600">No room info available</li>';
+                : '<li class="text-sm text-gray-600 py-2">No room info available</li>';
+
+            // Generate payment history HTML
+            const paymentHistoryHtml = booking.payments?.length
+                ? booking.payments.map(payment => `
+                    <li class="flex justify-between py-2 border-b border-gray-100 last:border-0">
+                        <div>
+                            <span class="text-sm font-medium text-gray-800">${formatDate(payment.payment_date)}</span>
+                            <span class="block text-xs text-gray-500">${payment.method || 'N/A'}</span>
+                        </div>
+                        <span class="text-sm font-medium text-green-600">${formatCurrency(payment.amount)}</span>
+                    </li>
+                `).join('')
+                : '<li class="text-sm text-gray-600 py-2">No payment history</li>';
 
             // Generate the HTML template
             const html = `
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <!-- Status & Guest Info -->
-                    <div class="mb-6 text-center">
-                        <div class="px-4 py-2 inline-flex text-lg leading-5 font-semibold rounded-full ${statusInfo.class} text-white mb-3">
-                            ${statusInfo.text}
+                <div class="divide-y divide-gray-200">
+                    <!-- Header with Status and Guest Info -->
+                    <div class="px-4 py-5 bg-white">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">${booking.reference}</h3>
+                                <p class="text-sm text-gray-500 mt-1">Booking ID: ${booking.id}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-lg font-semibold ${statusInfo.class} text-white">
+                                ${statusInfo.text}
+                            </span>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900">${booking.reference}</h3>
-                        <div class="mt-2">
-                            <h4 class="text-md font-medium text-gray-800">
-                                ${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}
+                        
+                        <div class="mt-4">
+                            <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                </svg>
+                                Guest Information
                             </h4>
-                            <p class="text-sm text-gray-600 mt-1">
-                                <i class="fas fa-envelope mr-1"></i> ${booking.user?.email || 'N/A'}
-                            </p>
-                            <p class="text-sm text-gray-600">
-                                <i class="fas fa-phone mr-1"></i> ${booking.user?.phone || 'N/A'}
-                            </p>
+                            <div class="mt-2 pl-7">
+                                <p class="text-sm font-medium text-gray-800">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</p>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                    </svg>
+                                    ${booking.user?.email || 'N/A'}
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                    </svg>
+                                    ${booking.user?.phone || 'N/A'}
+                                </p>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Room Information -->
-                    <div class="border-t border-gray-200 pt-4 mb-4">
-                        <h5 class="text-md font-semibold text-gray-800 mb-3 flex items-center">
-                            <i class="fas fa-hotel mr-2 text-blue-500"></i>
-                            Room(s) Booked
-                        </h5>
-                        <ul class="space-y-2 pl-5 list-disc">
-                            ${roomListHtml}
-                        </ul>
-                    </div>
-
+                    
                     <!-- Stay Details -->
-                    <div class="border-t border-gray-200 pt-4 mb-4">
-                        <h5 class="text-md font-semibold text-gray-800 mb-3 flex items-center">
-                            <i class="far fa-calendar-alt mr-2 text-blue-500"></i>
+                    <div class="px-4 py-5 bg-white">
+                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
                             Stay Details
-                        </h5>
-                        <div class="space-y-2">
+                        </h4>
+                        <div class="mt-3 pl-7 space-y-3">
                             <div class="flex justify-between">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <i class="fas fa-sign-in-alt mr-2 text-gray-400"></i> Check-in:
-                                </span>
+                                <span class="text-sm text-gray-600">Check-in:</span>
                                 <span class="text-sm font-medium text-gray-800">
                                     ${formatDate(detail?.checkin_date)}
                                 </span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <i class="fas fa-sign-out-alt mr-2 text-gray-400"></i> Check-out:
-                                </span>
+                                <span class="text-sm text-gray-600">Check-out:</span>
                                 <span class="text-sm font-medium text-gray-800">
                                     ${formatDate(detail?.checkout_date)}
                                 </span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <i class="fas fa-moon mr-2 text-gray-400"></i> Nights:
-                                </span>
+                                <span class="text-sm text-gray-600">Nights:</span>
                                 <span class="text-sm font-medium text-gray-800">
                                     ${getNights(detail?.checkin_date, detail?.checkout_date)}
                                 </span>
@@ -501,13 +582,29 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     
+                    <!-- Rooms Booked -->
+                    <div class="px-4 py-5 bg-white">
+                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                            </svg>
+                            Rooms Booked
+                        </h4>
+                        <ul class="mt-3 pl-7">
+                            ${roomListHtml}
+                        </ul>
+                    </div>
+                    
                     <!-- Payment Summary -->
-                    <div class="border-t border-gray-200 pt-4">
-                        <h5 class="text-md font-semibold text-gray-800 mb-3 flex items-center">
-                            <i class="fas fa-receipt mr-2 text-blue-500"></i>
+                    <div class="px-4 py-5 bg-white">
+                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+                            </svg>
                             Payment Summary
-                        </h5>
-                        <div class="space-y-3">
+                        </h4>
+                        <div class="mt-3 pl-7 space-y-3">
                             <div class="flex justify-between">
                                 <span class="text-sm text-gray-600">Total Amount:</span>
                                 <span class="text-sm font-medium text-gray-800">
@@ -520,20 +617,37 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${formatCurrency(totalPaid)}
                                 </span>
                             </div>
-                            <div class="flex justify-between border-t border-gray-100 pt-2">
+                            <div class="flex justify-between pt-2 border-t border-gray-100">
                                 <span class="text-sm font-semibold text-gray-700">Balance:</span>
                                 <span class="text-sm font-semibold ${balance > 0 ? 'text-red-600' : 'text-green-600'}">
                                     ${formatCurrency(Math.abs(balance))}
                                     ${balance > 0 ? '(Due)' : '(Overpaid)'}
                                 </span>
                             </div>
-                            <div class="flex justify-between mt-4 pt-2 border-t border-gray-100">
-                                <span class="text-sm text-gray-600">Payment Method:</span>
-                                <span class="text-sm font-medium text-gray-800">
-                                    ${booking.payments?.[0]?.method || 'N/A'}
-                                </span>
-                            </div>
                         </div>
+                    </div>
+                    
+                    <!-- Payment History -->
+                    <div class="px-4 py-5 bg-white">
+                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                            Payment History
+                        </h4>
+                        <ul class="mt-3 pl-7">
+                            ${paymentHistoryHtml}
+                        </ul>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="px-4 py-4 bg-gray-50 flex justify-end space-x-3">
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">
+                            Edit
+                        </button>
+                        <button class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                            Cancel Booking
+                        </button>
                     </div>
                 </div>
             `;
@@ -545,15 +659,19 @@ document.addEventListener('DOMContentLoaded', function() {
             toastr.error('Failed to load booking details');
             console.error('Error:', error);
             document.getElementById('booking-summary').innerHTML = `
-                <div class="bg-red-50 border-l-4 border-red-400 p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle text-red-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-red-700">
-                                Failed to load booking details. Please try again later.
-                            </p>
+                <div class="p-4">
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700">
+                                    Failed to load booking details. Please try again later.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

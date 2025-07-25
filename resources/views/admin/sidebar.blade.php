@@ -109,6 +109,20 @@
                         </svg>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.booking-logs') }}"
+                       class="group flex items-center py-3 px-4 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200 {{ $active === 'log' ? 'bg-white text-red-600 font-medium shadow-sm' : 'text-gray-600 hover:text-red-600' }}">
+                        <div class="p-1.5 mr-3 rounded-lg {{ $active === 'log' ? 'bg-red-100' : 'bg-gray-100 group-hover:bg-red-100' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ $active === 'log' ? '2' : '1.5' }}" d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+                            </svg>
+                        </div>
+                        <span class="flex-1">Try</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>

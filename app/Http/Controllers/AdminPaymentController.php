@@ -120,15 +120,30 @@ class AdminPaymentController extends Controller
             ], 422);
         }
 
+        // Get the amount paid from the request
+        $amountPaid = request('amount_paid', $payment->amount);
+        $totalAmount = $payment->bookingLog->details->sum('total_price');
+
+        // Validate amount paid doesn't exceed total amount
+        if ($amountPaid > $totalAmount) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Amount paid cannot exceed total amount'
+            ], 422);
+        }
+
         $payment->status = 'verified';
+        $payment->amount_paid = $amountPaid;
         $payment->verified_by = auth()->id();
         $payment->verified_at = now();
         $payment->is_updated = true;
         $payment->save();
         
-        $payment->bookingLog->payment_status = 'paid';
+        // Update booking log payment status
+        $paymentStatus = ($amountPaid >= $totalAmount) ? 'paid' : 'partially_paid';
+        $payment->bookingLog->payment_status = $paymentStatus;
         $payment->bookingLog->save();
-
+        
         return response()->json([
             'success' => true,
             'message' => 'Payment verified successfully',

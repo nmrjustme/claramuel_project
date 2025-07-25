@@ -35,7 +35,7 @@
         @if($payment->status == 'N/A')
             <span class="px-2 py-1 rounded-full text-xs bg-gray-600 text-white">N/A</span>
         @elseif($payment->status == 'advance_paid')
-            <span class="px-2 py-1 rounded-full text-xs bg-blue-600 text-white">Advance Paid</span>
+            <span class="px-2 py-1 rounded-full text-xs bg-green-600 text-white">50% Paid</span>
         @elseif($payment->status == 'paid')
             <span class="px-2 py-1 rounded-full text-xs bg-green-600 text-white">Paid</span>
         @elseif($payment->status == 'verified')

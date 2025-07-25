@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\BookingsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
+use App\Events\NewBookingRequest;
 
 class BookingController extends Controller
 {
@@ -125,6 +126,11 @@ class BookingController extends Controller
 
             // Commit transaction
             DB::commit();
+            
+            $bookingLog->load('user');
+            // After booking creation
+            event(new NewBookingRequest($bookingLog));
+            
 
             return response()->json([
                 'success' => true,
@@ -163,35 +169,61 @@ class BookingController extends Controller
         $status = $request->input('status', 'paid');
         $page = $request->input('page', 1);
         $perPage = $request->input('per_page', 10);
+        $search = $request->input('search', '');
         
         $query = FacilityBookingLog::with([
                 'user', 
                 'details', 
                 'payments',
-                'summaries'
+                'summaries.facility'
             ])
-            ->orderBy('confirmed_at', 'desc');
+            ->orderBy('confirmed_at', 'desc')
+            ->whereHas('payments', function($q) {
+                $q->whereNotNull('reference_no')
+                ->where('reference_no', '!=', '');
+        });
         
-        // Filter based on payment status
-        if ($status === 'paid') 
-        {
-            $query->whereHas('payments', function($q) {
-                $q->where('status', 'paid')
-                  ->where('amount', '>', 0);
-            })->whereDoesntHave('payments', function($q) {
-                $q->where('status', '!=', 'paid');
+        // Apply search filter if search term is provided
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('reference', 'like', "%{$search}%")
+                ->orWhereHas('user', function($userQuery) use ($search) {
+                    $userQuery->where('firstname', 'like', "%{$search}%")
+                                ->orWhere('lastname', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%");
+                })
+                ->orWhereHas('details', function($detailQuery) use ($search) {
+                    $detailQuery->where('checkin_date', 'like', "%{$search}%")
+                                ->orWhere('checkout_date', 'like', "%{$search}%");
+                })
+                ->orWhereHas('summaries.facility', function($facilityQuery) use ($search) {
+                    $facilityQuery->where('name', 'like', "%{$search}%");
+                });
             });
-        } 
-        elseif ($status === 'advance_paid') 
-        {
+        }
+        
+        // For 'paid' status, ensure full payment is received
+        if ($status === 'paid') {
+            $query->whereHas('payments', function($q) {
+                $q->where('status', 'paid');
+            })
+            ->with(['payments', 'details'])
+            ->get()
+            ->filter(function($booking) {
+                $totalPaid = $booking->payments->where('status', 'paid')->sum('amount');
+                $totalAmount = $booking->details->sum('total_price');
+                return $totalPaid >= $totalAmount;
+            });
+        }
+        elseif ($status === 'advance_paid') {
             $query->whereHas('payments', function($q) {
                 $q->where('status', 'advance_paid');
             })->whereDoesntHave('payments', function($q) {
                 $q->where('status', 'paid');
             });
         } 
-        elseif ($status === 'under_verification') 
-        {
+        elseif ($status === 'under_verification') {
             $query->whereHas('payments', function($q) {
                 $q->where('status', 'under_verification');
             });

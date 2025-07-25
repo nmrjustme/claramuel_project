@@ -24,7 +24,8 @@ use App\Http\Controllers\BookingCalendarController;
 use App\Http\Controllers\BookCottageController;
 use App\Http\Controllers\AdminPaymentController;
 use App\Http\Controllers\CheckinController;
-
+use App\Http\Controllers\BookingLogController
+;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -79,6 +80,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard/stats', [AdminController::class, 'getStats']);
     Route::get('/admin/dashboard/occupied-facilities', [AdminController::class, 'getOccupiedFacilities']);
     
+    Route::get('booking-logs', [BookingLogController::class, 'index'])->name('admin.booking-logs');
+
     //Bookings
     Route::get('/admin/bookings', [AdminController::class, 'getBookings'])->name('admin.bookings');
     Route::get('/get/admin/bookings', [BookingController::class, 'index']);
@@ -235,6 +238,7 @@ Route::middleware(['auth'])->group(function () {
         exit;
     });
     
+
     // calendar
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/bookings/calendar', [BookingCalendarController::class, 'getCalendarData'])->name('admin.calendar.getDate');
