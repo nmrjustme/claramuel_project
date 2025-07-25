@@ -75,71 +75,62 @@
             requestAnimationFrame(scanQR);
         }
     }
-
-    function processQRCode(qrData) {
+    
+    async function processQRCode(qrData) {
         try {
+            console.log("📦 QR Data:", qrData);
             
-            if (!qrData || qrData.trim() === "") {
-                console.error("❌ QR data is empty.");
-                resultContainer.innerHTML = "❌ Invalid QR code. No data found.";
-                isProcessing = false;
-                setTimeout(() => requestAnimationFrame(scanQR), 2000);
-                return;
+            // Validate input
+            if (!qrData || typeof qrData !== 'string') {
+                throw new Error("Invalid QR code data");
             }
     
-            // ✅ Log QR data to console
-            console.log("📦 QR Data:", qrData);
-            const data = { qr_data: qrData };
             resultContainer.innerHTML = "<div class='spinner'></div> Verifying...";
             
-            fetch('/verify-qr-codes', {
+            // Create the request payload
+            const payload = {
+                qr_data: qrData
+            };
+    
+            const response = await fetch('/verify-qr-codes', {
                 method: 'POST',
                 headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.success) {
-                    // Show welcome message before redirecting
-                    showWelcomeMessage(result.payment_id);
-                    
-                    // Stop camera
-                    video.srcObject.getTracks().forEach(track => track.stop());
-                    
-                    // Redirect after delay
-                    setTimeout(() => {
-                        window.location.href = `/check-in/success/${result.payment_id}`;
-                    }, 3000);
-                } else {
-                    resultContainer.innerHTML = "❌ Verification failed: " + result.message;
-                    isProcessing = false;
-                    setTimeout(() => requestAnimationFrame(scanQR), 2000);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                resultContainer.innerHTML = "❌ Error during verification. Please try again.";
-                isProcessing = false;
-                setTimeout(() => requestAnimationFrame(scanQR), 2000);
+                body: JSON.stringify(payload)
             });
-        } catch (e) {
-            console.error("Invalid QR code format:", e);
-            resultContainer.innerHTML = "Invalid QR code format.";
+    
+            // Handle response
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || `Server error: ${response.status}`);
+            }
+    
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || "Verification failed");
+            }
+            
+            // Success case
+            showWelcomeMessage(result.payment_id);
+            video.srcObject.getTracks().forEach(track => track.stop());
+            
+            setTimeout(() => {
+                window.location.href = `/check-in/success/${result.payment_id}`;
+            }, 3000);
+    
+        } catch (error) {
+            console.error("Verification error:", error);
+            resultContainer.innerHTML = `❌ ${error.message || "An error occurred"}`;
             isProcessing = false;
             setTimeout(() => requestAnimationFrame(scanQR), 2000);
         }
     }
 
     function showWelcomeMessage(paymentId) {
-        // Fetch customer details
         fetch(`/api/customer-details/${paymentId}`, {
             method: 'GET',
             headers: {
@@ -158,11 +149,9 @@
                     <p class="mt-2 text-green-300">Successfully checked in!</p>
                 `;
                 
-                // Hide the QR result and show welcome message
                 resultContainer.classList.add('hidden');
                 welcomeMessage.classList.remove('hidden');
             } else {
-                // Fallback if customer details can't be fetched
                 welcomeTitle.textContent = "Welcome!";
                 customerDetails.textContent = "Successfully checked in!";
                 resultContainer.classList.add('hidden');
@@ -171,7 +160,6 @@
         })
         .catch(error => {
             console.error("Error fetching customer details:", error);
-            // Fallback if API fails
             welcomeTitle.textContent = "Welcome!";
             customerDetails.textContent = "Successfully checked in!";
             resultContainer.classList.add('hidden');
