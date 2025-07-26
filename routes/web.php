@@ -334,10 +334,6 @@ Route::get('/booking/redirect/{booking}', function($booking) {
 
 // In routes/web.php
 
-
-
 //Route::get('admin/dashboard', [AdminsController::class, 'index'])->name('admin.index');
-
-
 
 require __DIR__.'/auth.php';
