@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const STATUS_CONFIG = {
         'fully_paid': {
-            class: 'bg-green-600',
+            class: 'bg-blue-600',
             text: 'FULLY PAID'
         },
         'verified': {

@@ -36,10 +36,13 @@
             <span class="px-2 py-1 rounded-full text-xs bg-gray-600 text-white">N/A</span>
         @elseif($payment->status == 'advance_paid')
             <span class="px-2 py-1 rounded-full text-xs bg-green-600 text-white">50% Paid</span>
-        @elseif($payment->status == 'paid')
-            <span class="px-2 py-1 rounded-full text-xs bg-green-600 text-white">Paid</span>
+        @elseif($payment->status == 'fully_paid')
+            <span class="px-2 py-1 rounded-full text-xs bg-blue-600 text-white">Fully Paid</span>
         @elseif($payment->status == 'verified')
-            <span class="px-2 py-1 rounded-full text-xs bg-green-600 text-white">Verified</span>
+            <div class="flex flex-col items-start space-y-1">
+                <span class="px-2 py-1 rounded-full text-xs bg-green-600 text-white">Verified</span>
+                <span class="px-2 py-1 rounded-full text-xs text-gray-500">₱{{ number_format($payment->amount_paid) }}</span>
+            </div>
         @elseif($payment->status == 'not_paid')
             <span class="px-2 py-1 rounded-full bg-yellow-600 text-white">Not Paid</span>
             @if($payment->verified_at)

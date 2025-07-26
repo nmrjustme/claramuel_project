@@ -198,9 +198,10 @@ class PaymentsController extends Controller
     
         // ✅ Encrypt QR code payload
         $payload = [
-            'token' => $verificationToken,
+            'id' => $payment->id,
             'expires_at' => $expire_date
         ];
+        
         $encryptedQrData = Crypt::encrypt($payload);
     
         // ✅ Build QR Code with encrypted string

@@ -9,6 +9,10 @@
                                         <dd class="text-sm font-medium text-gray-900">{{ $payment->reference_no }}</dd>
                                 </div>
                                 <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">GCash Number</dt>
+                                        <dd class="text-sm font-medium text-gray-900">{{ $payment->gcash_number }}</dd>
+                                </div>
+                                <div class="flex justify-between">
                                         <dt class="text-sm text-gray-500">Date</dt>
                                         <dd class="text-sm text-gray-900">
                                                 {{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('M d, Y h:i A') : 'N/A' }}
