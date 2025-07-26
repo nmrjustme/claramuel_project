@@ -12,7 +12,7 @@ class AdminPaymentController extends Controller
         $query = Payments::with(['bookingLog.user', 'bookingLog.details'])
             ->whereNotNull('reference_no')
             ->orderBy('id', 'desc');
-
+        
             
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -78,13 +78,13 @@ class AdminPaymentController extends Controller
 
         return $response;
     }
-
+    
     public function getPaymentRow($id)
     {
         $payment = Payments::with(['bookingLog.user'])->findOrFail($id);
         return view('admin.payment.payment_row', compact('payment'));
     }
-
+    
     public function getPaymentDetails($id)
     {
         try {
@@ -196,7 +196,7 @@ class AdminPaymentController extends Controller
             'payment' => $payment
         ]);
     }
-
+    
     public function search(Request $request)
     {
         $query = $request->q;
@@ -214,12 +214,12 @@ class AdminPaymentController extends Controller
             })
             ->orderBy('id', 'desc')
             ->get();
-
+        
         $html = '';
         foreach ($payments as $payment) {
             $html .= view('admin.payment.payment_row', compact('payment'))->render();
         }
-
+        
         return response()->json([
             'success' => true,
             'html' => $html,

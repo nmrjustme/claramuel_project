@@ -41,75 +41,68 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4 sm:p-6">
     <div class="bg-white rounded-lg shadow-md w-full max-w-md overflow-hidden card-hover">
         <!-- Animated progress bar -->
         <div class="progress-bar"></div>
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-red-600 to-red-700 py-6 px-6 text-center">
-            <div class="flex items-center justify-center space-x-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white float" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-gradient-to-r from-red-600 to-red-700 py-5 sm:py-6 px-4 sm:px-6 text-center">
+            <div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-white float" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h1 class="text-xl font-semibold text-white">Processing Your Booking</h1>
+                <h1 class="text-lg sm:text-xl font-semibold text-white">Processing Your Booking</h1>
             </div>
-            <p class="text-red-100 text-sm mt-1">Mt.Claramuel Resort</p>
+            <p class="text-red-100 text-xs sm:text-sm mt-1">Mt.Claramuel Resort</p>
         </div>
         
         <!-- Main content -->
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 text-center mb-3 sm:mb-4">Booking Received!</h2>
             
-            <h2 class="text-xl font-semibold text-gray-800 text-center mb-4">Booking Received!</h2>
-            
-            <div class="text-gray-600 mb-6 space-y-4">
-                <p class="text-center">Thank you for choosing Mt.Claramuel Resort!</p>
-                
+            <div class="text-gray-600 mb-4 sm:mb-6 space-y-3 sm:space-y-4">                
                 <!-- Summary Card -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div class="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
                     <div class="flex items-start">
-                        <div class="bg-red-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-info-circle text-red-600"></i>
+                        <div class="bg-red-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                            <i class="fas fa-info-circle text-red-600 text-sm sm:text-base"></i>
                         </div>
-                        <div class="text-sm">
-                            <p class="font-medium text-gray-800 mb-2">What's happening now:</p>
-                            <ul class="space-y-2">
+                        <div class="text-xs sm:text-sm">
+                            <p class="font-medium text-gray-800 mb-1 sm:mb-2">What's happening now:</p>
+                            <ul class="space-y-1.5 sm:space-y-2">
                                 <li class="flex items-start">
-                                    <i class="fas fa-check text-green-500 text-xs mt-1 mr-2"></i>
+                                    <i class="fas fa-check text-green-500 text-2xs sm:text-xs mt-0.5 sm:mt-1 mr-1.5 sm:mr-2"></i>
                                     <span>Verifying your booking details</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <i class="far fa-clock text-amber-500 text-xs mt-1 mr-2"></i>
+                                    <i class="far fa-clock text-amber-500 text-2xs sm:text-xs mt-0.5 sm:mt-1 mr-1.5 sm:mr-2"></i>
                                     <span>Sending confirmation to you</span>
                                 </li>
                             </ul>
-                            <div class="mt-3 bg-white p-2 rounded border border-gray-200">
-                                <p class="text-xs text-gray-500">Confirmation will be sent to:</p>
-                                <p class="font-medium text-red-600 truncate">{{ $email }}</p>
+                            <div class="mt-2 sm:mt-3 bg-white p-1.5 sm:p-2 rounded border border-gray-200">
+                                <p class="text-2xs sm:text-xs text-gray-500">Confirmation will be sent to:</p>
+                                <p class="font-medium text-red-600 truncate text-sm sm:text-base">{{ $email }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Important Notes -->
-                <div class="bg-amber-50 p-4 rounded-lg border border-amber-200 text-sm">
+                <div class="bg-amber-50 p-3 sm:p-4 rounded-lg border border-amber-200 text-xs sm:text-sm">
                     <div class="flex items-start">
-                        <div class="bg-amber-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                        <div class="bg-amber-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                            <i class="fas fa-exclamation-triangle text-amber-600 text-sm sm:text-base"></i>
                         </div>
                         <div>
-                            <p class="font-medium text-amber-700 mb-2">Important:</p>
-                            <ul class="space-y-1">
+                            <p class="font-medium text-amber-700 mb-1 sm:mb-2">Important:</p>
+                            <ul class="space-y-1 sm:space-y-1.5">
                                 <li class="flex items-start">
-                                    <i class="fas fa-circle text-amber-500 text-2xs mt-1.5 mr-2"></i>
+                                    <i class="fas fa-circle text-amber-500 text-3xs sm:text-2xs mt-1 sm:mt-1.5 mr-1 sm:mr-2"></i>
                                     <span>Check spam/junk folder if message doesn't arrive</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <i class="fas fa-circle text-amber-500 text-2xs mt-1.5 mr-2"></i>
-                                    <span>Reservation complete only after confirmation</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-circle text-amber-500 text-2xs mt-1.5 mr-2"></i>
+                                    <i class="fas fa-circle text-amber-500 text-3xs sm:text-2xs mt-1 sm:mt-1.5 mr-1 sm:mr-2"></i>
                                     <span>Processing may take up to 2 hours during peak times</span>
                                 </li>
                             </ul>
@@ -119,15 +112,15 @@
             </div>
             
             <!-- Contact Info -->
-            <div class="pt-4 border-t border-gray-200">
-                <p class="text-sm text-gray-600 mb-3 text-center">Need immediate assistance?</p>
-                <div class="flex flex-col space-y-2">
-                    <a href="tel:+631234567890" class="text-red-600 hover:text-red-700 text-sm flex items-center justify-center">
-                        <i class="fas fa-phone-alt mr-2"></i>
+            <div class="pt-3 sm:pt-4 border-t border-gray-200">
+                <p class="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 text-center">Need immediate assistance?</p>
+                <div class="flex flex-col space-y-1 sm:space-y-2">
+                    <a href="tel:+631234567890" class="text-red-600 hover:text-red-700 text-xs sm:text-sm flex items-center justify-center">
+                        <i class="fas fa-phone-alt mr-1.5 sm:mr-2"></i>
                         +63 995 290 1333
                     </a>
-                    <a href="mailto:reservations@mtclaramuelresort.com" class="text-red-600 hover:text-red-700 text-sm flex items-center justify-center">
-                        <i class="fas fa-envelope mr-2"></i>
+                    <a href="mailto:reservations@mtclaramuelresort.com" class="text-red-600 hover:text-red-700 text-xs sm:text-sm flex items-center justify-center">
+                        <i class="fas fa-envelope mr-1.5 sm:mr-2"></i>
                         mtclaramuelresort@gmail.com
                     </a>
                 </div>

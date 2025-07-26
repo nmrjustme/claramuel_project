@@ -18,6 +18,7 @@ class Payments extends Model
         'payer_email',
         'gcash_number',
         'amount',
+        'amount_paid',
         'receipt_path',
         'payment_date',
         'is_read',

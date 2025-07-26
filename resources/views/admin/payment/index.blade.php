@@ -173,6 +173,7 @@
 // Global variables
 let currentPaymentId = null;
 let eventSource = null;
+let amountPaid = null;
 const notificationSound = document.getElementById('notificationSound');
 
 // Initialize SSE connection
@@ -314,14 +315,22 @@ function verifyPaymentWithReceipt(paymentId) {
     const originalText = button.innerHTML;
     button.innerHTML = '<span class="animate-pulse">Verifying and sending receipt...</span>';
     button.disabled = true;
+
+    const amount = document.getElementById('amount_paid').value;
     
+    console.log('Verifying payment with amount:', amount);
+
     fetch(`/payments/${paymentId}/verify-with-receipt`, {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
+        },
+        body: JSON.stringify({
+            amount_paid: amount
+        })
     })
     .then(response => response.json())
     .then(data => {

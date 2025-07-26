@@ -36,8 +36,8 @@
                 
                 <!-- Status Tabs -->
                 <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
-                    <button class="px-4 py-2 bg-red-600 text-white rounded-t-lg font-medium" data-status="paid">Paid</button>
-                    <button class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-t-lg font-medium" data-status="advance_paid">Advance</button>
+                    <button class="px-4 py-2 bg-red-600 text-white rounded-t-lg font-medium" data-status="fully_paid">Fully Paid</button>
+                    <button class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-t-lg font-medium" data-status="verified">Advance</button>
                     <button class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-t-lg font-medium" data-status="under_verification">Under Verification</button>
                     <button class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-t-lg font-medium" data-status="rejected">Rejected</button>
                 </div>
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Current status filter and pagination
-    let currentStatus = 'paid';
+    let currentStatus = 'fully_paid';
     let currentPage = 1;
     let totalPages = 1;
     const perPage = 10;
@@ -288,13 +288,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const STATUS_CONFIG = {
-        'paid': {
+        'fully_paid': {
             class: 'bg-green-600',
-            text: 'PAID'
+            text: 'FULLY PAID'
         },
-        'advance_paid': {
+        'verified': {
             class: 'bg-green-600',
-            text: '50% PAID'
+            text: 'VERIFIED'
         },
         'under_verification': {
             class: 'bg-yellow-600',
@@ -303,10 +303,6 @@ document.addEventListener('DOMContentLoaded', function() {
         'rejected': {
             class: 'bg-red-600',
             text: 'REJECTED'
-        },
-        'not_paid': {
-            class: 'bg-gray-600',
-            text: 'NOT PAID'
         }
     };
 
@@ -347,7 +343,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 html = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No bookings found</td></tr>';
             } else {
                 bookings.forEach(booking => {
-                    const statusInfo = getBookingStatus(booking);
+                    // Get the payment status from the first payment or use booking status as fallback
+                    const paymentStatus = booking.payments?.[0]?.status || booking.status;
+                    const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
                     
                     html += `
                         <tr class="booking-row cursor-pointer hover:bg-gray-50" data-booking-id="${booking.id}">
@@ -389,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Highlight selected row
                     document.querySelectorAll('.booking-row').forEach(r => {
-                        r.classList.remove('bg-red-50');
+                        r.classList.remove('bg-red-200');
                     });
                     this.classList.add('bg-red-50');
                 });
@@ -401,24 +399,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function getBookingStatus(booking) {
-        // First check explicit booking status
-        if (booking.status === 'rejected') return STATUS_CONFIG.rejected;
-        if (booking.status === 'pending_confirmation') return STATUS_CONFIG.under_verification;
-        
-        // Calculate payment status
-        const totalPaid = booking.payments?.reduce((sum, payment) => 
-            ['paid', 'advance_paid'].includes(payment.status) ? sum + parseFloat(payment.amount) : sum, 0) || 0;
-        
-        const totalAmount = booking.details?.reduce((sum, detail) => 
-            sum + parseFloat(detail.total_price), 0) || 0;
-        
-        if (totalPaid <= 0) return STATUS_CONFIG.not_paid;
-        if (totalPaid >= totalAmount) return STATUS_CONFIG.paid;
-        if (totalPaid > 0 && totalPaid < totalAmount) return STATUS_CONFIG.advance_paid;
-        
-        return STATUS_CONFIG.not_paid;
-    }
     // Function to load next check-in
     function loadNextCheckin() {
         fetch(`/get/bookings/next-checkin`, {
@@ -478,11 +458,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             const booking = data.data;
             const detail = booking.details[0];
-            const statusInfo = getBookingStatus(booking);
-
-            // Calculate payment summary
+            const paymentStatus = booking.payments?.[0]?.status || booking.status;
+            const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
+            
+            // Calculate payment summary using amount_paid
             const totalPaid = booking.payments?.reduce((sum, payment) => 
-                sum + parseFloat(payment.amount), 0) || 0;
+                sum + (payment.amount_paid ? parseFloat(payment.amount_paid) : 0), 0) || 0;
+            
             const totalAmount = detail?.total_price || 0;
             const balance = totalAmount - totalPaid;
 
@@ -498,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).join('')
                 : '<li class="text-sm text-gray-600 py-2">No room info available</li>';
 
-            // Generate payment history HTML
+            // Generate payment history HTML - updated to show amount_paid
             const paymentHistoryHtml = booking.payments?.length
                 ? booking.payments.map(payment => `
                     <li class="flex justify-between py-2 border-b border-gray-100 last:border-0">
@@ -506,12 +488,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             <span class="text-sm font-medium text-gray-800">${formatDate(payment.payment_date)}</span>
                             <span class="block text-xs text-gray-500">${payment.method || 'N/A'}</span>
                         </div>
-                        <span class="text-sm font-medium text-green-600">${formatCurrency(payment.amount)}</span>
+                        <span class="text-sm font-medium text-green-600">${formatCurrency(payment.amount_paid || 0)}</span>
                     </li>
                 `).join('')
                 : '<li class="text-sm text-gray-600 py-2">No payment history</li>';
 
-            // Generate the HTML template
+            // Generate the HTML template - updated payment summary section
             const html = `
                 <div class="divide-y divide-gray-200">
                     <!-- Header with Status and Guest Info -->

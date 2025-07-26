@@ -97,7 +97,10 @@
                     <span class="detail-label">Amount:</span>
                     <span class="detail-value">₱{{ number_format($payment->amount, 2) }}</span>
                 </div>
-                
+                <div class="detail-row">
+                    <span class="detail-label">Amount Paid:</span>
+                    <span class="detail-value">₱{{ number_format($payment->amount_paid, 2) }}</span>
+                </div>
                 <div class="detail-row">
                     <span class="detail-label">Date:</span>
                     <span class="detail-value">{{ $payment->verified_at->format('F j, Y \a\t g:i A') }}</span>

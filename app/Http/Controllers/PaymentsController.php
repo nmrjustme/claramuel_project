@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Crypt;
 
 class PaymentsController extends Controller
 {
-
+    
     public function payments(FacilityBookingLog $booking)
     {
         // Load the FacilityBookingLog relationships
@@ -177,6 +177,10 @@ class PaymentsController extends Controller
      */
     public function verifyPaymentWithReceipt(Request $request, $id)
     {
+        $request->validate([
+            'amount_paid' => 'required|numeric|min:0',
+        ]);
+        
         $payment = Payments::with(
             'bookingLog.details',    
             'bookingLog.summaries.facility',
@@ -220,9 +224,10 @@ class PaymentsController extends Controller
     
         // ✅ Update payment record
         $payment->update([
-            'status' => 'advance_paid',
+            'status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
+            'amount_paid' => $request->amount_paid,
             'verification_token' => $verificationToken,
             'qr_code_path' => 'imgs/qr_code/' . $fileName
         ]);
@@ -284,6 +289,47 @@ class PaymentsController extends Controller
         }
     }
     
+    public function updateRemainingStatus(Request $request, $id)
+    {
+        $request->validate([
+            'remaining_status' => 'required|in:pending,fully_paid'
+        ]);
+        
+        $payment = Payments::findOrFail($id);
+        
+        // Check if the status is actually changing
+        if ($payment->status === $request->remaining_status) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Status is already set to ' . $request->remaining_status
+            ], 400);
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            // Update payment remaining balance status
+            $payment->update([
+                'status' => $request->remaining_status,
+            ]);
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'payment' => $payment->fresh()
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+        
     /**
      * Verify QR code
      */

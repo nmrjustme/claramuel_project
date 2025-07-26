@@ -157,7 +157,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-
+    
     public function WaitConfirmation(Request $request)
     {
         $email = $request->query('email');
@@ -166,11 +166,11 @@ class BookingController extends Controller
     
     public function index(Request $request)
     {
-        $status = $request->input('status', 'paid');
+        $status = $request->input('status', 'fully_paid');
         $page = $request->input('page', 1);
         $perPage = $request->input('per_page', 10);
         $search = $request->input('search', '');
-        
+
         $query = FacilityBookingLog::with([
                 'user', 
                 'details', 
@@ -181,8 +181,8 @@ class BookingController extends Controller
             ->whereHas('payments', function($q) {
                 $q->whereNotNull('reference_no')
                 ->where('reference_no', '!=', '');
-        });
-        
+            });
+
         // Apply search filter if search term is provided
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
@@ -202,41 +202,19 @@ class BookingController extends Controller
                 });
             });
         }
-        
-        // For 'paid' status, ensure full payment is received
-        if ($status === 'paid') {
-            $query->whereHas('payments', function($q) {
-                $q->where('status', 'paid');
-            })
-            ->with(['payments', 'details'])
-            ->get()
-            ->filter(function($booking) {
-                $totalPaid = $booking->payments->where('status', 'paid')->sum('amount');
-                $totalAmount = $booking->details->sum('total_price');
-                return $totalPaid >= $totalAmount;
+
+        // Status filter based on payments
+        if (in_array($status, ['fully_paid', 'verified', 'pending', 'rejected', 'under_verification'])) {
+            $query->whereHas('payments', function($q) use ($status) {
+                $q->where('status', $status);
             });
-        }
-        elseif ($status === 'advance_paid') {
-            $query->whereHas('payments', function($q) {
-                $q->where('status', 'advance_paid');
-            })->whereDoesntHave('payments', function($q) {
-                $q->where('status', 'paid');
-            });
-        } 
-        elseif ($status === 'under_verification') {
-            $query->whereHas('payments', function($q) {
-                $q->where('status', 'under_verification');
-            });
-        } 
-        elseif ($status === 'rejected') {
-            $query->where('status', 'rejected');
         }
         
         $total = $query->count();
         $bookings = $query->skip(($page - 1) * $perPage)
                         ->take($perPage)
                         ->get();
-        
+
         return response()->json([
             'data' => $bookings,
             'total' => $total,

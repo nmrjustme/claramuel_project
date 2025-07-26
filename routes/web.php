@@ -294,6 +294,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/verify-qr-codes', [CheckinController::class, 'verifyQrCode']);
     Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
     
+    Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);
+    
 });
 
 // =======================
@@ -318,7 +320,7 @@ Route::get('/admin/inquiries/check-new', [InquirerController::class, 'checkNewIn
 Route::get('/booking/completed/{booking}', [BookingsController::class, 'booking_completed'])->name('booking.completed');
 
 
-Route::get('/WaitForConfirmation/', [BookingController::class, 'WaitConfirmation'])
+Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
      ->name('booking.WaitConfirmation');
      
 Route::get('/booking/redirect/{booking}', function($booking) {
