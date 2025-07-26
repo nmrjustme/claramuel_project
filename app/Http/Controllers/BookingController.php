@@ -261,7 +261,6 @@ class BookingController extends Controller
             ], 500);
         }
     }
-
     
     public function nextCheckin()
     {

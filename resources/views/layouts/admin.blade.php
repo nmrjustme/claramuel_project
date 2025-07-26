@@ -30,7 +30,7 @@
     
     @yield('content_css')
 </head>
-<body class="bg-gray-700">
+<body class="bg-gray-200">
     <!-- Notification sound element -->
     <!-- <audio id="notificationSound" src="{{ asset('sounds/mixkit-software-interface-back-2575.wav') }}" preload="auto"></audio> -->
     
@@ -45,7 +45,7 @@
         <div class="flex items-center space-x-2">
             <x-logo-icon size="default" />
             <span class="text-gray-800 font-semibold text-lg whitespace-nowrap truncate max-w-[160px]">
-                <a href="#">Ｍｔ.ＣＬＡＲＡＭＵＥＬ</a>
+                <a href="{{ route('index') }}">Ｍｔ.ＣＬＡＲＡＭＵＥＬ</a>
             </span>
         </div>
 
@@ -76,22 +76,22 @@
             @endauth
         </div>
     </div>
-
+    <div class="md:hidden h-16"></div>
     @include('admin.sidebar')
 
     <!-- Mobile sidebar overlay - now with lighter color and smooth transition -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden pointer-events-none opacity-0 transition-all duration-300" id="sidebar-overlay"></div>
-
+    
     <!-- Main Content Area -->
     <div class="flex min-h-screen">
         <div class="flex-1 flex flex-col md:ml-64">
             <!-- Desktop Header -->
-            <header class="hidden md:block bg-gray-900 text-white shadow-md">
+            <header class="hidden md:block bg-gradient-to-b from-white to-red-50 text-dark shadow-md">
                 <div class="px-6 py-3 flex justify-between items-center">
                     <div class="flex items-center space-x-3">
                         <x-logo-icon size="default" />
                         <span class="text-2xl text-red-300">
-                            <a href="#">Ｍｔ.ＣＬＡＲＡＭＵＥＬ</a>
+                            <a href="{{ route('index') }}">Ｍｔ.ＣＬＡＲＡＭＵＥＬ</a>
                         </span>
                     </div>
                     
@@ -123,12 +123,12 @@
             </header>
             
             <!-- Page Content -->
-            <main class="flex-1 p-4 md:p-6 overflow-x-hidden md:rounded-tl-lg shadow-sm">
+            <main class="flex-1 p-2 md:p-2 overflow-x-hidden md:rounded-tl-lg shadow-sm">
                 @yield('content')
             </main>
         </div>
     </div>
-
+    
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
     
     <script>

@@ -61,7 +61,7 @@ class InquirerController extends Controller
                 // Create payment record
                 Payments::create([
                     'facility_log_id' => $booking->id,
-                    'status' => 'not_paid',
+                    'status' => 'Pending',
                     'amount' => (0.5 * $total_amount)
                 ]);
     

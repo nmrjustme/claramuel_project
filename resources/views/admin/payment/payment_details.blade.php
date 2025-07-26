@@ -110,7 +110,7 @@
                                         <h3 class="text-sm font-medium text-green-800">Verified Payment</h3>
                                         <div class="mt-1 text-sm text-green-700">
                                                 <p>Verified by:
-                                                        {{ $payment->bookingLog->user->firstname ?? 'System Admin' }}
+                                                        {{ $payment->verifiedBy?->firstname ?? 'System Admin' }}
                                                 </p>
                                                 <p>Verified at: {{ $payment->verified_at->format('M d, Y h:i A') }}</p>
                                         </div>

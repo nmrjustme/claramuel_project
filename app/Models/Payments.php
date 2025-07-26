@@ -19,6 +19,8 @@ class Payments extends Model
         'gcash_number',
         'amount',
         'amount_paid',
+        'remaining_balance_status',
+        'checkin_paid',
         'receipt_path',
         'payment_date',
         'is_read',

@@ -52,7 +52,7 @@ Route::get('/bookings/get-facilities', [BookingsController::class, 'getFacilitie
 Route::get('/Book', [PoolParkbookingController::class, 'index'])->name('Pools_Park');
 Route::get('/Images/{id}', [AccommodationImgController::class, 'index'])->name('my_modals');
 Route::post('/book', [BookingController::class, 'store'])->name('bookings.store');
-Route::get('/verify_email/', [VerifyEmailController::class, 'verify'])->name('verify.email');
+Route::get('/verify_email', [VerifyEmailController::class, 'verify'])->name('verify.email');
 
 Route::get('/events/', function (){
     return view('customer_pages.static_events');

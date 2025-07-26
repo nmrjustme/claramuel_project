@@ -86,7 +86,7 @@ class BookingsController extends Controller
             ->join('payments', 'payments.facility_log_id', '=', 'fac_log.id')
             ->where([
                 ['fac_log.status', 'Confirmed'],
-                ['payments.status', 'Paid'],
+                ['payments.status', 'verified'],
                 // Only get future or current bookings
                 ['fac_details.checkout_date', '>=', $now]
             ])

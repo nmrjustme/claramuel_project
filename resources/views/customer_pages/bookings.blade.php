@@ -734,7 +734,7 @@
                                             
                                             <div class="unavailable-dates-content hidden mt-2">
                                                 <div>
-                                                    <h4 class="text-xs font-semibold text-gray-500 mb-1">BOOKED DATES:</h4>
+                                                    <h4 class="text-xs font-semibold text-gray-500 mb-1">BLOCKED DATES:</h4>
                                                     <div class="text-xs">
                                                         {{ implode(', ', array_map(fn($date) => Carbon\Carbon::parse($date)->format('M j'), $bookedDates)) }}
                                                     </div>

@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 @section('title', 'Mt. ClaRamuel Resort & Events Place')
 @section('content')
@@ -86,15 +87,33 @@
     <!-- Background video container with performance optimizations -->
     <div class="absolute inset-0 w-full h-full">
         <video 
+            id="hero-video"
             class="absolute inset-0 w-full h-full object-cover"
             autoplay 
             loop 
             muted 
             playsinline 
-            poster="{{ url('imgs/hero-fallback.jpg') }}"
-            style="object-position: center center; filter: brightness(1.2) contrast(1.2);">
+            style="object-position: center center;"
+>
             <source src="{{ url('video/welcomeVideo.mp4') }}" type="video/mp4">
         </video>
+        
+        <!-- Dark Overlay -->
+        <div class="absolute inset-0 bg-black/40 z-10"></div>
+        
+        <!-- Sound Toggle Button -->
+        <button id="sound-toggle" class="absolute bottom-8 right-8 z-20 bg-black/50 text-white p-3 rounded-full shadow-lg hover:bg-black/70 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50">
+            <!-- Sound OFF Icon (visible by default) -->
+            <svg id="sound-off-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM17.78 9.22a.75.75 0 10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 001.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0 00-1.06-1.06l-1.72 1.72-1.72-1.72z" />
+            </svg>
+            
+            <!-- Sound ON Icon (hidden by default) -->
+            <svg id="sound-on-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z" />
+                <path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z" />
+            </svg>
+        </button>
     </div>
     
     <!-- Hero Content -->
@@ -111,22 +130,17 @@
                 <a href="{{ route('customer_bookings') }}" class="inline-block bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                     Book Now
                 </a>
-                <a href="{{ route('customer_bookings.cottage') }}" class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
-                    Book Cottage
-                </a>
             </div>
         </div>
     </div>
     
     <!-- Scroll indicator -->
-    <a href="#services" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
+    <a href="#services" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
         <svg class="w-8 h-8 text-white hover:text-red-400 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
         </svg>
     </a>
 </section>
-
-
 <!-- Featured Highlights Bar -->
 <div class="bg-gray-800 text-white py-4">
     <div class="container mx-auto">
@@ -402,22 +416,22 @@
             <div class="w-20 h-1 bg-red-500 mx-auto mt-6"></div>
         </div>
         
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            @foreach([1,222,3,4,5,66,7,8] as $i)
-            <a href="{{ url('imgs/gallery/'.$i.'.jpg') }}" class="gallery-item group">
-                <div class="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-md">
-                    <img src="{{ url('imgs/gallery/'.$i.'.jpg') }}" 
-                         alt="Gallery image {{ $i }}" 
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
-                        <svg class="w-10 h-10 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                        </svg>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+                @foreach([1,222,3,4,5,66,7,8] as $i)
+                <a href="{{ url('imgs/gallery/'.$i.'.jpg') }}" class="gallery-item group block relative">
+                    <div class="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <img src="{{ url('imgs/gallery/'.$i.'.jpg') }}" 
+                             alt="Gallery image {{ $i }}" 
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                            </svg>
+                        </div>
                     </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
+                </a>
+                @endforeach
+            </div>
         
         <div class="text-center mt-12">
             <a href="#" class="inline-block px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-300">
@@ -430,17 +444,17 @@
 <!-- CTA Section -->
 <section class="py-20 bg-gradient-to-r from-blue-700 to-blue-900 text-white">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-gray-200">
             Ready for an Unforgettable Experience?
         </h2>
-        <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-600">
+        <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-300">
             Book your stay or event today and discover the magic of Mt. ClaRamuel
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
             <a href="{{ route('customer_bookings') }}" class="inline-block bg-white hover:bg-gray-100 text-blue-800 font-semibold py-4 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                 Book Now
             </a>
-            <a href="tel:+639952901333" class="inline-block border-2 border-white hover:bg-white/20 text-gray-800 font-semibold py-4 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+            <a href="tel:+639952901333" class="inline-block border-2 border-white hover:bg-white/20 text-white font-semibold py-4 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
                 Call Us: +63 995 290 1333
             </a>
         </div>
@@ -618,6 +632,28 @@
 
 
 <script>
+    
+    // Sound toggle functionality
+    const soundToggle = document.getElementById('sound-toggle');
+    const heroVideo = document.getElementById('hero-video');
+    const soundOnIcon = document.getElementById('sound-on-icon');
+    const soundOffIcon = document.getElementById('sound-off-icon');
+    
+    soundToggle.addEventListener('click', () => {
+        if (heroVideo.muted) {
+            // Unmute the video
+            heroVideo.muted = false;
+            soundOnIcon.classList.remove('hidden');
+            soundOffIcon.classList.add('hidden');
+            soundToggle.setAttribute('aria-label', 'Mute sound');
+        } else {
+            // Mute the video
+            heroVideo.muted = true;
+            soundOnIcon.classList.add('hidden');
+            soundOffIcon.classList.remove('hidden');
+            soundToggle.setAttribute('aria-label', 'Unmute sound');
+        }
+    });
     // Initialize AOS (Animate On Scroll)
     AOS.init({
         duration: 800,

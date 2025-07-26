@@ -220,13 +220,20 @@
                                 </div>
                                 
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600">Amount Paid:</span>
+                                    <span class="text-gray-600">Advance Paid:</span>
                                     <span class="font-medium">₱{{ number_format($payment->amount_paid, 2) }}</span>
                                 </div>
+
+                                @if($payment->checkin_paid > 0)
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Paid at Check-in:</span>
+                                    <span class="font-medium">₱{{ number_format($payment->checkin_paid, 2) }}</span>
+                                </div>
+                                @endif
                                 
                                 <div class="flex justify-between pt-3 border-t border-gray-200">
                                     <span class="text-gray-600 font-semibold">Remaining Amount:</span>
-                                    <span class="font-bold text-primary-600">₱{{ number_format(($totalAmount - $payment->amount_paid), 2) }}</span>
+                                    <span class="font-bold text-primary-600">₱{{ number_format(($totalAmount - $payment->amount_paid - $payment->checkin_paid), 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -236,25 +243,32 @@
                             <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 mb-4 text-primary-600">Update Status</h3>
                             
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-gray-600">Current Status:</span>
+                                <span class="text-gray-600">Remaining Status:</span>
                                 <span id="status-display" class="px-2 py-1 rounded text-sm font-medium 
-                                    {{ $payment->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                    {{ ucfirst(str_replace('_', ' ', $payment->status)) }}
+                                    {{ $payment->remaining_balance_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                    {{ ucfirst(str_replace('_', ' ', $payment->remaining_balance_status)) }}
                                 </span>
                             </div>
                             
-                            <div class="no-print">
-                                <label for="status-select" class="block text-sm font-medium text-gray-700 mb-1">Change Status</label>
+                        <div class="no-print">
+                            <label for="status-select" class="block text-sm font-medium text-gray-700 mb-1">Change Status</label>
+                            <div class="flex flex-col gap-4">
                                 <div class="flex gap-2">
                                     <select id="status-select" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border">
-                                        <option value="pending" {{ $payment->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="fully_paid" {{ $payment->status === 'fully_paid' ? 'selected' : '' }}>Fully Paid</option>
+                                        <option value="pending" {{ $payment->remaining_balance_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="fully_paid" {{ $payment->remaining_balance_status === 'fully_paid' ? 'selected' : '' }}>Fully Paid</option>
                                     </select>
                                     <button id="save-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                         Save
                                     </button>
                                 </div>
+                                
+                                <div id="amount-container" class="hidden">
+                                    <label for="paid-amount" class="block text-sm font-medium text-gray-700 mb-1">Paid Amount</label>
+                                    <input type="number" id="paid-amount" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border" step="0.01" min="0" required>
+                                </div>
                             </div>
+                        </div>
                         </div>
                         
                         <!-- Payment Details -->
@@ -269,7 +283,7 @@
                                 
                                 <div>
                                     <p class="text-sm text-gray-500">Payment Date</p>
-                                    <p class="font-medium">{{ $payment->verified_at->format('F j, Y \a\t g:i A') }}</p>
+                                    <p class="font-medium">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F j, Y \a\t g:i A') }}</p>
                                 </div>
                                 
                                 @if($payment->reference_no)
@@ -296,23 +310,49 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const statusSelect = document.getElementById('status-select');
+            const amountContainer = document.getElementById('amount-container');
+            
+            statusSelect.addEventListener('change', function() {
+                if (this.value === 'fully_paid') {
+                    amountContainer.classList.remove('hidden');
+                } else {
+                    amountContainer.classList.add('hidden');
+                }
+            });
+            // Initialize visibility based on current selection
+            if (statusSelect.value === 'fully_paid') {
+                amountContainer.classList.remove('hidden');
+            }
+
             const saveBtn = document.getElementById('save-btn');
             const originalStatus = statusSelect.value;
             
             // Set original status for tracking changes
             statusSelect.dataset.originalStatus = originalStatus;
             saveBtn.disabled = true;
-
+            
             // Enable save only when status changes
             statusSelect.addEventListener('change', function () {
                 saveBtn.disabled = (this.value === this.dataset.originalStatus);
             });
-
+            
             saveBtn.addEventListener('click', function () {
                 const newStatus = statusSelect.value;
                 const paymentId = {{ $payment->id }};
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
+                let paidAmount = 0;
+                
+                // Validation: require paid amount when status is "fully_paid"
+                if (newStatus === 'fully_paid') {
+                    const paidAmountInput = document.getElementById('paid-amount');
+                    paidAmount = parseFloat(paidAmountInput.value.trim());
+                    console.log('Paid Amount:', paidAmount);
+                    if (!paidAmount || isNaN(paidAmount) || parseFloat(paidAmount) <= 0) {
+                        showToast('Please enter a valid paid amount.', 'error');
+                        paidAmountInput.focus();
+                        return;
+                    }
+                }
                 // Button UI feedback
                 const originalText = saveBtn.textContent;
                 saveBtn.disabled = true;
@@ -327,7 +367,8 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({
-                        remaining_status: newStatus
+                        remaining_status: newStatus,
+                        amount_paid: paidAmount
                     })
                 })
                 .then(response => response.json())

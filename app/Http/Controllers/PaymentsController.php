@@ -293,13 +293,14 @@ class PaymentsController extends Controller
     public function updateRemainingStatus(Request $request, $id)
     {
         $request->validate([
-            'remaining_status' => 'required|in:pending,fully_paid'
+            'remaining_status' => 'required|in:pending,fully_paid',
+            'amount_paid' => 'required|numeric|min:0'
         ]);
         
         $payment = Payments::findOrFail($id);
         
         // Check if the status is actually changing
-        if ($payment->status === $request->remaining_status) {
+        if ($payment->remaining_balance_status === $request->remaining_status) {
             return response()->json([
                 'success' => false,
                 'message' => 'Status is already set to ' . $request->remaining_status
@@ -311,14 +312,15 @@ class PaymentsController extends Controller
             
             // Update payment remaining balance status
             $payment->update([
-                'status' => $request->remaining_status,
+                'checkin_paid' => $request->amount_paid,
+                'remaining_balance_status' => $request->remaining_status,
             ]);
             
             DB::commit();
             
             return response()->json([
                 'success' => true,
-                'message' => 'Status updated successfully',
+                'message' => 'Status and amount updated successfully',
                 'payment' => $payment->fresh()
             ]);
             

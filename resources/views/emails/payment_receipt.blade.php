@@ -94,12 +94,16 @@
                 <h2 style="margin-top: 0;">Payment Details</h2>
                 
                 <div class="detail-row">
-                    <span class="detail-label">Amount:</span>
+                    <span class="detail-label">Advance Amount:</span>
                     <span class="detail-value">₱{{ number_format($payment->amount, 2) }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Amount Paid:</span>
                     <span class="detail-value">₱{{ number_format($payment->amount_paid, 2) }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Balance (To be paid upon checkin):</span>
+                    <span class="detail-value">₱{{ number_format(($payment->bookingLog->details->first()->total_price - $payment->amount_paid), 2) }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Date:</span>

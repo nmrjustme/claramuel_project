@@ -727,7 +727,7 @@
             throw error;
         }
     }
-
+    
     // Handle confirm booking button click
     window.handleConfirmBooking = function(bookingId) {
         if (!bookingId) {
