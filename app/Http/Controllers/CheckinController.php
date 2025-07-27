@@ -61,7 +61,7 @@ class CheckinController extends Controller
                 
                 return redirect()->route('qr-in-used', ['qr_path' => $qr_path]);
             }
-
+            
             // Validate payload structure
             if (empty($payload['id']) || empty($payload['expires_at'])) {
                 return response()->json([
