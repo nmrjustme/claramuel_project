@@ -53,9 +53,9 @@ class BookingsExport implements FromCollection, WithHeadings, WithMapping
         $facilities = $booking->summaries->map(function($summary) {
             return $summary->facility->name ?? 'Unknown Facility';
         })->implode(', ');
-
+        
         return [
-            $payment->status ?? 'N/A',
+            ucwords(str_replace('_', ' ', $payment->status ?? 'N/A')),
             $booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : 'N/A',
             $booking->id, // Using booking ID as reservation code
             $detail ? $detail->checkin_date->format('Y-m-d') : 'N/A',

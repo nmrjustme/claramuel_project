@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Facility extends Model
 {
     use HasFactory;
@@ -48,5 +48,12 @@ class Facility extends Model
     {
         return $this->hasMany(FacilityDiscount::class, 'facility_id');
     }
+
+    public function amenities()
+    {
+        return $this->belongsToMany(Amenity::class)
+            ->using(AmenityFacility::class);
+    }
+    
 }
 

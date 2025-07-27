@@ -1,16 +1,7 @@
 <tr data-id="{{ $payment->id }}" class="{{ $payment->is_read ? '' : 'bg-blue-50 highlight-new' }}">
     <td class="px-6 py-4">
-        <div class="text-sm font-medium text-gray-900">
-            {{ $payment->bookingLog->reference }}
-            @if($payment->method === 'gcash' && $payment->bookingLog->reference)
-                <div class="text-xs text-gray-500 mt-1">
-                    GCash Ref: {{ $payment->bookingLog->reference }}
-                </div>
-            @endif
-        </div>
         <div class="text-sm text-gray-500 mt-1">
-            ₱{{ number_format($payment->amount, 2) }} • 
-            {{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('M d, Y') : 'N/A' }}
+            ₱{{ number_format($payment->amount, 2) }}
         </div>
     </td>
     <td class="px-6 py-4">

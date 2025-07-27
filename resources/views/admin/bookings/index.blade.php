@@ -478,8 +478,7 @@ document.addEventListener('DOMContentLoaded', function() {
             totalPages = Math.ceil(data.total / perPage);
             
             // Update pagination info
-            document.getElementById('pagination-info').textContent = 
-                `Showing ${data.from} to ${data.to} of ${data.total} entries`;
+            document.getElementById('pagination-info').textContent = `Showing ${data.from} to ${data.to} of ${data.total} entries`;
             
             // Update pagination buttons
             document.getElementById('prev-page').disabled = currentPage <= 1;
@@ -503,6 +502,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Get the payment status from the first payment or use booking status as fallback
                     const paymentStatus = booking.payments?.[0]?.status || booking.status;
                     const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
+                    const verifiedBy = booking.payments?.[0]?.verifiedBy?.firstname || 'System Admin';
+                
                     
                     html += `
                         <tr class="booking-row cursor-pointer" data-booking-id="${booking.id}">
@@ -527,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="text-sm text-gray-900 font-medium">${formatCurrency((booking.details[0]?.total_price * 0.5) || 0)}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">${booking.payments?.length > 0 ? (booking.user?.firstname || 'Payment Gateway') : 'N/A'}</div> 
+                                <div class="text-sm text-gray-900">${verifiedBy}</div>
                             </td>
                         </tr>
                     `;
@@ -637,24 +638,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: headers,
                 credentials: 'same-origin'
             });
-
+            
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-
+            
             const data = await response.json();
             const booking = data.data;
             const detail = booking.details[0];
             const paymentStatus = booking.payments?.[0]?.status || booking.status;
             const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
             
-            // Calculate payment summary using amount_paid
-            const totalPaid = booking.payments?.reduce((sum, payment) => 
-                sum + (payment.amount_paid ? parseFloat(payment.amount_paid) : 0), 0) || 0;
             
-            const totalAmount = detail?.total_price || 0;
-            const balance = totalAmount - totalPaid;
-
+            const advancePaid = booking.payments?.[0]?.amount_paid || 0;
+            const totalAmount = booking.details.reduce((sum, detail) => {
+                return sum + parseFloat(detail.total_price);
+            }, 0);
+            const checkinPaid = booking.payments?.[0]?.checkin_paid || 0;
+            const balance = (totalAmount - advancePaid) - checkinPaid;
+            
+            // Calculate payment summary using amount_paid
+            // const totalPaid = booking.payments?.reduce((sum, payment) => 
+            //     sum + (payment.amount_paid ? parseFloat(payment.amount_paid) : 0), 0) || 0;
+            
+            // const checkinPaid = booking.payments?.[0].checkin_paid || 0;
+            // const totalAmount = detail?.total_price || 0;
+            // const balance = (totalAmount - totalPaid) - checkinPaid;
+            
             // Generate room list HTML
             const roomListHtml = booking.summaries?.length 
                 ? booking.summaries.map(summary => {
@@ -781,9 +791,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Amount Paid:</span>
+                                <span class="text-sm text-gray-600">Advance Paid:</span>
                                 <span class="text-sm font-medium text-green-600">
-                                    ${formatCurrency(totalPaid)}
+                                    ${formatCurrency(advancePaid)}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Check-in Paid:</span>
+                                <span class="text-sm font-medium text-green-600">
+                                    ${formatCurrency(checkinPaid)}
                                 </span>
                             </div>
                             <div class="flex justify-between pt-2 border-t border-gray-100">

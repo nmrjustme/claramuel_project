@@ -9,8 +9,8 @@
 <div class="min-h-screen p-6">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-white">Payments Verification</h1>
-            <p class="text-gray-200">Manually verify customer GCash payments by reference number</p>
+            <h1 class="text-3xl font-bold text-gray-800">Payments Verification</h1>
+            <p class="text-gray-600">Manually verify customer GCash payments by reference number</p>
         </div>
         <div class="flex items-center space-x-4">
             <div class="relative">
@@ -35,7 +35,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Details</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payable amount </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GCash Info</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>

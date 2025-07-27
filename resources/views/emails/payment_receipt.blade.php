@@ -72,8 +72,16 @@
         <div class="content">
             
             <div class="receipt">
-
+            
             <div class="section">
+                @php 
+                    $totalAmount = 0;
+                    foreach ($payment->bookingLog->summaries as $summary) {
+                        $subtotal = $summary->bookingDetails->sum('total_price');
+                        $totalAmount += $subtotal;
+                    }
+                @endphp
+                
                 <h2 class="section-title">Guest Information</h2>
                 
                 <div class="detail-row">
@@ -103,7 +111,7 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Balance (To be paid upon checkin):</span>
-                    <span class="detail-value">₱{{ number_format(($payment->bookingLog->details->first()->total_price - $payment->amount_paid), 2) }}</span>
+                    <span class="detail-value">₱{{ number_format(($totalAmount - $payment->amount_paid), 2) }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Date:</span>
@@ -131,8 +139,7 @@
                 
                     @php
                         $subtotal = $summary->bookingDetails->sum('total_price');
-                        $totalAmount += $subtotal;
-                        
+                        $totalAmount += $subtotal;                        
                     @endphp
                     <div style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
                     <div class="detail-row">

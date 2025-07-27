@@ -22,6 +22,9 @@ class BookingsController extends Controller
     protected function loadFacilities()
     {
         $this->facilities = Facility::with([
+            'amenities' => function($query) {
+                $query->select('amenities.id', 'amenities.name');
+            },
             'images' => function($query) {
                 $query->select('id', 'fac_id', 'image as path')
                     ->orderBy('id')
@@ -73,6 +76,38 @@ class BookingsController extends Controller
             'unavailable_dates' => $this->getUnavailableDates(),
             'breakfast_price' => $this->breakfast,
         ]);
+    }
+    
+    public function getAmenities(Facility $facility)
+    {
+        $amenities = $facility->amenities->map(function($amenity) {
+            return [
+                'name' => $amenity->name,
+                'icon' => $amenity->icon ?? $this->getAmenityIcon($amenity->name)
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'amenities' => $amenities
+        ]);
+    }
+    
+    protected function getAmenityIcon($amenityName)
+    {
+        $iconMap = [
+            'wifi' => 'fas fa-wifi',
+            'tv' => 'fas fa-tv',
+            'air conditioning' => 'fas fa-snowflake',
+            'kitchen' => 'fas fa-utensils',
+            'parking' => 'fas fa-parking',
+            'pool' => 'fas fa-swimming-pool',
+            'breakfast' => 'fas fa-coffee',
+            'gym' => 'fas fa-dumbbell',
+        ];
+        
+        $lowerName = strtolower($amenityName);
+        return $iconMap[$lowerName] ?? 'fas fa-check-circle';
     }
 
     protected function getUnavailableDates()

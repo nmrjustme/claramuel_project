@@ -124,8 +124,8 @@
 <div class="min-h-screen p-6">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-white">Booking Calendar</h1>
-            <p class="text-gray-200">View bookings by date</p>
+            <h1 class="text-3xl font-bold text-gray-800">Booking Calendar</h1>
+            <p class="text-gray-600">View bookings by date</p>
         </div>
         <div class="flex space-x-3">
             <button onclick="loadCalendar()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-800 transition-colors flex items-center">

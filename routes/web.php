@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WelcomeController;
@@ -25,7 +26,7 @@ use App\Http\Controllers\BookCottageController;
 use App\Http\Controllers\AdminPaymentController;
 use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\BookingLogController;
-    
+
 use App\Events\NewBookingRequest;
 
 use Carbon\Carbon;
@@ -54,51 +55,55 @@ Route::get('/Images/{id}', [AccommodationImgController::class, 'index'])->name('
 Route::post('/book', [BookingController::class, 'store'])->name('bookings.store');
 Route::get('/verify_email', [VerifyEmailController::class, 'verify'])->name('verify.email');
 
-Route::get('/events/', function (){
+Route::get('/events/', function () {
     return view('customer_pages.static_events');
 })->name('events');
 
-Route::get('/login', function (){
-    return view('auth.login'); 
+Route::get('/login', function () {
+    return view('auth.login');
 });
 
-Route::get('/Payment/Submitted', function(){
-   return view('customer_pages.payment_submitted'); 
+Route::get('/Payment/Submitted', function () {
+    return view('customer_pages.payment_submitted');
 })->name('payments.submitted');
 
 // This Condition is to verify email first before proceed
 Route::middleware(['auth', 'verified'])->group(function () {});
 
+// Amenities Modal Route
+Route::get('/api/facilities/{facility}/amenities', [BookingsController::class, 'getAmenities'])
+    ->name('facilities.amenities');
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+
     Route::post('/profile/image', [ProfileImageController::class, 'update'])->name('profile.image.update');
 });
 
 Route::middleware(['auth'])->group(function () {
 
-
     Route::get('/test-broadcast', function () {
         // Get the most recent booking for testing
         $booking = FacilityBookingLog::with('user')->latest()->first();
-        
+
         if (!$booking) {
             return 'No bookings found to broadcast. ';
         }
 
         // Fire the event
         event(new NewBookingRequest($booking));
-        
+
         return 'New booking event broadcasted!' . $booking->id;
     });
-    
-    
+
+
     Route::get('/admin_dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard/stats', [AdminController::class, 'getStats']);
     Route::get('/admin/dashboard/occupied-facilities', [AdminController::class, 'getOccupiedFacilities']);
-    
+
     Route::get('booking-logs', [BookingLogController::class, 'index'])->name('admin.booking-logs');
 
     //Bookings
@@ -107,51 +112,51 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get/bookings/next-checkin', [BookingController::class, 'nextCheckin']);
     Route::get('/get/show/bookings/{booking}', [BookingController::class, 'show']);
     Route::get('/admin/bookings/export/', [BookingController::class, 'export'])->name('admin.bookings.export');
-    
+
     Route::get('/facility_management', [AdminController::class, 'facilities'])->name('admin.facilities');
     Route::get('/events_management', [AdminController::class, 'events'])->name('admin.events');
     Route::get('/users_management', [AdminController::class, 'users'])->name('admin.users');
     Route::get('/overall_bookings', [AdminController::class, 'overall_bookings'])->name('admin.overall_bookings');
-
+    
     // open modal booking details each customer
     Route::get('/booking-details/{id}', [InquirerController::class, 'getBookingDetails'])->name('admin.inquirer.show');
     // open modal payment details each customer
     Route::get('/payment-details/{id}', [InquirerController::class, 'getPaymentDetails'])->name('admin.inquirerPayment.show');
     Route::post('/payment-details/{id}/verify', [InquirerController::class, 'verifyPayment'])->name('admin.inquirerPayment.verify');
-    
+
     Route::post('/admin/inquiries/mark-all-as-read', [AdminController::class, 'markAllAsRead'])
-    ->name('admin.inquiries.mark-all-as-read');
-    
+        ->name('admin.inquiries.mark-all-as-read');
+
     // =======================
     // bookings monitoring
     // =======================
     Route::get('Inquiries', [AdminController::class, 'inquiries'])->name('admin.inquiries');
-    
-    
+
+
     // =======================
     // ajax fetching data in recent Inquirers at admin index
     // =======================
     Route::get('/api/inquiries', [InquirerController::class, 'getInquiries'])->name('api.inquiries');
     Route::post('/api/inquiries/mark-read/{id}', [InquirerController::class, 'markAsRead'])->name('api.inquiries.mark-read');
     Route::post('/api/inquiries/mark-all-read', [InquirerController::class, 'markAllAsRead'])->name('api.inquiries.mark-all-read');
-    
+
     // =======================
     // Dynamic modal for customer booking request to edit their old data
     // =======================
-    
+
     // soon
-    
-    
+
+
     // =======================
     // Facility Crud
     // =======================
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
     Route::post('/facilities/store', [FacilitiesController::class, 'AdminStore'])->name('admin.facilities.store');
-    
+
     Route::get('/admin/facilities/{id}/edit', [FacilitiesController::class, 'edit']);
     Route::put('/admin/facilities/update/{id}', [FacilitiesController::class, 'UpdateFacility']);
     Route::delete('/facilities/delete/{id}', [FacilitiesController::class, 'DeleteFacility']);
-    
+
     // Cottages
     Route::get('/admin/cottages', [FacilitiesController::class, 'getCottage'])->name('admin.cottages.index');
     Route::get('/admin/cottages/{id}/edit', [FacilitiesController::class, 'editCottage'])->name('admin.cottages.edit');
@@ -159,17 +164,17 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/cottages/{id}', [FacilitiesController::class, 'updateCottage'])->name('admin.cottages.update');
     Route::delete('/admin/cottages/{id}', [FacilitiesController::class, 'destroyCottage'])->name('admin.cottages.destroy');
     Route::delete('/admin/cottage-images/{id}', [FacilitiesController::class, 'deleteCottageImage']);
-    
+
     // Discounts
     Route::get('/facilities/discounted/{id}', [FacilitiesController::class, 'getDiscounts']);
     Route::post('/facilities/{id}/discounts', [FacilitiesController::class, 'addDiscount']);
     Route::match(['post', 'put'], '/facilities/discounts/{id}', [FacilitiesController::class, 'updateDiscount']);
     Route::delete('/facilities/discounts/delete/{id}', [FacilitiesController::class, 'deleteDiscount'])->where('id', '[0-9]+');
-    
+
     // Facility Images Routes
     Route::get('/facilities/{id}/images', [FacilitiesController::class, 'getImages']);
     Route::delete('/admin/facilities/images/{image}', [FacilitiesController::class, 'deleteImage']);
-    
+
     // =======================
     // =======================
 
@@ -198,7 +203,7 @@ Route::middleware(['auth'])->group(function () {
                 if (connection_aborted() || (time() - $startTime) > $maxExecutionTime) {
                     break;
                 }
-                
+
                 // Get new bookings with limit
                 $newBookings = FacilityBookingLog::with(['user', 'details', 'payments'])
                     ->where('id', '>', $lastEventId)
@@ -225,7 +230,7 @@ Route::middleware(['auth'])->group(function () {
                         'lastUpdate' => $currentUpdateTime,
                         'playSound' => $newBookings->isNotEmpty() // Only play sound for new bookings
                     ];
-                    
+
                     echo "id: {$currentEventId}\n";
                     echo "event: update\n";
                     echo 'data: ' . json_encode($data) . "\n\n";
@@ -239,7 +244,7 @@ Route::middleware(['auth'])->group(function () {
 
                 // Clear memory
                 unset($newBookings, $updatedBookings, $data);
-                
+
                 // Sleep but check for connection abort more frequently
                 for ($i = 0; $i < 5; $i++) {
                     if (connection_aborted()) break 2;
@@ -256,13 +261,13 @@ Route::middleware(['auth'])->group(function () {
 
         exit;
     });
-    
+
 
     // calendar
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/bookings/calendar', [BookingCalendarController::class, 'getCalendarData'])->name('admin.calendar.getDate');
     Route::get('/bookings/by-date', [BookingCalendarController::class, 'getBookingsByDate'])->name('admin.calendar.byDate');
-    
+
     // =======================
     // Payments
     // =======================
@@ -274,28 +279,29 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payments/{id}/reject', [AdminPaymentController::class, 'rejectPayment'])->name('payments.reject');
     Route::post('/payments/{id}/update-reference', [AdminPaymentController::class, 'updateReference'])->name('payments.update-reference');
     Route::get('/payments/search', [AdminPaymentController::class, 'search'])->name('payments.search');
-    
+
     // Add these routes to your web.php
-    
+
     Route::post('/payments/{payment}/verify-with-receipt', [PaymentsController::class, 'verifyPaymentWithReceipt'])
         ->name('payments.verify-with-receipt');
-    
-    Route::post('/payments/verify-qr', [PaymentsController::class, 'verifyQrCode'])
-        ->name('payments.verify-qr');
-    
+
+    // Route::post('/payments/verify-qr', [PaymentsController::class, 'verifyQrCode'])
+    //     ->name('payments.verify-qr');
+
+
     Route::post('/admin/payments/verify/{payment_id}', [PaymentsController::class, 'verifyScannedPayment'])
-    ->name('admin.payments.verify');
-    
-    Route::get('check-in/scanner', function(){
-        
-    });
+        ->name('admin.payments.verify');
     
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
     Route::post('/verify-qr-codes', [CheckinController::class, 'verifyQrCode']);
+    Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
     Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
+    Route::get('/qrScanner/customer-details/{paymentId}', [CheckinController::class, 'getCustomerDetails']);
+    Route::get('/qr-in-used/{qr_path}', function ($qr_path) {
+        return view('admin.qr_in_used', ['qr_path' => $qr_path]);
+    })->name('qr-in-used');
     
     Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);
-    
 });
 
 // =======================
@@ -311,22 +317,22 @@ Route::post('/reject-booking/{id}', [InquirerController::class, 'rejectBooking']
 Route::get('/booking/verify/{token}', [InquirerController::class, 'verifyBooking'])->name('booking.verify');
 Route::get('/payment/create/{booking}', [PaymentsController::class, 'payments'])->name('payments');
 Route::get('/NotVerified/', [PaymentsController::class, 'notVerified'])->name('not.verified');
-Route::get('/link-expired', function() {
+Route::get('/link-expired', function () {
     return view('customer_pages.invalid_link');
 })->name('invalid_link');
 Route::get('/admin/inquiries/check-new', [InquirerController::class, 'checkNewInquiries'])
-     ->name('admin.inquiries.check-new');
-     
+    ->name('admin.inquiries.check-new');
+
 Route::get('/booking/completed/{booking}', [BookingsController::class, 'booking_completed'])->name('booking.completed');
 
 
 Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
-     ->name('booking.WaitConfirmation');
-     
-Route::get('/booking/redirect/{booking}', function($booking) {
+    ->name('booking.WaitConfirmation');
+
+Route::get('/booking/redirect/{booking}', function ($booking) {
     return view('booking-redirect', ['booking' => $booking]);
 })->name('booking.redirect');
-     
+
 // Route::get('/booking/verify/{token}', [BookingController::class, 'verify'])->name('booking.verify');
 
 // Route::post('/booking/{booking}/resend-confirmation', [BookingController::class, 'resendConfirmation'])
@@ -336,4 +342,4 @@ Route::get('/booking/redirect/{booking}', function($booking) {
 
 //Route::get('admin/dashboard', [AdminsController::class, 'index'])->name('admin.index');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

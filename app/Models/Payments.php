@@ -29,7 +29,8 @@ class Payments extends Model
         'verified_by',
         'verified_at',
         'verification_token',
-        'qr_code_path'
+        'qr_code_path',
+        'qr_status',
     ];
     protected $casts = [
         'verified_at' => 'datetime',

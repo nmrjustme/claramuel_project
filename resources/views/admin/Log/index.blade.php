@@ -19,7 +19,7 @@
         --gray: #64748b;
         --gray-light: #e2e8f0;
     }
-
+    
     /* Animation styles */
     @keyframes pop-in {
         0% { transform: scale(0.95); opacity: 0; }
@@ -189,17 +189,12 @@
         border-bottom: 1px solid var(--gray-light);
         position: relative;
     }
-    
-    /* Fixed column widths */
+
     th:nth-child(1), td:nth-child(1) { width: 5%; }
-    th:nth-child(2), td:nth-child(2) { width: 10%; }
+    th:nth-child(2), td:nth-child(2) { width: 25%; }
     th:nth-child(3), td:nth-child(3) { width: 20%; }
-    th:nth-child(4), td:nth-child(4) { width: 10%; }
-    th:nth-child(5), td:nth-child(5) { width: 10%; }
-    th:nth-child(6), td:nth-child(6) { width: 10%; }
-    th:nth-child(7), td:nth-child(7) { width: 15%; }
-    th:nth-child(8), td:nth-child(8) { width: 15%; }
-    th:nth-child(9), td:nth-child(9) { width: 15%; }
+    th:nth-child(4), td:nth-child(4) { width: 20%; }
+    th:nth-child(5), td:nth-child(5) { width: 30%; }
     
     /* Rounded corners for first and last cells */
     th:first-child, td:first-child {
@@ -394,7 +389,7 @@
     
     <!-- Real-time stats summary -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Bookings -->
+        
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover-scale relative overflow-hidden glassy-card">
             <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-blue-100 opacity-20"></div>
             <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-blue-200 opacity-30"></div>
@@ -402,7 +397,6 @@
                 <div>
                     <p class="text-sm font-medium text-blue-700">Total Inquiries</p>
                     <h3 class="text-2xl font-bold text-blue-900 mt-1" id="total-inquiries">24</h3>
-                    <p class="text-xs text-blue-600 mt-1">+5 this week</p>
                 </div>
                 <div class="p-2 bg-white rounded-lg shadow-inner">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -419,7 +413,6 @@
                 <div>
                     <p class="text-sm font-medium text-yellow-700">Pending Request</p>
                     <h3 class="text-2xl font-bold text-yellow-900 mt-1" id="pending-requests">8</h3>
-                    <p class="text-xs text-yellow-600 mt-1">3 awaiting response</p>
                 </div>
                 <div class="p-2 bg-white rounded-lg shadow-inner">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -428,8 +421,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Confirmed Request -->
+
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover-scale relative overflow-hidden glassy-card">
             <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-green-100 opacity-20"></div>
             <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-green-200 opacity-30"></div>
@@ -437,7 +429,6 @@
                 <div>
                     <p class="text-sm font-medium text-green-700">Confirmed Request</p>
                     <h3 class="text-2xl font-bold text-green-900 mt-1" id="confirmed-requests">11</h3>
-                    <p class="text-xs text-green-600 mt-1">+3 confirmed today</p>
                 </div>
                 <div class="p-2 bg-white rounded-lg shadow-inner">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -446,7 +437,7 @@
                 </div>
             </div>
         </div>
-    
+        
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover-scale relative overflow-hidden glassy-card">
             <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-purple-100 opacity-20"></div>
             <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-purple-200 opacity-30"></div>
@@ -461,7 +452,7 @@
                 </div>
             </div>
         </div>
-        
+    
     </div>
         
     <!-- Booking List Table -->
@@ -489,10 +480,10 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Id</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference #</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guest</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-out</th>
+                        <!-- Remove these two th elements -->
+                        <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in</th> -->
+                        <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-out</th> -->
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <div class="flex flex-col items-start space-y-1">
                                 <span>Request Status</span>
@@ -814,7 +805,6 @@ function updateSummaryCounts(summary) {
     document.getElementById('total-inquiries').textContent = summary.total || 0;
     document.getElementById('confirmed-requests').textContent = summary.confirmed_requests || 0;
     document.getElementById('pending-requests').textContent = summary.pending_requests || 0;
-    document.getElementById('rejected-request').textContent = summary.rejected_request || 0;
     document.getElementById('payment_under_verification').textContent = summary.payment_under_verification || 0;
 }
 
@@ -946,31 +936,31 @@ function renderBookings(bookings) {
         row.className = `booking-row ${!booking.is_read ? 'unread-booking' : ''}`;
         row.dataset.id = booking.id;
         
+        // In the renderBookings function, modify the row.innerHTML part:
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 ${booking.id}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                ${booking.reference || 'N/A'}
-            </td>
-            <td class="px-4 py-2 whitespace-nowrap">
+
+            <td class="px-6 py-4 whitespace-nowrap">
                 <div class="ml-2">
                     <div class="text-sm font-medium text-gray-900">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</div>
                     <div class="text-sm text-gray-500">${booking.user?.email || 'N/A'}</div>
                 </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <!-- Remove these two td elements -->
+            <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 ${bookingDetail?.checkin_date ? formatDate(bookingDetail.checkin_date) : 'N/A'}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 ${bookingDetail?.checkout_date ? formatDate(bookingDetail.checkout_date) : 'N/A'}
-            </td>
-            <td class="px-4 py-4 whitespace-nowrap status-cell">
+            </td> -->
+            <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
                     ${statusText}
                 </span>
             </td>
-            <td class="px-4 py-4 whitespace-nowrap payment-cell">
+            <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">
                     ${paymentStatusText}
                 </span>

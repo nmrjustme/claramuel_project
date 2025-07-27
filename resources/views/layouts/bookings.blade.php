@@ -21,14 +21,22 @@
                         accent: '#EA580C',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: [
+                            'Inter', 
+                            'system-ui', 
+                            '-apple-system', 
+                            'BlinkMacSystemFont', 
+                            'Segoe UI', 
+                            'Roboto', 
+                            'sans-serif'
+                        ],
                     },
                 }
             }
         }
     </script>
     
-    <body class="bg-red-50 min-h-screen">
+    <body class="bg-gray-50 min-h-screen">
         @yield('bookings')
     </body>
 </head>

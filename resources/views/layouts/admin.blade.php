@@ -9,7 +9,7 @@
     
     <!-- Fonts and Styles -->
     <link rel="icon" href="{{ asset('/favicon.ico?v=2') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script>-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -90,7 +90,7 @@
                 <div class="px-6 py-3 flex justify-between items-center">
                     <div class="flex items-center space-x-3">
                         <x-logo-icon size="default" />
-                        <span class="text-2xl text-red-300">
+                        <span class="text-2xl text-red-600">
                             <a href="{{ route('index') }}">Ｍｔ.ＣＬＡＲＡＭＵＥＬ</a>
                         </span>
                     </div>

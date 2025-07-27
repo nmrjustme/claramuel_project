@@ -9,8 +9,8 @@
 <div class="min-h-screen p-6">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-white">Rooms Management</h1>
-            <p class="text-gray-200">Manage all rooms and their details.</p>
+            <h1 class="text-3xl font-bold text-gray-800">Rooms Management</h1>
+            <p class="text-gray-600">Manage all rooms and their details.</p>
         </div>
         <button 
             onclick="openAddModal()"

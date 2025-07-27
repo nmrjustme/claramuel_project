@@ -4,18 +4,19 @@
 <div class="min-h-screen bg-black flex flex-col">
     <div class="container mx-auto px-4 py-8 flex-1 flex flex-col">
         <h1 class="text-white text-2xl font-bold mb-4">Scan Guest QR Code</h1>
-        
+
         <div class="flex-1 flex flex-col items-center justify-center">
             <video id="qrVideo" width="100%" class="max-w-md mb-4 border-4 border-white rounded-lg"></video>
             <div id="qrResult" class="text-white text-center mb-6"></div>
-            
+
             <!-- Welcome message container (initially hidden) -->
             <div id="welcomeMessage" class="hidden text-center mb-6 p-4 bg-gray-800 rounded-lg max-w-md">
                 <h2 class="text-xl font-bold text-green-400 mb-2" id="welcomeTitle">Welcome!</h2>
                 <p class="text-white" id="customerDetails"></p>
             </div>
-            
-            <a href="{{ url()->previous() }}" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+
+            <a href="{{ url()->previous() }}"
+                class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
                 Cancel
             </a>
         </div>
@@ -131,7 +132,7 @@
     }
 
     function showWelcomeMessage(paymentId) {
-        fetch(`/api/customer-details/${paymentId}`, {
+        fetch(`/qrScanner/customer-details/${paymentId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -142,13 +143,7 @@
         .then(data => {
             if (data.success) {
                 const customer = data.customer;
-                welcomeTitle.textContent = `Welcome, ${customer.name}!`;
-                customerDetails.innerHTML = `
-                    <p>Ticket: ${customer.ticket_type}</p>
-                    <p>Seat: ${customer.seat_number || 'General Admission'}</p>
-                    <p class="mt-2 text-green-300">Successfully checked in!</p>
-                `;
-                
+                welcomeTitle.textContent = `Welcome, ${customer.name}!`;                
                 resultContainer.classList.add('hidden');
                 welcomeMessage.classList.remove('hidden');
             } else {
@@ -173,14 +168,16 @@
         display: inline-block;
         width: 20px;
         height: 20px;
-        border: 3px solid rgba(255,255,255,.3);
+        border: 3px solid rgba(255, 255, 255, .3);
         border-radius: 50%;
         border-top-color: #fff;
         animation: spin 1s ease-in-out infinite;
     }
-    
+
     @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+            transform: rotate(360deg);
+        }
     }
 </style>
 @endsection

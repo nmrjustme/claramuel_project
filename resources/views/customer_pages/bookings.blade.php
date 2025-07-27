@@ -517,6 +517,44 @@
         background-color: #DC2626;
         border-radius: 4px;
     }
+
+    /* Amenities Modal Styles */
+    #amenities-modal {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .amenity-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        background-color: #f8fafc;
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .amenity-item:hover {
+        background-color: #f0f4f8;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .amenity-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: #DC2626;
+        font-size: 1rem;
+    }
+
+    .amenity-name {
+        font-size: 0.9375rem;
+        color: #1F2937;
+        font-weight: 500;
+    }
 </style>
 
 <x-header />
@@ -601,7 +639,7 @@
                         $groupedFacilities = $facilities->groupBy('category');
                         echo "<script>console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");</script>";
                     @endphp
-                
+
                     @foreach($groupedFacilities as $category => $facilitiesInCategory)
                     <div class="category-container">
                         <h3 class="category-title">{{ $category }}</h3>
@@ -678,15 +716,17 @@
                                         <h3 class="room-title">
                                             {{ $facility->name }}
                                             @if($facility->room_number)
-                                            <span class="room-number">(Room {{ $facility->room_number }})</span>
+                                            <span class="room-number">({{ $facility->room_number }} Room )</span>
                                             @endif
                                         </h3>
                                         
                                         <div class="room-features">
+                                            @if($facility->bed_number)
                                             <div class="feature-item">
                                                 <i class="fas fa-bed feature-icon"></i>
                                                 <span>{{ $facility->bed_number }} bed{{ $facility->bed_number != 1 ? 's' : '' }}</span>
                                             </div>
+                                            @endif
                                             <div class="feature-item">
                                                 <i class="fas fa-user-friends feature-icon"></i>
                                                 <span>Sleeps {{ $facility->pax }}</span>
@@ -722,7 +762,13 @@
                                                 @endif
                                             </div>
                                         </div>
-                                        
+
+                                        <button class="view-amenities-btn mt-2 text-sm text-primary font-medium flex items-center hover:text-primary-dark transition-colors"
+                                                data-room-id="{{ $facility->id }}"
+                                                data-amenities='@json($facility->amenities->map(function($a) { return ['name' => $a->name]; }))'>
+                                            <i class="fas fa-list mr-2"></i> View All Amenities
+                                        </button>
+
                                         <!-- Booked dates only -->
                                         @if(!empty($bookedDates))
                                         <div class="unavailable-dates-container mt-3">
@@ -744,9 +790,9 @@
                                         @endif
                                         
                                         <!-- Price and Book Button -->
-                                        <div class="price-container mt-auto">
-                                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 p-2 sm:p-0">
-                                                <div class="price-details">
+                                        <div class="price-container mt-auto w-full">
+                                            <div class="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-2 xs:gap-3 p-2 xs:p-0">
+                                                <div class="price-details flex-grow">
                                                     @php
                                                         $activeDiscount = $facility->discounts->first(function ($discount) {
                                                             return \Carbon\Carbon::now()->between(
@@ -755,9 +801,9 @@
                                                             );
                                                         });
                                                     @endphp
-                                        
+                                            
                                                     @if($activeDiscount)
-                                                        <div class="text-xs sm:text-sm text-green-600 font-medium mb-1">
+                                                        <div class="text-xs xs:text-sm text-green-600 font-medium mb-1">
                                                             <i class="fas fa-tag mr-1"></i> 
                                                             @if($activeDiscount->discount_type === 'percent')
                                                                 {{ $activeDiscount->discount_value }}% OFF
@@ -765,11 +811,11 @@
                                                                 ₱{{ number_format($activeDiscount->discount_value) }} OFF
                                                             @endif
                                                         </div>
-                                                        <div class="flex items-center flex-wrap">
-                                                            <div class="night-price text-gray-400 line-through mr-2 text-sm sm:text-base">
+                                                        <div class="flex items-center flex-wrap gap-x-2">
+                                                            <div class="night-price text-gray-400 line-through text-xs xs:text-sm sm:text-base">
                                                                 ₱{{ number_format($facility->price) }}
                                                             </div>
-                                                            <div class="night-price text-red-600 font-semibold text-sm sm:text-base">
+                                                            <div class="night-price text-red-600 font-semibold text-sm xs:text-base">
                                                                 ₱{{ number_format(
                                                                     $facility->price - (
                                                                         $activeDiscount->discount_type === 'percent' 
@@ -780,13 +826,13 @@
                                                             </div>
                                                         </div>
                                                     @else
-                                                        <div class="night-price font-semibold text-sm sm:text-base">
+                                                        <div class="night-price font-semibold text-sm xs:text-base">
                                                             ₱{{ number_format($facility->price) }}
                                                         </div>
                                                     @endif
-                                                    <div class="night-text text-xs sm:text-sm text-gray-500">per night</div>
+                                                    <div class="night-text text-xs xs:text-sm text-gray-500 mt-0.5">per night</div>
                                                 </div>
-                                                <button class="book-button add-to-cart-btn btn-primary w-full sm:w-auto px-4 py-2 text-sm sm:text-base"
+                                                <button class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-3 py-2 xs:px-4 xs:py-2 text-xs xs:text-sm sm:text-base rounded-lg hover:scale-[1.02] transition-transform duration-200 ease-in-out shadow-sm hover:shadow-md active:scale-95"
                                                     data-room="{{ $facilityId }}">
                                                     Book Now
                                                 </button>
@@ -915,7 +961,7 @@
                     </div>
                     <div id="confirm-error" class="checkbox-error">Please confirm to proceed</div>
                 </div>
-
+                
                 <button id="checkout-btn"
                     class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none hover:-translate-y-0.5 active:translate-y-0 btn-primary"
                     disabled>
@@ -925,13 +971,46 @@
                         <div id="spinner" class="w-6 h-6 border-4 border-white-500 border-t-transparent rounded-full animate-spin mx-2"></div>
                     </div>
                 </button>
-
+                
                 <div class="mt-4 text-center">
                     <p class="text-xs text-gray-400 flex items-center justify-center">
                         <i class="fas fa-shield-alt mr-1"></i>
                         Proceed and wait for confirmation before completing the payment.
                     </p>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Amenities Modal -->
+<div id="amenities-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        
+        <!-- Modal container -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Room Amenities
+                        </h3>
+                        <div class="mt-4">
+                            <div id="amenities-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Amenities will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" id="close-amenities-modal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    Close
+                </button>
             </div>
         </div>
     </div>
@@ -1003,6 +1082,75 @@
         this.setDefaultDates();
         this.setupScrollArrows();
         this.setupUnavailableDatesToggle();
+        this.setupAmenitiesModal();
+    }
+    setupAmenitiesModal() {
+        const modal = document.getElementById('amenities-modal');
+        const closeBtn = document.getElementById('close-amenities-modal');
+        const amenitiesList = document.getElementById('amenities-list');
+        
+        // Close handlers
+        closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+        
+        // View amenities button handler
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('.view-amenities-btn')) {
+                const button = e.target.closest('.view-amenities-btn');
+                const facilityId = button.dataset.roomId.replace('facility-', '');
+                
+                try {
+                    // Show loading state
+                    amenitiesList.innerHTML = '<div class="col-span-2 py-4 text-center"><i class="fas fa-spinner fa-spin text-primary mr-2"></i> Loading amenities...</div>';
+                    modal.classList.remove('hidden');
+                    
+                    // Fetch amenities via API
+                    const response = await fetch(`/api/facilities/${facilityId}/amenities`);
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        // Populate amenities list
+                        amenitiesList.innerHTML = data.amenities.map(amenity => `
+                            <div class="amenity-item">
+                                <div class="amenity-icon">
+                                    <i class="${amenity.icon}"></i>
+                                </div>
+                                <div class="amenity-name">${amenity.name}</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        throw new Error(data.message || 'Failed to load amenities');
+                    }
+                } catch (error) {
+                    console.error('Error loading amenities:', error);
+                    amenitiesList.innerHTML = `
+                        <div class="col-span-2 py-4 text-center text-red-500">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            ${error.message || 'Failed to load amenities'}
+                        </div>
+                    `;
+                }
+            }
+        });
+    }
+
+    getAmenityIcon(amenityName) {
+        const iconMap = {
+            'wifi': 'fas fa-wifi',
+            'tv': 'fas fa-tv',
+            'air conditioning': 'fas fa-snowflake',
+            'kitchen': 'fas fa-utensils',
+            'parking': 'fas fa-parking',
+            'pool': 'fas fa-swimming-pool',
+            'breakfast': 'fas fa-coffee',
+            'gym': 'fas fa-dumbbell',
+            // Add more mappings as needed
+        };
+        
+        const lowerName = amenityName.toLowerCase();
+        return iconMap[lowerName] || 'fas fa-check-circle';
     }
 
     setupUnavailableDatesToggle() {

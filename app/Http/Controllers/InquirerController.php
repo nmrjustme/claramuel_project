@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 class InquirerController extends Controller
 {
     // ... existing methods ...
-
+    
     /**
      * Confirm a booking and optionally send confirmation email
      *

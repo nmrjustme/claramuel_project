@@ -174,7 +174,7 @@ class BookingController extends Controller
         $query = FacilityBookingLog::with([
                 'user', 
                 'details', 
-                'payments',
+                'payments.verifiedBy',
                 'summaries.facility'
             ])
             ->orderBy('confirmed_at', 'desc')
@@ -231,7 +231,7 @@ class BookingController extends Controller
         try {
             $status = $request->query('status', 'paid');
             
-            $validStatuses = ['paid', 'not_paid', 'advance_paid', 'pending_confirmation', 'rejected', 'request', 'cancelled'];
+            $validStatuses = ['fully_paid', 'under_verification', 'verified', 'rejected', 'request', 'cancelled'];
             if (!in_array($status, $validStatuses)) {
                 $status = 'paid';
             }
@@ -269,7 +269,7 @@ class BookingController extends Controller
                 ->where('checked_in_at', '>', now()->toDateTimeString())
                 ->orderBy('checked_in_at')
                 ->first();
-
+            
             if ($nextBooking) {
                 $checkinDate = Carbon::parse($nextBooking->details[0]->checkin_date);
                 $daysUntil = now()->diffInDays($checkinDate);
