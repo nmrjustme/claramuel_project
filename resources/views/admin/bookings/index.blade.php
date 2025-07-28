@@ -150,7 +150,6 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reservation Code</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-out</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collected By</th>
                             </tr>
                         </thead>
@@ -201,7 +200,10 @@
                 <div class="glass-card p-6 hover-scale">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">Next Check-in</h3>
-                        <div class="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full animate-pulse">
+                        <div class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
                             Upcoming
                         </div>
                     </div>
@@ -231,8 +233,15 @@
                             </svg>
                             <p class="text-gray-600" id="next-checkin-phone">-</p>
                         </div>
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-3V3a1 1 0 00-1-1H9zm-1 7.707l2 2 4-4a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414z" clip-rule="evenodd" />
+                            </svg>
+                            <p class="font-medium text-gray-800" id="next-checkin-booking-code">-</p>
+                        </div>
                     </div>
                 </div>
+                
                 
                 <!-- Booking Summary -->
                 <div class="glass-card overflow-hidden hover-scale">
@@ -357,7 +366,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/admin/bookings/export?status=${status}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`, {
             method: 'GET',
             headers: {
+                'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             credentials: 'same-origin'
@@ -502,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Get the payment status from the first payment or use booking status as fallback
                     const paymentStatus = booking.payments?.[0]?.status || booking.status;
                     const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
-                    const verifiedBy = booking.payments?.[0]?.verifiedBy?.firstname || 'System Admin';
+                    const verifiedBy = booking.payments?.[0]?.verified_by?.firstname || 'System Admin';
                 
                     
                     html += `
@@ -523,9 +534,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">${formatDate(booking.details[0]?.checkout_date)}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 font-medium">${formatCurrency((booking.details[0]?.total_price * 0.5) || 0)}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">${verifiedBy}</div>
@@ -598,14 +606,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.data) {
                 const booking = data.data;
                 const detail = booking.details[0];
-                document.getElementById('next-checkin-time').textContent = 
-                    `${data.days_until} day${data.days_until !== 1 ? 's' : ''} from now`;
+                // Now displays "1.7 days from now" instead of the long decimal
+                const daysUntil = data.days_until;
+                let displayText;
+                
+                if (daysUntil < 1) {
+                    const hours = Math.round(daysUntil * 24);
+                    displayText = `${hours} hour${hours !== 1 ? 's' : ''} from now`;
+                } else {
+                    displayText = `${daysUntil} day${daysUntil !== 1 ? 's' : ''} from now`;
+                }
+                
+                document.getElementById('next-checkin-time').textContent = displayText;
                 document.getElementById('next-checkin-date').textContent = formatDate(detail.checkin_date);
                 document.getElementById('next-checkin-nights').textContent = 
                     `${getNights(detail.checkin_date, detail.checkout_date)} night${getNights(detail.checkin_date, detail.checkout_date) !== 1 ? 's' : ''}`;
                 document.getElementById('next-checkin-guest').textContent = 
                     `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
                 document.getElementById('next-checkin-phone').textContent = booking.user?.phone || 'N/A';
+                document.getElementById('next-checkin-booking-code').textContent = booking.reference || 'N/A';
             } else {
                 document.getElementById('next-checkin-time').textContent = 'No upcoming check-ins';
                 ['next-checkin-date', 'next-checkin-nights', 'next-checkin-guest', 'next-checkin-phone'].forEach(id => {

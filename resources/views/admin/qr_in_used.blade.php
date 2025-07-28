@@ -18,15 +18,10 @@
             <!-- QR Code Placeholder (replace with your actual QR code) -->
                <div class="w-48 h-48 bg-gray-100 flex items-center justify-center mb-3 relative overflow-hidden rounded">
                <!-- Replace "path/to/your-qr-code.png" with your actual image path -->
-                    @if(file_exists(public_path($qr_path)))
-                         <img src="{{ $qr_path }}" 
-                              alt="QR Code" 
-                              class="w-full h-full object-contain p-2">
-                    @else
-                         <div class="qr-error">
-                              QR code image not found
-                         </div>
-                    @endif
+               
+               <img src="{{ $qrPath }}" 
+                    alt="QR Code" 
+                    class="w-full h-full object-contain p-2">
                
                <!-- Overlay text (optional) -->
                <span class="absolute bottom-2 text-gray-400 text-xs bg-white/80 px-2 py-1 rounded">IN USE</span>
@@ -56,11 +51,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Footer Note -->
-        <p class="text-gray-500 text-xs mt-4 text-center">
-            Last scanned: <span class="font-medium">2 minutes ago</span>
-        </p>
     </div>
 </body>
 </html>

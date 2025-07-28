@@ -265,26 +265,30 @@ class BookingController extends Controller
     public function nextCheckin()
     {
         try {
+            // Get the next booking where checkin_date is in the future
             $nextBooking = FacilityBookingLog::with(['user', 'details'])
-                ->where('checked_in_at', '>', now()->toDateTimeString())
-                ->orderBy('checked_in_at')
+                ->whereHas('details', function($query) {
+                    $query->where('checkin_date', '>', now()->timezone('Asia/Manila')->toDateString())
+                        ->orderBy('checkin_date');
+                })
                 ->first();
-            
-            if ($nextBooking) {
-                $checkinDate = Carbon::parse($nextBooking->details[0]->checkin_date);
-                $daysUntil = now()->diffInDays($checkinDate);
-                
+
+            if (!$nextBooking) {
                 return response()->json([
                     'success' => true,
-                    'data' => $nextBooking,
-                    'days_until' => $daysUntil
+                    'data' => null,
+                    'message' => 'No upcoming check-ins found'
                 ]);
             }
+
+            // Use checkin_date (scheduled date) not checked_in_at (actual arrival)
+            $checkinDate = Carbon::parse($nextBooking->details[0]->checkin_date);
+            $daysUntil = round(now()->diffInHours($checkinDate) / 24, 1);
             
             return response()->json([
                 'success' => true,
-                'data' => null,
-                'message' => 'No upcoming check-ins found'
+                'data' => $nextBooking,
+                'days_until' => $daysUntil
             ]);
             
         } catch (\Exception $e) {
@@ -295,7 +299,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-    
+        
     public function show(FacilityBookingLog $booking)
     {
         $booking->load(['user', 'details', 'payments', 'summaries.facility']);

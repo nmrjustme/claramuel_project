@@ -42,8 +42,6 @@ class CheckinController extends Controller
                     'received_data' => $data
                 ], 400);
             }
-            
-
 
             // ✅ Decrypt QR code payload
             try {
@@ -55,11 +53,14 @@ class CheckinController extends Controller
                     'message' => 'Invalid or tampered QR code.',
                 ], 400);
             }
-
-            if ($this->qrInUsed($payload['id'])) {
+            
+             if ($this->qrInUsed($payload['id'])) {
                 $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
-                
-                return redirect()->route('qr-in-used', ['qr_path' => $qr_path]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'QR code is already in use.',
+                    'qr_path' => $qr_path
+                ], 409);    
             }
             
             // Validate payload structure
@@ -172,11 +173,20 @@ class CheckinController extends Controller
                     'message' => 'Invalid or tampered QR code.',
                 ], 400);
             }
-
+            
+            // if ($this->qrInUsed($payload['id'])) {
+            //     $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
+                
+            //     return redirect()->route('qr-in-used', ['qr_path' => $qr_path]);
+            // }
+            
             if ($this->qrInUsed($payload['id'])) {
                 $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
-                
-                return redirect()->route('qr-in-used', ['qr_path' => $qr_path]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'QR code is already in use.',
+                    'qr_path' => $qr_path
+                ], 409);    
             }
             
             // Validate payload structure

@@ -349,7 +349,7 @@ $active = 'dashboard';
                          </button>
                     </div>
                </div>
-
+               
                <div class="relative">
                     <!-- Horizontal scroll container -->
                     <div class="flex space-x-4 pb-4 overflow-x-auto scrollbar-hide" id="occupied-facilities-container">
@@ -360,7 +360,7 @@ $active = 'dashboard';
                               <p class="mt-2 text-gray-500">Loading facilities...</p>
                          </div>
                     </div>
-
+                    
                     <!-- Scroll indicators -->
                     <div
                          class="absolute top-0 left-0 h-full w-8 bg-gradient-to-r from-white to-transparent pointer-events-none">
@@ -371,110 +371,63 @@ $active = 'dashboard';
                </div>
           </div>
      </div>
-
+     
      <!-- Bottom Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Arriving Today List -->
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left Column (Next Check-in) -->
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
-               <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">Arriving Today</h2>
-                    <button class="text-sm text-red-600 hover:text-red-800">View All</button>
-               </div>
-               <div class="space-y-4">
-                    <!-- Guest with multiple rooms -->
-                    <div class="flex items-start p-3 bg-blue-50 rounded-lg group hover:bg-blue-100 transition-colors">
-                         <div
-                              class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
-                              <span class="text-blue-800 font-medium">JD</span>
-                         </div>
-                         <div class="flex-1">
-                              <div class="flex justify-between items-baseline">
-                                   <h4 class="text-sm font-medium text-gray-900">John Doe (Group
-                                        Booking)</h4>
-                                   <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">12:00
-                                        PM</span>
-                              </div>
-
-                              <!-- Multiple rooms section -->
-                              <div class="mt-1 space-y-2">
-                                   <div class="flex items-center text-sm text-gray-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-500"
-                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                        Room #205 (Deluxe) • 2 nights
-                                   </div>
-                                   <div class="flex items-center text-sm text-gray-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-500"
-                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                        Room #206 (Deluxe) • 2 nights
-                                   </div>
-                                   <div class="flex items-center text-sm text-gray-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-500"
-                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                        Room #207 (Suite) • 2 nights
-                                   </div>
-                              </div>
-
-                              <div class="mt-2 flex items-center text-xs text-gray-500">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                   </svg>
-                                   09738453821 • 4 guests total
-                              </div>
+               <!-- Next Check-in Section -->
+               <div class="glass-card">
+                    <div class="flex items-center justify-between mb-4">
+                         <h3 class="text-lg font-semibold text-gray-800">Next Check-in</h3>
+                         <div class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                              </svg>
+                              Upcoming
                          </div>
                     </div>
-
-                    <!-- Another guest -->
-                    <div class="flex items-start p-3 bg-green-50 rounded-lg group hover:bg-green-100 transition-colors">
-                         <div
-                              class="flex-shrink-0 h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mr-3 group-hover:bg-green-200 transition-colors">
-                              <span class="text-green-800 font-medium">AS</span>
+                    <p class="text-gray-600 mb-4" id="next-checkin-time">Loading...</p>
+                    <div class="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-100">
+                         <div class="flex items-center mb-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                              </svg>
+                              <p class="font-medium text-gray-800" id="next-checkin-date">-</p>
                          </div>
-                         <div class="flex-1">
-                              <div class="flex justify-between items-baseline">
-                                   <h4 class="text-sm font-medium text-gray-900">Alice Smith</h4>
-                                   <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">3:00
-                                        PM</span>
-                              </div>
-
-                              <div class="mt-1">
-                                   <div class="flex items-center text-sm text-gray-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-500"
-                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                        Room #301 (Suite) • 3 nights
-                                   </div>
-                              </div>
-
-                              <div class="mt-2 flex items-center text-xs text-gray-500">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                   </svg>
-                                   09123456789 • 2 guests
-                              </div>
+                         <div class="flex items-center mb-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                              </svg>
+                              <p class="text-gray-600" id="next-checkin-nights">-</p>
+                         </div>
+                         <div class="flex items-center mb-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                              </svg>
+                              <p class="font-medium text-gray-800" id="next-checkin-guest">-</p>
+                         </div>
+                         <div class="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                              </svg>
+                              <p class="text-gray-600" id="next-checkin-phone">-</p>
+                         </div>
+                         <div class="flex items-center mt-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd" d="M9 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" clip-rule="evenodd" />
+                              </svg>
+                              <p class="font-medium text-gray-800" id="next-checkin-booking-code">-</p>
                          </div>
                     </div>
                </div>
           </div>
 
           <!-- Quick Actions -->
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
+          <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
                <div class="grid grid-cols-2 gap-4">
+                    <!-- Row 1 -->
                     <a href="#" id="openBookingModal"
                          class="p-4 bg-red-50 rounded-lg text-center hover:bg-red-100 transition-colors group hover-scale">
                          <div
@@ -501,6 +454,7 @@ $active = 'dashboard';
                          <span class="text-sm font-medium text-gray-700">Check-in</span>
                     </a>
 
+                    <!-- Row 2 -->
                     <a href="#"
                          class="p-4 bg-green-50 rounded-lg text-center hover:bg-green-100 transition-colors group hover-scale">
                          <div
@@ -529,7 +483,7 @@ $active = 'dashboard';
                </div>
           </div>
      </div>
-</div>n
+</div>
 
 <!-- Modal for check-in options -->
 <div id="checkInModal"
@@ -684,7 +638,7 @@ $active = 'dashboard';
           </div>
      </div>
 </div>
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content_js')
@@ -766,8 +720,80 @@ function selectGuest(guestId) {
     // Redirect to check-in page for this guest
     window.location.href = `/check-in/manual/${guestId}`;
 }
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+function getNights(checkin, checkout) {
+    if (!checkin || !checkout) return 0;
+    const diff = new Date(checkout) - new Date(checkin);
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+// Function to load next check-in
+function loadNextCheckin() {
+    fetch('/get/bookings/next-checkin', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to load next check-in');
+        }
+        
+        const container = document.getElementById('next-checkin-time');
+        
+        if (data.data) {
+            const booking = data.data;
+            const detail = booking.details[0];
+            
+            // Format the time display
+            const daysUntil = data.days_until;
+            let displayText;
+            
+            if (daysUntil < 1) {
+                const hours = Math.round(daysUntil * 24);
+                displayText = `${hours} hour${hours !== 1 ? 's' : ''} from now`;
+            } else {
+                displayText = `${daysUntil.toFixed(1)} day${daysUntil !== 1 ? 's' : ''} from now`;
+            }
+            
+            container.textContent = displayText;
+            document.getElementById('next-checkin-date').textContent = formatDate(detail.checkin_date);
+            document.getElementById('next-checkin-nights').textContent = 
+                `${getNights(detail.checkin_date, detail.checkout_date)} night${getNights(detail.checkin_date, detail.checkout_date) !== 1 ? 's' : ''}`;
+            document.getElementById('next-checkin-guest').textContent = 
+                `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
+            document.getElementById('next-checkin-phone').textContent = booking.user?.phone || 'N/A';
+            document.getElementById('next-checkin-booking-code').textContent = booking.reference || 'N/A';
+        } else {
+            container.textContent = 'No upcoming check-ins';
+            ['next-checkin-date', 'next-checkin-nights', 'next-checkin-guest', 'next-checkin-phone'].forEach(id => {
+                document.getElementById(id).textContent = '-';
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading check-in data:', error);
+        document.getElementById('next-checkin-time').textContent = 'Error loading check-in data';
+        document.getElementById('next-checkin-time').classList.add('text-red-500');
+    });
+}
 
 // QR Upload and Processing
+
 document.addEventListener('DOMContentLoaded', function() {
     // Set up event listeners for all View buttons
     document.querySelectorAll('[data-id]').forEach(button => {
@@ -776,15 +802,19 @@ document.addEventListener('DOMContentLoaded', function() {
             openModal_accept_inquirer(this);
         });
     });
+     loadNextCheckin();
+    
+     // Refresh every 5 minutes
+     setInterval(loadNextCheckin, 300000);
+     // Set up event listener for New Booking button
+     document.getElementById('openBookingModal').addEventListener('click', function(e) {
+          e.preventDefault();
+          openBookingModal();
+     });
+     
+     loadOccupiedFacilities();
 
-    // Set up event listener for New Booking button
-    document.getElementById('openBookingModal').addEventListener('click', function(e) {
-        e.preventDefault();
-        openBookingModal();
-    });
-    
-    loadOccupiedFacilities();
-    
+
     // Refresh every 5 minutes
     setInterval(loadOccupiedFacilities, 300000);
     // QR Upload and Processing
@@ -850,6 +880,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
                const data = await response.json();
                
+               if (response.status === 409) {
+                    // Show confirmation dialog first
+                    const shouldRedirect = confirm(
+                         data.message || "This QR code has already been used. Do you want to view details?"
+                    );
+                    
+                    // Only redirect if user clicks "OK" (Yes)
+                    if (shouldRedirect && data.qr_path) {
+                         window.location.href = `/check-in/used?path=${encodeURIComponent(data.qr_path)}`;
+                    } else {
+                         resetQRUploadForm();
+                    }
+                    return;
+               }
+               
                if (!response.ok) {
                     throw new Error(data.message || 'Server verification failed');
                }
@@ -867,8 +912,9 @@ document.addEventListener('DOMContentLoaded', function() {
           }
      });
 
-          // Function to read QR code from image (client-side)
-          async function readQRCodeFromImage(file) {
+
+     // Function to read QR code from image (client-side)
+     async function readQRCodeFromImage(file) {
           return new Promise((resolve, reject) => {
                const reader = new FileReader();
                reader.onload = function(e) {
@@ -1017,4 +1063,4 @@ function loadOccupiedFacilities() {
     });
 }
 </script>
-@endsection()
+@endsection

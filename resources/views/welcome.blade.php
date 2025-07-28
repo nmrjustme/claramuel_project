@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mt. ClaRamuel Resort & Events Place</title>
+    <title>Mt. ClaRamuel Resort & Events Place | Luxury Mountain Retreat</title>
+    <meta name="description" content="Experience luxury accommodations and premier event hosting at Mt. ClaRamuel Resort in Isabela, Philippines.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -13,347 +14,522 @@
                     colors: {
                         primary: '#1a365d',
                         secondary: '#e53e3e',
+                        accent: '#d1a054',
+                        darkAccent: '#9f723d'
+                    },
+                    fontFamily: {
+                        serif: ['Georgia', 'serif'],
+                        sans: ['"Open Sans"', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+        .hero-title {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50%;
+            height: 3px;
+            background: #e53e3e;
+        }
+        
+        /* Animation Styles */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        /* Service card hover animation */
+        .service-card {
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Gallery image hover effect */
+        .gallery-item img {
+            transition: transform 0.5s ease, opacity 0.3s ease;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Button pulse animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .btn-pulse:hover {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
 </head>
-<body class="bg-white font-sans text-gray-800">
+<body class="bg-white text-gray-700">
     <!-- Header -->
-    <header class="bg-primary text-white fixed w-full shadow-md z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2 group">
-                <img src="{{ url('imgs/logo.png') }}" class="h-10" alt="Logo">
-                <a href="#" class="text-2xl font-bold">
-                    <span class="text-white">Mt.</span><span class="text-secondary">ClaRamuel</span>
-                </a>
+    <header id="main-header" class="bg-primary text-white fixed w-full shadow-lg z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="{{ url('imgs/logo.png') }}" class="h-12" alt="Mt. ClaRamuel Logo">
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">
+                        <span class="text-white">Mt. ClaRamuel</span>
+                    </h1>
+                    <p class="text-xs text-gray-300">Resort & Events Place</p>
+                </div>
             </div>
-            <nav class="hidden md:flex space-x-8 items-center">
-                <a href="#home" class="hover:text-secondary transition">Home</a>
-                <a href="#about" class="hover:text-secondary transition">About</a>
-                <a href="#services" class="hover:text-secondary transition">Services</a>
-                <a href="#gallery" class="hover:text-secondary transition">Gallery</a>
-                <a href="#contact" class="hover:text-secondary transition">Contact</a>
-                <a href="{{ route('login') }}" class="hover:text-secondary transition">Login</a>
-                <a href="{{ route('customer_bookings') }}" class="bg-secondary hover:bg-red-700 px-4 py-2 rounded transition flex items-center">
+            <nav class="hidden lg:flex space-x-6 items-center">
+                <a href="#home" class="hover:text-accent transition duration-300 font-medium">Home</a>
+                <a href="#about" class="hover:text-accent transition duration-300 font-medium">About</a>
+                <a href="#services" class="hover:text-accent transition duration-300 font-medium">Services</a>
+                <a href="#gallery" class="hover:text-accent transition duration-300 font-medium">Gallery</a>
+                <a href="#contact" class="hover:text-accent transition duration-300 font-medium">Contact</a>
+                <a href="{{ route('login') }}" class="hover:text-accent transition duration-300 font-medium">Login</a>
+                <a href="{{ route('customer_bookings') }}" class="bg-accent hover:bg-yellow-600 text-white px-5 py-2 rounded-sm transition duration-300 font-medium flex items-center btn-pulse">
                     <i class="fas fa-calendar-check mr-2"></i> Book Now
                 </a>
             </nav>
-            <button class="md:hidden text-white focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
+            <button id="mobile-menu-button" class="lg:hidden text-white focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
             </button>
         </div>
     </header>
 
-    <!-- Hero Section with Video -->
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden fixed top-0 left-0 w-full h-full bg-primary/95 z-40 pt-20 px-6 transform translate-x-full transition-transform duration-300 backdrop-blur-sm">
+        <div class="flex flex-col space-y-5 py-6">
+            <a href="#home" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Home</a>
+            <a href="#about" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">About</a>
+            <a href="#services" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Services</a>
+            <a href="#gallery" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Gallery</a>
+            <a href="#contact" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Contact</a>
+            <a href="{{ route('login') }}" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Login</a>
+            <a href="{{ route('customer_bookings') }}" class="bg-accent hover:bg-yellow-600 text-white px-6 py-3 rounded-sm transition flex items-center justify-center text-lg mt-4 btn-pulse">
+                <i class="fas fa-calendar-check mr-2"></i> Book Now
+            </a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
     <section id="home" class="pt-32 pb-20 relative h-screen flex items-center justify-center text-center overflow-hidden">
         <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
             <source src="{{ url('video/welcomeVideo.mp4') }}" type="video/mp4">
+            <img src="{{ url('imgs/video-backup.jpg') }}" alt="Mt. ClaRamuel Resort" class="absolute inset-0 w-full h-full object-cover z-0">
         </video>
         <div class="absolute inset-0 bg-black/40 z-10"></div>
-        <div class="relative z-20 text-white px-6">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                <span class="text-secondary">Mt. ClaRamuel</span> Resort & Events Place
-            </h1>
-            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-                Experience a Perfect Getaway with Nature's Serenity and Modern Comfort
+        <div class="relative z-20 text-white px-6 max-w-6xl mx-auto">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 hero-title font-serif animate-fadeInUp">
+                Mt. ClaRamuel Resort & Events Place
+            </h1> 
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fadeInUp" style="animation-delay: 0.2s;">
+                A premier mountain retreat offering luxury accommodations and exceptional event venues in the heart of Isabela
             </p>
-            <a href="{{ route('customer_bookings') }}" class="inline-block bg-secondary hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-md shadow-lg transition">
-                Book Now
+            <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+                <a href="{{ route('customer_bookings') }}" class="inline-block bg-accent hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
+                    Book Your Stay
+                </a>
+            </div>
+        </div>
+        
+        <!-- Video sound toggle -->
+        <button id="sound-toggle" class="absolute bottom-8 right-8 bg-black/50 text-white p-3 rounded-full shadow-lg z-30">
+            <i class="fas fa-volume-mute"></i>
+        </button>
+        
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
+            <a href="#about" class="text-white">
+                <i class="fas fa-chevron-down text-2xl"></i>
             </a>
         </div>
     </section>
 
     <!-- Highlights Bar -->
-    <div class="bg-gray-800 text-white py-4">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-wrap justify-center items-center gap-6 md:gap-12">
-                <div class="flex items-center">
-                    <i class="fas fa-clock text-secondary mr-2"></i>
-                    <span>Open Daily 8AM-10PM</span>
+    <div class="bg-gray-800 text-white py-4 md:py-8 lg:py-12">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12 lg:gap-16">
+                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                        <i class="fas fa-clock text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs sm:text-sm md:text-base font-medium">Open Daily</p>
+                        <p class="text-xs sm:text-xs md:text-sm">8 AM - 10 PM</p>
+                    </div>
                 </div>
-                <div class="flex items-center">
-                    <i class="fas fa-home text-secondary mr-2"></i>
-                    <span>Accommodations</span>
+                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                        <i class="fas fa-home text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs sm:text-sm md:text-base font-medium">Luxury</p>
+                        <p class="text-xs sm:text-xs md:text-sm">Accommodations</p>
+                    </div>
                 </div>
-                <div class="flex items-center">
-                    <i class="fas fa-calendar-alt text-secondary mr-2"></i>
-                    <span>Event Hosting</span>
+                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.3s;">
+                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                        <i class="fas fa-calendar-alt text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs sm:text-sm md:text-base font-medium">Event</p>
+                        <p class="text-xs sm:text-xs md:text-sm">Hosting</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                        <i class="fas fa-utensils text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs sm:text-sm md:text-base font-medium">Fine</p>
+                        <p class="text-xs sm:text-xs md:text-sm">Dining</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Services Section -->
-    <section id="services" class="py-20">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Our <span class="text-secondary">Services</span></h2>
-                <div class="w-20 h-1 bg-secondary mx-auto mb-6"></div>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                    We offer a variety of premium services to make your stay comfortable and memorable
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Service Card 1 -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
-                    <div class="h-64 overflow-hidden">
-                        <img src="{{ url('/imgs/room.jpg') }}" alt="Accommodations" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-3">Accommodations</h3>
-                        <p class="text-gray-600 mb-4">
-                            Cozy rooms and cottages designed for ultimate relaxation with modern amenities.
-                        </p>
-                        <ul class="space-y-2 mb-6">
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Air-conditioned rooms
-                            </li>
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Private bathrooms
-                            </li>
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Mountain views
-                            </li>
-                        </ul>
-                        <a href="{{ route('customer_bookings') }}" class="text-secondary hover:text-red-700 font-medium inline-flex items-center">
-                            View details
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Service Card 2 -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
-                    <div class="h-64 overflow-hidden">
-                        <img src="{{ url('/imgs/event.jpg') }}" alt="Event Hosting" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-3">Event Hosting</h3>
-                        <p class="text-gray-600 mb-4">
-                            Perfect venues for weddings, corporate events, and parties with professional services.
-                        </p>
-                        <ul class="space-y-2 mb-6">
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Wedding receptions
-                            </li>
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Corporate retreats
-                            </li>
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Birthday celebrations
-                            </li>
-                        </ul>
-                        <a href="{{ route('events') }}" class="text-secondary hover:text-red-700 font-medium inline-flex items-center">
-                            Plan your event
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Service Card 3 -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
-                    <div class="h-64 overflow-hidden">
-                        <img src="{{ url('/imgs/recreational_activities.png') }}" alt="Activities" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-3">Recreational Activities</h3>
-                        <p class="text-gray-600 mb-4">
-                            Enjoy nature walks, swimming, cycling, and other fun activities for all ages.
-                        </p>
-                        <ul class="space-y-2 mb-6">
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Swimming pools
-                            </li>
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Nature trails
-                            </li>
-                            <li class="flex items-center">
-                                <i class="fas fa-check text-secondary mr-2"></i>
-                                Picnic areas
-                            </li>
-                        </ul>
-                        <a href="{{ route('Pools_Park') }}" class="text-secondary hover:text-red-700 font-medium inline-flex items-center">
-                            See activities
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- About Section -->
-    <section id="about" class="py-20 bg-gray-50">
+    <section id="about" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="flex flex-col lg:flex-row items-center gap-12">
-                <div class="lg:w-1/2">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-6">About <span class="text-secondary">Mt. ClaRamuel</span></h2>
-                    <div class="w-20 h-1 bg-secondary mb-8"></div>
-                    
-                    <p class="text-gray-600 mb-6">
-                        Nestled in the heart of nature, Mt. ClaRamuel Resort & Events Place offers the perfect blend of relaxation and memorable experiences.
-                    </p>
-                    
-                    <div class="space-y-6 mb-8">
-                        <div class="flex">
-                            <div class="flex-shrink-0 mt-1">
-                                <i class="fas fa-check-circle text-secondary mr-3"></i>
+                <div class="lg:w-1/2 animate-fadeInUp">
+                    <div class="relative">
+                        <img 
+                            src="{{ url('imgs/welcome_pic.png') }}" 
+                            alt="Mt. ClaRamuel Resort" 
+                            class="w-full h-auto rounded-lg shadow-xl
+                                max-w-xs mx-auto sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl 2xl:max-w-5xl
+                                transition-all duration-300"
+                            loading="lazy"
+                        >
+                        <div class="absolute -bottom-6 -right-6 bg-white p-4 shadow-lg rounded-lg hidden md:block">
+                            <div class="flex items-center">
+                                <div class="bg-accent p-3 rounded-full mr-3">
+                                    <i class="fas fa-award text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800">Excellence in Hospitality</p>
+                                    <p class="text-sm text-gray-600">Since 2010</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="text-lg font-semibold mb-2">Our Mission</h3>
-                                <p class="text-gray-600">
-                                    To provide exceptional hospitality services while preserving the natural beauty of our surroundings.
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex">
-                            <div class="flex-shrink-0 mt-1">
-                                <i class="fas fa-check-circle text-secondary mr-3"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold mb-2">Our Vision</h3>
-                                <p class="text-gray-600">
-                                    To be the premier destination for those seeking tranquility and exceptional event experiences.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex flex-wrap gap-4">
-                        <div class="bg-white px-6 py-4 rounded-lg shadow-sm">
-                            <span class="block text-2xl font-bold text-secondary">50+</span>
-                            <span class="text-gray-600">Rooms & Cottages</span>
-                        </div>
-                        <div class="bg-white px-6 py-4 rounded-lg shadow-sm">
-                            <span class="block text-2xl font-bold text-secondary">100+</span>
-                            <span class="text-gray-600">Events Hosted</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="lg:w-1/2 grid grid-cols-2 gap-4">
-                    <img src="{{ url('imgs/welcome_pic.png') }}" alt="Resort" class="rounded-lg shadow-md h-64 w-full object-cover">
-                    <img src="{{ url('imgs/pool.jpg') }}" alt="Pool" class="rounded-lg shadow-md h-64 w-full object-cover mt-8">
-                    <img src="{{ url('imgs/coffeeShop.jpg') }}" alt="Restaurant" class="rounded-lg shadow-md h-64 w-full object-cover -mt-8">
-                    <img src="{{ url('imgs/event.jpg') }}" alt="Event" class="rounded-lg shadow-md h-64 w-full object-cover">
+                <div class="lg:w-1/2">
+                    <h2 class="text-3xl md:text-4xl text-darkAccent mb-6 font-serif font-light animate-fadeInUp" style="animation-delay: 0.2s;">
+                        𝒜 𝓅𝑒𝒶𝒸𝑒𝒻𝓊𝓁 𝓂𝑜𝓊𝓃𝓉𝒶𝒾𝓃 𝓇𝑒𝓉𝓇𝑒𝒶𝓉 𝒾𝓃 𝐼𝓈𝒶𝒷𝑒𝓁𝒶, 𝑀𝓉. 𝒞𝓁𝒶𝑅𝒶𝓂𝓊𝑒𝓁 𝒷𝓁𝑒𝓃𝒹𝓈 𝓃𝒶𝓉𝓊𝓇𝑒 𝒶𝓃𝒹 𝒸𝑜𝓂𝒻𝑜𝓇𝓉 𝒻𝑜𝓇 𝓁𝒶𝓈𝓉𝒾𝓃𝑔 𝓂𝑒𝓂𝑜𝓇𝒾𝑒𝓈.
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-accent animate-fadeInUp" style="animation-delay: 0.3s;">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Our Mission</h3>
+                            <p class="text-gray-600 text-sm">
+                                To provide exceptional hospitality services while preserving the natural beauty that defines our location, creating memorable experiences for every guest.
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-accent animate-fadeInUp" style="animation-delay: 0.4s;">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Our Vision</h3>
+                            <p class="text-gray-600 text-sm">
+                                To be the premier destination for luxury retreats and exceptional event venues in the region.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6">
+                        <div class="text-center animate-fadeInUp" style="animation-delay: 0.5s;">
+                            <p class="text-3xl font-bold text-primary">50+</p>
+                            <p class="text-gray-600 text-sm">Luxury Rooms</p>
+                        </div>
+                        <div class="text-center animate-fadeInUp" style="animation-delay: 0.6s;">
+                            <p class="text-3xl font-bold text-primary">100+</p>
+                            <p class="text-gray-600 text-sm">Events Hosted</p>
+                        </div>
+                        <div class="text-center animate-fadeInUp" style="animation-delay: 0.7s;">
+                            <p class="text-3xl font-bold text-primary">5+</p>
+                            <p class="text-gray-600 text-sm">Recreational Areas</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Gallery Section -->
-    <section id="gallery" class="py-20">
+    <!-- Services Section -->
+    <section id="services" class="py-20 bg-gray-50">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Resort <span class="text-secondary">Gallery</span></h2>
-                <div class="w-20 h-1 bg-secondary mx-auto mb-6"></div>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                    Explore the beauty of Mt. ClaRamuel through our photo gallery
-                </p>
+                <h2 class="text-3xl md:text-4xl text-darkAccent mb-6 font-serif font-light animate-fadeInUp" style="animation-delay: 0.2s;">
+                        𝒟𝒾𝓈𝒸𝑜𝓋𝑒𝓇 𝑜𝓊𝓇 𝒸𝑜𝓂𝓅𝓇𝑒𝒽𝑒𝓃𝓈𝒾𝓋𝑒 𝓇𝒶𝓃𝑔𝑒 𝑜𝒻 𝓅𝓇𝑒𝓂𝒾𝓊𝓂 𝓈𝑒𝓇𝓋𝒾𝒸𝑒𝓈
+                </h2>
             </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                @foreach([1,222,3,4,5,66,7,8] as $i)
-                <a href="{{ url('imgs/gallery/'.$i.'.jpg') }}" class="gallery-item group block relative">
-                    <div class="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <img src="{{ url('imgs/gallery/'.$i.'.jpg') }}" 
-                             alt="Gallery image {{ $i }}" 
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                            <i class="fas fa-search text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform group-hover:scale-110"></i>
-                        </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Accommodations -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp" style="animation-delay: 0.1s;">
+                    <div class="h-64 overflow-hidden">
+                        <img src="{{ url('/imgs/room.jpg') }}" alt="Luxury Accommodations" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
                     </div>
-                </a>
-                @endforeach
-            </div>
-            
-            <div class="text-center mt-12">
-                <a href="#" class="inline-block bg-secondary hover:bg-red-700 text-white px-6 py-3 rounded-md shadow-lg transition">
-                    View More Photos
-                </a>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-accent p-2 rounded-full mr-4">
+                                <i class="fas fa-bed text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Luxury Accommodations</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            Experience unparalleled comfort in our well-appointed rooms and cottages, each designed with your relaxation in mind.
+                        </p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Air-conditioned rooms with modern amenities
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Private bathrooms with premium toiletries
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Panoramic mountain views
+                            </li>
+                        </ul>
+                        <a href="{{ route('customer_bookings') }}" class="inline-flex items-center text-primary hover:text-secondary font-medium transition duration-300">
+                            View Accommodations
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Event Hosting -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="h-64 overflow-hidden">
+                        <img src="{{ url('/imgs/event.jpg') }}" alt="Event Hosting" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-accent p-2 rounded-full mr-4">
+                                <i class="fas fa-calendar-alt text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Event Hosting</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            Our versatile venues and professional event services ensure your special occasion is executed flawlessly.
+                        </p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Wedding receptions and ceremonies
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Corporate meetings and retreats
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Birthday and anniversary celebrations
+                            </li>
+                        </ul>
+                        <a href="{{ route('events') }}" class="inline-flex items-center text-primary hover:text-secondary font-medium transition duration-300">
+                            Plan Your Event
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recreational Activities -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp" style="animation-delay: 0.3s;">
+                    <div class="h-64 overflow-hidden">
+                        <img src="{{ url('/imgs/recreational_activities.png') }}" alt="Recreational Activities" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-accent p-2 rounded-full mr-4">
+                                <i class="fas fa-swimming-pool text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Recreational Activities</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            Engage in a variety of leisure activities designed to rejuvenate your mind and body.
+                        </p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Swimming pools for all ages
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Scenic nature trails
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-accent mr-2"></i>
+                                Picnic areas with mountain views
+                            </li>
+                        </ul>
+                        <a href="{{ route('Pools_Park') }}" class="inline-flex items-center text-primary hover:text-secondary font-medium transition duration-300">
+                            Explore Activities
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
     
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl text-darkAccent mb-6 font-serif font-light animate-fadeInUp" style="animation-delay: 0.2s;">
+                        𝒜 𝓋𝒾𝓈𝓊𝒶𝓁 𝒿𝑜𝓊𝓇𝓃𝑒𝓎 𝓉𝒽𝓇𝑜𝓊𝑔𝒽 𝑜𝓊𝓇 𝑒𝓍𝓆𝓊𝒾𝓈𝒾𝓉𝑒 𝒻𝒶𝒸𝒾𝓁𝒾𝓉𝒾𝑒𝓈 𝒶𝓃𝒹 𝒷𝓇𝑒𝒶𝓉𝒽𝓉𝒶𝓀𝒾𝓃𝑔 𝓈𝓊𝓇𝓇𝑜𝓊𝓃𝒹𝒾𝓃𝑔𝓈
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                @foreach([1,222,3,4,5,66,7,8] as $i)
+                <div class="group gallery-item relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp" style="animation-delay: {{ $i * 0.1 }}s;">
+                    <img src="{{ url('imgs/gallery/'.$i.'.jpg') }}" 
+                         alt="Gallery image {{ $i }}" 
+                         class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <h3 class="text-white font-medium translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                            Resort View {{ $i }}
+                        </h3>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#" class="inline-block bg-primary hover:bg-blue-900 text-white px-8 py-3 rounded-sm shadow-lg transition duration-300 font-medium btn-pulse">
+                    View Complete Gallery
+                </a>
+            </div>
+        </div>
+    </section>
 
     <!-- CTA Section -->
     <section class="py-20 bg-primary text-white">
         <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready for an Unforgettable Experience?</h2>
-            <p class="text-xl mb-8 max-w-2xl mx-auto text-gray-200">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6 font-serif animate-fadeInUp">
+                Ready for an Unforgettable Experience?
+            </h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto text-gray-200 animate-fadeInUp" style="animation-delay: 0.2s;">
                 Book your stay or event today and discover the magic of Mt. ClaRamuel
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="{{ route('customer_bookings') }}" class="inline-block bg-white hover:bg-gray-100 text-secondary font-semibold px-8 py-3 rounded-md shadow-lg transition">
+            <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+                <a href="{{ route('customer_bookings') }}" class="inline-block bg-accent hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
                     Book Now
                 </a>
-                <a href="tel:+639952901333" class="inline-block border-2 border-white hover:bg-white/10 text-white font-semibold px-8 py-3 rounded-md shadow-lg transition">
-                    Call Us: +63 995 290 1333
+                <a href="tel:+639952901333" class="inline-block border-2 border-white hover:bg-white/10 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300">
+                    <i class="fas fa-phone mr-2"></i> +63 995 290 1333
                 </a>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-gray-50">
+    <section id="contact" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="flex flex-col lg:flex-row gap-12">
-                <div class="lg:w-1/2">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-6">Visit <span class="text-secondary">Us Today</span></h2>
-                    <div class="w-20 h-1 bg-secondary mb-8"></div>
+                <div class="lg:w-1/2">  
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6 section-title font-serif animate-fadeInUp">
+                        Contact <span class="text-primary">Information</span>
+                    </h2>
                     
                     <div class="space-y-6">
-                        <div>
-                            <h3 class="text-xl font-semibold mb-2">Location</h3>
-                            <p class="text-gray-600">
-                                Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines
-                            </p>
+                        <div class="flex items-start animate-fadeInUp" style="animation-delay: 0.2s;">
+                            <div class="bg-accent p-3 rounded-full mr-4 flex-shrink-0">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-1">Location</h3>
+                                <p class="text-gray-600">
+                                    Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines
+                                </p>
+                            </div>
                         </div>
                         
-                        <div>
-                            <h3 class="text-xl font-semibold mb-2">Contact Information</h3>
-                            <p class="text-gray-600 mb-2">
-                                <a href="tel:+639952901333" class="hover:text-secondary transition">+63 995 290 1333</a>
-                            </p>
-                            <p class="text-gray-600">
-                                <a href="mailto:mtclaramuelresort@gmail.com" class="hover:text-secondary transition">mtclaramuelresort@gmail.com</a>
-                            </p>
+                        <div class="flex items-start animate-fadeInUp" style="animation-delay: 0.3s;">
+                            <div class="bg-accent p-3 rounded-full mr-4 flex-shrink-0">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-1">Contact</h3>
+                                <p class="text-gray-600 mb-1">
+                                    <a href="tel:+639952901333" class="hover:text-secondary transition">+63 995 290 1333</a>
+                                </p>
+                                <p class="text-gray-600">
+                                    <a href="mailto:mtclaramuelresort@gmail.com" class="hover:text-secondary transition">mtclaramuelresort@gmail.com</a>
+                                </p>
+                            </div>
                         </div>
                         
-                        <div>
-                            <h3 class="text-xl font-semibold mb-2">Operating Hours</h3>
-                            <p class="text-gray-600">
-                                Daily: 8:00 AM - 10:00 PM
-                            </p>
+                        <div class="flex items-start animate-fadeInUp" style="animation-delay: 0.4s;">
+                            <div class="bg-accent p-3 rounded-full mr-4 flex-shrink-0">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-1">Operating Hours</h3>
+                                <p class="text-gray-600">
+                                    Daily: 8:00 AM - 10:00 PM
+                                </p>
+                            </div>
                         </div>
                         
-                        <div class="pt-4">
-                            <h3 class="text-xl font-semibold mb-4">Follow Us</h3>
+                        <div class="pt-4 animate-fadeInUp" style="animation-delay: 0.5s;">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Connect With Us</h3>
                             <div class="flex gap-4">
-                                <a href="https://www.facebook.com/mtclaramuelresort" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                                <a href="https://www.facebook.com/mtclaramuelresort" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-full flex items-center justify-center transition">
                                     <i class="fab fa-facebook-f"></i>
                                 </a>
-                                <a href="https://www.instagram.com/mt_claramuelresort/" target="_blank" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                                <a href="https://www.instagram.com/mt_claramuelresort/" target="_blank" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white w-12 h-12 rounded-full flex items-center justify-center transition">
                                     <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="#" class="bg-green-600 hover:bg-green-700 text-white w-12 h-12 rounded-full flex items-center justify-center transition">
+                                    <i class="fab fa-whatsapp"></i>
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="lg:w-1/2 h-96 rounded-xl overflow-hidden shadow-xl border border-gray-200">
+                <div class="lg:w-1/2 h-96 rounded-xl overflow-hidden shadow-xl border border-gray-200 animate-fadeInUp" style="animation-delay: 0.6s;">
                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d789.1338574963425!2d121.9251491!3d17.142796!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33856b144a6449f5%3A0xea1ad60f5e068495!2sMt.%20Claramuel%20Resort%20and%20Events%20Place!5e0!3m2!1sen!2sph!4v1711431557" 
                             width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
@@ -362,89 +538,143 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white pt-16 pb-8">
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <div>
-                    <div class="flex items-center mb-4">
+                    <div class="flex items-center mb-6 animate-fadeInUp">
                         <img src="{{ url('imgs/logo.png') }}" class="h-12 mr-3" alt="Logo">
-                        <span class="text-2xl font-bold">Mt. ClaRamuel Resort</span>
+                        <span class="text-xl font-bold">Mt. ClaRamuel Resort</span>
                     </div>
-                    <p class="text-gray-400 mb-4">
-                        Your perfect getaway destination offering luxury, comfort, and unforgettable experiences in the heart of nature.
+                    <p class="text-gray-400 mb-6 animate-fadeInUp" style="animation-delay: 0.2s;">
+                        A premier destination offering luxury accommodations and exceptional event venues in the heart of Isabela's natural beauty.
                     </p>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 animate-fadeInUp" style="animation-delay: 0.3s;">
                         <a href="https://www.facebook.com/mtclaramuelresort" target="_blank" class="text-gray-400 hover:text-white transition">
                             <i class="fab fa-facebook-f"></i>
                         </a>
                         <a href="https://www.instagram.com/mt_claramuelresort/" target="_blank" class="text-gray-400 hover:text-white transition">
                             <i class="fab fa-instagram"></i>
                         </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
                     </div>
                 </div>
                 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition">Home</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-white transition">About Us</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-white transition">Services</a></li>
-                        <li><a href="#gallery" class="text-gray-400 hover:text-white transition">Gallery</a></li>
-                        <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    <h3 class="text-lg font-semibold mb-6 border-b border-gray-700 pb-2 animate-fadeInUp" style="animation-delay: 0.4s;">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li class="animate-fadeInUp" style="animation-delay: 0.5s;"><a href="#home" class="text-gray-400 hover:text-accent transition">Home</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.6s;"><a href="#about" class="text-gray-400 hover:text-accent transition">About Us</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.7s;"><a href="#services" class="text-gray-400 hover:text-accent transition">Services</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.8s;"><a href="#gallery" class="text-gray-400 hover:text-accent transition">Gallery</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.9s;"><a href="#contact" class="text-gray-400 hover:text-accent transition">Contact</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Services</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Accommodations</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Event Hosting</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Recreational Activities</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Dining</a></li>
+                    <h3 class="text-lg font-semibold mb-6 border-b border-gray-700 pb-2 animate-fadeInUp" style="animation-delay: 0.4s;">Services</h3>
+                    <ul class="space-y-3">
+                        <li class="animate-fadeInUp" style="animation-delay: 0.5s;"><a href="#" class="text-gray-400 hover:text-accent transition">Accommodations</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.6s;"><a href="#" class="text-gray-400 hover:text-accent transition">Event Hosting</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.7s;"><a href="#" class="text-gray-400 hover:text-accent transition">Recreational Activities</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.8s;"><a href="#" class="text-gray-400 hover:text-accent transition">Dining</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.9s;"><a href="#" class="text-gray-400 hover:text-accent transition">Special Packages</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
-                    <ul class="space-y-2 text-gray-400">
-                        <li class="flex items-start">
-                            <i class="fas fa-map-marker-alt text-secondary mr-3 mt-1"></i>
+                    <h3 class="text-lg font-semibold mb-6 border-b border-gray-700 pb-2 animate-fadeInUp" style="animation-delay: 0.4s;">Contact Info</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-start animate-fadeInUp" style="animation-delay: 0.5s;">
+                            <i class="fas fa-map-marker-alt text-accent mr-3 mt-1"></i>
                             Narra Street, Brgy. Marana 3rd, Ilagan, Isabela
                         </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-phone text-secondary mr-3"></i>
-                            <a href="tel:+639952901333" class="hover:text-white transition">+63 995 290 1333</a>
+                        <li class="flex items-center animate-fadeInUp" style="animation-delay: 0.6s;">
+                            <i class="fas fa-phone text-accent mr-3"></i>
+                            <a href="tel:+639952901333" class="hover:text-accent transition">+63 995 290 1333</a>
                         </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-envelope text-secondary mr-3"></i>
-                            <a href="mailto:mtclaramuelresort@gmail.com" class="hover:text-white transition">mtclaramuelresort@gmail.com</a>
+                        <li class="flex items-center animate-fadeInUp" style="animation-delay: 0.7s;">
+                            <i class="fas fa-envelope text-accent mr-3"></i>
+                            <a href="mailto:mtclaramuelresort@gmail.com" class="hover:text-accent transition">mtclaramuelresort@gmail.com</a>
                         </li>
                     </ul>
                 </div>
             </div>
             
-            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400 mb-4 md:mb-0">
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 text-sm mb-4 md:mb-0 animate-fadeInUp">
                     © 2025 Mt. ClaRamuel Resort. All rights reserved.
                 </p>
-                <div class="flex gap-6">
-                    <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+                <div class="flex gap-6 animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <a href="#" class="text-gray-500 hover:text-accent transition text-sm">Privacy Policy</a>
+                    <a href="#" class="text-gray-500 hover:text-accent transition text-sm">Terms of Service</a>
+                    <a href="#" class="text-gray-500 hover:text-accent transition text-sm">Sitemap</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Back to Top Button -->
-    <button id="back-to-top" class="fixed bottom-8 right-8 bg-secondary text-white p-3 rounded-full shadow-lg opacity-0 invisible transition-all z-50">
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-accent text-white p-4 rounded-full shadow-lg opacity-0 invisible transition-all duration-300 z-50 hover:bg-yellow-600">
         <i class="fas fa-arrow-up"></i>
     </button>
-
+    
     <script>
         // Mobile menu toggle
-        const mobileMenuButton = document.querySelector('.md\\:hidden');
-        // You would need to add mobile menu functionality here
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
         
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('translate-x-0');
+            mobileMenu.classList.toggle('translate-x-full');
+            
+            // Toggle between hamburger and close icon
+            const icon = mobileMenuButton.querySelector('i');
+            if (mobileMenu.classList.contains('translate-x-0')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('translate-x-0');
+                mobileMenu.classList.add('translate-x-full');
+                const icon = mobileMenuButton.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            });
+        });
+
+        // Header scroll effect
+        let lastScroll = 0;
+        const header = document.getElementById('main-header');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                if (currentScroll > lastScroll && !mobileMenu.classList.contains('translate-x-0')) {
+                    // Scrolling down - hide header
+                    header.style.transform = 'translateY(-100%)';
+                } else {
+                    // Scrolling up - show header
+                    header.style.transform = 'translateY(0)';
+                }
+            } else {
+                // At top of page - always show header
+                header.style.transform = 'translateY(0)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
@@ -484,14 +714,41 @@
 
         // Video sound toggle
         const video = document.querySelector('video');
-        const soundToggle = document.createElement('button');
-        soundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
-        soundToggle.className = 'absolute bottom-8 right-8 bg-black/50 text-white p-3 rounded-full shadow-lg z-30';
+        const soundToggle = document.getElementById('sound-toggle');
         soundToggle.addEventListener('click', () => {
             video.muted = !video.muted;
             soundToggle.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
         });
-        document.querySelector('#home').appendChild(soundToggle);
+
+        // Scroll animation for elements
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.animate-fadeInUp');
+            
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementPosition < windowHeight - 100) {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }
+            });
+        };
+
+        // Initialize animation on load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.animate-fadeInUp').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+            });
+            
+            setTimeout(() => {
+                animateOnScroll();
+            }, 300);
+        });
+
+        // Animate on scroll
+        window.addEventListener('scroll', animateOnScroll);
     </script>
 </body>
 </html>

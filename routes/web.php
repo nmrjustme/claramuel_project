@@ -38,6 +38,7 @@ use App\Models\FacilityBookingLog;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BookingsExport;
+use Illuminate\Http\Request;
 
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
@@ -287,7 +288,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Route::post('/payments/verify-qr', [PaymentsController::class, 'verifyQrCode'])
     //     ->name('payments.verify-qr');
-
+    
 
     Route::post('/admin/payments/verify/{payment_id}', [PaymentsController::class, 'verifyScannedPayment'])
         ->name('admin.payments.verify');
@@ -297,9 +298,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
     Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
     Route::get('/qrScanner/customer-details/{paymentId}', [CheckinController::class, 'getCustomerDetails']);
-    Route::get('/qr-in-used/{qr_path}', function ($qr_path) {
-        return view('admin.qr_in_used', ['qr_path' => $qr_path]);
-    })->name('qr-in-used');
+
+    Route::get('/check-in/used', function (Request $request) {
+        $qrPath = $request->query('path');
+        return view('admin.qr_in_used', ['qrPath' => $qrPath]);
+    });
     
     Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);
 });

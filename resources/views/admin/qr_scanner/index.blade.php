@@ -102,7 +102,19 @@
                 },
                 body: JSON.stringify(payload)
             });
-    
+            
+            if (response.status === 409) {
+                const conflictData = await response.json();
+                // Optional: Show a message first before redirecting
+                resultContainer.innerHTML = `⚠️ ${conflictData.message || "QR Code already used."}`;
+                
+                // Redirect to a "conflict" page or show QR image if needed
+                setTimeout(() => {
+                    window.location.href = `/check-in/used?path=${encodeURIComponent(conflictData.qr_path)}`;
+                }, 2000);
+                return;
+            }
+
             // Handle response
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);

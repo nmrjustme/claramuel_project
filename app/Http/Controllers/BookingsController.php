@@ -119,12 +119,10 @@ class BookingsController extends Controller
             ->join('facility_booking_details as fac_details', 'fac_details.facility_summary_id', '=', 'fac_sum.id')
             ->join('facility_booking_log as fac_log', 'fac_log.id', '=', 'fac_details.facility_booking_log_id')
             ->join('payments', 'payments.facility_log_id', '=', 'fac_log.id')
-            ->where([
-                ['fac_log.status', 'Confirmed'],
-                ['payments.status', 'verified'],
-                // Only get future or current bookings
-                ['fac_details.checkout_date', '>=', $now]
-            ])
+                ->where('fac_log.status', 'Confirmed')
+                ->whereIn('payments.status', ['verified', 'fully_paid'])
+                ->where('fac_details.checkout_date', '>=', $now)
+            
             ->select([
                 'fac.id as facility_id', 
                 'fac_details.checkin_date', 
@@ -153,4 +151,5 @@ class BookingsController extends Controller
     {
         return view('customer_pages.booking_completed', ['booking' => $booking]);
     }
+    
 }
