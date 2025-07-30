@@ -115,7 +115,7 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Date:</span>
-                    <span class="detail-value">{{ $payment->verified_at->format('F j, Y \a\t g:i A') }}</span>
+                    <span class="detail-value">{{ $payment->payment_date->format('F j, Y \a\t g:i A') }}</span>
                 </div>
                 
                 <div class="detail-row">

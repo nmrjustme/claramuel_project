@@ -141,7 +141,7 @@ class PaymentsController extends Controller
                 'gcash_number' => $request->gcash_number,
                 'reference_no' => $request->reference_no,
                 'receipt_path' => $receiptPath, // Store relative path
-                'payment_date' => now(),
+                'payment_date' => now()->setTimezone('Asia/Manila'),
                 'status' => 'under_verification',
                 'paid_at' => now(),
             ]);
