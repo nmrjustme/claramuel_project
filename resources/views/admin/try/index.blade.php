@@ -1,80 +1,46 @@
 @extends('layouts.admin')
 @section('title', 'Booking Requests')
 
-@php
-    $active = 'log';
-@endphp
+@php $active = 'log'; @endphp
 
 @section('content')
-<div class="min-h-screen p-6">
-    <h1 class="text-3xl font-bold mb-4 text-white">Booking Requests</h1>
-
-    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow">
-        <thead class="bg-gray-200">
+<table id="booking-list" class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+        <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+        </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+        @foreach($bookings as $booking)
             <tr>
-                <th class="text-left p-3">ID</th>
-                <th class="text-left p-3">Guest</th>
-                <th class="text-left p-3">Status</th>
-                <th class="text-left p-3">Action</th>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->user->firstname }} {{ $booking->user->lastname }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->status }}</td>
             </tr>
-        </thead>
-        <tbody id="booking-table-body">
-            @foreach($bookings as $booking)
-            <tr class="border-b">
-                <td class="p-3">{{ $booking->id }}</td>
-                <td class="p-3">{{ $booking->user->firstname }} {{ $booking->user->lastname }}</td>
-                <td class="p-3">{{ ucfirst($booking->status) }}</td>
-                <td class="p-3">
-                    <button class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">View Request</button>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
+        @endforeach
+    </tbody>
+</table>
 @endsection
 
 @section('content_js')
-<!-- Include Pusher and Echo -->
-<script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
 <script>
-    // Initialize Echo with CSRF token
-    window.Echo = new Echo({
-        broadcaster: 'pusher',
-        key: '{{ config('broadcasting.connections.pusher.key') }}',
-        cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
-        forceTLS: true,
-        auth: {
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        }
-    });
-
-    // Listen to the channel
-    Echo.channel('booking-channel')
-        .listen('.NewBookingRequest', (e) => {  // Note the dot prefix for private channels
+document.addEventListener('DOMContentLoaded', function () {
+    Echo.channel('booking-log-channel')
+        .listen('.new-booking-log', (e) => {
             const booking = e.booking;
-
-            // Basic Validation
-            if (!booking || !booking.id || !booking.status || !booking.user) {
-                console.warn('❌ Invalid booking data received:', e);
-                return;
-            }
-
-            // Proceed if valid
+            
             const row = `
-                <tr class="border-b">
-                    <td class="p-3">${booking.id}</td>
-                    <td class="p-3">${booking.user.firstname || ''} ${booking.user.lastname || ''}</td>
-                    <td class="p-3">${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}</td>
-                    <td class="p-3">
-                        <button class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">View Request</button>
-                    </td>
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${booking.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${booking.user.firstname} ${booking.user.lastname}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${booking.status}</td>
                 </tr>
             `;
 
-            document.getElementById('booking-table-body').insertAdjacentHTML('afterbegin', row);
+            document.querySelector('#booking-list tbody').insertAdjacentHTML('afterbegin', row);
         });
+});
 </script>
 @endsection

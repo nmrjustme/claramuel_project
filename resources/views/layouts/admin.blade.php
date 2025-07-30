@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- In your layout file's head or before the closing body tag -->
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+    
     <style>
         /* Smooth transitions for overlay */
         #sidebar-overlay {

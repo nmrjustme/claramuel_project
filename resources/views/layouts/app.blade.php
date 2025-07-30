@@ -16,11 +16,26 @@
         
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script>
+            module.exports = {
+                theme: {
+                    extend: {
+                    backgroundImage: {
+                        'red-theme': "radial-gradient(at 80% 20%, rgba(254, 202, 202, 0.3) 0px, transparent 50%), radial-gradient(at 20% 80%, rgba(252, 165, 165, 0.3) 0px, transparent 50%)",
+                    },
+                    backgroundColor: {
+                        'theme-50': '#fef2f2',
+                    }
+                    }
+                }
+                }
+        </script>
     </head>
+    
     
     @if(View::hasSection('content') && !View::hasSection('dashboard') && !View::hasSection('myBookings'))
         <body class="font-sans antialiased">
-            <div class="min-h-screen bg-white">
+            <div class="min-h-screen bg-theme-50">
                 <!-- Page Content -->
                 <main>
                     @yield('content')
@@ -43,7 +58,7 @@
     @endif
     
     @if(View::hasSection('myBookings') && !View::hasSection('content') && !View::hasSection('dashboard'))
-        <body class="bg-gray-50 dark:bg-gray-800 bg-gray-100 text-gray-800">
+        <body class="bg-theme-50  text-gray-800">
             <x-navigation />
             <!-- Page Content -->
             <main>

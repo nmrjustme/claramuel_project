@@ -12,4 +12,9 @@ class GuestType extends Model
         'type',
         'rate'
     ];
+
+    public function bookingGuestDetails()
+    {
+        return $this->hasMany(BookingGuestDetails::class, 'guest_type_id');
+    }
 }

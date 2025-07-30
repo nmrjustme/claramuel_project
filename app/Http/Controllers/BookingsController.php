@@ -78,6 +78,20 @@ class BookingsController extends Controller
         ]);
     }
     
+    public function trylang()
+    {
+        return view('customer_pages.try.bookings', [
+            'facilities' => $this->facilities,
+            'unavailable_dates' => $this->getUnavailableDates(),
+            'breakfast_price' => $this->breakfast,
+        ]);
+    }
+
+    public function customerInfo()
+    {
+        return view('customer_pages.try.customer_info');
+    }
+    
     public function getAmenities(Facility $facility)
     {
         $amenities = $facility->amenities->map(function($amenity) {

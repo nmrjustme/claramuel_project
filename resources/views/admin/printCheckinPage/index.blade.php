@@ -89,7 +89,6 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .highlight-box {
-            background-color: #f8fafc;
             border-left: 4px solid #f63b3b;
         }
         .toast {
@@ -288,11 +287,10 @@
                         </div>
 
                         <!-- QR Code -->
-                        @if(isset($qrCodeUrl))
+                        @if(isset($payment->qr_code_path))
                         <div class="text-center bg-white p-4 rounded-xl border border-gray-200 mt-8">
                             <div class="flex flex-col items-center">
-                                <img src="{{ $qrCodeUrl }}" alt="Verification QR Code" class="w-32 h-32 mb-3 border-4 border-primary-100 rounded-lg">
-                                <p class="text-sm text-gray-600 max-w-xs">Present this QR code when claiming your reservation</p>
+                                <img src="{{ asset($payment->qr_code_path) }}" alt="Verification QR Code" class="w-40 h-40 mb-3 border-4 border-primary-100 rounded-lg">
                             </div>
                         </div>
                         @endif
@@ -306,7 +304,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <!-- Right Side - Payment Status -->
             <div class="md:w-1/3">
                 <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-4 print-border">
@@ -344,7 +342,7 @@
                                 @endif
                                 
                                 <div class="flex justify-between items-center pt-3 border-t border-gray-200 print-row">
-                                    <span class="text-gray-700 font-semibold print-label">Remaining Amount:</span>
+                                    <span class="text-gray-700 font-semibold print-label">Balance Amount:</span>
                                     <span class="font-bold text-primary-600 print-value">₱{{ number_format(($totalAmount - $payment->amount_paid - $payment->checkin_paid), 2) }}</span>
                                 </div>
                             </div>
@@ -360,7 +358,7 @@
                             </div>
                             
                             <div class="flex items-center justify-between mb-3 print-row">
-                                <span class="text-gray-600 print-label">Remaining Status:</span>
+                                <span class="text-gray-600 print-label">Balance Status:</span>
                                 <span id="status-display" class="status-badge 
                                     {{ $payment->remaining_balance_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
                                     {{ ucfirst(str_replace('_', ' ', $payment->remaining_balance_status)) }}

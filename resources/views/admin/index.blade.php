@@ -322,9 +322,9 @@ $active = 'dashboard';
                     </div>
                </div>
           </div>
-
+          
           @include('admin.inquirers.recent_inquirers')
-
+          
           <!-- Facilities Occupied Today -->
           <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
                <div class="flex justify-between items-center mb-6">
@@ -422,7 +422,7 @@ $active = 'dashboard';
                     </div>
                </div>
           </div>
-
+          
           <!-- Quick Actions -->
           <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
@@ -453,9 +453,9 @@ $active = 'dashboard';
                          </div>
                          <span class="text-sm font-medium text-gray-700">Check-in</span>
                     </a>
-
+                    
                     <!-- Row 2 -->
-                    <a href="#"
+                    <a href="#" onclick="openCheckOutModal()"
                          class="p-4 bg-green-50 rounded-lg text-center hover:bg-green-100 transition-colors group hover-scale">
                          <div
                               class="mx-auto h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
@@ -490,19 +490,19 @@ $active = 'dashboard';
      class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
      <div
           class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4 transform transition-all duration-300 scale-95 hover:scale-100">
-          <!-- Modal Header -->
-          <div class="bg-gradient-to-r from-red-600 to-red-700 p-6">
+          <!-- Modal Header - Updated to blue color scheme -->
+          <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
                <h3 class="text-xl font-semibold text-white">Check-in Method</h3>
-               <p class="text-red-100 text-sm mt-1">Choose how you'd like to check in guests</p>
+               <p class="text-blue-100 text-sm mt-1">Choose how you'd like to check in guests</p>
           </div>
 
           <div class="p-6 space-y-4">
-               <!-- QR Code Scan Option -->
+               <!-- QR Code Scan Option - Updated to blue color scheme -->
                <a href="{{ route('checkin.scanner') }}" class="block group">
                     <div
-                         class="p-4 bg-red-50 rounded-lg border border-red-100 hover:border-red-300 transition-all duration-200 flex items-start hover-scale">
-                         <div class="bg-red-100 p-3 rounded-lg mr-4 group-hover:bg-red-200 transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-700" fill="none"
+                         class="p-4 bg-blue-50 rounded-lg border border-blue-100 hover:border-blue-300 transition-all duration-200 flex items-start hover-scale">
+                         <div class="bg-blue-100 p-3 rounded-lg mr-4 group-hover:bg-blue-200 transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700" fill="none"
                                    viewBox="0 0 24 24" stroke="currentColor">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -520,15 +520,13 @@ $active = 'dashboard';
                     </div>
                </a>
 
-               <!-- Enhanced Upload QR Code Option -->
-
-               <!-- Enhanced Upload QR Code Option -->
+               <!-- Upload QR Code Option - Updated to blue color scheme -->
                <div
-                    class="border border-red-100 rounded-lg overflow-hidden hover:border-red-300 transition-colors duration-200 hover-scale">
-                    <div class="p-4 bg-red-50 hover:bg-red-100 transition-colors duration-200">
+                    class="border border-blue-100 rounded-lg overflow-hidden hover:border-blue-300 transition-colors duration-200 hover-scale">
+                    <div class="p-4 bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
                          <div class="flex items-start">
-                              <div class="bg-red-100 p-3 rounded-lg mr-4 hover:bg-red-200 transition-colors">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-700" fill="none"
+                              <div class="bg-blue-100 p-3 rounded-lg mr-4 hover:bg-blue-200 transition-colors">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -542,7 +540,7 @@ $active = 'dashboard';
                                    <div class="mt-4">
                                         <input type="file" id="qr-upload-input" accept="image/*" class="hidden" />
                                         <label for="qr-upload-input"
-                                             class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer text-sm font-medium">
+                                             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer text-sm font-medium">
                                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
                                                   viewBox="0 0 24 24" stroke="currentColor">
                                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -565,7 +563,7 @@ $active = 'dashboard';
                                    </div>
                               </div>
                               <button id="process-qr-btn"
-                                   class="w-full mt-3 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center">
+                                   class="w-full mt-3 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center">
                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -608,7 +606,6 @@ $active = 'dashboard';
           </div>
      </div>
 </div>
-
 <!-- Manual Search Container (hidden by default) -->
 <div id="manualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50">
      <div class="max-w-md mx-auto">
@@ -638,6 +635,131 @@ $active = 'dashboard';
           </div>
      </div>
 </div>
+
+
+<!-- Add this modal near your checkInModal in the HTML section -->
+<div id="checkOutModal" class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+     <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4 transform transition-all duration-300 scale-95 hover:scale-100">
+          <!-- Modal Header -->
+          <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
+               <h3 class="text-xl font-semibold text-white">Check-out Method</h3>
+               <p class="text-green-100 text-sm mt-1">Choose how you'd like to check out guests</p>
+          </div>
+
+          <div class="p-6 space-y-4">
+               <!-- QR Code Scan Option -->
+               <a href="" class="block group">
+                    <div class="p-4 bg-green-50 rounded-lg border border-green-100 hover:border-green-300 transition-all duration-200 flex items-start hover-scale">
+                         <div class="bg-green-100 p-3 rounded-lg mr-4 group-hover:bg-green-200 transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                              </svg>
+                         </div>
+                         <div>
+                              <h4 class="font-medium text-gray-900">Scan QR Code</h4>
+                              <p class="text-sm text-gray-600 mt-1">Use your device camera to scan guest's QR code</p>
+                         </div>
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                         </svg>
+                    </div>
+               </a>
+
+               <!-- Upload QR Code Option -->
+               <div class="border border-green-100 rounded-lg overflow-hidden hover:border-green-300 transition-colors duration-200 hover-scale">
+                    <div class="p-4 bg-green-50 hover:bg-green-100 transition-colors duration-200">
+                         <div class="flex items-start">
+                              <div class="bg-green-100 p-3 rounded-lg mr-4 hover:bg-green-200 transition-colors">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                   </svg>
+                              </div>
+                              <div class="flex-1">
+                                   <h4 class="font-medium text-gray-900">Upload QR Code</h4>
+                                   <p class="text-sm text-gray-600 mt-1">Upload an image containing the QR code</p>
+
+                                   <div class="mt-4">
+                                        <input type="file" id="checkout-qr-upload-input" accept="image/*" class="hidden" />
+                                        <label for="checkout-qr-upload-input" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer text-sm font-medium">
+                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                             </svg>
+                                             Choose File
+                                        </label>
+                                        <span id="checkout-file-name" class="ml-3 text-sm text-gray-600"></span>
+                                   </div>
+                              </div>
+                         </div>
+
+                         <div id="checkout-qr-upload-preview" class="mt-4 hidden">
+                              <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center">
+                                   <img id="checkout-qr-image-preview" src="#" alt="QR Code Preview" class="mx-auto max-h-40 mb-3 hidden">
+                                   <div id="checkout-upload-instructions" class="text-center text-sm text-gray-500">
+                                        <p>QR code will appear here after selection</p>
+                                   </div>
+                              </div>
+                              <button id="checkout-process-qr-btn" class="w-full mt-3 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                                   </svg>
+                                   Process QR Code
+                              </button>
+                         </div>
+                    </div>
+               </div>
+
+               <!-- Manual Search Option -->
+               <button onclick="showCheckoutManualSearch()" class="w-full p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-start hover-scale">
+                    <div class="bg-gray-200 p-3 rounded-lg mr-4 hover:bg-gray-300 transition-colors">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                         </svg>
+                    </div>
+                    <div class="text-left">
+                         <h4 class="font-medium text-gray-900">Manual Search</h4>
+                         <p class="text-sm text-gray-600 mt-1">Search for guest by name or reference number</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+               </button>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+               <button onclick="closeCheckOutModal()" class="w-full py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">
+                    Cancel
+               </button>
+          </div>
+     </div>
+</div>
+
+<!-- Manual Checkout Search Container -->
+<div id="checkoutManualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50">
+     <div class="max-w-md mx-auto">
+          <div class="flex justify-between items-center mb-4">
+               <h3 class="text-lg font-medium">Search Guest for Check-out</h3>
+               <button onclick="closeCheckoutManualSearch()" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+               </button>
+          </div>
+
+          <div class="mb-4">
+               <input type="text" id="checkoutSearchInput" placeholder="Enter name or reference number" class="w-full p-2 border rounded-lg">
+          </div>
+
+          <button onclick="performCheckoutSearch()" class="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+               Search
+          </button>
+
+          <div id="checkoutSearchResults" class="mt-4">
+               <!-- Checkout search results will appear here -->
+          </div>
+     </div>
+</div>
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
@@ -645,6 +767,168 @@ $active = 'dashboard';
 <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
+// Checkout Modal Functions
+function openCheckOutModal() {
+    document.getElementById('checkOutModal').classList.remove('hidden');
+}
+
+function closeCheckOutModal() {
+    document.getElementById('checkOutModal').classList.add('hidden');
+}
+
+// Checkout Manual Search functions
+function showCheckoutManualSearch() {
+    closeCheckOutModal();
+    document.getElementById('checkoutManualSearchContainer').classList.remove('hidden');
+}
+
+function closeCheckoutManualSearch() {
+    document.getElementById('checkoutManualSearchContainer').classList.add('hidden');
+}
+
+async function performCheckoutSearch() {
+     const searchTerm = document.getElementById('checkoutSearchInput').value.trim();
+     if (!searchTerm) return;
+     
+     const resultsContainer = document.getElementById('checkoutSearchResults');
+     resultsContainer.innerHTML = '<p class="text-center py-4">Searching...</p>';
+     
+     try {
+          const response = await fetch(`/check-out/search-guests?q=${encodeURIComponent(searchTerm)}`);
+          const data = await response.json();
+          
+          if (data.length > 0) {
+               let html = '<div class="space-y-2">';
+               data.forEach(guest => {
+                    if (guest.payment_id) { // Only show guests with payment_id
+                         html += `
+                         <div class="p-3 border rounded-lg hover:bg-green-50 cursor-pointer" 
+                              onclick="selectGuestForCheckout('${guest.payment_id}')">
+                              <h4 class="font-medium">${guest.name}</h4>
+                              <p class="text-sm text-gray-600">Booking Ref: ${guest.reference_no}</p>
+                              <p class="text-sm text-green-600 font-medium">Payment ID: ${guest.payment_id}</p>
+                              <div class="mt-2 flex items-center text-sm text-gray-500">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                   </svg>
+                                   ${guest.checkin_date} to ${guest.checkout_date}
+                              </div>
+                         </div>
+                         `;
+                    }
+               });
+               html += '</div>';
+               resultsContainer.innerHTML = html;
+          } else {
+               resultsContainer.innerHTML = '<p class="text-center py-4">No guests found for checkout</p>';
+          }
+     } catch (error) {
+          resultsContainer.innerHTML = '<p class="text-center py-4 text-red-500">Error searching</p>';
+          console.error('Checkout search error:', error);
+     }
+}
+
+function selectGuestForCheckout(paymentId) {
+     window.location.href = `/check-out/process/${paymentId}`;
+}
+
+// Checkout QR Upload and Processing
+document.addEventListener('DOMContentLoaded', function() {
+     const checkoutQrUploadInput = document.getElementById('checkout-qr-upload-input');
+     const checkoutQrUploadPreview = document.getElementById('checkout-qr-upload-preview');
+     const checkoutQrImagePreview = document.getElementById('checkout-qr-image-preview');
+     const checkoutFileNameSpan = document.getElementById('checkout-file-name');
+     const checkoutProcessQrBtn = document.getElementById('checkout-process-qr-btn');
+     
+     checkoutQrUploadInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          // Update file name display
+          checkoutFileNameSpan.textContent = file.name;
+          
+          // Show preview section
+          checkoutQrUploadPreview.classList.remove('hidden');
+          document.getElementById('checkout-upload-instructions').classList.add('hidden');
+          
+          // Preview the image
+          if (file.type.startsWith('image/')) {
+               const reader = new FileReader();
+               reader.onload = function(e) {
+                    checkoutQrImagePreview.src = e.target.result;
+                    checkoutQrImagePreview.classList.remove('hidden');
+               };
+               reader.readAsDataURL(file);
+          }
+     });
+
+     checkoutProcessQrBtn.addEventListener('click', async function() {
+          const file = checkoutQrUploadInput.files[0];
+          if (!file) {
+               alert('Please select a QR code image first');
+               return;
+          }
+          
+          // Show loading state
+          checkoutProcessQrBtn.disabled = true;
+          checkoutProcessQrBtn.innerHTML = `
+               <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+               </svg>
+               Processing...
+          `;
+
+          try {
+               // Read the QR code from the image client-side first
+               const qrData = await readQRCodeFromImage(file);
+               
+               // Send to server for verification
+               const response = await fetch('/check-out/process-qr-upload', {
+                    method: 'POST',
+                    headers: {
+                         'Content-Type': 'application/json',
+                         'Accept': 'application/json',
+                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ qr_data: qrData })
+               });
+               
+               const data = await response.json();
+               
+               if (!response.ok) {
+                    throw new Error(data.message || 'Server verification failed');
+               }
+               
+               if (data.success) {
+                    window.location.href = `/check-out/process/${data.payment_id}`;
+               } else {
+                    throw new Error(data.message || 'QR verification failed');
+               }
+          } catch (error) {
+               console.error('Error:', error);
+               alert(error.message || 'An error occurred while processing the QR code');
+          } finally {
+               resetCheckoutQRUploadForm();
+          }
+     });
+
+     function resetCheckoutQRUploadForm() {
+          checkoutProcessQrBtn.disabled = false;
+          checkoutProcessQrBtn.innerHTML = `
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+               </svg>
+               Process QR Code
+          `;
+          checkoutQrUploadInput.value = '';
+          checkoutFileNameSpan.textContent = '';
+          checkoutQrImagePreview.src = '';
+          checkoutQrImagePreview.classList.add('hidden');
+          document.getElementById('checkout-upload-instructions').classList.remove('hidden');
+     }
+});
+
 // Your existing JavaScript code remains the same
 fetch(`/admin/dashboard/stats`, {
     method: 'GET',
@@ -690,19 +974,22 @@ function performSearch() {
     const resultsContainer = document.getElementById('searchResults');
     resultsContainer.innerHTML = '<p class="text-center py-4">Searching...</p>';
     
-    fetch(`/api/search-guests?q=${encodeURIComponent(searchTerm)}`)
+    fetch(`/check-in/search-guests?q=${encodeURIComponent(searchTerm)}`)
         .then(response => response.json())
         .then(data => {
             if (data.length > 0) {
                 let html = '<div class="space-y-2">';
                 data.forEach(guest => {
-                    html += `
-                        <div class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" onclick="selectGuest('${guest.id}')">
-                            <h4 class="font-medium">${guest.name}</h4>
-                            <p class="text-sm text-gray-600">Ref: ${guest.reference_no}</p>
-                            <p class="text-sm text-gray-600">${guest.email}</p>
-                        </div>
-                    `;
+                    if (guest.payment_id) { // Only show guests with payment_id
+                        html += `
+                            <div class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" 
+                                 onclick="selectGuest('${guest.payment_id}')">
+                                <h4 class="font-medium">${guest.name}</h4>
+                                <p class="text-sm text-gray-600">Booking Ref: ${guest.reference_no}</p>
+                                <p class="text-sm text-green-600 font-medium">Payment ID: ${guest.payment_id}</p>
+                            </div>
+                        `;
+                    }
                 });
                 html += '</div>';
                 resultsContainer.innerHTML = html;
@@ -716,9 +1003,9 @@ function performSearch() {
         });
 }
 
-function selectGuest(guestId) {
-    // Redirect to check-in page for this guest
-    window.location.href = `/check-in/manual/${guestId}`;
+// Redirect to check-in success with payment_id
+function selectGuest(paymentId) {
+    window.location.href = `/check-in/success/${paymentId}`;
 }
 function formatDate(dateString) {
     if (!dateString) return '-';

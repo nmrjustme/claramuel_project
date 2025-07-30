@@ -19,7 +19,7 @@
                <div class="w-48 h-48 bg-gray-100 flex items-center justify-center mb-3 relative overflow-hidden rounded">
                <!-- Replace "path/to/your-qr-code.png" with your actual image path -->
                
-               <img src="{{ $qrPath }}" 
+               <img src="{{ asset($qrPath) }}" 
                     alt="QR Code" 
                     class="w-full h-full object-contain p-2">
                
@@ -37,7 +37,7 @@
         </div>
 
         <!-- Warning Message -->
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-6">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -46,10 +46,20 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-sm text-red-700">
-                        This QR code is currently active. Please wait until the current session ends or contact the system administrator if this persists.
+                        This QR code is currently in-use.
                     </p>
                 </div>
             </div>
+        </div>
+
+        <!-- Back to Dashboard Button -->
+        <div class="text-center">
+            <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Dashboard
+            </a>
         </div>
     </div>
 </body>

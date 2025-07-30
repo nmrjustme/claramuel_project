@@ -26,7 +26,7 @@ use App\Http\Controllers\BookCottageController;
 use App\Http\Controllers\AdminPaymentController;
 use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\BookingLogController;
-
+use App\Http\Controllers\GuestTypeController;
 use App\Events\NewBookingRequest;
 
 use Carbon\Carbon;
@@ -39,16 +39,22 @@ use App\Models\FacilityBookingLog;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BookingsExport;
 use Illuminate\Http\Request;
+use App\Events\FacilityBookingLogCreated;
 
+
+Route::get('/test-broadcast', [FacilityBookingLogCreated::class, 'broadcastWith']);
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
-Route::get('/dashboard/', [FacilitiesController::class, 'showData'])->name('dashboard');
+Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
 route::get('/dashboard/cottages', [BookCottageController::class, 'index'])->name('customer_bookings.cottage');
 
+Route::get('/customer/guest-types', [GuestTypeController::class, 'index'])->name('customer.guest-types');
+
 Route::get('/dashboard/checkin_page/{id}', [CustomerBookingPageController::class, 'Data'])->name('facility.deal');
-Route::get('/dashboard/MyBookings/', [MyBookingsController::class, 'index'])->name('MyBookings');
 
 Route::get('/Bookings', [BookingsController::class, 'index'])->name('customer_bookings');
+Route::get('/dashboard/MyBookings/new/', [BookingsController::class, 'trylang'])->name('MyNewBookings');
+Route::get('/bookings/customer-info', [BookingsController::class, 'customerInfo'])->name('bookings.customer-info');
 
 Route::get('/bookings/get-facilities', [BookingsController::class, 'getFacilities'])->name('bookings.get-facilities');
 Route::get('/Book', [PoolParkbookingController::class, 'index'])->name('Pools_Park');
@@ -56,7 +62,7 @@ Route::get('/Images/{id}', [AccommodationImgController::class, 'index'])->name('
 Route::post('/book', [BookingController::class, 'store'])->name('bookings.store');
 Route::get('/verify_email', [VerifyEmailController::class, 'verify'])->name('verify.email');
 
-Route::get('/events/', function () {
+Route::get('/events', function () {
     return view('customer_pages.static_events');
 })->name('events');
 
@@ -85,22 +91,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/test-broadcast', function () {
-        // Get the most recent booking for testing
-        $booking = FacilityBookingLog::with('user')->latest()->first();
-
-        if (!$booking) {
-            return 'No bookings found to broadcast. ';
-        }
-
-        // Fire the event
-        event(new NewBookingRequest($booking));
-
-        return 'New booking event broadcasted!' . $booking->id;
-    });
-
-
+    
+    
     Route::get('/admin_dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard/stats', [AdminController::class, 'getStats']);
     Route::get('/admin/dashboard/occupied-facilities', [AdminController::class, 'getOccupiedFacilities']);
@@ -298,11 +290,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
     Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
     Route::get('/qrScanner/customer-details/{paymentId}', [CheckinController::class, 'getCustomerDetails']);
-
+    
     Route::get('/check-in/used', function (Request $request) {
         $qrPath = $request->query('path');
         return view('admin.qr_in_used', ['qrPath' => $qrPath]);
     });
+
+    Route::get('/check-in/search-guests', [CheckinController::class, 'searchGuests']);
     
     Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);
 });

@@ -19,10 +19,203 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\BookingsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
-use App\Events\NewBookingRequest;
+use App\Events\FacilityBookingLogCreated;
 
 class BookingController extends Controller
 {
+    public function stores(Request $request)
+    {
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+            'checkin_date' => 'required|date',
+            'checkout_date' => 'required|date|after:checkin_date',
+            'facilities' => 'required|array',
+            'facilities.*.facility_id' => 'required|exists:facilities,id',
+            'facilities.*.price' => 'required|numeric|min:0',
+            'facilities.*.nights' => 'required|integer|min:1',
+            'facilities.*.total_price' => 'required|numeric|min:0',
+            'breakfast_included' => 'sometimes|boolean',
+            'breakfast_price' => 'required_if:breakfast_included,true|numeric|min:0',
+            'total_price' => 'required|numeric|min:0',
+            'guest_types' => 'required|array',
+            'guest_types.*' => 'required|array',
+            'guest_types.*.*' => 'required|integer|min:0',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Parse dates explicitly with timezone
+        $timezone = config('app.timezone', 'Asia/Manila');
+        $checkinDate = Carbon::parse($request->checkin_date, $timezone)
+            ->setTimezone('UTC')
+            ->startOfDay();
+        $checkoutDate = Carbon::parse($request->checkout_date, $timezone)
+            ->setTimezone('UTC')
+            ->startOfDay();
+
+        // Verify dates after parsing
+        if ($checkinDate >= $checkoutDate) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Check-out date must be after check-in date'
+            ], 422);
+        }
+
+        // Validate guest counts against room pax limits
+        foreach ($request->facilities as $facilityData) {
+            $facility = Facility::findOrFail($facilityData['facility_id']);
+            $totalGuests = 0;
+            
+            if (isset($request->guest_types[$facility->id])) {
+                $totalGuests = array_sum($request->guest_types[$facility->id]);
+            }
+            
+            if ($totalGuests > $facility->pax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Room {$facility->name} exceeds maximum guest limit of {$facility->pax}"
+                ], 422);
+            }
+
+            // Ensure at least one guest is selected per room
+            if ($totalGuests < 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Please select at least one guest for room {$facility->name}"
+                ], 422);
+            }
+        }
+
+        // Start database transaction
+        DB::beginTransaction();
+
+        try {
+            // Create or update user (email is no longer unique)
+            $user = User::create([
+                'firstname' => $request->firstname,
+                'lastname' => $request->lastname,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role' => 'customer',
+            ]);
+            
+            // Create booking log with confirmation token
+            $bookingLog = FacilityBookingLog::create([
+                'user_id' => $user->id,
+                'booking_date' => now(),
+                'confirmation_token' => Str::random(60),
+            ]);
+            
+            $bookingLog->load(['user']);
+            
+            event(new FacilityBookingLogCreated($bookingLog));
+            
+            \Log::info('Booking created', [
+                'booking_id' => $bookingLog->id,
+                'user_id' => $user->id
+            ]);
+            
+            // Get active breakfast price if included
+            $breakfastId = null;
+            if ($request->breakfast_included) {
+                $breakfast = Breakfast::where('status', 'Active')->first();
+                if ($breakfast) {
+                    $breakfastId = $breakfast->id;
+                }
+            }
+
+            // Process each facility
+            foreach ($request->facilities as $facilityData) {
+                $facility = Facility::findOrFail($facilityData['facility_id']);
+                
+                // Create facility summary
+                $facilitySummary = FacilitySummary::create([
+                    'facility_id' => $facility->id,
+                    'breakfast_id' => $breakfastId,
+                    'facility_booking_log_id' => $bookingLog->id,
+                    'qty' => 1, // Assuming 1 room per facility summary
+                ]);
+
+                // Calculate price including breakfast if applicable
+                $facilityPrice = $facilityData['total_price'];
+                if ($request->breakfast_included) {
+                    $facilityPrice += ($request->breakfast_price / count($request->facilities));
+                }
+
+                // Create booking details
+                FacilityBookingDetails::create([
+                    'facility_summary_id' => $facilitySummary->id,
+                    'facility_booking_log_id' => $bookingLog->id,
+                    'checkin_date' => $checkinDate->format('Y-m-d'),
+                    'checkout_date' => $checkoutDate->format('Y-m-d'),
+                    'total_price' => $facilityPrice,
+                    'nights' => $facilityData['nights'],
+                ]);
+
+                // Save guest details if provided
+                if (isset($request->guest_types[$facility->id])) {
+                    foreach ($request->guest_types[$facility->id] as $guestTypeId => $quantity) {
+                        if ($quantity > 0) {
+                            BookingGuestDetails::create([
+                                'guest_type_id' => $guestTypeId,
+                                'facility_summary_id' => $facilitySummary->id,
+                                'quantity' => $quantity,
+                            ]);
+
+                            // If guest type has a rate, we could apply additional charges here
+                            $guestType = GuestType::find($guestTypeId);
+                            if ($guestType && $guestType->rate > 0) {
+                                // Example: Add additional charges based on guest type
+                                // $additionalCharge = $guestType->rate * $quantity * $facilityData['nights'];
+                                // $facilityPrice += $additionalCharge;
+                                // FacilityBookingDetails::where('id', $bookingDetails->id)
+                                //     ->update(['total_price' => $facilityPrice]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Commit transaction
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'booking_id' => $bookingLog->id,
+                'message' => 'Booking created successfully',
+                'redirect_url' => '/bookings/payment/' . $bookingLog->id
+            ]);
+        
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Booking failed:', [
+                'message' => $e->getMessage(),
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+                'dates' => [
+                    'checkin' => $checkinDate->format('Y-m-d H:i:s'),
+                    'checkout' => $checkoutDate->format('Y-m-d H:i:s')
+                ]
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
     public function store(Request $request)
     {
         // Validate the request data
@@ -80,15 +273,23 @@ class BookingController extends Controller
                 'phone' => $request->phone,
                 'role' => 'customer',
             ]);
-
+            
             // Create booking log with confirmation token
             $bookingLog = FacilityBookingLog::create([
                 'user_id' => $user->id,
                 'booking_date' => now(),
                 'confirmation_token' => Str::random(60),
             ]);
-
-
+            
+            $bookingLog->load(['user']);
+            
+            event(new FacilityBookingLogCreated($bookingLog));
+            
+            \Log::info('Event fired', [
+                'booking_id' => $bookingLog->id,
+                'broadcasting' => \Illuminate\Support\Facades\Broadcast::getFacadeRoot()->socket([])
+            ]);
+            
             // Get active breakfast price if included
             $breakfastId = null;
             if ($request->breakfast_included) {
@@ -127,10 +328,6 @@ class BookingController extends Controller
 
             // Commit transaction
             DB::commit();
-            
-            $bookingLog->load('user');
-            // After booking creation
-            event(new NewBookingRequest($bookingLog));
             
             return response()->json([
                 'success' => true,

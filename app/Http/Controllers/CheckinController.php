@@ -275,4 +275,45 @@ class CheckinController extends Controller
 
         return view('admin.printCheckinPage.index', ['payment' => $payment]);
     }
+    
+    public function searchGuests(Request $request)
+    {
+        $searchTerm = $request->query('q');
+        
+        if (empty($searchTerm)) {
+            return response()->json([]);
+        }
+
+        // Search bookings (with payment relationship)
+        $bookings = FacilityBookingLog::with(['user', 'payments'])
+            ->where(function($query) use ($searchTerm) {
+                $query->where('reference', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('user', function($q) use ($searchTerm) {
+                        $q->where('firstname', 'like', "%{$searchTerm}%")
+                        ->orWhere('lastname', 'like', "%{$searchTerm}%")
+                        ->orWhere('email', 'like', "%{$searchTerm}%");
+                    });
+            })
+            ->limit(20)
+            ->get();
+
+        // Format results with payment ID (if exists)
+        $results = $bookings->map(function($booking) {
+            // Get the first payment ID (assuming 1 booking : many payments)
+            $paymentId = $booking->payments->first()?->id ?? null;
+            
+            return [
+                'id' => $booking->id, // Booking ID
+                'name' => $booking->user ? "{$booking->user->firstname} {$booking->user->lastname}" : 'Unknown',
+                'reference_no' => $booking->reference,
+                'email' => $booking->user->email ?? '',
+                'payment_id' => $paymentId, // Payment ID (or null)
+                'type' => 'booking',
+                'status' => $booking->status,
+                'checked_in_at' => $booking->checked_in_at,
+            ];
+        });
+
+        return response()->json($results);
+    }
 }

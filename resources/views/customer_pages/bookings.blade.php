@@ -562,12 +562,12 @@
 <div class="container mx-auto px-6 py-8 max-w-12xl">
     
     <!-- Progress Steps -->
-    <x-progress-steps
+     <x-progress-steps
         :currentStep="1"
         :progress="'4%'"
-        :steps="[['label' => 'Select Rooms'], ['label' => 'Payment'], ['label' => 'Completed']]"
+        :steps="[['label' => 'Select Rooms'],  ['label' => 'Payment'], ['label' => 'Completed']]"
     />
-
+    
     <!-- Main Content -->
     <div class="flex flex-col lg:flex-row gap-12">
         <!-- Left Column -->
@@ -647,6 +647,7 @@
                         <div class="relative" style="overflow: visible;">
                             <div class="rooms-scroll-container" id="scroll-{{ $loop->index }}">
                                 @foreach($facilitiesInCategory as $facility)
+
                                 @php
                                 $facilityId = 'facility-' . $facility->id;
                                 $allImages = [];
@@ -683,13 +684,12 @@
                                     }
                                 }
                         
-                                $bookedDates = array_unique($bookedDates);
+                                $bookedDates = array_values(array_unique($bookedDates));
                                 @endphp
                         
                                 <div class="room-card"
                                     data-price="{{ $facility->price }}" data-room-id="{{ $facilityId }}"
-                                    data-images='@json($allImages)' data-booked-dates='@json($bookedDates)'>
-                        
+                                    data-images='@json($allImages)' data-booked-dates='{{ json_encode($bookedDates) }}'>
                                     @if ($facility->included != null)
                                         <div class="included-ribbon">
                                             {{ $facility->included }}
@@ -855,6 +855,7 @@
                     </div>
                     @endforeach
                 </div>
+
             </div>
         </div>
 
@@ -1025,841 +1026,832 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     class BookingSystem {
-    constructor() {
-        this.cart = [];
-        this.nights = 1;
-        this.roomsData = {};
-        this.bookedDates = {};
-        this.datePicker = null;
-        this.breakfastIncluded = false;
-        this.breakfastPrice = {{ $breakfast_price->status == 'Active' ? $breakfast_price->price : 0 }};
-        this.confirmed = false;
-        this.isSubmitting = false;
-        
-        this.initializeRoomsData();
-        this.init();
-    }
-
-    initializeRoomsData() {
-        document.querySelectorAll('.room-card').forEach(card => {
-            const roomId = card.dataset.roomId;
-            const images = JSON.parse(card.dataset.images);
+        constructor() {
+            this.cart = [];
+            this.nights = 1;
+            this.roomsData = {};
+            this.bookedDates = {};
+            this.datePicker = null;
+            this.breakfastIncluded = false;
+            this.breakfastPrice = {{ $breakfast_price->status == 'Active' ? $breakfast_price->price : 0 }};
+            this.confirmed = false;
+            this.isSubmitting = false;
             
-            let bookedDates = [];
-            try {
-                bookedDates = JSON.parse(card.dataset.bookedDates || '[]');
-                if (!Array.isArray(bookedDates)) {
+            this.initializeRoomsData();
+            this.init();
+        }
+
+        initializeRoomsData() {
+            document.querySelectorAll('.room-card').forEach(card => {
+                const roomId = card.dataset.roomId;
+                const images = JSON.parse(card.dataset.images);
+                
+                let bookedDates = [];
+                try {
+                    bookedDates = JSON.parse(card.dataset.bookedDates || '[]');
+                    if (!Array.isArray(bookedDates)) {
+                        bookedDates = [];
+                    }
+                } catch (e) {
+                    console.error('Error parsing booked dates:', e);
                     bookedDates = [];
                 }
-            } catch (e) {
-                console.error('Error parsing booked dates:', e);
-                bookedDates = [];
-            }
-            
-            this.bookedDates[roomId] = bookedDates;
-            const discountedPriceElement = card.querySelector('.night-price.text-red-600');
-            const price = discountedPriceElement 
-                ? parseFloat(discountedPriceElement.textContent.replace(/[^\d.]/g, ''))
-                : parseFloat(card.dataset.price);
-    
-            this.roomsData[roomId] = {
-                name: card.querySelector('h3').textContent.trim(),
-                price: price,
-                originalPrice: parseFloat(card.dataset.price),
-                images: images,
-                mainImage: images[0] || 'https://via.placeholder.com/500x300?text=No+Image',
-                id: roomId,
-                facilityId: roomId.replace('facility-', '')
-            };
-    
-            this.bookedDates[roomId] = bookedDates;
-        });
-    }
-
-    init() {
-        this.setupEventListeners();
-        this.initDatePickers();
-        this.setDefaultDates();
-        this.setupScrollArrows();
-        this.setupUnavailableDatesToggle();
-        this.setupAmenitiesModal();
-    }
-    setupAmenitiesModal() {
-        const modal = document.getElementById('amenities-modal');
-        const closeBtn = document.getElementById('close-amenities-modal');
-        const amenitiesList = document.getElementById('amenities-list');
-        
-        // Close handlers
-        closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.add('hidden');
-        });
-        
-        // View amenities button handler
-        document.addEventListener('click', async (e) => {
-            if (e.target.closest('.view-amenities-btn')) {
-                const button = e.target.closest('.view-amenities-btn');
-                const facilityId = button.dataset.roomId.replace('facility-', '');
                 
-                try {
-                    // Show loading state
-                    amenitiesList.innerHTML = '<div class="col-span-2 py-4 text-center"><i class="fas fa-spinner fa-spin text-primary mr-2"></i> Loading amenities...</div>';
-                    modal.classList.remove('hidden');
+                this.bookedDates[roomId] = bookedDates;
+                const discountedPriceElement = card.querySelector('.night-price.text-red-600');
+                const price = discountedPriceElement 
+                    ? parseFloat(discountedPriceElement.textContent.replace(/[^\d.]/g, ''))
+                    : parseFloat(card.dataset.price);
+        
+                this.roomsData[roomId] = {
+                    name: card.querySelector('h3').textContent.trim(),
+                    price: price,
+                    originalPrice: parseFloat(card.dataset.price),
+                    images: images,
+                    mainImage: images[0] || 'https://via.placeholder.com/500x300?text=No+Image',
+                    id: roomId,
+                    facilityId: roomId.replace('facility-', '')
+                };
+        
+                this.bookedDates[roomId] = bookedDates;
+            });
+        }
+
+        init() {
+            this.setupEventListeners();
+            this.initDatePickers();
+            this.setDefaultDates();
+            this.setupScrollArrows();
+            this.setupUnavailableDatesToggle();
+            this.setupAmenitiesModal();
+        }
+        
+        setupAmenitiesModal() {
+            const modal = document.getElementById('amenities-modal');
+            const closeBtn = document.getElementById('close-amenities-modal');
+            const amenitiesList = document.getElementById('amenities-list');
+            
+            // Close handlers
+            closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+            
+            // View amenities button handler
+            document.addEventListener('click', async (e) => {
+                if (e.target.closest('.view-amenities-btn')) {
+                    const button = e.target.closest('.view-amenities-btn');
+                    const facilityId = button.dataset.roomId.replace('facility-', '');
                     
-                    // Fetch amenities via API
-                    const response = await fetch(`/api/facilities/${facilityId}/amenities`);
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        // Populate amenities list
-                        amenitiesList.innerHTML = data.amenities.map(amenity => `
-                            <div class="amenity-item">
-                                <div class="amenity-icon">
-                                    <i class="${amenity.icon}"></i>
+                    try {
+                        // Show loading state
+                        amenitiesList.innerHTML = '<div class="col-span-2 py-4 text-center"><i class="fas fa-spinner fa-spin text-primary mr-2"></i> Loading amenities...</div>';
+                        modal.classList.remove('hidden');
+                        
+                        // Fetch amenities via API
+                        const response = await fetch(`/api/facilities/${facilityId}/amenities`);
+                        const data = await response.json();
+                        
+                        if (response.ok && data.success) {
+                            // Populate amenities list
+                            amenitiesList.innerHTML = data.amenities.map(amenity => `
+                                <div class="amenity-item">
+                                    <div class="amenity-icon">
+                                        <i class="${amenity.icon}"></i>
+                                    </div>
+                                    <div class="amenity-name">${amenity.name}</div>
                                 </div>
-                                <div class="amenity-name">${amenity.name}</div>
+                            `).join('');
+                        } else {
+                            throw new Error(data.message || 'Failed to load amenities');
+                        }
+                    } catch (error) {
+                        console.error('Error loading amenities:', error);
+                        amenitiesList.innerHTML = `
+                            <div class="col-span-2 py-4 text-center text-red-500">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                ${error.message || 'Failed to load amenities'}
                             </div>
-                        `).join('');
-                    } else {
-                        throw new Error(data.message || 'Failed to load amenities');
+                        `;
                     }
-                } catch (error) {
-                    console.error('Error loading amenities:', error);
-                    amenitiesList.innerHTML = `
-                        <div class="col-span-2 py-4 text-center text-red-500">
-                            <i class="fas fa-exclamation-circle mr-2"></i>
-                            ${error.message || 'Failed to load amenities'}
-                        </div>
-                    `;
                 }
-            }
-        });
-    }
-
-    getAmenityIcon(amenityName) {
-        const iconMap = {
-            'wifi': 'fas fa-wifi',
-            'tv': 'fas fa-tv',
-            'air conditioning': 'fas fa-snowflake',
-            'kitchen': 'fas fa-utensils',
-            'parking': 'fas fa-parking',
-            'pool': 'fas fa-swimming-pool',
-            'breakfast': 'fas fa-coffee',
-            'gym': 'fas fa-dumbbell',
-            // Add more mappings as needed
-        };
+            });
+        }
         
-        const lowerName = amenityName.toLowerCase();
-        return iconMap[lowerName] || 'fas fa-check-circle';
-    }
-
-    setupUnavailableDatesToggle() {
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.toggle-unavailable-dates')) {
-                const button = e.target.closest('.toggle-unavailable-dates');
-                const content = button.nextElementSibling;
-                
-                button.classList.toggle('active');
-                content.classList.toggle('hidden');
-                
-                // Rotate chevron icon
-                const icon = button.querySelector('i:last-child');
-                if (icon) {
-                    icon.style.transform = content.classList.contains('hidden') ? 
-                        'rotate(0deg)' : 'rotate(180deg)';
-                }
-            }
-        });
-    }
-
-    setupScrollArrows() {
-        const categoryContainers = document.querySelectorAll('.category-container');
-        
-        categoryContainers.forEach(container => {
-            const scrollContainer = container.querySelector('.rooms-scroll-container');
-            const leftArrow = container.querySelector('.scroll-left');
-            const rightArrow = container.querySelector('.scroll-right');
-            
-            const updateArrows = () => {
-                const scrollLeft = scrollContainer.scrollLeft;
-                const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-                
-                if (scrollLeft <= 10) {
-                    leftArrow.style.opacity = '0';
-                    leftArrow.style.pointerEvents = 'none';
-                } else {
-                    leftArrow.style.opacity = '1';
-                    leftArrow.style.pointerEvents = 'auto';
-                }
-                
-                if (scrollLeft >= maxScroll - 10) {
-                    rightArrow.style.opacity = '0';
-                    rightArrow.style.pointerEvents = 'none';
-                } else {
-                    rightArrow.style.opacity = '1';
-                    rightArrow.style.pointerEvents = 'auto';
-                }
+        getAmenityIcon(amenityName) {
+            const iconMap = {
+                'wifi': 'fas fa-wifi',
+                'tv': 'fas fa-tv',
+                'air conditioning': 'fas fa-snowflake',
+                'kitchen': 'fas fa-utensils',
+                'parking': 'fas fa-parking',
+                'pool': 'fas fa-swimming-pool',
+                'breakfast': 'fas fa-coffee',
+                'gym': 'fas fa-dumbbell',
+                // Add more mappings as needed
             };
             
-            updateArrows();
-            
-            leftArrow.addEventListener('click', () => {
-                const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
-                scrollContainer.scrollBy({
-                    left: -cardWidth * 2,
-                    behavior: 'smooth'
-                });
-            });
-            
-            rightArrow.addEventListener('click', () => {
-                const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
-                scrollContainer.scrollBy({
-                    left: cardWidth * 2,
-                    behavior: 'smooth'
-                });
-            });
-            
-            scrollContainer.addEventListener('scroll', updateArrows);
-            window.addEventListener('resize', updateArrows);
-        });
-    }
+            const lowerName = amenityName.toLowerCase();
+            return iconMap[lowerName] || 'fas fa-check-circle';
+        }
 
-    initDatePickers() {
-        const self = this;
-    
-        this.checkinPicker = flatpickr("#checkin", {
-            minDate: "today",
-            dateFormat: "Y-m-d",
-            onChange: function(selectedDates, dateStr) {
-                self.handleDateChange();
-                if (selectedDates.length > 0) {
-                    const nextDay = new Date(selectedDates[0]);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    self.checkoutPicker.set('minDate', nextDay);
+        setupUnavailableDatesToggle() {
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.toggle-unavailable-dates')) {
+                    const button = e.target.closest('.toggle-unavailable-dates');
+                    const content = button.nextElementSibling;
                     
-                    if (self.cart.length > 0) {
-                        self.updateDatePickerDisabledDates(self.cart[0].id);
+                    button.classList.toggle('active');
+                    content.classList.toggle('hidden');
+                    
+                    // Rotate chevron icon
+                    const icon = button.querySelector('i:last-child');
+                    if (icon) {
+                        icon.style.transform = content.classList.contains('hidden') ? 
+                            'rotate(0deg)' : 'rotate(180deg)';
                     }
                 }
-            },
-            onDayCreate: function(dObj, dStr, fp, dayElem) {
-                if (dayElem.classList.contains('flatpickr-disabled')) {
-                    dayElem.classList.add('unavailable');
-                }
-            }
-        });
-    
-        this.checkoutPicker = flatpickr("#checkout", {
-            minDate: new Date(Date.now() + 86400000), // Tomorrow
-            dateFormat: "Y-m-d",
-            onChange: function(selectedDates, dateStr) {
-                self.handleDateChange();
-            },
-            onDayCreate: function(dObj, dStr, fp, dayElem) {
-                if (dayElem.classList.contains('flatpickr-disabled')) {
-                    dayElem.classList.add('unavailable');
-                }
-            }
-        });
-    }
-
-    updateDatePickerDisabledDates(roomId) {
-        if (!roomId) return;
-    
-        const bookedDates = this.bookedDates[roomId] || [];
-        
-        // Convert booked dates to Date objects
-        const disabledDates = bookedDates.map(dateStr => {
-            const [year, month, day] = dateStr.split('-').map(Number);
-            return new Date(year, month - 1, day);
-        });
-    
-        // Flatpickr disable function
-        const disableFunction = (date) => {
-            // Check if date is in disabledDates array
-            return disabledDates.some(disabledDate => 
-                date.getFullYear() === disabledDate.getFullYear() &&
-                date.getMonth() === disabledDate.getMonth() &&
-                date.getDate() === disabledDate.getDate()
-            );
-        };
-        
-        // Update both datepickers
-        this.checkinPicker.set('disable', [disableFunction]);
-        this.checkoutPicker.set('disable', [disableFunction]);
-        
-        // Force redraw of the calendar
-        this.checkinPicker.redraw();
-        this.checkoutPicker.redraw();
-    }
-
-    setDefaultDates() {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        this.checkinPicker.setDate(today);
-        this.checkoutPicker.setDate(tomorrow);
-
-        this.calculateNightsAndPrices();
-    }
-
-    setupEventListeners() {
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.add-to-cart-btn')) {
-                const button = e.target.closest('.add-to-cart-btn');
-                this.addToCart(button.dataset.room);
-            }
-
-            if (e.target.closest('.remove-btn')) {
-                const button = e.target.closest('.remove-btn');
-                this.removeFromCart(button.dataset.room);
-            }
-        });
-
-        document.getElementById('breakfast-toggle')?.addEventListener('change', (e) => {
-            this.breakfastIncluded = e.target.checked;
-            this.updateCartDisplay();
-        });
-
-        document.getElementById('checkout-btn').addEventListener('click', () => this.handleCheckout());
-        
-        document.getElementById('confirm-checkbox').addEventListener('change', (e) => {
-            this.confirmed = e.target.checked;
-            this.validateCheckoutButton();
-        });
-
-        // Input validation on blur
-        document.getElementById('firstname').addEventListener('blur', this.validateNameField.bind(this));
-        document.getElementById('lastname').addEventListener('blur', this.validateNameField.bind(this));
-        document.getElementById('email').addEventListener('blur', this.validateEmailField.bind(this));
-        document.getElementById('phone').addEventListener('blur', this.validatePhoneField.bind(this));
-    }
-
-    validateNameField(e) {
-        const field = e.target;
-        const errorElement = document.getElementById(`${field.id}-error`);
-        
-        if (!field.value.trim()) {
-            field.classList.add('input-error');
-            errorElement.style.display = 'block';
-            return false;
+            });
         }
-        
-        field.classList.remove('input-error');
-        errorElement.style.display = 'none';
-        return true;
-    }
 
-    validateEmailField(e) {
-        const field = e.target;
-        const errorElement = document.getElementById(`${field.id}-error`);
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        if (!field.value.trim() || !emailRegex.test(field.value)) {
-            field.classList.add('input-error');
-            errorElement.style.display = 'block';
-            return false;
+        setupScrollArrows() {
+            const categoryContainers = document.querySelectorAll('.category-container');
+            
+            categoryContainers.forEach(container => {
+                const scrollContainer = container.querySelector('.rooms-scroll-container');
+                const leftArrow = container.querySelector('.scroll-left');
+                const rightArrow = container.querySelector('.scroll-right');
+                
+                const updateArrows = () => {
+                    const scrollLeft = scrollContainer.scrollLeft;
+                    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+                    
+                    if (scrollLeft <= 10) {
+                        leftArrow.style.opacity = '0';
+                        leftArrow.style.pointerEvents = 'none';
+                    } else {
+                        leftArrow.style.opacity = '1';
+                        leftArrow.style.pointerEvents = 'auto';
+                    }
+                    
+                    if (scrollLeft >= maxScroll - 10) {
+                        rightArrow.style.opacity = '0';
+                        rightArrow.style.pointerEvents = 'none';
+                    } else {
+                        rightArrow.style.opacity = '1';
+                        rightArrow.style.pointerEvents = 'auto';
+                    }
+                };
+                
+                updateArrows();
+                
+                leftArrow.addEventListener('click', () => {
+                    const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
+                    scrollContainer.scrollBy({
+                        left: -cardWidth * 2,
+                        behavior: 'smooth'
+                    });
+                });
+                
+                rightArrow.addEventListener('click', () => {
+                    const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
+                    scrollContainer.scrollBy({
+                        left: cardWidth * 2,
+                        behavior: 'smooth'
+                    });
+                });
+                
+                scrollContainer.addEventListener('scroll', updateArrows);
+                window.addEventListener('resize', updateArrows);
+            });
         }
-        
-        field.classList.remove('input-error');
-        errorElement.style.display = 'none';
-        return true;
-    }
 
-    validatePhoneField(e) {
-        return validatePhone(e.target);
-    }
+        initDatePickers() {
+            const self = this;
+        
+            this.checkinPicker = flatpickr("#checkin", {
+                minDate: "today",
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr) {
+                    self.handleDateChange();
+                    if (selectedDates.length > 0) {
+                        const nextDay = new Date(selectedDates[0]);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        self.checkoutPicker.set('minDate', nextDay);
+                        
+                        if (self.cart.length > 0) {
+                            self.updateDatePickerDisabledDates(self.cart[0].id);
+                        }
+                    }
+                },
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    if (dayElem.classList.contains('flatpickr-disabled')) {
+                        dayElem.classList.add('unavailable');
+                    }
+                }
+            });
+        
+            this.checkoutPicker = flatpickr("#checkout", {
+                minDate: new Date(Date.now() + 86400000), // Tomorrow
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr) {
+                    self.handleDateChange();
+                },
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    if (dayElem.classList.contains('flatpickr-disabled')) {
+                        dayElem.classList.add('unavailable');
+                    }
+                }
+            });
+        }
 
-    validateCheckoutButton() {
-        const checkoutBtn = document.getElementById('checkout-btn');
-        checkoutBtn.disabled = !(this.cart.length > 0 && this.confirmed);
-    }
-
-    formatDate(date) {
-        if (!date) return '';
+        updateDatePickerDisabledDates(roomId) {
+            if (!roomId) return;
         
-        // Handle both string dates and Date objects
-        const d = new Date(date);
-        if (isNaN(d.getTime())) return ''; // Invalid date
-        
-        // Use local date components (not UTC)
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        
-        return `${year}-${month}-${day}`;
-    }
-
-    async handleCheckout() {
-        if (this.cart.length === 0 || this.isSubmitting) return;
-    
-        const button = document.getElementById('checkout-btn');
-        const spinner = document.getElementById('spinnerContainer');
-        
-        let controller;
-        
-        try {
-            // Show loading state
-            button.disabled = true;
-            spinner.classList.remove('hidden');
-            this.isSubmitting = true;
+            const bookedDates = this.bookedDates[roomId] || [];
             
-            // Validate all fields
-            const isValid = this.validateAllFields();
-            if (!isValid) {
-                throw new Error('Please correct the form errors');
-            }
-            
-            // Prepare and submit data
-            const bookingData = {
-                firstname: document.getElementById('firstname').value.trim(),
-                lastname: document.getElementById('lastname').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                checkin_date: this.formatForBackend(this.checkinPicker.selectedDates[0]),
-                checkout_date: this.formatForBackend(this.checkoutPicker.selectedDates[0]),
-                facilities: this.cart.map(item => ({
-                    facility_id: item.facilityId,
-                    price: item.price,
-                    nights: this.nights,
-                    total_price: item.price * this.nights
-                })),
-                breakfast_included: this.breakfastIncluded,
-                breakfast_price: this.breakfastIncluded ? this.breakfastPrice * this.nights * this.cart.length : 0,
-                total_price: this.calculateTotalPrice()
+            // Convert booked dates to Date objects
+            const disabledDates = bookedDates.map(dateStr => {
+                const [year, month, day] = dateStr.split('-').map(Number);
+                return new Date(year, month - 1, day);
+            });
+        
+            // Flatpickr disable function
+            const disableFunction = (date) => {
+                // Check if date is in disabledDates array
+                return disabledDates.some(disabledDate => 
+                    date.getFullYear() === disabledDate.getFullYear() &&
+                    date.getMonth() === disabledDate.getMonth() &&
+                    date.getDate() === disabledDate.getDate()
+                );
             };
             
-            controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
-    
-            const response = await fetch('/book', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(bookingData),
-                signal: controller.signal
+            // Update both datepickers
+            this.checkinPicker.set('disable', [disableFunction]);
+            this.checkoutPicker.set('disable', [disableFunction]);
+            
+            // Force redraw of the calendar
+            this.checkinPicker.redraw();
+            this.checkoutPicker.redraw();
+        }
+        
+        setDefaultDates() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            this.checkinPicker.setDate(today);
+            this.checkoutPicker.setDate(tomorrow);
+
+            this.calculateNightsAndPrices();
+        }
+        
+        setupEventListeners() {
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.add-to-cart-btn')) {
+                    const button = e.target.closest('.add-to-cart-btn');
+                    this.addToCart(button.dataset.room);
+                }
+
+                if (e.target.closest('.remove-btn')) {
+                    const button = e.target.closest('.remove-btn');
+                    this.removeFromCart(button.dataset.room);
+                }
             });
-    
-            clearTimeout(timeoutId);
-    
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || 'Booking failed with status ' + response.status);
-            }
-    
-            const result = await response.json();
+
+            document.getElementById('breakfast-toggle')?.addEventListener('change', (e) => {
+                this.breakfastIncluded = e.target.checked;
+                this.updateCartDisplay();
+            });
+
+            document.getElementById('checkout-btn').addEventListener('click', () => this.handleCheckout());
             
-            if (!result.success) {
-                throw new Error(result.message || 'Booking was not successful');
-            }
-            
-            window.location.href = `/WaitForConfirmation?email=${encodeURIComponent(bookingData.email)}`;
+            document.getElementById('confirm-checkbox').addEventListener('change', (e) => {
+                this.confirmed = e.target.checked;
+                this.validateCheckoutButton();
+            });
 
-        } catch (error) {
-            console.error('Booking error:', error);
-            let errorMessage = 'Booking failed. Please try again.';
-            if (error.name === 'AbortError') {
-                errorMessage = 'Request timed out. Please check your connection and try again.';
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-            
-            showNotification(errorMessage, true);
-        } finally {
-            this.isSubmitting = false;
-            spinner.classList.add('hidden');
-            button.disabled = this.cart.length === 0 || !this.confirmed;
-            if (controller) {
-                controller.abort(); // Ensure controller is cleaned up
-            }
-        }
-    }
-
-    validateAllFields() {
-        let isValid = true;
-        
-        // Validate each field
-        isValid = this.validateNameField({ target: document.getElementById('firstname') }) && isValid;
-        isValid = this.validateNameField({ target: document.getElementById('lastname') }) && isValid;
-        isValid = this.validateEmailField({ target: document.getElementById('email') }) && isValid;
-        isValid = this.validatePhoneField({ target: document.getElementById('phone') }) && isValid;
-        
-        // Validate confirmation checkbox
-        const confirmCheckbox = document.getElementById('confirm-checkbox');
-        if (!confirmCheckbox.checked) {
-            document.getElementById('confirm-error').style.display = 'block';
-            isValid = false;
-        } else {
-            document.getElementById('confirm-error').style.display = 'none';
-        }
-        
-        return isValid;
-    }
-
-    formatForBackend(date) {
-        if (!date) return null;
-        
-        // Create a new date object to avoid modifying the original
-        const d = new Date(date);
-        
-        // Use local date components
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        
-        return `${year}-${month}-${day}`;
-    }
-
-    calculateTotalPrice() {
-        const roomsTotal = this.cart.reduce((sum, item) => sum + (item.price * this.nights), 0);
-        const breakfastTotal = this.breakfastIncluded ? this.breakfastPrice * this.nights * this.cart.length : 0;
-        return roomsTotal + breakfastTotal;
-    }
-
-    handleDateChange() {
-        const checkinDate = this.checkinPicker.selectedDates[0];
-        const checkoutDate = this.checkoutPicker.selectedDates[0];
-
-        if (!checkinDate || !checkoutDate) return;
-
-        if (checkinDate >= checkoutDate) {
-            const newCheckout = new Date(checkinDate);
-            newCheckout.setDate(newCheckout.getDate() + 1);
-            this.checkoutPicker.setDate(newCheckout);
-            return;
+            // Input validation on blur
+            document.getElementById('firstname').addEventListener('blur', this.validateNameField.bind(this));
+            document.getElementById('lastname').addEventListener('blur', this.validateNameField.bind(this));
+            document.getElementById('email').addEventListener('blur', this.validateEmailField.bind(this));
+            document.getElementById('phone').addEventListener('blur', this.validatePhoneField.bind(this));
         }
 
-        if (this.cart.length > 0) {
-            const roomId = this.cart[0].id;
-            const checkin = this.formatDate(checkinDate);
-            const checkout = this.formatDate(checkoutDate);
+        validateNameField(e) {
+            const field = e.target;
+            const errorElement = document.getElementById(`${field.id}-error`);
+            
+            if (!field.value.trim()) {
+                field.classList.add('input-error');
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            field.classList.remove('input-error');
+            errorElement.style.display = 'none';
+            return true;
+        }
 
-            if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
-                const roomName = this.roomsData[roomId]?.name || 'This room';
-                const formattedCheckin = this.formatDisplayDate(checkinDate);
-                const formattedCheckout = this.formatDisplayDate(checkoutDate);
-                const nextAvailable = this.findNextAvailableDates(roomId, checkinDate);
+        validateEmailField(e) {
+            const field = e.target;
+            const errorElement = document.getElementById(`${field.id}-error`);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!field.value.trim() || !emailRegex.test(field.value)) {
+                field.classList.add('input-error');
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            field.classList.remove('input-error');
+            errorElement.style.display = 'none';
+            return true;
+        }
+
+        validatePhoneField(e) {
+            return validatePhone(e.target);
+        }
+
+        validateCheckoutButton() {
+            const checkoutBtn = document.getElementById('checkout-btn');
+            checkoutBtn.disabled = !(this.cart.length > 0 && this.confirmed);
+        }
+
+        formatDate(date) {
+            if (!date) return '';
+            
+            // Handle both string dates and Date objects
+            const d = new Date(date);
+            if (isNaN(d.getTime())) return ''; // Invalid date
+            
+            // Use local date components (not UTC)
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}`;
+        }
+        
+        async handleCheckout() {
+            if (this.cart.length === 0 || this.isSubmitting) return;
+        
+            const button = document.getElementById('checkout-btn');
+            const spinner = document.getElementById('spinnerContainer');
+            
+            let controller;
+            
+            try {
+                // Show loading state
+                button.disabled = true;
+                spinner.classList.remove('hidden');
+                this.isSubmitting = true;
                 
-                let message = `${roomName} is not available for ${formattedCheckin} to ${formattedCheckout}.`;
-                if (nextAvailable) {
-                    message += ` Next available: ${nextAvailable.checkin} to ${nextAvailable.checkout}.`;
+                // Validate all fields
+                const isValid = this.validateAllFields();
+                if (!isValid) {
+                    throw new Error('Please correct the form errors');
                 }
                 
-                showNotification(message, true);
-                this.checkoutPicker.setDate(null);
-                return;
+                // Prepare and submit data
+                const bookingData = {
+                    firstname: document.getElementById('firstname').value.trim(),
+                    lastname: document.getElementById('lastname').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    checkin_date: this.formatForBackend(this.checkinPicker.selectedDates[0]),
+                    checkout_date: this.formatForBackend(this.checkoutPicker.selectedDates[0]),
+                    facilities: this.cart.map(item => ({
+                        facility_id: item.facilityId,
+                        price: item.price,
+                        nights: this.nights,
+                        total_price: item.price * this.nights
+                    })),
+                    breakfast_included: this.breakfastIncluded,
+                    breakfast_price: this.breakfastIncluded ? this.breakfastPrice * this.nights * this.cart.length : 0,
+                    total_price: this.calculateTotalPrice()
+                };
+                
+                controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+        
+                const response = await fetch('/book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData),
+                    signal: controller.signal
+                });
+        
+                clearTimeout(timeoutId);
+        
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Booking failed with status ' + response.status);
+                }
+        
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || 'Booking was not successful');
+                }
+                
+                window.location.href = `/WaitForConfirmation?email=${encodeURIComponent(bookingData.email)}`;
+            
+            } catch (error) {
+                console.error('Booking error:', error);
+                let errorMessage = 'Booking failed. Please try again.';
+                if (error.name === 'AbortError') {
+                    errorMessage = 'Request timed out. Please check your connection and try again.';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showNotification(errorMessage, true);
+            } finally {
+                this.isSubmitting = false;
+                spinner.classList.add('hidden');
+                button.disabled = this.cart.length === 0 || !this.confirmed;
+                if (controller) {
+                    controller.abort(); // Ensure controller is cleaned up
+                }
             }
         }
 
-        this.calculateNightsAndPrices();
-    }
-
-    formatDisplayDate(date) {
-        if (typeof date === 'string') {
-            date = new Date(date);
-        }
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-
-    calculateNightsAndPrices() {
-        const checkinDate = this.checkinPicker.selectedDates[0];
-        const checkoutDate = this.checkoutPicker.selectedDates[0];
-
-        if (!checkinDate || !checkoutDate) return;
-
-        const timeDiff = checkoutDate.getTime() - checkinDate.getTime();
-        this.nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-        document.getElementById('nights-display').textContent =
-            `${this.nights} night${this.nights !== 1 ? 's' : ''} selected (${this.formatDisplayDate(checkinDate)} - ${this.formatDisplayDate(checkoutDate)})`;
-
-        if (this.cart.length > 0) {
-            this.updateCartDisplay();
-        }
-    }
-
-    addToCart(roomId) {
-        try {
-            if (!this.roomsData[roomId]) {
-                throw new Error('Room not found');
+        validateAllFields() {
+            let isValid = true;
+            
+            // Validate each field
+            isValid = this.validateNameField({ target: document.getElementById('firstname') }) && isValid;
+            isValid = this.validateNameField({ target: document.getElementById('lastname') }) && isValid;
+            isValid = this.validateEmailField({ target: document.getElementById('email') }) && isValid;
+            isValid = this.validatePhoneField({ target: document.getElementById('phone') }) && isValid;
+            
+            // Validate confirmation checkbox
+            const confirmCheckbox = document.getElementById('confirm-checkbox');
+            if (!confirmCheckbox.checked) {
+                document.getElementById('confirm-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('confirm-error').style.display = 'none';
             }
-    
-            // Check if already in cart
-            if (this.cart.some(item => item.id === roomId)) {
-                showNotification('This room is already in your cart', true);
-                return;
-            }
-    
-            // Validate dates
+            
+            return isValid;
+        }
+        
+        formatForBackend(date) {
+            if (!date) return null;
+            
+            // Create a new date object to avoid modifying the original
+            const d = new Date(date);
+            
+            // Use local date components
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}`;
+        }
+
+        calculateTotalPrice() {
+            const roomsTotal = this.cart.reduce((sum, item) => sum + (item.price * this.nights), 0);
+            const breakfastTotal = this.breakfastIncluded ? this.breakfastPrice * this.nights * this.cart.length : 0;
+            return roomsTotal + breakfastTotal;
+        }
+
+        handleDateChange() {
             const checkinDate = this.checkinPicker.selectedDates[0];
             const checkoutDate = this.checkoutPicker.selectedDates[0];
 
-            if (!checkinDate || !checkoutDate) {
-                showNotification('Please select both check-in and check-out dates', true);
-                return;
-            }
-    
-            // Convert to YYYY-MM-DD format for consistency
-            const checkin = this.formatDate(checkinDate);
-            const checkout = this.formatDate(checkoutDate);
-    
-            // Additional validation
-            if (new Date(checkin) >= new Date(checkout)) {
-                showNotification('Check-out date must be after check-in date', true);
-                return;
-            }
-    
-            // Check availability
-            if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
-                const roomName = this.roomsData[roomId].name;
-                const formattedCheckin = this.formatDisplayDate(checkinDate);
-                const formattedCheckout = this.formatDisplayDate(checkoutDate);
-                
-                // Find next available dates for better UX
-                const nextAvailable = this.findNextAvailableDates(roomId, checkinDate);
-                let message = `${roomName} is not available for ${formattedCheckin} to ${formattedCheckout}.`;
-                
-                if (nextAvailable) {
-                    message += ` Next available: ${nextAvailable.checkin} to ${nextAvailable.checkout}.`;
-                } else {
-                    message += ' Please try different dates.';
-                }
-                
-                showNotification(message, true);
-                return;
-            }
-    
-            // Add to cart
-            const room = this.roomsData[roomId];
-            this.cart.push({
-                id: roomId,
-                name: room.name,
-                price: room.price,
-                images: room.images,
-                mainImage: room.mainImage,
-                nights: this.nights,
-                facilityId: room.facilityId,
-                checkin: checkin,
-                checkout: checkout
-            });
-    
-            // Update UI
-            this.updateCartDisplay();
-            this.updateDatePickerDisabledDates(roomId);
-            this.validateCheckoutButton();
-    
-            // Highlight selected room
-            document.querySelectorAll('.room-card').forEach(card => {
-                card.classList.toggle('selected', card.dataset.roomId === roomId);
-            });
-    
-            // Show success feedback
-            const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
-            buttons.forEach(button => {
-                const originalHTML = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check mr-2"></i> Added!';
-                button.classList.replace('bg-primary', 'bg-green-500');
-                
-                setTimeout(() => {
-                    button.innerHTML = originalHTML;
-                    button.classList.replace('bg-green-500', 'bg-primary');
-                }, 2000);
-            });
-    
-            showNotification(`${room.name} added to your booking`);
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-            showNotification(error.message || 'Failed to add room to cart', true);
-        }
-    }
+            if (!checkinDate || !checkoutDate) return;
 
-    isDateRangeAvailable(roomId, checkin, checkout) {
-        console.groupCollapsed(`Checking availability for room ${roomId} from ${checkin} to ${checkout}`);
-        console.log("Input Dates:", { checkin, checkout }); // Check if dates match datepicker
-        console.log("Booked Dates:", this.bookedDates[roomId]); // Verify stored booked dates
-        
-        if (!roomId || !checkin || !checkout) {
-            return false;
-        }
-    
-        // Parse dates as local dates (no timezone conversion)
-        const parseLocalDate = (dateStr) => {
-            if (dateStr instanceof Date) {
-                // Return a new date with just the date components (no time)
-                return new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
+            if (checkinDate >= checkoutDate) {
+                const newCheckout = new Date(checkinDate);
+                newCheckout.setDate(newCheckout.getDate() + 1);
+                this.checkoutPicker.setDate(newCheckout);
+                return;
             }
-            const [year, month, day] = dateStr.split('-').map(Number);
-            return new Date(year, month - 1, day);
-        };
-    
-        const checkinDate = parseLocalDate(checkin);
-        const checkoutDate = parseLocalDate(checkout);
-    
-        // Basic validation
-        if (checkinDate >= checkoutDate) {
-            return false;
-        }
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (checkinDate < today) {
-            return false;
-        }
-    
-        // Ensure bookedDates is always an array
-        const bookedDates = Array.isArray(this.bookedDates[roomId]) 
-            ? this.bookedDates[roomId] 
-            : [];
-    
-        // Check against individual booked dates
-        for (const dateStr of bookedDates) {
-            try {
-                const bookedDate = parseLocalDate(dateStr);
-                
-                if (bookedDate >= checkinDate && bookedDate < checkoutDate) {
+
+            if (this.cart.length > 0) {
+                const roomId = this.cart[0].id;
+                const checkin = this.formatDate(checkinDate);
+                const checkout = this.formatDate(checkoutDate);
+
+                if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
+                    const roomName = this.roomsData[roomId]?.name || 'This room';
+                    const formattedCheckin = this.formatDisplayDate(checkinDate);
+                    const formattedCheckout = this.formatDisplayDate(checkoutDate);
+                    const nextAvailable = this.findNextAvailableDates(roomId, checkinDate);
                     
-                    return false;
+                    let message = `${roomName} is not available for ${formattedCheckin} to ${formattedCheckout}. Please try different dates.`;
+                    showNotification(message, true);
+                    this.checkoutPicker.setDate(null);  
+                    return;
                 }
-            } catch (e) {
-                console.error('Error parsing booked date:', dateStr, e);
-                continue;
+            }
+
+            this.calculateNightsAndPrices();
+        }
+
+        formatDisplayDate(date) {
+            if (typeof date === 'string') {
+                date = new Date(date);
+            }
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        
+        calculateNightsAndPrices() {
+            const checkinDate = this.checkinPicker.selectedDates[0];
+            const checkoutDate = this.checkoutPicker.selectedDates[0];
+
+            if (!checkinDate || !checkoutDate) return;
+
+            const timeDiff = checkoutDate.getTime() - checkinDate.getTime();
+            this.nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+            document.getElementById('nights-display').textContent =
+                `${this.nights} night${this.nights !== 1 ? 's' : ''} selected (${this.formatDisplayDate(checkinDate)} - ${this.formatDisplayDate(checkoutDate)})`;
+
+            if (this.cart.length > 0) {
+                this.updateCartDisplay();
             }
         }
-    
-        return true;
-    }
 
-    findNextAvailableDates(roomId, afterDate) {
-        try {
-            const bookedDates = this.bookedDates[roomId] || [];
+        addToCart(roomId) {
+            try {
+                if (!this.roomsData[roomId]) {
+                    throw new Error('Room not found');
+                }
+        
+                // Check if already in cart
+                if (this.cart.some(item => item.id === roomId)) {
+                    showNotification('This room is already in your cart', true);
+                    return;
+                }
+        
+                // Validate dates
+                const checkinDate = this.checkinPicker.selectedDates[0];
+                const checkoutDate = this.checkoutPicker.selectedDates[0];
+
+                if (!checkinDate || !checkoutDate) {
+                    showNotification('Please select both check-in and check-out dates', true);
+                    return;
+                }
+        
+                // Convert to YYYY-MM-DD format for consistency
+                const checkin = this.formatDate(checkinDate);
+                const checkout = this.formatDate(checkoutDate);
+        
+                // Additional validation
+                if (new Date(checkin) >= new Date(checkout)) {
+                    showNotification('Check-out date must be after check-in date', true);
+                    return;
+                }
+        
+                // Check availability
+                if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
+                    const roomName = this.roomsData[roomId].name;
+                    const formattedCheckin = this.formatDisplayDate(checkinDate);
+                    const formattedCheckout = this.formatDisplayDate(checkoutDate);
+                    
+                    // Find next available dates for better UX
+                    const nextAvailable = this.findNextAvailableDates(roomId, checkinDate);
+                    let message = `${roomName} is not available for ${formattedCheckin} to ${formattedCheckout}. Please try different dates.`;
+                    
+                    showNotification(message, true);
+                    return;
+                }
+        
+                // Add to cart
+                const room = this.roomsData[roomId];
+                this.cart.push({
+                    id: roomId,
+                    name: room.name,
+                    price: room.price,
+                    images: room.images,
+                    mainImage: room.mainImage,
+                    nights: this.nights,
+                    facilityId: room.facilityId,
+                    checkin: checkin,
+                    checkout: checkout
+                });
+        
+                // Update UI
+                this.updateCartDisplay();
+                this.updateDatePickerDisabledDates(roomId);
+                this.validateCheckoutButton();
+        
+                // Highlight selected room
+                document.querySelectorAll('.room-card').forEach(card => {
+                    card.classList.toggle('selected', card.dataset.roomId === roomId);
+                });
+        
+                // Show success feedback
+                const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
+                buttons.forEach(button => {
+                    const originalHTML = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check mr-2"></i> Added!';
+                    button.classList.replace('bg-primary', 'bg-green-500');
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalHTML;
+                        button.classList.replace('bg-green-500', 'bg-primary');
+                    }, 2000);
+                });
+        
+                showNotification(`${room.name} added to your booking`);
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showNotification(error.message || 'Failed to add room to cart', true);
+            }
+        }
+
+        isDateRangeAvailable(roomId, checkin, checkout) {
+            console.groupCollapsed(`Checking availability for room ${roomId} from ${checkin} to ${checkout}`);
+            console.log("Input Dates:", { checkin, checkout }); // Check if dates match datepicker
+            console.log("Booked Dates:", this.bookedDates[roomId]); // Verify stored booked dates
             
-            // Convert booked dates to Date objects and sort
-            const unavailableDates = bookedDates
-                .map(dateStr => new Date(dateStr))
-                .sort((a, b) => a - b);
+            if (!roomId || !checkin || !checkout) {
+                return false;
+            }
+        
+            // Parse dates as local dates (no timezone conversion)
+            const parseLocalDate = (dateStr) => {
+                if (dateStr instanceof Date) {
+                    // Return a new date with just the date components (no time)
+                    return new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
+                }
+                const [year, month, day] = dateStr.split('-').map(Number);
+                return new Date(year, month - 1, day);
+            };
+        
+            const checkinDate = parseLocalDate(checkin);
+            const checkoutDate = parseLocalDate(checkout);
+        
+            // Basic validation
+            if (checkinDate >= checkoutDate) {
+                return false;
+            }
             
-            // Start checking from the day after the requested date
-            let currentDate = new Date(afterDate);
-            currentDate.setDate(currentDate.getDate() + 1);
-            
-            // Find the first available date
-            for (const bookedDate of unavailableDates) {
-                // If current date is before this booked date, we found availability
-                if (currentDate < bookedDate) {
-                    return {
-                        checkin: this.formatDisplayDate(currentDate),
-                        checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000)) // Suggest 1 night
-                    };
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (checkinDate < today) {
+                return false;
+            }
+        
+            // Ensure bookedDates is always an array
+            const bookedDates = Array.isArray(this.bookedDates[roomId]) 
+                ? this.bookedDates[roomId] 
+                : [];
+        
+            // Check against individual booked dates
+            for (const dateStr of bookedDates) {
+                try {
+                    const bookedDate = parseLocalDate(dateStr);
+                    
+                    if (bookedDate >= checkinDate && bookedDate < checkoutDate) {
+                        
+                        return false;
+                    }
+                } catch (e) {
+                    console.error('Error parsing booked date:', dateStr, e);
+                    continue;
+                }
+            }
+        
+            return true;
+        }
+
+        findNextAvailableDates(roomId, afterDate) {
+            try {
+                const bookedDates = this.bookedDates[roomId] || [];
+                
+                // Convert booked dates to Date objects and sort
+                const unavailableDates = bookedDates
+                    .map(dateStr => new Date(dateStr))
+                    .sort((a, b) => a - b);
+                
+                // Start checking from the day after the requested date
+                let currentDate = new Date(afterDate);
+                currentDate.setDate(currentDate.getDate() + 1);
+                
+                // Find the first available date
+                for (const bookedDate of unavailableDates) {
+                    // If current date is before this booked date, we found availability
+                    if (currentDate < bookedDate) {
+                        return {
+                            checkin: this.formatDisplayDate(currentDate),
+                            checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000)) // Suggest 1 night
+                        };
+                    }
+                    
+                    // If current date is on or after this booked date, move to next day
+                    if (currentDate <= bookedDate) {
+                        currentDate = new Date(bookedDate);
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
                 }
                 
-                // If current date is on or after this booked date, move to next day
-                if (currentDate <= bookedDate) {
-                    currentDate = new Date(bookedDate);
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
+                // If we get here, all dates after currentDate are available
+                return {
+                    checkin: this.formatDisplayDate(currentDate),
+                    checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000)) // Suggest 1 night
+                };
+            } catch (error) {
+                console.error('Error finding next available dates:', error);
+                return null;
             }
-            
-            // If we get here, all dates after currentDate are available
-            return {
-                checkin: this.formatDisplayDate(currentDate),
-                checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000)) // Suggest 1 night
-            };
-        } catch (error) {
-            console.error('Error finding next available dates:', error);
-            return null;
         }
-    }
-
-    updateCartDisplay() {
-        const container = document.getElementById('cart-items');
-        const checkoutBtn = document.getElementById('checkout-btn');
-        const totalElement = document.getElementById('total-price');
-        const breakfastSummary = document.getElementById('breakfast-summary');
-        const breakfastNights = document.getElementById('breakfast-nights');
-        const breakfastPrice = document.getElementById('breakfast-price');
-    
-        if (this.cart.length === 0) {
-            container.innerHTML = '<div class="text-gray-400 text-center py-6"><i class="fas fa-shopping-cart text-3xl mb-3 opacity-50"></i><p>Your list is empty</p></div>';
-            totalElement.textContent = '₱0.00';
-            checkoutBtn.disabled = true;
-            breakfastSummary?.classList.add('hidden');
-            return;
-        }
-    
-        checkoutBtn.disabled = !this.confirmed;
-    
-        let subtotal = 0;
-        let html = '';
-    
-        this.cart.forEach(item => {
-            const itemTotal = item.price * this.nights;
-            subtotal += itemTotal;
-    
-            html += `
-                <div class="flex justify-between items-start border-b border-gray-100 pb-4">
-                    <div class="flex items-start">
-                        <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
-                        <div>
-                            <h4 class="font-medium text-dark">${item.name}</h4>
-                            <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
+        
+        updateCartDisplay() {
+            const container = document.getElementById('cart-items');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const totalElement = document.getElementById('total-price');
+            const breakfastSummary = document.getElementById('breakfast-summary');
+            const breakfastNights = document.getElementById('breakfast-nights');
+            const breakfastPrice = document.getElementById('breakfast-price');
+        
+            if (this.cart.length === 0) {
+                container.innerHTML = '<div class="text-gray-400 text-center py-6"><i class="fas fa-shopping-cart text-3xl mb-3 opacity-50"></i><p>Your list is empty</p></div>';
+                totalElement.textContent = '₱0.00';
+                checkoutBtn.disabled = true;
+                breakfastSummary?.classList.add('hidden');
+                return;
+            }
+        
+            checkoutBtn.disabled = !this.confirmed;
+        
+            let subtotal = 0;
+            let html = '';
+        
+            this.cart.forEach(item => {
+                const itemTotal = item.price * this.nights;
+                subtotal += itemTotal;
+        
+                html += `
+                    <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                        <div class="flex items-start">
+                            <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
+                            <div>
+                                <h4 class="font-medium text-dark">${item.name}</h4>
+                                <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
+                            <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
+                                <i class="far fa-trash-alt mr-1"></i> Remove
+                            </button>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
-                        <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
-                            <i class="far fa-trash-alt mr-1"></i> Remove
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-    
-        container.innerHTML = html;
+                `;
+            });
         
-        if (this.breakfastIncluded && breakfastSummary) {
-            const breakfastTotal = this.breakfastPrice * this.nights * this.cart.length;
-            breakfastNights.textContent = `${this.nights} night${this.nights !== 1 ? 's' : ''} × ${this.cart.length} room${this.cart.length !== 1 ? 's' : ''}`;
-            breakfastPrice.textContent = `₱${breakfastTotal.toFixed(2)}`;
-            breakfastSummary.classList.remove('hidden');
-            subtotal += breakfastTotal;
-        } else if (breakfastSummary) {
-            breakfastSummary.classList.add('hidden');
-        }
-        
-        totalElement.textContent = `₱${subtotal.toFixed(2)}`;
-    }
-
-    removeFromCart(roomId) {
-        const room = this.roomsData[roomId];
-        this.cart = this.cart.filter(item => item.id !== roomId);
-        this.updateCartDisplay();
-        this.validateCheckoutButton();
-
-        document.querySelectorAll('.room-card').forEach(card => {
-            if (card.dataset.roomId === roomId) {
-                card.classList.remove('selected');
+            container.innerHTML = html;
+            
+            if (this.breakfastIncluded && breakfastSummary) {
+                const breakfastTotal = this.breakfastPrice * this.nights * this.cart.length;
+                breakfastNights.textContent = `${this.nights} night${this.nights !== 1 ? 's' : ''} × ${this.cart.length} room${this.cart.length !== 1 ? 's' : ''}`;
+                breakfastPrice.textContent = `₱${breakfastTotal.toFixed(2)}`;
+                breakfastSummary.classList.remove('hidden');
+                subtotal += breakfastTotal;
+            } else if (breakfastSummary) {
+                breakfastSummary.classList.add('hidden');
             }
-        });
-
-        const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
-        buttons.forEach(button => {
-            button.innerHTML = 'Book Now';
-            button.classList.remove('bg-green-500', 'bg-primary');
-            button.classList.add('bg-primary');
-            button.disabled = false;
-        });
-
-        if (this.cart.length === 0) {
-            this.checkinPicker.set('disable', []);
-            this.checkoutPicker.set('disable', []);
+            
+            totalElement.textContent = `₱${subtotal.toFixed(2)}`;
         }
 
-        showNotification(`${room.name} removed from your booking`);
-    }
+        removeFromCart(roomId) {
+            const room = this.roomsData[roomId];
+            this.cart = this.cart.filter(item => item.id !== roomId);
+            this.updateCartDisplay();
+            this.validateCheckoutButton();
+
+            document.querySelectorAll('.room-card').forEach(card => {
+                if (card.dataset.roomId === roomId) {
+                    card.classList.remove('selected');
+                }
+            });
+
+            const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
+            buttons.forEach(button => {
+                button.innerHTML = 'Book Now';
+                button.classList.remove('bg-green-500', 'bg-primary');
+                button.classList.add('bg-primary');
+                button.disabled = false;
+            });
+
+            if (this.cart.length === 0) {
+                this.checkinPicker.set('disable', []);
+                this.checkoutPicker.set('disable', []);
+            }
+
+            showNotification(`${room.name} removed from your booking`);
+        }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -98,6 +98,28 @@
         .btn-pulse:hover {
             animation: pulse 1.5s infinite;
         }
+        
+        /* Hero section with highlights bar */
+        .hero-container {
+            position: relative;
+            height: 100vh;
+        }
+        
+        .highlights-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 20;
+        }
+        
+        /* Video controls */
+        .video-controls {
+            position: absolute;
+            bottom: 120px; /* Adjusted to account for highlights bar */
+            right: 20px;
+            z-index: 30;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-700">
@@ -123,6 +145,7 @@
                 <a href="{{ route('customer_bookings') }}" class="bg-accent hover:bg-yellow-600 text-white px-5 py-2 rounded-sm transition duration-300 font-medium flex items-center btn-pulse">
                     <i class="fas fa-calendar-check mr-2"></i> Book Now
                 </a>
+                
             </nav>
             <button id="mobile-menu-button" class="lg:hidden text-white focus:outline-none">
                 <i class="fas fa-bars text-2xl"></i>
@@ -145,84 +168,90 @@
         </div>
     </div>
 
-    <!-- Hero Section -->
-    <section id="home" class="pt-32 pb-20 relative h-screen flex items-center justify-center text-center overflow-hidden">
-        <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
-            <source src="{{ url('video/welcomeVideo.mp4') }}" type="video/mp4">
-            <img src="{{ url('imgs/video-backup.jpg') }}" alt="Mt. ClaRamuel Resort" class="absolute inset-0 w-full h-full object-cover z-0">
-        </video>
-        <div class="absolute inset-0 bg-black/40 z-10"></div>
-        <div class="relative z-20 text-white px-6 max-w-6xl mx-auto">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 hero-title font-serif animate-fadeInUp">
-                Mt. ClaRamuel Resort & Events Place
-            </h1> 
-            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fadeInUp" style="animation-delay: 0.2s;">
-                A premier mountain retreat offering luxury accommodations and exceptional event venues in the heart of Isabela
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
-                <a href="{{ route('customer_bookings') }}" class="inline-block bg-accent hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
-                    Book Your Stay
+    <!-- Hero Section with Highlights Bar -->
+    <div class="hero-container">
+        <section id="home" class="pt-32 pb-20 relative h-full flex items-center justify-center text-center overflow-hidden">
+            <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+                <source src="{{ url('video/welcomeVideo.mp4') }}" type="video/mp4">
+                <img src="{{ url('imgs/video-backup.jpg') }}" alt="Mt. ClaRamuel Resort" class="absolute inset-0 w-full h-full object-cover z-0">
+            </video>
+            <div class="absolute inset-0 bg-black/40 z-10"></div>
+            <div class="relative z-20 text-white px-6 max-w-6xl mx-auto">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 hero-title font-serif animate-fadeInUp">
+                    Mt. ClaRamuel Resort & Events Place
+                </h1> 
+                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fadeInUp" style="animation-delay: 0.2s;">
+                    A premier mountain retreat offering luxury accommodations and exceptional event venues in the heart of Isabela
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+                    <a href="{{ route('customer_bookings') }}" class="inline-block bg-accent hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
+                        Book Your Stay
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Video sound toggle -->
+            <div class="video-controls">
+                <button id="sound-toggle" class="bg-black/50 text-white p-3 rounded-full shadow-lg transition hover:bg-black/70">
+                    <i class="fas fa-volume-mute"></i>
+                </button>
+            </div>
+            
+            <!-- Scroll indicator -->
+            <div class="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
+                <a href="#about" class="text-white">
+                    <i class="fas fa-chevron-down text-2xl"></i>
                 </a>
             </div>
-        </div>
+        </section>
         
-        <!-- Video sound toggle -->
-        <button id="sound-toggle" class="absolute bottom-8 right-8 bg-black/50 text-white p-3 rounded-full shadow-lg z-30">
-            <i class="fas fa-volume-mute"></i>
-        </button>
-        
-        <!-- Scroll indicator -->
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
-            <a href="#about" class="text-white">
-                <i class="fas fa-chevron-down text-2xl"></i>
-            </a>
-        </div>
-    </section>
-
-    <!-- Highlights Bar -->
-    <div class="bg-gray-800 text-white py-4 md:py-8 lg:py-12">
-        <div class="container mx-auto px-4 sm:px-6">
-            <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12 lg:gap-16">
-                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.1s;">
-                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
-                        <i class="fas fa-clock text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs sm:text-sm md:text-base font-medium">Open Daily</p>
-                        <p class="text-xs sm:text-xs md:text-sm">8 AM - 10 PM</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.2s;">
-                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
-                        <i class="fas fa-home text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs sm:text-sm md:text-base font-medium">Luxury</p>
-                        <p class="text-xs sm:text-xs md:text-sm">Accommodations</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.3s;">
-                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
-                        <i class="fas fa-calendar-alt text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs sm:text-sm md:text-base font-medium">Event</p>
-                        <p class="text-xs sm:text-xs md:text-sm">Hosting</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.4s;">
-                    <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
-                        <i class="fas fa-utensils text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs sm:text-sm md:text-base font-medium">Fine</p>
-                        <p class="text-xs sm:text-xs md:text-sm">Dining</p>
+        <!-- Highlights Bar -->
+        <div class="highlights-bar">
+            <div class="bg-gray-800 text-white py-4 md:py-8 lg:py-12">
+                <div class="container mx-auto px-4 sm:px-6">
+                    <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12 lg:gap-16">
+                        <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+                            <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                                <i class="fas fa-clock text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm md:text-base font-medium">Open Daily</p>
+                                <p class="text-xs sm:text-xs md:text-sm">8 AM - 10 PM</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.2s;">
+                            <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                                <i class="fas fa-home text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm md:text-base font-medium">Luxury</p>
+                                <p class="text-xs sm:text-xs md:text-sm">Accommodations</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.3s;">
+                            <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                                <i class="fas fa-calendar-alt text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm md:text-base font-medium">Event</p>
+                                <p class="text-xs sm:text-xs md:text-sm">Hosting</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+                            <div class="bg-accent p-1.5 sm:p-2 md:p-3 rounded-full">
+                                <i class="fas fa-utensils text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm md:text-base font-medium">Fine</p>
+                                <p class="text-xs sm:text-xs md:text-sm">Dining</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <!-- About Section -->
     <section id="about" class="py-20 bg-white">
         <div class="container mx-auto px-6">
