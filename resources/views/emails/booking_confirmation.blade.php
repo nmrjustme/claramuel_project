@@ -50,7 +50,7 @@
                             <h1 style="font-size:24px; font-weight:700; color:#1f2937; margin:0 0 16px 0;">Booking Confirmation</h1>
                             <p style="margin:0 0 24px 0;">Dear {{ $booking->user->firstname }},</p>
                             
-                            <p style="margin:0 0 24px 0;">Your booking request (Reference #{{ $booking->reference }}) has been confirmed!</p>
+                            <p style="margin:0 0 24px 0;">Your booking request has been confirmed!</p>
 
                             @if($customMessage)
                             <p style="margin:0 0 24px 0;">{{ $customMessage }}</p>

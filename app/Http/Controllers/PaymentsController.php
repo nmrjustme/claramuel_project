@@ -67,7 +67,7 @@ class PaymentsController extends Controller
             if ($paymentStatus == 'under_verification') {
                 return redirect()->route('payments.submitted');
             } else {
-                return view('customer_pages.payments', [
+                return view('customer_pages.booking.payments', [
                     'booking' => $booking,
                     'verified_at' => $verified_at,
                     'user_firstname' => $user_firstname,

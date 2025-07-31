@@ -3,12 +3,6 @@
 @section('bookings')
 <style>
      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-     body {
-          font-family: 'Inter', sans-serif;
-          background-color: #f8fafc;
-     }
-
      /* Netflix-inspired category styling */
      .category-container {
           margin-bottom: 3rem;
@@ -393,10 +387,6 @@
           color: white !important;
      }
 
-     .loading-spinner {
-          display: inline-block;
-     }
-
      /* Floating notification */
      .notification {
           position: fixed;
@@ -541,23 +531,47 @@
 
      /* Amenities Modal Styles */
      #amenities-modal {
-          transition: opacity 0.3s ease, visibility 0.3s ease;
+          transition: opacity 0.8s ease, visibility 0.3s ease;
      }
-
+     
      .amenity-item {
           display: flex;
           align-items: center;
-          padding: 0.75rem 1rem;
-          border-radius: 0.5rem;
+          padding: 1.25rem 1.5rem;
+          border-radius: 0.75rem;
           background-color: #f8fafc;
           transition: all 0.2s ease;
           border: 1px solid #e5e7eb;
+          min-height: 80px;
      }
-
-     .amenity-item:hover {
-          background-color: #f0f4f8;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+     
+     .amenity-name {
+          font-size: 1.125rem;
+          color: #1F2937;
+          font-weight: 500;
+          text-align: left;
+     }
+     @media (max-width: 768px) {
+          #amenities-modal .modal-container {
+               width: 95%;
+               margin: 0 auto;
+          }
+          
+          .amenity-item {
+               padding: 1rem;
+               min-height: 70px;
+          }
+          
+          .amenity-icon {
+               width: 28px;
+               height: 28px;
+               font-size: 1rem;
+               margin-right: 1rem;
+          }
+          
+          .amenity-name {
+               font-size: 1rem;
+          }
      }
 
      .amenity-icon {
@@ -576,6 +590,60 @@
           color: #1F2937;
           font-weight: 500;
      }
+
+     #checkout-btn {
+          background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+          color: white;
+          font-weight: 600;
+          padding: 0.875rem 1.5rem;
+          border-radius: 0.5rem;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 1rem;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          box-shadow: 0 4px 6px rgba(220, 38, 38, 0.1);
+          position: relative;
+          overflow: hidden;
+     }
+
+     #checkout-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(220, 38, 38, 0.2);
+     }
+
+     #checkout-btn:active {
+          transform: translateY(0);
+          box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+     }
+
+     #checkout-btn::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -60%;
+          width: 200%;
+          height: 200%;
+          background: rgba(255, 255, 255, 0.1);
+          transform: rotate(30deg);
+          transition: all 0.3s ease;
+     }
+
+     #checkout-btn:hover::after {
+          left: 100%;
+     }
+
+     #checkout-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+          transform: none !important;
+          box-shadow: none !important;
+     }    
+
 </style>
 
 <x-header />
@@ -585,7 +653,7 @@
      <!-- Progress Steps -->
      <x-progress-step :currentStep="1" :steps="[
                ['label' => 'Select Rooms'],
-               ['label' => 'Customer Info'],
+               ['label' => 'Your Details'],
                ['label' => 'Payment'],
                ['label' => 'Completed']
           ]" />
@@ -942,13 +1010,7 @@
                     <button id="checkout-btn"
                          class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-70 disabled:transform-none hover:-translate-y-0.5 active:translate-y-0 btn-primary"
                          disabled>
-                         <i class="fas fa-user-edit mr-3"></i>
-                         <span>Proceed to Customer Information</span>
-                         <div id="spinnerContainer" class="hidden">
-                              <div id="spinner"
-                                   class="w-6 h-6 border-4 border-white-500 border-t-transparent rounded-full animate-spin mx-2">
-                              </div>
-                         </div>
+                         <span id="button-text">Proceed to Customer Information</span>
                     </button>
                </div>
           </div>
@@ -963,32 +1025,33 @@
                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
           </div>
           
-          <!-- Modal container -->
+          <!-- Modal container - Made larger and centered -->
           <div
-               class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-               <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+               class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
+               <div class="bg-white px-8 pt-8 pb-6 sm:p-8 sm:pb-6">
                     <div class="sm:flex sm:items-start">
                          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                              <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                              <h3 class="text-2xl font-bold text-gray-900 mb-6" id="modal-title">
                                    Room Amenities
                               </h3>
-                              <div class="mt-4">
-                                   <div id="amenities-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div class="mt-2">
+                                   <div id="amenities-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         <!-- Amenities will be populated here -->
                                    </div>
                               </div>
                          </div>
                     </div>
                </div>
-               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+               <div class="bg-gray-50 px-8 py-6 sm:px-8 sm:flex sm:flex-row-reverse">
                     <button type="button" id="close-amenities-modal"
-                         class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-6 py-3 bg-primary text-base font-medium text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm">
                          Close
                     </button>
                </div>
           </div>
      </div>
 </div>
+
 
 <!-- Notification element -->
 <div id="notification" class="notification hidden">
@@ -1090,8 +1153,13 @@
                     const facilityId = button.dataset.roomId.replace('facility-', '');
                     
                     try {
-                         // Show loading state
-                         amenitiesList.innerHTML = '<div class="col-span-2 py-4 text-center"><i class="fas fa-spinner fa-spin text-primary mr-2"></i> Loading amenities...</div>';
+                         // Show loading state with centered spinner
+                         amenitiesList.innerHTML = `
+                         <div class="col-span-3 py-8 flex flex-col items-center justify-center">
+                              <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
+                              <div class="text-lg">Loading amenities...</div>
+                         </div>`;
+                         
                          modal.classList.remove('hidden');
                          
                          // Fetch amenities via API
@@ -1099,26 +1167,27 @@
                          const data = await response.json();
                          
                          if (response.ok && data.success) {
-                         // Populate amenities list
-                         amenitiesList.innerHTML = data.amenities.map(amenity => `
-                              <div class="amenity-item">
-                                   <div class="amenity-icon">
-                                        <i class="${amenity.icon}"></i>
+                              // Populate amenities list with larger items
+                              amenitiesList.innerHTML = data.amenities.map(amenity => `
+                                   <div class="amenity-item">
+                                        <div class="amenity-icon">
+                                             <i class="${amenity.icon || this.getAmenityIcon(amenity.name)} text-xl"></i>
+                                        </div>
+                                        <div class="amenity-name">${amenity.name}</div>
                                    </div>
-                                   <div class="amenity-name">${amenity.name}</div>
-                              </div>
-                         `).join('');
+                              `).join('');
                          } else {
-                         throw new Error(data.message || 'Failed to load amenities');
+                              throw new Error(data.message || 'Failed to load amenities');
                          }
                     } catch (error) {
                          console.error('Error loading amenities:', error);
                          amenitiesList.innerHTML = `
-                         <div class="col-span-2 py-4 text-center text-red-500">
-                              <i class="fas fa-exclamation-circle mr-2"></i>
-                              ${error.message || 'Failed to load amenities'}
-                         </div>
-                         `;
+                         <div class="col-span-3 py-8 text-center">
+                              <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
+                              <div class="text-lg text-red-500">
+                                   ${error.message || 'Failed to load amenities'}
+                              </div>
+                         </div>`;
                     }
                }
           });
@@ -1338,12 +1407,10 @@
 		if (this.cart.length === 0 || this.isSubmitting) return;
 
 		const button = document.getElementById('checkout-btn');
-		const spinner = document.getElementById('spinnerContainer');
 		
 		try {
 			// Show loading state
 			button.disabled = true;
-			spinner.classList.remove('hidden');
 			this.isSubmitting = true;
 			
 			// Get pax information from each room card
@@ -1380,10 +1447,12 @@
 		} catch (error) {
 			console.error('Checkout error:', error);
 			showNotification('Failed to proceed to checkout. Please try again.', true);
+               
+               button.textContent = 'Proceed to Customer Information';
+               spinner.classList.add('hidden');
+               button.disabled = this.cart.length === 0;
 		} finally {
 			this.isSubmitting = false;
-			spinner.classList.add('hidden');
-			button.disabled = this.cart.length === 0 || !this.confirmed;
 		}
 	}
      

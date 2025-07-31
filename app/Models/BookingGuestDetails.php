@@ -10,7 +10,8 @@ class BookingGuestDetails extends Model
 
     protected $fillable = [
         'guest_type_id',
-        'facility_sumary_id',
+        'facility_booking_log_id',
+        'facility_id',
         'quantity',
     ];
     
@@ -19,8 +20,8 @@ class BookingGuestDetails extends Model
         return $this->belongsTo(GuestType::class, 'guest_type_id');
     }
 
-    public function facilitySummary()
+    public function facility()
     {
-        return $this->belongsTo(FacilitySummary::class, 'facility_sumary_id');
+        return $this->belongsTo(Facility::class, 'facility_id');
     }
 }

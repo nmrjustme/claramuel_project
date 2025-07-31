@@ -1,7 +1,6 @@
-@extends('layouts.app')
-@section('title', 'Event Packages')
-@section('dashboard')
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <div class="container mx-auto px-4 py-8">
         <!-- Back Button -->
         <div class="mb-6">
@@ -145,4 +144,3 @@
             </div>
         </div>
     </div>
-@endsection

@@ -52,14 +52,33 @@ Route::get('/customer/guest-types', [GuestTypeController::class, 'index'])->name
 
 Route::get('/dashboard/checkin_page/{id}', [CustomerBookingPageController::class, 'Data'])->name('facility.deal');
 
+// =======================
+// Completed page 
+// =======================
+Route::get('/booking/completed/{booking}', [BookingsController::class, 'booking_completed'])->name('booking.completed');
+
+
+Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
+    ->name('booking.WaitConfirmation');
+
+Route::get('/booking-submitted', [BookingController::class, 'bookingSubmitted'])
+    ->name('booking.submitted');
+
+
 Route::get('/Bookings', [BookingsController::class, 'index'])->name('customer_bookings');
-Route::get('/dashboard/MyBookings/new/', [BookingsController::class, 'trylang'])->name('MyNewBookings');
+Route::get('/dashboard/Bookings', [BookingsController::class, 'bookings_page'])->name('dashboard.bookings');
+
 Route::get('/bookings/customer-info', [BookingsController::class, 'customerInfo'])->name('bookings.customer-info');
 
 Route::get('/bookings/get-facilities', [BookingsController::class, 'getFacilities'])->name('bookings.get-facilities');
 Route::get('/Book', [PoolParkbookingController::class, 'index'])->name('Pools_Park');
 Route::get('/Images/{id}', [AccommodationImgController::class, 'index'])->name('my_modals');
-Route::post('/book', [BookingController::class, 'store'])->name('bookings.store');
+
+
+Route::post('/book', [BookingController::class, 'store'])->name('bookings.store');// Ongoing
+Route::post('/new/booking', [BookingController::class, 'stores'])->name('booking.stores');
+
+
 Route::get('/verify_email', [VerifyEmailController::class, 'verify'])->name('verify.email');
 
 Route::get('/events', function () {
@@ -312,23 +331,26 @@ Route::post('/confirm-booking/{id}', [InquirerController::class, 'confirmBooking
 Route::post('/reject-booking/{id}', [InquirerController::class, 'rejectBooking'])->name('booking.reject');
 
 Route::get('/booking/verify/{token}', [InquirerController::class, 'verifyBooking'])->name('booking.verify');
-Route::get('/payment/create/{booking}', [PaymentsController::class, 'payments'])->name('payments');
-Route::get('/NotVerified/', [PaymentsController::class, 'notVerified'])->name('not.verified');
+
+// =======================
+// Payments Redirection
+// =======================
+Route::get('/payment/create/{booking}', [PaymentsController::class, 'payments'])->name('payments'); 
+// =======================
+
+Route::get('/NotVerified', [PaymentsController::class, 'notVerified'])->name('not.verified');
+
+
 Route::get('/link-expired', function () {
     return view('customer_pages.invalid_link');
 })->name('invalid_link');
 Route::get('/admin/inquiries/check-new', [InquirerController::class, 'checkNewInquiries'])
     ->name('admin.inquiries.check-new');
 
-Route::get('/booking/completed/{booking}', [BookingsController::class, 'booking_completed'])->name('booking.completed');
-
-
-Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
-    ->name('booking.WaitConfirmation');
-
 Route::get('/booking/redirect/{booking}', function ($booking) {
     return view('booking-redirect', ['booking' => $booking]);
 })->name('booking.redirect');
+
 
 // Route::get('/booking/verify/{token}', [BookingController::class, 'verify'])->name('booking.verify');
 

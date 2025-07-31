@@ -78,9 +78,9 @@ class BookingsController extends Controller
         ]);
     }
     
-    public function trylang()
+    public function bookings_page()
     {
-        return view('customer_pages.try.bookings', [
+        return view('customer_pages.booking.index', [
             'facilities' => $this->facilities,
             'unavailable_dates' => $this->getUnavailableDates(),
             'breakfast_price' => $this->breakfast,
@@ -89,7 +89,7 @@ class BookingsController extends Controller
 
     public function customerInfo()
     {
-        return view('customer_pages.try.customer_info');
+        return view('customer_pages.booking.customer_info');
     }
     
     public function getAmenities(Facility $facility)
@@ -163,7 +163,7 @@ class BookingsController extends Controller
     
     public function booking_completed(FacilityBookingLog $booking)
     {
-        return view('customer_pages.booking_completed', ['booking' => $booking]);
+        return view('customer_pages.booking.booking_completed', ['booking' => $booking]);
     }
     
 }

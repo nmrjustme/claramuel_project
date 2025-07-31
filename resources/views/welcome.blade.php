@@ -14,8 +14,8 @@
                     colors: {
                         primary: '#1a365d',
                         secondary: '#e53e3e',
-                        accent: '#d1a054',
-                        darkAccent: '#9f723d'
+                        accent: '#990F02',
+                        darkAccent: '#950606'
                     },
                     fontFamily: {
                         serif: ['Georgia', 'serif'],
@@ -142,7 +142,7 @@
                 <a href="#gallery" class="hover:text-accent transition duration-300 font-medium">Gallery</a>
                 <a href="#contact" class="hover:text-accent transition duration-300 font-medium">Contact</a>
                 <a href="{{ route('login') }}" class="hover:text-accent transition duration-300 font-medium">Login</a>
-                <a href="{{ route('customer_bookings') }}" class="bg-accent hover:bg-yellow-600 text-white px-5 py-2 rounded-sm transition duration-300 font-medium flex items-center btn-pulse">
+                <a href="{{ route('dashboard.bookings') }}" class="bg-accent hover:bg-darkAccent text-white px-5 py-2 rounded-sm transition duration-300 font-medium flex items-center btn-pulse">
                     <i class="fas fa-calendar-check mr-2"></i> Book Now
                 </a>
                 
@@ -162,7 +162,7 @@
             <a href="#gallery" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Gallery</a>
             <a href="#contact" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Contact</a>
             <a href="{{ route('login') }}" class="text-white hover:text-accent text-lg transition border-b border-gray-700 pb-3">Login</a>
-            <a href="{{ route('customer_bookings') }}" class="bg-accent hover:bg-yellow-600 text-white px-6 py-3 rounded-sm transition flex items-center justify-center text-lg mt-4 btn-pulse">
+            <a href="{{ route('dashboard.bookings') }}" class="bg-accent hover:bg-darkAccent text-white px-6 py-3 rounded-sm transition flex items-center justify-center text-lg mt-4 btn-pulse">
                 <i class="fas fa-calendar-check mr-2"></i> Book Now
             </a>
         </div>
@@ -184,7 +184,7 @@
                     A premier mountain retreat offering luxury accommodations and exceptional event venues in the heart of Isabela
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
-                    <a href="{{ route('customer_bookings') }}" class="inline-block bg-accent hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
+                    <a href="{{ route('dashboard.bookings') }}" class="inline-block bg-accent hover:bg-darkAccent text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
                         Book Your Stay
                     </a>
                 </div>
@@ -454,7 +454,7 @@
                 <div class="group gallery-item relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp" style="animation-delay: {{ $i * 0.1 }}s;">
                     <img src="{{ url('imgs/gallery/'.$i.'.jpg') }}" 
                          alt="Gallery image {{ $i }}" 
-                         class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
+                         class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-110">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                         <h3 class="text-white font-medium translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             Resort View {{ $i }}
@@ -482,7 +482,7 @@
                 Book your stay or event today and discover the magic of Mt. ClaRamuel
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
-                <a href="{{ route('customer_bookings') }}" class="inline-block bg-accent hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
+                <a href="{{ route('dashboard.bookings') }}" class="inline-block bg-accent hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
                     Book Now
                 </a>
                 <a href="tel:+639952901333" class="inline-block border-2 border-white hover:bg-white/10 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300">

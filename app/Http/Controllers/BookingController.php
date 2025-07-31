@@ -12,6 +12,8 @@ use App\Models\Facility;
 use App\Models\Breakfast;
 use App\Models\FacilitySummary;
 use App\Models\FacilityBookingDetails;
+use App\Models\BookingGuestDetails;
+use App\Models\GuestType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -38,14 +40,14 @@ class BookingController extends Controller
             'facilities.*.price' => 'required|numeric|min:0',
             'facilities.*.nights' => 'required|integer|min:1',
             'facilities.*.total_price' => 'required|numeric|min:0',
+            'guest_types' => 'required|array',
+            'guest_types.*' => 'required|array', // Each facility's guest types
+            'guest_types.*.*' => 'required|integer|min:1|exists:guest_type,id',
             'breakfast_included' => 'sometimes|boolean',
             'breakfast_price' => 'required_if:breakfast_included,true|numeric|min:0',
             'total_price' => 'required|numeric|min:0',
-            'guest_types' => 'required|array',
-            'guest_types.*' => 'required|array',
-            'guest_types.*.*' => 'required|integer|min:0',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -57,10 +59,10 @@ class BookingController extends Controller
         // Parse dates explicitly with timezone
         $timezone = config('app.timezone', 'Asia/Manila');
         $checkinDate = Carbon::parse($request->checkin_date, $timezone)
-            ->setTimezone('UTC')
+            ->setTimezone('Asia/Manila')
             ->startOfDay();
         $checkoutDate = Carbon::parse($request->checkout_date, $timezone)
-            ->setTimezone('UTC')
+            ->setTimezone('Asia/Manila')
             ->startOfDay();
 
         // Verify dates after parsing
@@ -71,27 +73,17 @@ class BookingController extends Controller
             ], 422);
         }
 
-        // Validate guest counts against room pax limits
+        // Validate guest counts match facility pax limits
         foreach ($request->facilities as $facilityData) {
-            $facility = Facility::findOrFail($facilityData['facility_id']);
-            $totalGuests = 0;
+            $facilityId = $facilityData['facility_id'];
+            $facility = Facility::findOrFail($facilityId);
             
-            if (isset($request->guest_types[$facility->id])) {
-                $totalGuests = array_sum($request->guest_types[$facility->id]);
-            }
+            $totalGuests = array_sum($request->guest_types[$facilityId] ?? []);
             
             if ($totalGuests > $facility->pax) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Room {$facility->name} exceeds maximum guest limit of {$facility->pax}"
-                ], 422);
-            }
-
-            // Ensure at least one guest is selected per room
-            if ($totalGuests < 1) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Please select at least one guest for room {$facility->name}"
+                    'message' => "Facility {$facility->name} exceeds maximum guest limit of {$facility->pax}"
                 ], 422);
             }
         }
@@ -100,7 +92,7 @@ class BookingController extends Controller
         DB::beginTransaction();
 
         try {
-            // Create or update user (email is no longer unique)
+            // Create or update user
             $user = User::create([
                 'firstname' => $request->firstname,
                 'lastname' => $request->lastname,
@@ -143,7 +135,6 @@ class BookingController extends Controller
                     'facility_id' => $facility->id,
                     'breakfast_id' => $breakfastId,
                     'facility_booking_log_id' => $bookingLog->id,
-                    'qty' => 1, // Assuming 1 room per facility summary
                 ]);
 
                 // Calculate price including breakfast if applicable
@@ -159,29 +150,17 @@ class BookingController extends Controller
                     'checkin_date' => $checkinDate->format('Y-m-d'),
                     'checkout_date' => $checkoutDate->format('Y-m-d'),
                     'total_price' => $facilityPrice,
-                    'nights' => $facilityData['nights'],
                 ]);
 
-                // Save guest details if provided
+                // Process guest types for this facility
                 if (isset($request->guest_types[$facility->id])) {
                     foreach ($request->guest_types[$facility->id] as $guestTypeId => $quantity) {
-                        if ($quantity > 0) {
-                            BookingGuestDetails::create([
-                                'guest_type_id' => $guestTypeId,
-                                'facility_summary_id' => $facilitySummary->id,
-                                'quantity' => $quantity,
-                            ]);
-
-                            // If guest type has a rate, we could apply additional charges here
-                            $guestType = GuestType::find($guestTypeId);
-                            if ($guestType && $guestType->rate > 0) {
-                                // Example: Add additional charges based on guest type
-                                // $additionalCharge = $guestType->rate * $quantity * $facilityData['nights'];
-                                // $facilityPrice += $additionalCharge;
-                                // FacilityBookingDetails::where('id', $bookingDetails->id)
-                                //     ->update(['total_price' => $facilityPrice]);
-                            }
-                        }
+                        BookingGuestDetails::create([
+                            'guest_type_id' => $guestTypeId,
+                            'facility_booking_log_id' => $bookingLog->id,
+                            'facility_id' => $facility->id,
+                            'quantity' => $quantity
+                        ]);
                     }
                 }
             }
@@ -193,20 +172,16 @@ class BookingController extends Controller
                 'success' => true,
                 'booking_id' => $bookingLog->id,
                 'message' => 'Booking created successfully',
-                'redirect_url' => '/bookings/payment/' . $bookingLog->id
+                'redirect_url' => route('booking.submitted', ['email' => $request->email])
             ]);
-        
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Booking failed:', [
                 'message' => $e->getMessage(),
                 'exception' => $e,
                 'trace' => $e->getTraceAsString(),
-                'request' => $request->all(),
-                'dates' => [
-                    'checkin' => $checkinDate->format('Y-m-d H:i:s'),
-                    'checkout' => $checkoutDate->format('Y-m-d H:i:s')
-                ]
+                'request' => $request->all()
             ]);
             
             return response()->json([
@@ -359,6 +334,12 @@ class BookingController extends Controller
     {
         $email = $request->query('email');
         return view('customer_pages.wait_for_confirmation', ['email' => $email]);
+    }
+
+    public function bookingSubmitted(Request $request)
+    {
+        $email = $request->query('email');
+        return view('customer_pages.booking.wait_for_confirmation', ['email' => $email]);
     }
     
     public function index(Request $request)
