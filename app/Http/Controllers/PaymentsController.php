@@ -20,6 +20,8 @@ use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel; 
+use Endroid\QrCode\Label\LabelAlignment;
+use Endroid\QrCode\Label\Font\OpenSans;
 use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\RoundBlockSizeMode; 
 // Encryption
@@ -232,9 +234,9 @@ class PaymentsController extends Controller
             ->data($encryptedQrData)
             ->encoding(new Encoding('UTF-8'))
             ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-            ->size(250)
-            ->margin(5)
-            ->roundBlockSizeMode(RoundBlockSizeMode::Enlarge)  // Correct usage
+            ->size(300)
+            ->margin(10)
+            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)  // Correct usage
             ->foregroundColor(new Color(0, 0, 0))
             ->backgroundColor(new Color(255, 255, 255))
             ->build();
