@@ -29,7 +29,13 @@ class PaymentsController extends Controller
     public function payments(FacilityBookingLog $booking)
     {
         // Load the FacilityBookingLog relationships
-        $booking->load(['user', 'details', 'summaries.facility', 'payments']); 
+        $booking->load([
+            'user', 
+            'details', 
+            'summaries.facility', 
+            'payments',
+            'guestDetails.guestType'
+        ]); 
         
         $verified_at = $booking->verified_at;
         $user_firstname = $booking->user->firstname ?? 'No user found';
@@ -37,21 +43,33 @@ class PaymentsController extends Controller
         $half_of_total_price = ($total_price * 0.5) ?? 0;
         $reference = $booking->reference ?? 'No reference found';
         
-        $facilities = $booking->summaries->map(function ($summary) {
+        $facilities = $booking->summaries->map(function ($summary) use ($booking) {
+            // Get guest details for this specific facility
+            $guestDetails = $booking->guestDetails
+                ->where('facility_id', $summary->facility_id)
+                ->map(function($detail) {
+                    return [
+                        'type' => $detail->guestType->type ?? 'Unknown',
+                        'quantity' => $detail->quantity
+                    ];
+                });
+                
             return [
                 'name' => $summary->facility->name ?? 'Unknown',
                 'price' => $summary->facility->price ?? 0,
+                'guest_details' => $guestDetails
             ];
         });
         
         // Improved breakfast summary handling
         $breakfastPrice = $booking->summaries->first()->breakfast ?? 0;
-
+        
         
         $firstDetail = $booking->details->first();
         
         // Safer payment status check
         $paymentStatus = $booking->payments->first()->status ?? null;
+
         
         if ($firstDetail && $firstDetail->checkin_date && $firstDetail->checkout_date) {
             $checkin = Carbon::parse($firstDetail->checkin_date);
@@ -185,7 +203,8 @@ class PaymentsController extends Controller
             'bookingLog.details',    
             'bookingLog.summaries.facility',
             'bookingLog.summaries.breakfast',
-            'bookingLog.summaries.bookingDetails'
+            'bookingLog.summaries.bookingDetails',
+            'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
         
         $checkout_date = $payment->bookingLog->details->first()->checkout_date;
@@ -241,10 +260,11 @@ class PaymentsController extends Controller
             'success' => true,
             'payment' => $payment,
             'message' => 'Payment verified and receipt sent with QR code',
-            'qr_code_url' => $qrCodeUrl
+            'qr_code_url' => $qrCodeUrl,
+            'guest_details' => $payment->bookingLog->guestDetails
         ]);
     }
-
+    
     
     /**
      * Send verification email with QR code

@@ -78,7 +78,6 @@ Route::get('/Images/{id}', [AccommodationImgController::class, 'index'])->name('
 Route::post('/book', [BookingController::class, 'store'])->name('bookings.store');// Ongoing
 Route::post('/new/booking', [BookingController::class, 'stores'])->name('booking.stores');
 
-
 Route::get('/verify_email', [VerifyEmailController::class, 'verify'])->name('verify.email');
 
 Route::get('/events', function () {

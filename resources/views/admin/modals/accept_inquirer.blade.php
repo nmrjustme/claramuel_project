@@ -444,57 +444,80 @@
         }
 
         // Create booking details HTML
+// In your populateModalWithData function, update the facility card HTML generation:
         const detailsHtml = data.facilities?.map((facility, index) => {
             const facilityNights = calculateNights(facility.check_in, facility.check_out);
             const hasMeal = facility.breakfast && facility.breakfast !== 'None';
+            
+            // Generate guest details HTML
+            const guestDetailsHtml = facility.guest_details?.length > 0 
+                ? facility.guest_details.map(guest => `
+                    <li class="flex justify-between text-sm py-1">
+                        <span class="text-gray-600">${guest.type}:</span>
+                        <span class="font-medium">${guest.quantity} guest(s)</span>
+                    </li>
+                `).join('')
+                : '<li class="text-sm text-gray-500 italic">No guest details available</li>';
             
             return `
                 <div class="facility-card">
                     <div class="flex justify-between items-start mb-1">
                         <div>
                             <h4 class="text-lg font-semibold">${facility.facility_name || 'Facility not specified'}</h4>
-                            <p class="text-sm">
-                                <span class="font-medium text-gray-600">Category:</span>
-                                <span class="ml-2">${facility.facility_category || 'Not specified'}</span>
+                            <span class="facility-category">${facility.facility_category || 'No category'}</span>
+                            <p class="text-sm mt-1">
+                                <span class="font-medium text-gray-600">Room:</span>
+                                <span class="ml-2">${facility.room_info.room_number || 'N/A'}</span>
                             </p>
                             <p class="text-sm">
                                 <span class="font-medium text-gray-600">Night(s):</span>
                                 <span class="ml-2">${facilityNights}</span>
                             </p>
                         </div>
-                        ${facility.room_info?.price_per_night ? `
-                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                                ${formatPrice(facility.room_info.price_per_night)}/night
-                            </span>
-                        ` : ''}
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                            ${formatPrice(facility.room_info.price_per_night)}/night
+                        </span>
+                    </div>
+                    
+                    <!-- Guest Composition Section -->
+                    <div class="mt-3 border-t pt-3">
+                        <h5 class="text-sm font-medium text-gray-700 mb-2">Guest Composition</h5>
+                        <ul class="space-y-1">
+                            ${guestDetailsHtml}
+                        </ul>
                     </div>
                     
                     ${hasMeal ? `
-                        <div class="meal-info">
-                            <p class="text-sm font-medium text-gray-600">Meal Plan: ${facility.breakfast}</p>
+                        <div class="meal-info mt-3">
+                            <h5 class="text-sm font-medium text-gray-700 mb-1">Meal Plan</h5>
+                            <p class="text-sm">${facility.breakfast}</p>
                             <p class="text-sm mt-1">
-                                <span class="font-medium text-gray-600">Meal Dates:</span>
-                                <span class="ml-2">${facilityNights} mornings (${formatDate(facility.check_in)} to ${formatDate(facility.check_out)})</span>
-                                
+                                <span class="font-medium">Price:</span>
+                                <span class="ml-2">${formatPrice(facility.breakfast_price)}/morning</span>
                             </p>
-                            <p class="text-sm font-medium text-gray-600">Price: ${facility.breakfast_price}/morning(s)</p>
-                            <p class="text-sm font-medium text-gray-600">Meal total: ${ formatPrice(facility.breakfast_price * facilityNights) }</p>
+                            <p class="text-sm">
+                                <span class="font-medium">Total:</span>
+                                <span class="ml-2">${formatPrice(facility.breakfast_price * facilityNights)}</span>
+                            </p>
                         </div>
                     ` : ''}
-                    <p class="text-sm mt-1">
-                        <span class="font-medium text-gray-600">Subtotal:</span>
-                        <span class="ml-2 font-semibold">${formatPrice(facility.total_price)}</span>
-                    </p>
+                    
+                    <div class="mt-3 pt-3 border-t">
+                        <p class="text-sm flex justify-between">
+                            <span class="font-medium text-gray-600">Subtotal:</span>
+                            <span class="font-semibold">${formatPrice(facility.total_price)}</span>
+                        </p>
+                    </div>
                     
                     <!-- Add checkbox for each room -->
-                    <div class="checkbox-container">
+                    <div class="checkbox-container mt-3">
                         <input type="checkbox" id="room-checkbox-${index}" class="room-checkbox" data-room="${facility.facility_name || 'Room ' + (index + 1)}">
                         <label for="room-checkbox-${index}">I have reviewed ${facility.facility_name || 'this room'} details</label>
                     </div>
                 </div>
             `;
         }).join('') || '<p class="text-gray-500 italic">No facilities booked</p>';
-
+        
         // Check if booking is already confirmed or rejected
         const isConfirmed = data.status === 'confirmed';
         const isRejected = data.status === 'rejected';

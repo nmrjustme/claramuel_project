@@ -406,6 +406,7 @@ class InquirerController extends Controller
                 'summaries.facility:id,name,room_number,bed_number,price,category',
                 'summaries.breakfast:id,price',
                 'summaries.bookingDetails',
+                'guestDetails.guestType'
             ])->findOrFail($id);
         
         $formattedData = $this->formatInquiryData($inquiry);
@@ -431,21 +432,42 @@ class InquirerController extends Controller
             return $detail ? $detail->total_price : 0;
         });
         
+        // Calculate nights for the first facility (assuming all have same dates)
+        $firstDetail = $inquiry->summaries->first()->bookingDetails->first() ?? null;
+        $nights = 0;
+        if ($firstDetail && $firstDetail->checkin_date && $firstDetail->checkout_date) {
+            $checkin = \Carbon\Carbon::parse($firstDetail->checkin_date);
+            $checkout = \Carbon\Carbon::parse($firstDetail->checkout_date);
+            $nights = $checkin->diffInDays($checkout);
+        }
+
         return [
             'id' => $inquiry->id,
             'reference' => $inquiry->reference,
-            'status' => $inquiry->status,  
+            'status' => $inquiry->status,
             'total_price' => $totalPrice,
+            'nights' => $nights,
             'user' => [
                 'firstname' => $inquiry->user->firstname ?? null,
                 'lastname' => $inquiry->user->lastname ?? null,
                 'email' => $inquiry->user->email ?? null,
                 'phone' => $inquiry->user->phone ?? null
             ],
-            'facilities' => $inquiry->summaries->map(function($summary) {
+            'facilities' => $inquiry->summaries->map(function($summary) use ($inquiry) {
                 $detail = $summary->bookingDetails->first() ?? new \stdClass();
-                    
+                
+                // Get ALL guest details for this facility
+                $guestDetails = $inquiry->guestDetails
+                    ->where('facility_id', $summary->facility_id)
+                    ->map(function($detail) {
+                        return [
+                            'type' => $detail->guestType->type ?? 'Unknown',
+                            'quantity' => $detail->quantity
+                        ];
+                    })->values()->all(); // Ensure we get a clean array
+                
                 return [
+                    'facility_id' => $summary->facility_id,
                     'check_in' => $detail->checkin_date ?? null,
                     'check_out' => $detail->checkout_date ?? null,
                     'total_price' => $detail->total_price ?? 0,
@@ -453,13 +475,15 @@ class InquirerController extends Controller
                     'facility_category' => $summary->facility->category ?? 'N/A',
                     'breakfast' => $summary->breakfast ? 'Included' : 'None',
                     'breakfast_price' => $summary->breakfast->price ?? 0,
+                    'guest_details' => $guestDetails, // Now guaranteed to be an array
                     'room_info' => [
                         'room_number' => $summary->facility->room_number ?? 'N/A',
                         'room_type' => $summary->facility->category ?? 'N/A',
-                        'price_per_night' => $summary->facility->price ?? 0
+                        'price_per_night' => $summary->facility->price ?? 0,
+                        'bed_number' => $summary->facility->bed_number ?? 'N/A'
                     ]
                 ];
-            })
+            })->values()->all() // Ensure facilities is a clean array
         ];
     }
     

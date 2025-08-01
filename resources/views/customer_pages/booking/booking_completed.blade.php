@@ -12,7 +12,7 @@
             ['label' => 'Completed']
         ]" />
     
-        <div class="max-w-4xl mx-auto bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg overflow-hidden">
+        <div class="max-w-4xl mx-auto rounded-lg md:rounded-xl border border-lightGray overflow-hidden">
             <!-- Header Section -->
             <div class="bg-gradient-to-r from-red-600 to-red-700 py-6 md:py-8 px-6 md:px-8 text-center">
                 <div class="heart-beat text-white mb-3 md:mb-4">

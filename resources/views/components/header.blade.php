@@ -1,9 +1,27 @@
-<header class="bg-red-600 sticky top-0 z-50 shadow-none">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+<header class="z-50 shadow-lg relative overflow-hidden">
+    <!-- Background image with overlay -->
+>
+    
+    <div class="absolute inset-0 bg-gradient-to-r from-red-800 to-red-600 opacity-90 z-0">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center mix-blend-multiply opacity-20 z-0"></div>
+    </div>
+    
+    
+    <div class="container mx-auto px-6 py-12 flex justify-between items-center relative z-10">
         <div class="flex items-center">
-            <a href="/" class="text-2xl text-white font-bold text-primary font-display flex items-center">
-                Ｍｔ.ＣＬＡＲＡＭＵＥＬ.com
+            <a href="/" class="text-2xl md:text-4xl text-white font-bold hover:text-red-200 transition-colors duration-300 font-display flex items-center">
+                <span class="text-shadow">ＭｔＣＬＡＲＡＭＵＥＬ.com</span>
             </a>
         </div>
+        
+        <nav class="md:flex items-center space-x-8">
+            <a href="/" class="text-white hover:text-red-200 text-xl font-medium transition-colors duration-300">Home</a>
+        </nav>
+        
+        <button class="md:hidden text-white focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
     </div>
 </header>

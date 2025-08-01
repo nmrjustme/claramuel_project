@@ -2,19 +2,16 @@
 @section('title', 'Customer Information')
 @section('bookings')
 <style>
-    header {
-        box-shadow: none !important; /* This will override any shadow on the header */
-    }
     /* Base Styles */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+    
     /* Form Elements - Enhanced */
     .input-group {
         margin-bottom: 1.5rem;
         position: relative;
         transition: all 0.3s ease;
     }
-
+    
     label {
         display: block;
         margin-bottom: 0.5rem;
@@ -23,16 +20,14 @@
         font-size: 0.9375rem;
         transition: all 0.2s ease;
     }
-
+    
     .form-input {
         width: 100%;
         padding: 0.75rem 1rem;
-        border: 1px solid #d1d5db;
+        border: 1px solid 	#696969;
         border-radius: 0.375rem;
         font-size: 0.9375rem;
         transition: all 0.2s ease;
-        background-color: white;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 
     .form-input:hover {
@@ -45,7 +40,7 @@
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         background-color: #fffafa;
     }
-
+    
     .input-error {
         border-color: #DC2626 !important;
         background-color: #FEF2F2;
@@ -61,7 +56,7 @@
 
     .input-hint {
         font-size: 0.8125rem;
-        color: #6b7280;
+        color: #444850;
         margin-top: 0.25rem;
         line-height: 1.4;
         transition: all 0.2s ease;
@@ -121,16 +116,6 @@
         left: 100%;
     }
 
-    /* Cards & Containers - Enhanced */
-    .form-card {
-        background-color: white;
-        border-radius: 0.75rem;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
-    }
-
     .section-title {
         font-size: 1.25rem;
         font-weight: 700;
@@ -141,17 +126,6 @@
         gap: 0.75rem;
         position: relative;
         padding-bottom: 0.75rem;
-    }
-
-    .section-title::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 50px;
-        height: 3px;
-        background: linear-gradient(90deg, #DC2626, #B91C1C);
-        border-radius: 3px;
     }
 
     .section-title i {
@@ -186,17 +160,6 @@
         gap: 0.75rem;
         position: relative;
         padding-bottom: 0.75rem;
-    }
-
-    .booking-summary-title::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 50px;
-        height: 3px;
-        background: linear-gradient(90deg, #DC2626, #B91C1C);
-        border-radius: 3px;
     }
 
     .booking-summary-title i {
@@ -555,13 +518,13 @@
         display: flex;
         align-items: center;
     }
-
+    
     /* Floating Labels */
     .floating-label-group {
         position: relative;
         margin-bottom: 1.5rem;
     }
-
+    
     .floating-label {
         position: absolute;
         left: 1rem;
@@ -583,7 +546,26 @@
         color: #DC2626;
         background-color: white;
     }
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #1F2937;
+        padding-left: 0;
+        position: relative;
+        display: inline-block;
+    }
 
+    .page-title:after {
+        content: '';
+        position: absolute;
+        bottom: -0.5rem;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #DC2626 0%, rgba(220, 38, 38, 0.2) 100%);
+        border-radius: 4px;
+    }
     
 </style>
 
@@ -602,15 +584,18 @@
     />
     
     <div class="flex flex-col lg:flex-row gap-8">
+        
+        
         <!-- Left Column - Customer Information -->
         <div class="lg:w-2/3">
-
-            <div class="form-card">
+            <h3 class="page-title font-semibold text-dark mb-2">Request To Book</h3>
+            
+            <div class="rounded-lg p-8 mb-6 border border-lightGray">
                 <h2 class="section-title">
                     <i class="fas fa-user-circle"></i>
                     Guest Information
                 </h2>
-
+                
                 <form id="customer-info-form">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- First Name with Floating Label -->
@@ -628,7 +613,7 @@
                             <label class="floating-label">Last Name <span class="text-red-500">*</span></label>
                             <div id="lastname-error" class="error-message">Please enter your last name</div>
                         </div>
-
+                        
                         <!-- Email with Icon -->
                         <div class="input-group">
                             <label for="email">Email Address <span class="text-red-500">*</span></label>
@@ -670,18 +655,65 @@
                     </div>
                 </form>
             </div>
+            <div class="rounded-lg p-6 border border-lightGray mb-6">
+                <h3 class="text-lg font-semibold mb-3">Your arrival time</h3>
+                
+                <div class="flex items-start mb-4">
+                    <label for="room-ready-time" class="text-gray-700">
+                        Your room will be ready for check-in between 12:00 and 01:00
+                    </label>
+                </div>
+                
+                <div class="mb-3">
+                    <p class="font-medium text-gray-800">Add your estimated arrival time <span class="text-gray-500">(optional)</span></p>
+                </div>
+                
+                <div class="relative">
+                    <select id="arrival_time" name="arrival_time" class="w-full p-3 border border-gray-300 rounded-md appearance-none bg-white pr-8">
+                        <option selected disabled>Please select</option>
+                        <option value="08:00">08:00 AM</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">01:00 PM</option>
+                        <option value="14:00">02:00 PM</option>
+                        <option value="15:00">03:00 PM</option>
+                        <option value="16:00">04:00 PM</option>
+                        <option value="17:00">05:00 PM</option>
+                        <option value="18:00">06:00 PM</option>
+                        <option value="19:00">07:00 PM</option>
+                        <option value="20:00">08:00 PM</option>
+                        <option value="21:00">09:00 PM</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-gray-500 mt-2">Time is for Isabela time zone</p>
+            </div> 
         </div>
-
+        
         <!-- Right Column - Booking Summary -->
         <div class="lg:w-1/3">
             <div class="sticky top-6 space-y-6">
-                <!-- Date Summary Card -->
-                <div class="bg-white border border-gray-300 rounded-md p-6 shadow-sm">
+
+                
+                <div class="rounded-xl shadow-sm p-4 border border-lightGray text-center">
                     <h3 class="booking-summary-title">
-                        <i class="fas fa-calendar-alt"></i>
+                        Your Payment Schedule
+                    </h3>
+                    <span class="booking-item-value">You will pay 50% of the total price after your request is confirmed</span>
+                </div>
+                <!-- Date Summary Card -->
+                <div class="border border-lightGray rounded-lg p-6">
+                    <h3 class="booking-summary-title">
                         Booking Summary
                     </h3>
-
+                    
                     <div class="booking-item">
                         <span class="booking-item-label">Check-in</span>
                         <span class="booking-item-value" id="summary-checkin">-</span>
@@ -697,12 +729,11 @@
                 </div>
 
                 <!-- Rooms Summary Card - Enhanced -->
-                <div class="booking-summary-card">
+                <div class="rounded-lg p-8 mb-6 border border-lightGray">
                     <h3 class="booking-summary-title">
-                        <i class="fas fa-bed"></i>
                         Your Rooms
                     </h3>
-
+                    
                     <div id="rooms-list">
                         <!-- Rooms will be populated here -->
                         <div class="text-gray-400 text-center py-4">
@@ -717,7 +748,7 @@
                             <span class="booking-item-value" id="breakfast-price">-</span>
                         </div>
                     </div>
-
+                    
                     <!-- Total Section with Animation -->
                     <div class="total-section">
                         <div class="total-row">
@@ -725,10 +756,9 @@
                             <span class="total-amount" id="summary-total">₱0.00</span>
                         </div>
                     </div>
-                </div>
-
+                </div>        
                 <!-- Payment CTA Card - Enhanced -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div class="rounded-xl p-6 border border-lightGray">
                     <div class="checkbox-container">
                         <input type="checkbox" id="terms-checkbox"
                             class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary mt-0.5">
@@ -740,23 +770,23 @@
                     <div id="terms-error" class="error-message hidden text-sm text-red-500 mb-4">
                         Please accept the terms and conditions to proceed
                     </div>
-
+                    
                     <button id="confirm-booking-btn"
                         class="btn-primary disabled:opacity-70 disabled:cursor-not-allowed"
                         disabled>
-                        <span id="button-text">Confirm Booking</span>
+                        <span id="button-text">I'll Reserve</span>
                         <div id="button-spinner" class="loading-spinner hidden"></div>
                     </button>
-
+                    
                     <!-- Secure Payment Info -->
                     <div class="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
                         <i class="fas fa-lock"></i>
                         <span>Secure Payment Processing</span>
                     </div>
                 </div>
-
+                
                 <!-- Customer Support -->
-                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 text-center">
+                <div class="rounded-xl shadow-sm p-4 border border-lightGray text-center">
                     <h4 class="font-medium text-gray-700 mb-2">Need Help?</h4>
                     <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
                         <i class="fas fa-phone-alt text-red-500"></i>
@@ -767,6 +797,8 @@
                         <span>mtclaramuelresort@gmail.com</span>
                     </div>
                 </div>
+
+
             </div>
         </div>
     </div>
@@ -777,7 +809,7 @@
     <i class="fas fa-check-circle"></i>
     <span id="notification-message"></span>
 </div>
-<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Retrieve booking data from sessionStorage
@@ -852,7 +884,7 @@
                     uniqueTypes.push(type);
                 }
             });
-
+            
             console.log('Processed guest types:', uniqueTypes); // Debug log
             
             bookingData.facilities.forEach((room, index) => {
@@ -955,7 +987,6 @@
     function updateGuestCounts() {
         const roomIndex = this.dataset.roomIndex;
         const roomPax = parseInt(this.dataset.roomPax);
-        const roomId = this.dataset.roomId;
         
         // Get all inputs for this room
         const roomInputs = document.querySelectorAll(`.counter-value[data-room-index="${roomIndex}"]`);
@@ -963,34 +994,25 @@
         // Calculate total selected guests
         let totalGuests = 0;
         roomInputs.forEach(input => {
-            totalGuests += parseInt(input.value) || 0;
+            totalGuests += parseInt(input.value) || 0; // Important: Use ||0 to handle NaN
         });
-        
-        // Update the display
-        const guestCountElement = document.getElementById(`guest-count-${roomIndex}`);
-        guestCountElement.textContent = `${totalGuests} / ${roomPax} guests`;
-        
-        // Change color if max is reached
-        if (totalGuests >= roomPax) {
-            guestCountElement.classList.add('text-red-500', 'font-medium');
-            guestCountElement.classList.remove('text-gray-500');
-            
-            // Pulse animation when max is reached
-            guestCountElement.style.animation = 'pulse 0.5s ease';
-            setTimeout(() => {
-                guestCountElement.style.animation = '';
-            }, 500);
-        } else {
-            guestCountElement.classList.remove('text-red-500', 'font-medium');
-            guestCountElement.classList.add('text-gray-500');
-        }
         
         // Enforce max pax limit
         if (totalGuests > roomPax) {
-            showNotification(`Maximum ${roomPax} guests allowed for this room`, true);
-            this.value = Math.max(0, parseInt(this.value) - (totalGuests - roomPax));
-            updateGuestCounts.call(this); // Recursive call to update again
+            // Find which input caused the overflow
+            const overflow = totalGuests - roomPax;
+            this.value = Math.max(0, parseInt(this.value) - overflow);
+            
+            // Recalculate after adjustment
+            totalGuests = 0;
+            roomInputs.forEach(input => {
+                totalGuests += parseInt(input.value) || 0;
+            });
         }
+        
+        // Update the display
+        document.getElementById(`guest-count-${roomIndex}`).textContent = 
+            `${totalGuests} / ${roomPax} guests`;
     }
     
     function displayBookingSummary(bookingData) {
@@ -1015,6 +1037,7 @@
                     <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
                     <div class="room-details">
                         <div class="room-name">${room.name}</div>
+                        <div class="room-type">${room.category}</div>
                         <div class="room-price">${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                         <div class="room-price">₱${(room.price * nights).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     </div>
@@ -1154,6 +1177,7 @@
             lastname: document.getElementById('lastname').value.trim(),
             email: document.getElementById('email').value.trim(),
             phone: document.getElementById('phone').value.trim(),
+            arrival_time: document.getElementById('arrival_time').value || null,
             checkin_date: bookingData.checkin_date,
             checkout_date: bookingData.checkout_date,
             facilities: bookingData.facilities.map(facility => ({
@@ -1184,7 +1208,7 @@
                 formData.guest_types[roomId][guestTypeId] = quantity;
             }
         });
-
+        
         fetch(`{{ route('booking.stores') }}`, {
             method: 'POST',
             headers: {
@@ -1259,7 +1283,7 @@
             }, 300);
         }, 5000);
     }
-
+    
     // Phone number validation
     function validatePhone(input) {
         const phoneRegex = /^9\d{3}\s\d{3}\s\d{3}$/;
@@ -1275,7 +1299,7 @@
         input.classList.remove('input-error');
         return true;
     }
-
+    
     // Phone number formatting
     function formatPhone(input) {
         let phone = input.value.replace(/\D/g, '');

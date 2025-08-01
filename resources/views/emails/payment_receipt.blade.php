@@ -59,6 +59,13 @@
         .detail-value {
             flex: 1;
         }
+        .resort-info {
+            margin-top: 15px;
+            font-style: italic;
+        }
+        .contact-info {
+            margin-top: 10px;
+        }
     </style>
     
 </head>
@@ -142,13 +149,39 @@
                 
                     @php
                         $subtotal = $summary->bookingDetails->sum('total_price');
-                        $totalAmount += $subtotal;                        
+                        $totalAmount += $subtotal; 
+                        
+                        $guestsForFacility = $payment->bookingLog->guestDetails
+                            ->where('facility_id', $summary->facility_id)
+                            ->groupBy('guest_type_id')
+                            ->map(function($items) {
+                                return [
+                                    'type' => $items->first()->guestType->type ?? 'Unknown',
+                                    'quantity' => $items->sum('quantity')
+                                ];
+                        });
                     @endphp
                     <div style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
                     <div class="detail-row">
                         <span class="detail-label">Room Type:</span>
                         <span class="detail-value">{{ $summary->facility->name }} {{ $summary->facility->price }}/Per night</span>
                     </div>
+                    @if($guestsForFacility->count() > 0)
+                        <table style="width: 100%; border-collapse: collapse;">
+                            @foreach($guestsForFacility as $guest)
+                            <tr>
+                                <td style="padding: 5px; border-bottom: 1px solid #ddd; width: 70%;">{{ $guest['type'] }}</td>
+                                <td style="padding: 5px; border-bottom: 1px solid #ddd; text-align: right;">{{ $guest['quantity'] }} guest(s)</td>
+                            </tr>
+                            @endforeach
+                            <tr style="font-weight: bold;">
+                                <td style="padding: 5px;">Total Guests</td>
+                                <td style="padding: 5px; text-align: right;">{{ $guestsForFacility->sum('quantity') }}</td>
+                            </tr>
+                        </table>
+                    @else
+                        <p style="color: #666; font-style: italic;">No guest details recorded</p>
+                    @endif
                     
                     <div class="detail-row">
                         <span class="detail-label">Check-in:</span>
@@ -197,6 +230,16 @@
         <div class="footer">
             <p>Thank you for choosing our services!</p>
             <p>We will wait for your arrival.</p>
+            
+            <div class="resort-info">
+                <p>Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines</p>
+            </div>
+            
+            <div class="contact-info">
+                <p>Contact: +63 995 290 1333</p>
+                <p>Email: mtclaramuelresort@gmail.com</p>
+            </div>
+            
             <p>If you have any questions, please contact our support team.</p>
         </div>
     </div>

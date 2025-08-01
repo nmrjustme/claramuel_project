@@ -40,12 +40,15 @@ class BookingController extends Controller
             'facilities.*.price' => 'required|numeric|min:0',
             'facilities.*.nights' => 'required|integer|min:1',
             'facilities.*.total_price' => 'required|numeric|min:0',
+
             'guest_types' => 'required|array',
-            'guest_types.*' => 'required|array', // Each facility's guest types
-            'guest_types.*.*' => 'required|integer|min:1|exists:guest_type,id',
+            'guest_types.*' => 'array', // Each facility's guest types
+            'guest_types.*.*' => 'nullable|integer|min:0',
+            
             'breakfast_included' => 'sometimes|boolean',
             'breakfast_price' => 'required_if:breakfast_included,true|numeric|min:0',
             'total_price' => 'required|numeric|min:0',
+            'arrival_time' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -147,6 +150,7 @@ class BookingController extends Controller
                 FacilityBookingDetails::create([
                     'facility_summary_id' => $facilitySummary->id,
                     'facility_booking_log_id' => $bookingLog->id,
+                    'arriving_time' => $request->arrival_time,
                     'checkin_date' => $checkinDate->format('Y-m-d'),
                     'checkout_date' => $checkoutDate->format('Y-m-d'),
                     'total_price' => $facilityPrice,

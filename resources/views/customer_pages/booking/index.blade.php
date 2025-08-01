@@ -8,7 +8,7 @@
           margin-bottom: 3rem;
           position: relative;
      }
-
+     
      .category-title {
           font-size: 1.75rem;
           font-weight: 700;
@@ -18,7 +18,7 @@
           position: relative;
           display: inline-block;
      }
-
+     
      .category-title:after {
           content: '';
           position: absolute;
@@ -47,12 +47,11 @@
      .rooms-scroll-container::-webkit-scrollbar {
           display: none;
      }
-
+     
      /* Netflix-style room cards */
      .room-card {
           transition: all 0.3s ease;
-          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
-          border: 1px solid #e5e7eb;
+          border: 1px solid #D3D3D3;
           min-width: 340px;
           /* Increased from 280px */
           width: 340px;
@@ -235,7 +234,7 @@
      }
 
      .book-button:hover {
-          background-color: #B91C1C;
+          background-color: #2c4a75;
           transform: translateY(-2px);
           box-shadow: 0 6px 12px rgba(220, 38, 38, 0.15);
      }
@@ -649,7 +648,7 @@
 <x-header />
 
 <div class="container mx-auto px-6 py-8 max-w-12xl">
-
+     
      <!-- Progress Steps -->
      <x-progress-step :currentStep="1" :steps="[
                ['label' => 'Select Rooms'],
@@ -662,7 +661,7 @@
           <!-- Left Column -->
           <div class="lg:w-4/6">
                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-dark mb-2">Available Accommodation</h3>
+                    <h3 class="category-title font-semibold text-dark mb-2">Available Accommodation</h3>
 
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                          <div class="flex items-center">
@@ -739,7 +738,7 @@
                                              $bookedDates = array_values(array_unique($bookedDates));
                                              @endphp
 
-                                             <div class="room-card" data-price="{{ $facility->price }}"
+                                             <div class="room-card border-lightGray" data-price="{{ $facility->price }}"
                                                   data-room-id="{{ $facilityId }}" data-images='@json($allImages)'
                                                   data-booked-dates='{{ json_encode($bookedDates) }}'>
 
@@ -912,9 +911,9 @@
           <!-- Right Column - Order Summary -->
           <div class="lg:w-2/5 space-y-4 sticky-sidebar">
                <!-- Date Selection Card -->
-               <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+               <div class="rounded-xl p-8 border border-lightGray">
                     <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
-                         <i class="far fa-calendar-alt text-primary mr-3"></i>
+                         <i class="far fa-calendar-alt text-redprimary mr-3"></i>
                          Select Your Dates
                     </h2>
 
@@ -924,14 +923,14 @@
                                    Check-in Date <span class="text-gray-500 font-normal">(from 12:00 PM)</span>
                               </label>
                               <input type="text" id="checkin" placeholder="Select date"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
+                                   class="w-full px-4 py-3 border border-darkGray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
                          </div>
                          <div>
                               <label for="checkout" class="block text-sm font-medium text-gray-700 mb-2">
                                    Check-out Date <span class="text-gray-500 font-normal">(until 11:00 AM)</span>
                               </label>
                               <input type="text" id="checkout" placeholder="Select date"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
+                                   class="w-full px-4 py-3 border border-darkGray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
                          </div>
                     </div>
 
@@ -942,7 +941,7 @@
                </div>
 
                <!-- Breakfast Option Card -->
-               <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+               <div class="rounded-xl p-8 border border-lightGray">
                     <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
                          <i class="fas fa-utensils text-primary mr-3"></i>
                          Breakfast Option
@@ -970,7 +969,7 @@
                
                <!-- Booking Summary Card -->
                <div
-                    class="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                    class="rounded-xl p-8 border border-lightGray">
                     <h2 class="text-2xl font-bold text-gray-800 mb-5 flex items-center">
                          <i class="fas fa-receipt text-primary mr-3 text-2xl"></i>
                          Booking Summary
@@ -1010,7 +1009,7 @@
                     <button id="checkout-btn"
                          class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-70 disabled:transform-none hover:-translate-y-0.5 active:translate-y-0 btn-primary"
                          disabled>
-                         <span id="button-text">Proceed to Customer Information</span>
+                         <span id="button-text">Proceed to Information</span>
                     </button>
                </div>
           </div>
@@ -1135,6 +1134,7 @@
           this.setupAmenitiesModal();
           this.initializeCart();
      }
+     
      setupAmenitiesModal() {
           const modal = document.getElementById('amenities-modal');
           const closeBtn = document.getElementById('close-amenities-modal');
@@ -1421,7 +1421,9 @@
 					// Find the room card element to get pax info
 					const roomCard = document.querySelector(`.room-card[data-room-id="${item.id}"]`);
 					const pax = roomCard ? parseInt(roomCard.querySelector('.feature-item:last-child span').textContent.match(/\d+/)[0]) : 1;
-					
+                         const categoryContainer = roomCard.closest('.category-container');
+					const category = categoryContainer ? categoryContainer.querySelector('.category-title').textContent.trim() : 'Standard';
+
 					return {
 						facility_id: item.facilityId,
 						name: item.name,
@@ -1429,7 +1431,8 @@
 						nights: this.nights,
 						total_price: item.price * this.nights,
 						mainImage: item.mainImage,
-						pax: pax // Add pax information here
+						pax: pax, // Add pax information here
+                              category: category
 					};
 				}),
 				breakfast_included: this.breakfastIncluded,

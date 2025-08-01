@@ -12,7 +12,7 @@
             ['label' => 'Completed']
         ]" />
     
-        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="max-w-4xl mx-auto rounded-lg border border-lightGray overflow-hidden">
             <div class="md:flex">
                 <!-- GCash Payment Form -->
                 <div class="md:w-1/2 p-8">
@@ -49,7 +49,7 @@
                                 Your GCash Registered Mobile Number <span class="text-red-500">*</span>
                             </label>
                             <input type="tel" name="gcash_number" id="gcash_number"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                class="w-full px-3 py-2 border border-darkGray rounded-lg"
                                 maxlength="11" placeholder="09123456789"
                                 oninput="validatePhoneInput(this)"
                                 onblur="validatePhone(this)" required>
@@ -62,7 +62,7 @@
                             <label class="block text-gray-700 text-sm font-medium mb-2" for="reference">
                                 GCash Reference Number <span class="text-red-500">*</span>
                             </label>
-                            <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" 
+                            <input class="w-full px-3 py-2 border border-darkGray rounded-lg" 
                                    id="reference" name="reference_no" type="text" placeholder="Ex: 1234567890" required>
                             <p class="text-xs text-gray-500 mt-1">Found in your GCash transaction receipt</p>
                         </div>
@@ -72,7 +72,7 @@
                                 Upload GCash Payment Proof <b>(Screenshot)</b> <span class="text-red-500">*</span>
                             </label>
                             <div class="flex items-center justify-center w-full">
-                                <label class="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 hover:border-primary hover:bg-blue-50 rounded-md cursor-pointer transition duration-150">
+                                <label class="flex flex-col w-full h-32 border-2 border-dashed border-lightGray hover:border-primary hover:bg-blue-50 rounded-md cursor-pointer transition duration-150">
                                     <div class="flex flex-col items-center justify-center pt-7">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -158,6 +158,22 @@
                                     <span class="font-medium">{{ $facility['name'] }}</span>
                                     <span class="font-medium">₱{{ number_format($facility['price'], 2) }}</span>
                                 </div>
+                                
+                                <!-- Add Guest Details Section -->
+                                @if(isset($facility['guest_details']) && count($facility['guest_details']) > 0)
+                                    <div class="mt-2">
+                                        <p class="text-xs font-medium text-gray-600 mb-1">Guest Composition:</p>
+                                        <ul class="text-xs text-gray-500 space-y-1">
+                                            @foreach($facility['guest_details'] as $guest)
+                                                <li class="flex justify-between">
+                                                    <span>{{ $guest['type'] }}:</span>
+                                                    <span>{{ $guest['quantity'] }} guest(s)</span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                                
                                 <div class="flex justify-between text-xs text-gray-500">
                                     @if ($breakfastPrice)
                                         <span>Breakfast Included:</span>
@@ -181,7 +197,7 @@
                                 </div>
                             </div>
                         @endforeach
-    
+
                         <div class="pt-3">
                             <div class="flex justify-between text-lg font-bold mt-4 pt-2 border-t border-gray-200">
                                 <span>Total:</span>
@@ -193,6 +209,7 @@
                             </div>
                         </div>
                     </div>
+                    
     
                     <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <h3 class="font-medium text-yellow-800 mb-2">Important Reminder</h3>

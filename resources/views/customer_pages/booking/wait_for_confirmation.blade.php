@@ -6,43 +6,38 @@
     <title>Booking Processing - Mt.Claramuel Resort</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .progress-bar {
-            height: 4px;
-            background: linear-gradient(90deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
-            background-size: 200% 100%;
-            animation: progressAnimation 2s ease-in-out infinite;
-        }
-        @keyframes progressAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .card-hover {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        .pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .float {
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-    </style>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: '#DC2626',
+                            secondary: '#B91C1C',
+                            dark: '#1F2937',
+                            light: '#F9FAFB',
+                            accent: '#EA580C',
+                            lightGray: '#D3D3D3',
+                            darkGray: '#A0A0A0'
+                        },
+                        fontFamily: {
+                            sans: [
+                                'Inter', 
+                                'system-ui', 
+                                '-apple-system', 
+                                'BlinkMacSystemFont', 
+                                'Segoe UI', 
+                                'Roboto', 
+                                'sans-serif'
+                            ],
+                        },
+                    }
+                }
+            }
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4 sm:p-6">
-    <div class="bg-white rounded-lg shadow-md w-full max-w-md overflow-hidden card-hover">
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+
+    <div class="border border-lightGray rounded-lg w-full max-w-md overflow-hidden card-hover">
         <!-- Animated progress bar -->
         <div class="progress-bar"></div>
         
@@ -124,6 +119,13 @@
                         mtclaramuelresort@gmail.com
                     </a>
                 </div>
+            </div>
+
+            <!-- Browse More Button -->
+            <div class="mt-4 sm:mt-5 text-center">
+                <a href="/" class="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition duration-200 ease-in-out">
+                    <i class="fas fa-search mr-2"></i>Browse More
+                </a>
             </div>
         </div>
     </div>

@@ -17,6 +17,7 @@ class FacilityBookingDetails extends Model
     protected $fillable = [
         'facility_booking_log_id',
         'facility_summary_id',
+        'arriving_time',
         'checkin_date',
         'checkout_date',
         'total_price',

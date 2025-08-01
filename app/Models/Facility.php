@@ -54,6 +54,11 @@ class Facility extends Model
         return $this->belongsToMany(Amenity::class)
             ->using(AmenityFacility::class);
     }
+
+    public function guestDetails()
+    {
+        return $this->hasMany(BookingGuestDetails::class);
+    }
     
 }
 

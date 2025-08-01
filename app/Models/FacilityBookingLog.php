@@ -49,5 +49,10 @@ class FacilityBookingLog extends Model
     {
         return $this->hasMany(Payments::class, 'facility_log_id');
     }
+
+    public function guestDetails()
+    {
+        return $this->hasMany(BookingGuestDetails::class, 'facility_booking_log_id');
+    }
     
 }   
