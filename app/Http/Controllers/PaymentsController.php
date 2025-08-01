@@ -232,9 +232,9 @@ class PaymentsController extends Controller
             ->data($encryptedQrData)
             ->encoding(new Encoding('UTF-8'))
             ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-            ->size(600)
-            ->margin(15)
-            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)  // Correct usage
+            ->size(250)
+            ->margin(5)
+            ->roundBlockSizeMode(RoundBlockSizeMode::Enlarge)  // Correct usage
             ->foregroundColor(new Color(0, 0, 0))
             ->backgroundColor(new Color(255, 255, 255))
             ->build();
