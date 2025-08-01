@@ -233,7 +233,7 @@ class PaymentsController extends Controller
             ->encoding(new Encoding('UTF-8'))
             ->errorCorrectionLevel(ErrorCorrectionLevel::High)
             ->size(500)
-            ->margin(10)
+            ->margin(5)
             ->roundBlockSizeMode(RoundBlockSizeMode::Margin)  // Correct usage
             ->foregroundColor(new Color(0, 0, 0))
             ->backgroundColor(new Color(255, 255, 255))
