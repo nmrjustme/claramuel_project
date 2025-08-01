@@ -43,18 +43,10 @@ class CheckinController extends Controller
                 ], 400);
             }
             
-            // ✅ Decrypt QR code payload
-            try {
-                $payload = Crypt::decrypt($data['qr_data']);
-            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-                \Log::error('Decryption failed: ' . $e->getMessage());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid or tampered QR code.',
-                ], 400);
-            }
+            // Use the QR data directly (no decryption needed)
+            $payload = $data['qr_data'];
             
-             if ($this->qrInUsed($payload['id'])) {
+            if ($this->qrInUsed($payload['id'])) {
                 $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
                 return response()->json([
                     'success' => false,
@@ -162,23 +154,9 @@ class CheckinController extends Controller
                 ], 400);
             }
 
-            // Decrypt QR code payload
-            try {
-                $payload = Crypt::decrypt($data['qr_data']);
-                \Log::debug('Decrypted QR upload payload:', $payload);
-            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-                \Log::error('Decryption failed for uploaded QR: ' . $e->getMessage());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid or tampered QR code.',
-                ], 400);
-            }
-            
-            // if ($this->qrInUsed($payload['id'])) {
-            //     $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
-                
-            //     return redirect()->route('qr-in-used', ['qr_path' => $qr_path]);
-            // }
+            // Use the QR data directly (no decryption needed)
+            $payload = $data['qr_data'];
+            \Log::debug('QR upload payload:', $payload);
             
             if ($this->qrInUsed($payload['id'])) {
                 $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
