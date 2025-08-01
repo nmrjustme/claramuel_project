@@ -158,7 +158,13 @@
 <body class="bg-gray-200 font-sans">
     <div class="container mx-auto max-w-6xl p-4">
         <!-- Print Button -->
-        <div class="no-print text-center mb-4">
+        <div class="no-print text-center mb-4 flex space-x-4">
+            <a href="{{ route('admin.dashboard') }}" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back to Dashboard
+            </a>
             <button onclick="window.print()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
@@ -256,9 +262,9 @@
                                                 'quantity' => $items->sum('quantity')
                                             ];
                                         });
-
-                                @endphp
                                 
+                                @endphp
+
                                 @if($bookingDetail)
                                     <div class="highlight-box p-4 rounded-lg mb-4 print:border-0 print:p-0">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:block">
