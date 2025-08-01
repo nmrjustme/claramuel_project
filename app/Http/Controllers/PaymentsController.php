@@ -12,22 +12,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use App\Mail\PaymentVerifiedMail;
 use Illuminate\Support\Str;
-
+use SimpleSoftwareIO\QrCode\Facades\QrCode; 
 use Illuminate\Support\Facades\Mail;
 
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Label\LabelAlignment;
-use Endroid\QrCode\Label\Font\OpenSans;
-use Endroid\QrCode\Color\Color;
-use Endroid\QrCode\RoundBlockSizeMode; 
-use Endroid\QrCode\Logo\Logo;
-use Endroid\QrCode\Writer\ValidationException;
-use Endroid\QrCode\Label\Label;
+
 // Encryption
 use Illuminate\Support\Facades\Crypt;
 
@@ -207,75 +198,63 @@ class PaymentsController extends Controller
         $request->validate([
             'amount_paid' => 'required|numeric|min:0',
         ]);
-
+        
         $payment = Payments::with(
-            'bookingLog.details',
+            'bookingLog.details',    
             'bookingLog.summaries.facility',
             'bookingLog.summaries.breakfast',
             'bookingLog.summaries.bookingDetails',
             'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
-
+        
         $checkout_date = $payment->bookingLog->details->first()->checkout_date;
         $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
+    
+        // ✅ Generate a unique token
+        do {
+            $verificationToken = Str::random(64);
+        } while (Payments::where('verification_token', $verificationToken)->exists());
+    
+        // ✅ Encrypt QR code payload
+        $payload = [
+            'id' => $payment->id,
+            'expires_at' => $expire_date
+        ];
 
-        // ✅ Generate a unique token (short UUID)
-        $verificationToken = Str::uuid()->toString();
-
-        // ✅ Save token in DB for lookup
-        $payment->update([
-            'verification_token' => $verificationToken
-        ]);
-
-        // ✅ Encrypt only the token (shorter string = cleaner QR)
-        $encryptedQrData = Crypt::encrypt($verificationToken);
-
-        // ✅ Generate QR code using Endroid but clean and optimized
-        $writer = new PngWriter();
-
-        $qrCode = new \Endroid\QrCode\QrCode(
-            data: $encryptedQrData,
-            encoding: new Encoding('UTF-8'),
-            errorCorrectionLevel: ErrorCorrectionLevel::High,
-            size: 500, // 🔼 Higher size for better readability
-            margin: 10,
-            roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            foregroundColor: new Color(0, 0, 0),
-            backgroundColor: new Color(255, 255, 255)
-        );
-
-        // ✅ Optional logo
-        $logoPath = public_path('imgs/logo/logo.png');
-        $logo = file_exists($logoPath)
-            ? new \Endroid\QrCode\Logo\Logo(path: $logoPath, resizeToWidth: 50)
-            : null;
-
-        $result = $writer->write($qrCode, $logo);
-
-        // ✅ Save QR Code to file
+    
+        // ✅ Build QR Code with encrypted string
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data(json_encode($payload))
+            ->size(300)
+            ->margin(10)
+            ->build();
+    
+        // ✅ Save QR Code Image
         $directory = public_path('imgs/qr_code/');
-        $fileName = 'qr_payment_' . $payment->id . '_' . time() . '.png';
+        $fileName = 'qr_payment_'.$payment->id.'_'.time().'.png';
         $filePath = $directory . $fileName;
-
+    
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
-
+    
         $result->saveToFile($filePath);
-
-        // ✅ Update payment with QR code image path
+    
+        // ✅ Update payment record
         $payment->update([
             'status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'amount_paid' => $request->amount_paid,
+            'verification_token' => $verificationToken,
             'qr_code_path' => 'imgs/qr_code/' . $fileName
         ]);
-
-        // ✅ Send Email with QR Code
+    
+        // ✅ Send Email with QR Code (Optional)
         $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
         $this->sendVerificationEmail($payment, $qrCodeUrl);
-
+    
         return response()->json([
             'success' => true,
             'payment' => $payment,
@@ -284,10 +263,6 @@ class PaymentsController extends Controller
             'guest_details' => $payment->bookingLog->guestDetails
         ]);
     }
-    
-    
-    
-    
     
     /**
      * Send verification email with QR code
