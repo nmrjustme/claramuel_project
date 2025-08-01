@@ -231,24 +231,13 @@ class PaymentsController extends Controller
             ->writer(new PngWriter())
             ->data($encryptedQrData)
             ->encoding(new Encoding('UTF-8'))
-            
-            // Use HIGHEST error correction
-            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-
-            // Slightly increase the size to spread out modules
+            ->errorCorrectionLevel(ErrorCorrectionLevel::High)
             ->size(600)
-
-            // Use a bigger margin (quiet zone)
             ->margin(15)
-
-            ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
-
-            // Make sure colors are correctly defined
-            ->foregroundColor(new Color(0, 0, 0))        // Black
-            ->backgroundColor(new Color(255, 255, 255))  // White
-            
+            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)  // Correct usage
+            ->foregroundColor(new Color(0, 0, 0))
+            ->backgroundColor(new Color(255, 255, 255))
             ->build();
-        
     
         // ✅ Save QR Code Image
         $directory = public_path('imgs/qr_code/');
