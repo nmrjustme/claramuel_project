@@ -231,7 +231,7 @@ class PaymentsController extends Controller
         $directory = public_path('imgs/qr_code/');
         $fileName = 'qr_payment_' . $payment->id . '_' . time() . '.png';
         $filePath = $directory . $fileName;
-
+        
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
@@ -239,7 +239,7 @@ class PaymentsController extends Controller
         // ✅ Generate QR Code with Simple QrCode and save to file
         \QrCode::format('png')
             ->size(300)
-            ->margin(1)
+            ->margin(10)
             ->generate($encryptedQrData, $filePath);
 
         // ✅ Update payment record
