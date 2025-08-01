@@ -203,55 +203,45 @@ class PaymentsController extends Controller
         $request->validate([
             'amount_paid' => 'required|numeric|min:0',
         ]);
-        
+
         $payment = Payments::with(
-            'bookingLog.details',    
+            'bookingLog.details',
             'bookingLog.summaries.facility',
             'bookingLog.summaries.breakfast',
             'bookingLog.summaries.bookingDetails',
             'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
-        
+
         $checkout_date = $payment->bookingLog->details->first()->checkout_date;
         $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
-    
+
         // ✅ Generate a unique token
         do {
             $verificationToken = Str::random(64);
         } while (Payments::where('verification_token', $verificationToken)->exists());
-    
+
         // ✅ Encrypt QR code payload
         $payload = [
             'id' => $payment->id,
             'expires_at' => $expire_date
         ];
-        
         $encryptedQrData = Crypt::encrypt($payload);
-    
-        // ✅ Build QR Code with encrypted string
-        $result = Builder::create()
-            ->writer(new PngWriter())
-            ->data($encryptedQrData)
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-            ->size(300)
-            ->margin(10)
-            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)  // Correct usage
-            ->foregroundColor(new Color(0, 0, 0))
-            ->backgroundColor(new Color(255, 255, 255))
-            ->build();
-    
-        // ✅ Save QR Code Image
+
+        // ✅ Create directory for QR code if not exists
         $directory = public_path('imgs/qr_code/');
-        $fileName = 'qr_payment_'.$payment->id.'_'.time().'.png';
+        $fileName = 'qr_payment_' . $payment->id . '_' . time() . '.png';
         $filePath = $directory . $fileName;
-    
+
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
-    
-        $result->saveToFile($filePath);
-    
+
+        // ✅ Generate QR Code with Simple QrCode and save to file
+        \QrCode::format('png')
+            ->size(300)
+            ->margin(1)
+            ->generate($encryptedQrData, $filePath);
+
         // ✅ Update payment record
         $payment->update([
             'status' => 'verified',
@@ -261,11 +251,11 @@ class PaymentsController extends Controller
             'verification_token' => $verificationToken,
             'qr_code_path' => 'imgs/qr_code/' . $fileName
         ]);
-    
-        // ✅ Send Email with QR Code (Optional)
+
+        // ✅ Send Email with QR Code
         $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
         $this->sendVerificationEmail($payment, $qrCodeUrl);
-    
+
         return response()->json([
             'success' => true,
             'payment' => $payment,
@@ -274,6 +264,7 @@ class PaymentsController extends Controller
             'guest_details' => $payment->bookingLog->guestDetails
         ]);
     }
+    
     
     
     /**
