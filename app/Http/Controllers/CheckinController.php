@@ -271,9 +271,10 @@ class CheckinController extends Controller
             'bookingLog.details',
             'bookingLog.summaries.facility',
             'bookingLog.summaries.breakfast',
-            'bookingLog.summaries.bookingDetails'
+            'bookingLog.summaries.bookingDetails',
+            'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
-
+        
         return view('admin.printCheckinPage.index', ['payment' => $payment]);
     }
     

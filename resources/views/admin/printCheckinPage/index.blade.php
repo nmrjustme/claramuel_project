@@ -60,14 +60,34 @@
                 font-weight: 500;
                 color: #6b7280;
                 margin-right: 0.5rem;
+                min-width: 50%;
             }
             .print-value {
                 display: inline;
                 font-weight: 500;
                 color: #1f2937;
+                text-align: right;
+                flex-grow: 1;
             }
             .print-row {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
                 margin-bottom: 0.5rem;
+            }
+            .payment-row {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                margin-bottom: 0.25rem;
+            }
+            .payment-label {
+                font-weight: 500;
+                color: #6b7280;
+            }
+            .payment-value {
+                font-weight: 500;
+                color: #1f2937;
             }
         }
         .receipt-container {
@@ -143,6 +163,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
                 </svg>
+                Print Receipt
             </button>
         </div>
         
@@ -167,8 +188,6 @@
                             Check-in Date:
                             {{ $payment->bookingLog->checked_in_at ? \Carbon\Carbon::parse($payment->bookingLog->checked_in_at)->format('F j, Y \a\t g:i A') : 'N/A' }}
                         </p>
-                    
-                    
                     </div>
                     
                     <div class="p-6 relative z-10">
@@ -227,6 +246,17 @@
                                         $subtotal = ($facility->price + $breakfastPrice) * $nights;
                                         $totalAmount += $subtotal;
                                     }
+
+                                    $guestsForFacility = $payment->bookingLog->guestDetails
+                                        ->where('facility_id', $summary->facility_id)
+                                        ->groupBy('guest_type_id')
+                                        ->map(function($items) {
+                                            return [
+                                                'type' => $items->first()->guestType->type ?? 'Unknown',
+                                                'quantity' => $items->sum('quantity')
+                                            ];
+                                        });
+
                                 @endphp
                                 
                                 @if($bookingDetail)
@@ -236,7 +266,6 @@
                                                 <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room Type:</span>
                                                 <span class="font-medium text-gray-800 print-value">{{ $facility->name }} (₱{{ number_format($facility->price, 2) }}/night)</span>
                                             </div>
-                                            
                                             <div class="print-row">
                                                 <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room Number:</span>
                                                 <span class="font-medium text-gray-800 print-value">{{ $facility->room_number ?? 'Not assigned' }}</span>
@@ -269,6 +298,7 @@
                                                 <span class="font-medium text-gray-800 print-value">₱{{ number_format($summary->breakfast->price * $nights) }}/morning(s)</span>
                                             </div>
                                             @endif
+          
 
                                             <div class="md:col-span-2 pt-2 print:block print-row">
                                                 <span class="text-sm font-medium text-gray-500 print-label">Subtotal:</span>
@@ -276,6 +306,22 @@
                                                 <div class="divider my-2 print:hidden"></div>
                                             </div>
                                         </div>
+                                    @if($guestsForFacility->count() > 0)
+                                        <table class="w-full border-collapse">
+                                            @foreach($guestsForFacility as $guest)
+                                            <tr>
+                                                <td class="p-2 border-b border-gray-200 guest-type">{{ $guest['type'] }}</td>
+                                                <td class="p-2 border-b border-gray-200 text-right guest-quantity">{{ $guest['quantity'] }} guest(s)</td>
+                                            </tr>
+                                            @endforeach
+                                            <tr class="guest-total">
+                                                <td class="p-2 font-semibold">Total Guests</td>
+                                                <td class="p-2 text-right font-semibold">{{ $guestsForFacility->sum('quantity') }}</td>
+                                            </tr>
+                                        </table>
+                                    @else
+                                        <p class="text-gray-500 italic">No guest details recorded</p>
+                                    @endif
                                     </div>
                                 @endif
                             @endforeach
@@ -324,26 +370,26 @@
                             </div>
                             
                             <div class="space-y-3">
-                                <div class="flex justify-between items-center print-row">
-                                    <span class="text-gray-600 print-label">Total Amount:</span>
-                                    <span class="font-medium print-value">₱{{ number_format($totalAmount, 2) }}</span>
+                                <div class="payment-row">
+                                    <span class="payment-label">Total Amount:</span>
+                                    <span class="payment-value">₱{{ number_format($totalAmount, 2) }}</span>
                                 </div>
                                 
-                                <div class="flex justify-between items-center print-row">
-                                    <span class="text-gray-600 print-label">Advance Paid:</span>
-                                    <span class="font-medium text-green-600 print-value">₱{{ number_format($payment->amount_paid, 2) }}</span>
+                                <div class="payment-row">
+                                    <span class="payment-label">Advance Paid:</span>
+                                    <span class="payment-value text-green-600">₱{{ number_format($payment->amount_paid, 2) }}</span>
                                 </div>
 
                                 @if($payment->checkin_paid > 0)
-                                <div class="flex justify-between items-center print-row">
-                                    <span class="text-gray-600 print-label">Paid at Check-in:</span>
-                                    <span class="font-medium text-green-600 print-value">₱{{ number_format($payment->checkin_paid, 2) }}</span>
+                                <div class="payment-row">
+                                    <span class="payment-label">Paid at Check-in:</span>
+                                    <span class="payment-value text-green-600">₱{{ number_format($payment->checkin_paid, 2) }}</span>
                                 </div>
                                 @endif
                                 
-                                <div class="flex justify-between items-center pt-3 border-t border-gray-200 print-row">
-                                    <span class="text-gray-700 font-semibold print-label">Balance Amount:</span>
-                                    <span class="font-bold text-primary-600 print-value">₱{{ number_format(($totalAmount - $payment->amount_paid - $payment->checkin_paid), 2) }}</span>
+                                <div class="payment-row pt-3 border-t border-gray-200">
+                                    <span class="payment-label font-semibold">Balance Amount:</span>
+                                    <span class="payment-value font-bold text-primary-600">₱{{ number_format(($totalAmount - $payment->amount_paid - $payment->checkin_paid), 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -358,7 +404,7 @@
                             </div>
                             
                             <div class="flex items-center justify-between mb-3 print-row">
-                                <span class="text-gray-600 print-label">Balance Status:</span>
+                                <span class="payment-label">Balance Status:</span>
                                 <span id="status-display" class="status-badge 
                                     {{ $payment->remaining_balance_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
                                     {{ ucfirst(str_replace('_', ' ', $payment->remaining_balance_status)) }}
@@ -401,23 +447,23 @@
                             </div>
                             
                             <div class="space-y-3">
-                                <div class="bg-gray-50 p-3 rounded-lg print:bg-transparent print:p-0 print-row">
-                                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Method:</span>
-                                    <span class="font-medium print-value">{{ ucfirst($payment->method) }}</span>
+                                <div class="payment-row">
+                                    <span class="payment-label">Method:</span>
+                                    <span class="payment-value">{{ ucfirst($payment->method) }}</span>
                                 </div>
-                                <div class="bg-gray-50 p-3 rounded-lg print:bg-transparent print:p-0 print-row">
-                                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">GCASH NUMBER:</span>
-                                    <span class="font-medium print-value">{{ ucfirst($payment->gcash_number) }}</span>
+                                <div class="payment-row">
+                                    <span class="payment-label">GCASH NUMBER:</span>
+                                    <span class="payment-value">{{ ucfirst($payment->gcash_number) }}</span>
                                 </div>
-                                <div class="bg-gray-50 p-3 rounded-lg print:bg-transparent print:p-0 print-row">
-                                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Payment Date:</span>
-                                    <span class="font-medium print-value">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F j, Y \a\t g:i A') }}</span>
+                                <div class="payment-row">
+                                    <span class="payment-label">Payment Date:</span>
+                                    <span class="payment-value">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F j, Y \a\t g:i A') }}</span>
                                 </div>
                                 
                                 @if($payment->reference_no)
-                                <div class="bg-gray-50 p-3 rounded-lg print:bg-transparent print:p-0 print-row">
-                                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Reference No:</span>
-                                    <span class="font-medium print-value">{{ $payment->reference_no }}</span>
+                                <div class="payment-row">
+                                    <span class="payment-label">Reference No:</span>
+                                    <span class="payment-value">{{ $payment->reference_no }}</span>
                                 </div>
                                 @endif
                             </div>
@@ -427,6 +473,7 @@
             </div>
         </div>
     </div>
+    
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
