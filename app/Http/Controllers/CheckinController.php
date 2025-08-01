@@ -45,8 +45,16 @@ class CheckinController extends Controller
                 ], 400);
             }
             
-            // Use the QR data directly (no decryption needed)
-            $payload = $data['qr_data'];
+            // Decode the JSON string if qr_data is a string
+            $payload = is_string($data['qr_data']) ? json_decode($data['qr_data'], true) : $data['qr_data'];
+            
+            if (!is_array($payload) || json_last_error() !== JSON_ERROR_NONE) {
+                \Log::error('Invalid QR data format', ['qr_data' => $data['qr_data']]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid QR code data format',
+                ], 400);
+            }
             
             if ($this->qrInUsed($payload['id'])) {
                 $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
@@ -162,9 +170,16 @@ class CheckinController extends Controller
                 ], 400);
             }
 
-            // Use the QR data directly (no decryption needed)
-            $payload = $data['qr_data'];
-            \Log::debug('QR upload payload', ['payload' => $payload]);
+            // Decode the JSON string if qr_data is a string
+            $payload = is_string($data['qr_data']) ? json_decode($data['qr_data'], true) : $data['qr_data'];
+            
+            if (!is_array($payload) || json_last_error() !== JSON_ERROR_NONE) {
+                \Log::error('Invalid QR data format', ['qr_data' => $data['qr_data']]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid QR code data format',
+                ], 400);
+            }
             
             if ($this->qrInUsed($payload['id'])) {
                 $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
