@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Mail;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
+use Endroid\QrCode\Color\Color;
+
 
 // Encryption
 use Illuminate\Support\Facades\Crypt;
