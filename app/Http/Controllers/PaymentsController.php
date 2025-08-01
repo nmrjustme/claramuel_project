@@ -207,7 +207,7 @@ class PaymentsController extends Controller
         $request->validate([
             'amount_paid' => 'required|numeric|min:0',
         ]);
-        
+
         $payment = Payments::with(
             'bookingLog.details',
             'bookingLog.summaries.facility',
@@ -215,51 +215,44 @@ class PaymentsController extends Controller
             'bookingLog.summaries.bookingDetails',
             'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
-        
+
         $checkout_date = $payment->bookingLog->details->first()->checkout_date;
         $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
 
-        // Generate a unique token
-        do {
-            $verificationToken = Str::random(64);
-        } while (Payments::where('verification_token', $verificationToken)->exists());
+        // ✅ Generate a unique token (short UUID)
+        $verificationToken = Str::uuid()->toString();
 
-        // Encrypt QR code payload
-        $payload = [
-            'id' => $payment->id,
-            'expires_at' => $expire_date
-        ];
-        $encryptedQrData = Crypt::encrypt($payload);
+        // ✅ Save token in DB for lookup
+        $payment->update([
+            'verification_token' => $verificationToken
+        ]);
 
-        // === QR CODE GENERATION SECTION (customized) ===
+        // ✅ Encrypt only the token (shorter string = cleaner QR)
+        $encryptedQrData = Crypt::encrypt($verificationToken);
+
+        // ✅ Generate QR code using Endroid but clean and optimized
         $writer = new PngWriter();
 
         $qrCode = new \Endroid\QrCode\QrCode(
             data: $encryptedQrData,
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::High,
-            size: 300,
+            size: 500, // 🔼 Higher size for better readability
             margin: 10,
             roundBlockSizeMode: RoundBlockSizeMode::Margin,
             foregroundColor: new Color(0, 0, 0),
             backgroundColor: new Color(255, 255, 255)
         );
-        
-        // Optional logo (you can customize the path or remove this block)
-        $logoPath = public_path('imgs/logo/logo.png'); // Make sure this path exists
+
+        // ✅ Optional logo
+        $logoPath = public_path('imgs/logo/logo.png');
         $logo = file_exists($logoPath)
-            ? new Logo(path: $logoPath, resizeToWidth: 50, punchoutBackground: true)
+            ? new \Endroid\QrCode\Logo\Logo(path: $logoPath, resizeToWidth: 50)
             : null;
 
-        // Optional label
-        $label = new Label(
-            text: 'Reservation QR',
-            textColor: new Color(0, 0, 0)
-        );
-        
-        $result = $writer->write($qrCode, $logo, $label);
+        $result = $writer->write($qrCode, $logo);
 
-        // Save to file
+        // ✅ Save QR Code to file
         $directory = public_path('imgs/qr_code/');
         $fileName = 'qr_payment_' . $payment->id . '_' . time() . '.png';
         $filePath = $directory . $fileName;
@@ -270,21 +263,16 @@ class PaymentsController extends Controller
 
         $result->saveToFile($filePath);
 
-        // Optional: Validate QR content
-        $writer->validateResult($result, $encryptedQrData);
-        // === END QR CODE GENERATION SECTION ===
-
-        // Update payment record
+        // ✅ Update payment with QR code image path
         $payment->update([
             'status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'amount_paid' => $request->amount_paid,
-            'verification_token' => $verificationToken,
             'qr_code_path' => 'imgs/qr_code/' . $fileName
         ]);
 
-        // Send Email
+        // ✅ Send Email with QR Code
         $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
         $this->sendVerificationEmail($payment, $qrCodeUrl);
 
@@ -296,6 +284,7 @@ class PaymentsController extends Controller
             'guest_details' => $payment->bookingLog->guestDetails
         ]);
     }
+    
     
     
     
