@@ -42,7 +42,7 @@ class CheckinController extends Controller
                     'received_data' => $data
                 ], 400);
             }
-
+            
             // ✅ Decrypt QR code payload
             try {
                 $payload = Crypt::decrypt($data['qr_data']);

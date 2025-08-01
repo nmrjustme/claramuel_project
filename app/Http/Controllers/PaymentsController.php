@@ -227,9 +227,12 @@ class PaymentsController extends Controller
         $result = Builder::create()
             ->writer(new PngWriter())
             ->data($encryptedQrData)
-            ->size(300)
-            ->margin(10)
+            ->size(500) // 🔼 Increased size
+            ->margin(5) // 🔽 Reduced margin
+            ->foregroundColor(0, 0, 0) // ⬛ Black
+            ->backgroundColor(255, 255, 255) // ⬜ White
             ->build();
+        
     
         // ✅ Save QR Code Image
         $directory = public_path('imgs/qr_code/');
