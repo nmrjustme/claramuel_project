@@ -18,12 +18,10 @@ use Illuminate\Support\Facades\Mail;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
-use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\Label\Label;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
-use Endroid\QrCode\Writer\WriterOptions;
-
+use Endroid\QrCode\ErrorCorrectionLevel; 
+use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\RoundBlockSizeMode; 
 // Encryption
 use Illuminate\Support\Facades\Crypt;
 
@@ -229,23 +227,17 @@ class PaymentsController extends Controller
         $encryptedQrData = Crypt::encrypt($payload);
     
         // ✅ Build QR Code with encrypted string
-        $qrCode = QrCode::create($encryptedQrData)
-            ->setEncoding(new Encoding('UTF-8'))
-            ->setErrorCorrectionLevel(new ErrorCorrectionLevelHigh())
-            ->setSize(500)
-            ->setMargin(5);
-
-        $writerOptions = WriterOptions::create()
-            ->setForegroundColor(new Color(0, 0, 0))       // black
-            ->setBackgroundColor(new Color(255, 255, 255)); // white
-
         $result = Builder::create()
             ->writer(new PngWriter())
-            ->data($qrCode)
-            ->writerOptions($writerOptions)
+            ->data($encryptedQrData)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+            ->size(500)
+            ->margin(10)
+            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)  // Correct usage
+            ->foregroundColor(new Color(0, 0, 0))
+            ->backgroundColor(new Color(255, 255, 255))
             ->build();
-        
-        
     
         // ✅ Save QR Code Image
         $directory = public_path('imgs/qr_code/');
