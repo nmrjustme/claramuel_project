@@ -18,12 +18,14 @@ class CheckinController extends Controller
 
     public function verifyQrCode(Request $request)
     {
-        \Log::debug('Incoming request headers:', $request->headers->all());
+        \Log::debug('Incoming request headers', ['headers' => $request->headers->all()]);
 
         try {
             // Ensure JSON format
             if (!$request->isJson()) {
-                \Log::error('Non-JSON request received');
+                \Log::error('Non-JSON request received', [
+                    'content_type' => $request->header('Content-Type')
+                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Request must be JSON format',
@@ -32,10 +34,10 @@ class CheckinController extends Controller
             }
 
             $data = $request->json()->all();
-            \Log::debug('Parsed request data:', $data);
+            \Log::debug('Parsed request data', ['data' => $data]);
 
             if (empty($data['qr_data'])) {
-                \Log::error('Missing qr_data field');
+                \Log::error('Missing qr_data field', ['received_data' => $data]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Missing qr_data field',
@@ -57,6 +59,7 @@ class CheckinController extends Controller
             
             // Validate payload structure
             if (empty($payload['id']) || empty($payload['expires_at'])) {
+                \Log::error('QR code missing required fields', ['payload' => $payload]);
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code missing required fields',
@@ -66,6 +69,7 @@ class CheckinController extends Controller
 
             // Check for expiry
             if (Carbon::now()->greaterThan(Carbon::parse($payload['expires_at']))) {
+                \Log::warning('QR code has expired', ['expired_at' => $payload['expires_at']]);
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code has expired.',
@@ -73,7 +77,7 @@ class CheckinController extends Controller
                 ], 403);
             }
 
-            // ✅ Find payment by ID
+            // Find payment by ID
             $payment = Payments::with(['bookingLog', 'bookingLog.user'])
                 ->where('id', $payload['id'])
                 ->first();
@@ -81,6 +85,7 @@ class CheckinController extends Controller
             $this->updateCheckedin($payment);
             $this->updateQrStatus($payment, 'in_used');
             if (!$payment) {
+                \Log::error('QR code not recognized', ['payment_id' => $payload['id']]);
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code not recognized',
@@ -88,13 +93,14 @@ class CheckinController extends Controller
                 ], 404);
             }
 
+            \Log::info('QR code verified successfully', ['payment_id' => $payment->id]);
             return response()->json([
                 'success' => true,
                 'message' => 'QR code verified successfully',
                 'payment_id' => $payment->id,
             ]);
         } catch (\Exception $e) {
-            \Log::error('Server error:', ['exception' => $e]);
+            \Log::error('Server error', ['exception' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage(),
@@ -129,12 +135,14 @@ class CheckinController extends Controller
 
     public function processUploadQrUpload(Request $request)
     {
-        \Log::debug('QR Upload Verification Request:', $request->all());
+        \Log::debug('QR Upload Verification Request', ['request' => $request->all()]);
 
         try {
             // Validate JSON request
             if (!$request->isJson()) {
-                \Log::error('Non-JSON request received for QR upload');
+                \Log::error('Non-JSON request received for QR upload', [
+                    'content_type' => $request->header('Content-Type')
+                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Request must be JSON format',
@@ -143,10 +151,10 @@ class CheckinController extends Controller
             }
             
             $data = $request->json()->all();
-            \Log::debug('Parsed QR upload data:', $data);
+            \Log::debug('Parsed QR upload data', ['data' => $data]);
 
             if (empty($data['qr_data'])) {
-                \Log::error('Missing qr_data field in upload');
+                \Log::error('Missing qr_data field in upload', ['received_data' => $data]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Missing qr_data field',
@@ -156,7 +164,7 @@ class CheckinController extends Controller
 
             // Use the QR data directly (no decryption needed)
             $payload = $data['qr_data'];
-            \Log::debug('QR upload payload:', $payload);
+            \Log::debug('QR upload payload', ['payload' => $payload]);
             
             if ($this->qrInUsed($payload['id'])) {
                 $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
@@ -211,7 +219,7 @@ class CheckinController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('QR upload processing error:', ['exception' => $e]);
+            \Log::error('QR upload processing error', ['exception' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage(),
