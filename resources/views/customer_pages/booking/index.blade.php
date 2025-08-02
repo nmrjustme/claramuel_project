@@ -822,8 +822,7 @@
                                                             </div>
                                                        </div>
                                                        @endif
-
-                                                       <!-- Price and Book Button -->
+                                                       
                                                        <!-- Price and Book Button -->
                                                        <div class="price-container mt-auto w-full">
                                                        <div class="flex flex-col xs:flex-row justify-between items-start xs:items-end gap-2 xs:gap-3 p-2 xs:p-0">
