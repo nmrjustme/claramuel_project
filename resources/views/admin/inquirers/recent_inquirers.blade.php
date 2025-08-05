@@ -208,14 +208,63 @@ function showErrorState(containerId, error) {
     }
 }
 
+// Function to add a new inquiry with animation
+function addNewInquiry(booking) {
+    const container = document.getElementById('inquiries-container');
+    
+    // Create the new inquiry element
+    const inquiryElement = document.createElement('div');
+    inquiryElement.className = 'inquiry-item flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors group border-l-4 border-red-500 bg-red-50 animate-pulse';
+    inquiryElement.dataset.id = booking.id;
+    inquiryElement.innerHTML = `
+        <div class="ml-3 flex-1 min-w-0">
+            <div class="flex justify-between items-baseline">
+                <h4 class="text-sm font-medium text-gray-900 truncate">
+                    ${booking.user.firstname} ${booking.user.lastname}
+                    <span class="ml-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
+                </h4>
+                <span class="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                    ${new Date(booking.created_at).toLocaleString()}
+                </span>
+            </div>
+            <p class="text-sm text-gray-500 truncate">${booking.user.email || 'No email provided'}</p>
+            <p class="text-sm text-gray-500 truncate">${booking.user.phone}</p>
+        </div>
+        <button 
+            onclick="openInquiriesPageAndSearch('${booking.id}')" 
+            class="px-3 py-1 text-sm text-gray-700 hover:text-white hover:bg-red-600 border border-gray-300 rounded-md transition-colors"
+        >
+            View
+        </button>
+    `;
+    
+    // Remove animation after 2 seconds
+    setTimeout(() => {
+        inquiryElement.classList.remove('animate-pulse');
+    }, 2000);
+    
+    // Insert at the top of the container
+    if (container.firstChild) {
+        container.insertBefore(inquiryElement, container.firstChild);
+    } else {
+        container.appendChild(inquiryElement);
+    }
+    
+    // Update the counter
+    updateNewInquiriesCount(newInquiriesCount + 1);
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadInquiries();
     
-    // Optionally poll for new inquiries every 30 seconds
-    setInterval(() => {
-        const searchInput = document.getElementById('inquiry-search');
-        loadInquiries(searchInput.value);
-    }, 30000);
+    // Set up Echo channel for real-time updates
+    if (typeof Echo !== 'undefined') {
+        window.Echo.channel('bookings')
+            .listen('.booking.created', (e) => {
+                console.log('New inquiry received:', e);
+                addNewInquiry(e.booking);
+            });
+    }
 });
 </script>

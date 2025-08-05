@@ -109,6 +109,9 @@
     /* Ensure body doesn't scroll when modal is open */
     body.modal-open {
         overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
     }
     
     /* Info cards styling */
@@ -257,11 +260,6 @@
                 </svg>
                 <h2 class="text-xl font-bold">Booking Details</h2>
             </div>
-            <button onclick="closeModal('bookdetailsmodalContainer')" class="text-white hover:text-red-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
         </div>
         
         <!-- Modal Body -->
@@ -376,7 +374,7 @@
         const modal = document.getElementById('bookdetailsmodalContainer');
         const modalBody = modal.querySelector('.modal-body');
         const modalFooter = modal.querySelector('.modal-footer');
-        
+
         if (!modal || !modalBody || !modalFooter) {
             console.error('Modal elements not found');
             return;
@@ -444,11 +442,11 @@
         }
 
         // Create booking details HTML
-// In your populateModalWithData function, update the facility card HTML generation:
         const detailsHtml = data.facilities?.map((facility, index) => {
             const facilityNights = calculateNights(facility.check_in, facility.check_out);
             const hasMeal = facility.breakfast && facility.breakfast !== 'None';
-            
+            const isConfirmed = data.status === 'confirmed';
+            const isRejected = data.status === 'rejected';
             // Generate guest details HTML
             const guestDetailsHtml = facility.guest_details?.length > 0 
                 ? facility.guest_details.map(guest => `
@@ -511,7 +509,9 @@
                     
                     <!-- Add checkbox for each room -->
                     <div class="checkbox-container mt-3">
-                        <input type="checkbox" id="room-checkbox-${index}" class="room-checkbox" data-room="${facility.facility_name || 'Room ' + (index + 1)}">
+                        <input type="checkbox" id="room-checkbox-${index}" class="room-checkbox" 
+                            data-room="${facility.facility_name || 'Room ' + (index + 1)}"
+                            ${isConfirmed || isRejected ? 'disabled checked' : ''}>
                         <label for="room-checkbox-${index}">I have reviewed ${facility.facility_name || 'this room'} details</label>
                     </div>
                 </div>

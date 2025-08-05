@@ -8,13 +8,6 @@
 
 @section('content_css')
 <style>
-    .glass-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        border-radius: 12px;
-    }
     
     .hover-scale {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -102,11 +95,11 @@
 @endsection
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <div class="flex flex-col lg:flex-row gap-6">
+<div class="min-h-screen px-4 py-4">
+    <div class="flex flex-col lg:flex-row gap-4">
         <!-- Main Content -->
         <div class="lg:w-3/4">
-            <div class="glass-card p-6 hover-scale">
+            <div class="glass-card bg-white p-6 hover-scale rounded-lg border border-lightGray">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Bookings Management</h1>
@@ -195,9 +188,9 @@
         <!-- Booking Summary Sidebar -->
         <div class="lg:w-1/4">
             <!-- Sticky Wrapper -->
-            <div class="sticky-container space-y-6">
+            <div class="sticky-container space-y-4">
                 <!-- Next Check-in Section -->
-                <div class="glass-card p-6 hover-scale">
+                <div class="glass-card bg-white p-4 hover-scale rounded-lg border border-lightGray">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">Next Check-in</h3>
                         <div class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center">
@@ -244,7 +237,7 @@
                 
                 
                 <!-- Booking Summary -->
-                <div class="glass-card overflow-hidden hover-scale">
+                <div class="glass-card bg-white overflow-hidden hover-scale rounded-lg border border-lightGray">
                     <div class="bg-gradient-to-r from-red-600 to-red-800 p-4 text-white">
                         <h2 class="text-xl font-bold flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">

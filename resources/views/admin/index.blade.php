@@ -149,17 +149,10 @@ $active = 'dashboard';
 @endsection
 
 @section('content')
-<div class="min-h-screen p-6">
-     <!-- Floating Action Button -->
-     <a href="#" id="openBookingModal" class="floating-action-btn text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-     </a>
-
+<div class="min-h-screen px-4 py-4">
      <!-- Header with animated gradient -->
-     <div class="rounded-xl mb-8 overflow-hidden">
-          <div class="bg-gradient-to-r from-red-600 to-red-700 p-8 text-white rounded-xl relative overflow-hidden">
+     <div class="rounded-lg mb-4 overflow-hidden">
+          <div class="bg-gradient-to-r from-red-600 to-red-700 p-8 text-white rounded-lg relative overflow-hidden">
                <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-white/0"></div>
                <div class="relative z-10">
                     <div class="flex items-center justify-between">
@@ -196,10 +189,10 @@ $active = 'dashboard';
      </div>
 
      <!-- Status Cards with hover effects -->
-     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <!-- Total Bookings -->
           <div
-               class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover-scale relative overflow-hidden glassy-card">
+               class="bg-white p-5 rounded-lg border border-lightGray relative overflow-hidden glassy-card">
                <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-blue-100 opacity-20"></div>
                <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-blue-200 opacity-30"></div>
                <div class="relative z-10 flex justify-between items-start">
@@ -220,7 +213,7 @@ $active = 'dashboard';
 
           <!-- Pending Confirmations -->
           <div
-               class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover-scale relative overflow-hidden glassy-card">
+               class="bg-white p-5 rounded-lg border border-lightGray hover-scale relative overflow-hidden glassy-card">
                <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-yellow-100 opacity-20"></div>
                <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-yellow-200 opacity-30"></div>
                <div class="relative z-10 flex justify-between items-start">
@@ -241,7 +234,7 @@ $active = 'dashboard';
 
           <!-- Awaiting Payments -->
           <div
-               class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover-scale relative overflow-hidden glassy-card">
+               class="bg-white p-5 rounded-lg border border-lightGray hover-scale relative overflow-hidden glassy-card">
                <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-purple-100 opacity-20"></div>
                <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-purple-200 opacity-30"></div>
                <div class="relative z-10 flex justify-between items-start">
@@ -258,7 +251,7 @@ $active = 'dashboard';
 
           <!-- Verified Bookings -->
           <div
-               class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover-scale relative overflow-hidden glassy-card">
+               class="bg-white p-5 rounded-lg border border-lightGray hover-scale relative overflow-hidden glassy-card">
                <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-green-100 opacity-20"></div>
                <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-green-200 opacity-30"></div>
                <div class="relative z-10 flex justify-between items-start">
@@ -278,12 +271,12 @@ $active = 'dashboard';
           </div>
 
      </div>
-
+     
      <!-- Main Content Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           <!-- Recent Enquiries -->
           <div
-               class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
+               class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 bg-white p-6 rounded-lg border border-lightGray hover-scale">
                <div class="flex justify-between items-center mb-6">
                     <div class="flex items-center">
                          <h2 class="text-xl font-semibold text-gray-800">Recent Inquiries</h2>
@@ -309,7 +302,7 @@ $active = 'dashboard';
                          </svg>
                     </div>
                     <input type="text" id="inquiry-search"
-                         class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                         class="block w-full pl-10 pr-3 py-2 border border-darkGray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
                          placeholder="Search inquiries..." onkeyup="filterInquiries()">
                </div>
 
@@ -326,7 +319,7 @@ $active = 'dashboard';
           @include('admin.inquirers.recent_inquirers')
           
           <!-- Facilities Occupied Today -->
-          <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
+          <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-lightGray hover-scale">
                <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">Facilities Occupied Today</h2>
                     <div class="flex items-center">
@@ -373,9 +366,9 @@ $active = 'dashboard';
      </div>
      
      <!-- Bottom Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <!-- Left Column (Next Check-in) -->
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
+          <div class="bg-white p-6 rounded-lg border border-lightGray hover-scale">
                <!-- Next Check-in Section -->
                <div class="glass-card">
                     <div class="flex items-center justify-between mb-4">
@@ -424,7 +417,7 @@ $active = 'dashboard';
           </div>
           
           <!-- Quick Actions -->
-          <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover-scale">
+          <div class="lg:col-span-2 bg-white p-6 rounded-lg border  border-lightGray hover-scale">
                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
                <div class="grid grid-cols-2 gap-4">
                     <!-- Row 1 -->

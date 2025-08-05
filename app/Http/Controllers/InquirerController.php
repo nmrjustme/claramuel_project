@@ -379,9 +379,9 @@ class InquirerController extends Controller
     {
         $inquiry = FacilityBookingLog::findOrFail($id);
         $inquiry->update(['is_read' => true]);
-
+        
         $newCount = FacilityBookingLog::where('is_read', false)->count();
-
+        
         return response()->json([
             'success' => true,
             'newCount' => $newCount

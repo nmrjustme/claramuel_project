@@ -41,9 +41,6 @@ use App\Exports\BookingsExport;
 use Illuminate\Http\Request;
 use App\Events\FacilityBookingLogCreated;
 
-
-Route::get('/test-broadcast', [FacilityBookingLogCreated::class, 'broadcastWith']);
-
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
 route::get('/dashboard/cottages', [BookCottageController::class, 'index'])->name('customer_bookings.cottage');
@@ -108,17 +105,31 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/image', [ProfileImageController::class, 'update'])->name('profile.image.update');
 });
 
+Route::get('/env-test', function() {
+    return [
+        'PUSHER_APP_KEY' => env('PUSHER_APP_KEY'),
+        'PUSHER_APP_SECRET' => env('PUSHER_APP_SECRET'),
+        'PUSHER_APP_ID' => env('PUSHER_APP_ID'),
+        'PUSHER_APP_CLUSTER' => env('PUSHER_APP_CLUSTER'),
+        'loaded_file' => file_exists(base_path('.env')),
+    ];
+});
+
 Route::middleware(['auth'])->group(function () {
     
     
     Route::get('/admin_dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard/stats', [AdminController::class, 'getStats']);
     Route::get('/admin/dashboard/occupied-facilities', [AdminController::class, 'getOccupiedFacilities']);
-
+    
+    
     Route::get('booking-logs', [BookingLogController::class, 'index'])->name('admin.booking-logs');
-
+    
+    Route::get('/get/mybooking', [BookingController::class, 'getMyBookings'])->name('my_bookings');
+    
     //Bookings
     Route::get('/admin/bookings', [AdminController::class, 'getBookings'])->name('admin.bookings');
+
     Route::get('/get/admin/bookings', [BookingController::class, 'index']);
     Route::get('/get/bookings/next-checkin', [BookingController::class, 'nextCheckin']);
     Route::get('/get/show/bookings/{booking}', [BookingController::class, 'show']);

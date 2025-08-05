@@ -124,7 +124,6 @@
         </div>
         
     </div>
-    @include('admin.facilities.cottage')
 </div>
 
 <!-- Add Facility Modal -->

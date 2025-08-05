@@ -21,10 +21,11 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\BookingsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
-use App\Events\FacilityBookingLogCreated;
+use App\Events\BookingNew;
 
 class BookingController extends Controller
 {
+    
     public function stores(Request $request)
     {
         // Validate the request data
@@ -110,10 +111,7 @@ class BookingController extends Controller
                 'booking_date' => now(),
                 'confirmation_token' => Str::random(60),
             ]);
-            
-            $bookingLog->load(['user']);
-            
-            event(new FacilityBookingLogCreated($bookingLog));
+    
             
             \Log::info('Booking created', [
                 'booking_id' => $bookingLog->id,
@@ -172,6 +170,9 @@ class BookingController extends Controller
             // Commit transaction
             DB::commit();
             
+            $bookingLog->load(['user']);
+            event(new BookingNew($bookingLog));
+            
             return response()->json([
                 'success' => true,
                 'booking_id' => $bookingLog->id,
@@ -194,7 +195,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-    
+
     public function store(Request $request)
     {
         // Validate the request data
@@ -260,9 +261,6 @@ class BookingController extends Controller
                 'confirmation_token' => Str::random(60),
             ]);
             
-            $bookingLog->load(['user']);
-            
-            event(new FacilityBookingLogCreated($bookingLog));
             
             \Log::info('Event fired', [
                 'booking_id' => $bookingLog->id,
@@ -333,7 +331,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-    
+
     public function WaitConfirmation(Request $request)
     {
         $email = $request->query('email');
@@ -345,7 +343,7 @@ class BookingController extends Controller
         $email = $request->query('email');
         return view('customer_pages.booking.wait_for_confirmation', ['email' => $email]);
     }
-    
+
     public function index(Request $request)
     {
         $status = $request->input('status', 'fully_paid');
@@ -407,7 +405,7 @@ class BookingController extends Controller
             'last_page' => ceil($total / $perPage)
         ]);
     }
-    
+
     public function Export(Request $request)
     {
         try {
@@ -443,7 +441,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-    
+
     public function nextCheckin()
     {
         try {
@@ -481,7 +479,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-        
+
     public function show(FacilityBookingLog $booking)
     {
         $booking->load(['user', 'details', 'payments', 'summaries.facility']);
@@ -490,4 +488,54 @@ class BookingController extends Controller
             'data' => $booking
         ]);
     }
+
+    public function getMyBookings(Request $request)
+    {
+        try {
+            $perPage = $request->input('per_page', 15);
+            $page = $request->input('page', 1);
+            $search = $request->input('search', '');
+            
+            $query = FacilityBookingLog::with(['user'])
+                ->orderBy('created_at', 'desc');
+            
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('id', 'like', "%$search%")
+                    ->orWhereHas('user', function($userQuery) use ($search) {
+                        $userQuery->where('firstname', 'like', "%$search%")
+                                    ->orWhere('lastname', 'like', "%$search%");
+                    });
+                });
+            }
+            
+            $bookings = $query->paginate($perPage, ['*'], 'page', $page);
+            
+            return response()->json([
+                'data' => $bookings->map(function($booking) {
+                    return [
+                        'id' => $booking->id,
+                        'user' => [
+                            'firstname' => $booking->user->firstname,
+                            'lastname' => $booking->user->lastname,
+                        ],
+                        'created_at' => $booking->created_at->toDateTimeString(),
+                        'status' => $booking->status,
+                        'is_read' => $booking->is_read,
+                    ];
+                }),
+                'current_page' => $bookings->currentPage(),
+                'per_page' => $bookings->perPage(),
+                'last_page' => $bookings->lastPage(),
+                'total' => $bookings->total()
+            ]);
+        
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Server Error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

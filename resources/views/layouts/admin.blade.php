@@ -9,13 +9,25 @@
     
     <!-- Fonts and Styles -->
     <link rel="icon" href="{{ asset('/favicon.ico?v=2') }}">
-    <!-- <script src="https://cdn.tailwindcss.com"></script>-->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/js/app.js'])
     <!-- In your layout file's head or before the closing body tag -->
-    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+        <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lightGray: '#D3D3D3',
+                        darkGray: '#A0A0A0',
+                        backgroundLightGray: '#f6f6f6'
+                    },
+                }
+            }
+        }
+    </script>
     
     <style>
         /* Smooth transitions for overlay */
@@ -29,11 +41,14 @@
         html {
             overflow-y: scroll;
         }
+        .red-gradient-header {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+        }
     </style>
     
     @yield('content_css')
 </head>
-<body class="bg-gray-200">
+<body class="bg-backgroundLightGray">
     <!-- Notification sound element -->
     <!-- <audio id="notificationSound" src="{{ asset('sounds/mixkit-software-interface-back-2575.wav') }}" preload="auto"></audio> -->
     
@@ -46,9 +61,8 @@
         </button>
 
         <div class="flex items-center space-x-2">
-            <x-logo-icon size="default" />
             <span class="text-gray-800 font-semibold text-lg whitespace-nowrap truncate max-w-[160px]">
-                <a href="{{ route('index') }}">Ｍｔ.ＣＬＡＲＡＭＵＥＬ</a>
+                <a href="{{ route('index') }}"></a>
             </span>
         </div>
 
@@ -56,8 +70,8 @@
             @auth
             <button class="flex items-center gap-2 focus:outline-none" aria-label="User menu">
                 <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}" 
-                     class="h-8 w-8 rounded-full object-cover border border-gray-200"
-                     alt="{{ Auth::user()->firstname }}'s profile picture">
+                    class="h-8 w-8 rounded-full object-cover border border-gray-200"
+                    alt="{{ Auth::user()->firstname }}'s profile picture">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -65,8 +79,8 @@
 
             <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200">
                 <a href="{{ route('profile.edit') }}"
-                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                   Profile
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                Profile
                 </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -79,6 +93,7 @@
             @endauth
         </div>
     </div>
+    
     <div class="md:hidden h-16"></div>
     @include('admin.sidebar')
 
@@ -89,12 +104,11 @@
     <div class="flex min-h-screen">
         <div class="flex-1 flex flex-col md:ml-64">
             <!-- Desktop Header -->
-            <header class="hidden md:block bg-gradient-to-b from-white to-red-50 text-dark shadow-md">
-                <div class="px-6 py-3 flex justify-between items-center">
+            <header class="hidden md:block bg-gradient-to-r from-red-600 to-red-800 text-white shadow-md sticky top-0 z-50">
+                <div class="px-6 py-6 flex justify-between items-center">
                     <div class="flex items-center space-x-3">
-                        <x-logo-icon size="default" />
-                        <span class="text-2xl text-red-600">
-                            <a href="{{ route('index') }}">Ｍｔ.ＣＬＡＲＡＭＵＥＬ</a>
+                        <span class="text-2xl font-bold">
+                            <a href="{{ route('index') }}"></a>
                         </span>
                     </div>
                     
@@ -104,7 +118,7 @@
                             <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}"
                                 class="h-8 w-8 rounded-full object-cover"
                                 alt="Profile">
-                            <span class="text-sm font-medium">{{ Auth::user()->firstname }}</span>
+                            <span class="text-sm font-medium text-white">{{ Auth::user()->firstname }}</span>
                             <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -126,7 +140,7 @@
             </header>
             
             <!-- Page Content -->
-            <main class="flex-1 p-2 md:p-2 overflow-x-hidden md:rounded-tl-lg shadow-sm">
+            <main class="flex-1 p-2 md:p-2 overflow-x-hidden md:rounded-tl-lg">
                 @yield('content')
             </main>
         </div>
@@ -134,7 +148,9 @@
     
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
     
-    <script>
+    <script type="module">
+
+            
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const toggleSidebarMobile = document.getElementById('toggleSidebarMobile');
@@ -152,6 +168,7 @@
                     document.body.classList.add('overflow-hidden');
                 }
             }
+
             
             // Mobile header toggle button
             toggleSidebarMobile.addEventListener('click', toggleSidebar);
@@ -184,32 +201,22 @@
             });
         });
         
-        // window.addEventListener("load", () => {
-        //   if ("Notification" in window && Notification.permission !== "granted") {
-        //     Notification.requestPermission();
-        //   }
-        // });
-        
-        // Play notification sound
-        function playNotificationSound(type = 'normal') {
-            // Only play sound if there are new bookings and the tab isn't active
-            // if (newBookingsCount > 0 && document.hidden) {
-            //     // Use Laravel's asset helper (passed from Blade template)
-            //     const soundPath = document.getElementById('notificationSound');
-            //     const sound = new Audio(soundPath);
-            //     sound.volume = 0.3; // Reduced volume to be less intrusive
+        window.Echo.channel('bookings')
+            .listen('.booking.created', (e) => {
+                console.log('New booking received:', e);
                 
-            //     if (type === 'critical') {
-            //         sound.volume = 0.5;
-            //         sound.play().catch(e => console.log('Audio play failed:', e));
-            //         setTimeout(() => {
-            //             sound.play().catch(e => console.log('Audio play failed:', e));
-            //         }, 500);
-            //     } else {
-            //         sound.play().catch(e => console.log('Audio play failed:', e));
-            //     }
-            // }
+                // Show notification if permission is granted
+                if (Notification.permission === 'granted') {
+                    new Notification('New Booking', {
+                        body: `${e.booking.user.firstname} ${e.booking.user.lastname} made a booking: ID= ${e.booking.id}`,
+                    });
+                }
+            });
+        // Request notification permission
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission();
         }
+        
     </script>
     
     @yield('content_js')
