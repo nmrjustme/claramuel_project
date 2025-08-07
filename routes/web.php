@@ -41,6 +41,8 @@ use App\Exports\BookingsExport;
 use Illuminate\Http\Request;
 use App\Events\FacilityBookingLogCreated;
 
+use Illuminate\Support\Facades\Hash;
+
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
 route::get('/dashboard/cottages', [BookCottageController::class, 'index'])->name('customer_bookings.cottage');
@@ -95,6 +97,19 @@ Route::middleware(['auth', 'verified'])->group(function () {});
 // Amenities Modal Route
 Route::get('/api/facilities/{facility}/amenities', [BookingsController::class, 'getAmenities'])
     ->name('facilities.amenities');
+
+
+Route::get('/test-insert-user', function () {
+    DB::table('users')->insert([
+        'firstname' => 'Richter',
+        'lastname'  => 'Mayandoc',
+        'phone'     => '09169824195',
+        'role'      => 'Admin',
+        'email'     => 'rmayandoc0625@gmail.com',
+        'password'  => Hash::make('?richter11'),
+    ]);
+    return 'User inserted!';
+});
 
 
 Route::middleware('auth')->group(function () {
@@ -313,6 +328,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/admin/payments/verify/{payment_id}', [PaymentsController::class, 'verifyScannedPayment'])
         ->name('admin.payments.verify');
+
+    Route::get('/admin/payments/search', [AdminPaymentController::class, 'search'])->name('admin.payments.search');
     
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
     Route::post('/verify-qr-codes', [CheckinController::class, 'verifyQrCode']);

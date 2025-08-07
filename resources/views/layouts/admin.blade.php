@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     @vite(['resources/js/app.js'])
     <!-- In your layout file's head or before the closing body tag -->
-        <script>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {

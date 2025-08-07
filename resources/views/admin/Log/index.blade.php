@@ -1,16 +1,20 @@
 @extends('layouts.admin')
-@section('title', 'Booking List')
+@section('title', 'Inquiries Monitoring')
 @php
     $active = 'inquiries';
 @endphp
 
 @section('content')
-<div class="min-h-screen px-4 py-4">
+<div class="min-h-screen px-6 py-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Request Monitoring</h1>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Request Monitoring</h1>
+            <p class="text-gray-600">Manually verify customer GCash payments by reference number</p>
+        </div>
+
         <div class="flex items-center space-x-4">
             <span class="text-sm text-gray-600">
-                Total Bookings: <span id="bookingCount" class="font-bold">0</span>
+                Total Inquiries: <span id="bookingCount" class="font-bold">0</span>
             </span>
             <span class="text-sm text-gray-600 ml-4">
                 <span class="inline-block w-3 h-3 bg-red-200 rounded-full mr-1"></span> Unread requests
@@ -37,7 +41,7 @@
     </div>
 
     <!-- Booking List -->
-    <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+    <div class="bg-white rounded-lg overflow-hidden border border-lightGray">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -152,6 +156,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${timeAgo(booking.created_at)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                </svg>
                 <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
             </td>
         `;
@@ -214,6 +222,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${timeAgo(booking.created_at)}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                    </svg>
                     <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
                 </td>
             `;
@@ -222,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         renderPagination();
     }
-
+    
     // Function to render pagination
     function renderPagination() {
         if (totalPages <= 1) {

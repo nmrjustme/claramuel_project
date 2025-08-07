@@ -7,7 +7,7 @@
         <!-- Left side (Profile Card) -->
         @auth
         <div class="w-full lg:w-1/3">
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+            <div class="bg-white rounded-lg border border-lightGray overflow-hidden transition-all duration-300">
                 <div class="p-6 sm:p-8 flex flex-col items-center relative">
                     
                     <!-- Back button -->
@@ -22,7 +22,7 @@
                     
                     <!-- Profile image with animated hover effect -->
                     <div class="relative group mb-6">
-                        <div class="absolute -inset-2 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="absolute -inset-2 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <div class="relative">
                             <img src="{{ url('imgs/profiles/' . (Auth::user()->profile_img ?? 'default.jpg')) }}" 
                                  alt="Profile" 
@@ -95,7 +95,7 @@
                             <div class="ml-3">
                                 <h3 class="text-sm font-medium text-yellow-800">Email Verification Required</h3>
                                 <div class="mt-1 text-sm text-yellow-700">
-                                    <p>Please verify your email to access all features.</p>
+                                    <p>Please verify your email.</p>
                                     <form method="POST" action="{{ route('verification.send') }}" class="inline">
                                         @csrf
                                         <button type="submit" class="font-medium text-yellow-700 hover:text-yellow-600 underline">
@@ -127,7 +127,7 @@
             </div>
             
             <!-- Stats card -->
-            <div class="mt-6 bg-white rounded-2xl shadow-lg p-6">
+            <div class="mt-6 bg-white  rounded-lg  border border-lightGray p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Account Stats</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-blue-50 p-3 rounded-lg text-center">
@@ -146,10 +146,10 @@
         <!-- Right side (Forms Section) -->
         <div class="w-full lg:w-2/3 space-y-6">
             <!-- Profile Information Card -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-                <div class="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600">
-                    <h3 class="text-lg font-medium">Profile Information</h3>
-                    <p class="mt-1 text-sm text-blue-400">Update your account's profile information</p>
+            <div class="bg-white rounded-lg border border-lightGray overflow-hidden">
+                <div class="px-6 py-4 bg-gradient-to-r from-red-600 to-red-700">
+                    <h3 class="text-lg font-medium text-gray-100">Profile Information</h3>
+                    <p class="mt-1 text-sm text-gray-200">Update your account's profile information</p>
                 </div>
                 
                 <div class="p-6">
@@ -158,10 +158,10 @@
             </div>
             
             <!-- Password Update Card -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-                <div class="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500">
-                    <h3 class="text-lg font-medium">Change Password</h3>
-                    <p class="mt-1 text-sm text-blue-400">Secure your account with a strong password</p>
+            <div class="bg-white rounded-lg border border-lightGray overflow-hidden">
+                <div class="px-6 py-4 bg-gradient-to-r from-red-600 to-red-700">
+                    <h3 class="text-lg font-medium text-gray-100">Change Password</h3>
+                    <p class="mt-1 text-sm text-gray-200">Secure your account with a strong password</p>
                 </div>
                 <div class="p-6">
                     @include('profile.partials.update-password-form')
@@ -171,10 +171,10 @@
             @auth
                 @if (empty(Auth::user()->email_verified_at))
                 <!-- Danger Zone Card -->
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl border border-red-100">
-                    <div class="px-6 py-4 bg-gradient-to-r from-red-500 to-orange-500">
-                        <h3 class="text-lg font-medium">Danger Zone</h3>
-                        <p class="mt-1 text-sm text-blue-400">Permanent actions that cannot be undone</p>
+                <div class="bg-white rounded-lg border border-lightGray overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-red-600 to-red-700">
+                        <h3 class="text-lg font-medium text-gray-100">Danger Zone</h3>
+                        <p class="mt-1 text-sm text-gray-200">Permanent actions that cannot be undone</p>
                     </div>
                     <div class="p-6">
                         @include('profile.partials.delete-user-form')
@@ -270,12 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
     button, a, input, .hover-effect {
         transition: all 0.3s ease;
     }
-    
-    /* Custom shadow for cards */
-    .shadow-lg {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    
     /* Hover effect for cards */
     .hover-effect:hover {
         transform: translateY(-2px);

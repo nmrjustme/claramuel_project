@@ -13,6 +13,14 @@ $active = 'dashboard';
           position: relative;
      }
 
+     .modal {
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 999;
+          bottom: 0;
+     }
+     
      #qr-reader__dashboard_section_csr {
           margin-top: 15px;
           text-align: center;
@@ -21,7 +29,7 @@ $active = 'dashboard';
      #qr-reader__scan_region {
           background: white;
      }
-
+     
      #qr-reader__dashboard_section {
           padding: 10px;
      }
@@ -149,7 +157,7 @@ $active = 'dashboard';
 @endsection
 
 @section('content')
-<div class="min-h-screen px-4 py-4">
+<div class="min-h-screen px-6 py-6">
      <!-- Header with animated gradient -->
      <div class="rounded-lg mb-4 overflow-hidden">
           <div class="bg-gradient-to-r from-red-600 to-red-700 p-8 text-white rounded-lg relative overflow-hidden">
@@ -347,10 +355,9 @@ $active = 'dashboard';
                     <!-- Horizontal scroll container -->
                     <div class="flex space-x-4 pb-4 overflow-x-auto scrollbar-hide" id="occupied-facilities-container">
                          <!-- Loading state -->
-                         <div class="flex-shrink-0 w-full h-48 flex items-center justify-center">
-                              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto">
-                              </div>
-                              <p class="mt-2 text-gray-500">Loading facilities...</p>
+                         <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
+                              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                              <p class="mt-2 text-gray-500">Loading occupied facilities...</p>
                          </div>
                     </div>
                     
@@ -417,61 +424,50 @@ $active = 'dashboard';
           </div>
           
           <!-- Quick Actions -->
-          <div class="lg:col-span-2 bg-white p-6 rounded-lg border  border-lightGray hover-scale">
+          <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-lightGray">
                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
                <div class="grid grid-cols-2 gap-4">
-                    <!-- Row 1 -->
+               
+                    
+                    <!-- Action Buttons -->
                     <a href="#" id="openBookingModal"
-                         class="p-4 bg-red-50 rounded-lg text-center hover:bg-red-100 transition-colors group hover-scale">
-                         <div
-                              class="mx-auto h-10 w-10 bg-red-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                              </svg>
+                         class="p-4 bg-red-100 rounded-lg text-center hover:bg-red-200 transition-all group hover:-translate-y-0.5">
+                         <div class="mx-auto h-10 w-10 bg-red-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                         </svg>
                          </div>
-                         <span class="text-sm font-medium text-gray-700">New Booking</span>
-                    </a>
-
-                    <a href="#" onclick="openCheckInModal()"
-                         class="p-4 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors group hover-scale">
-                         <div
-                              class="mx-auto h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                              </svg>
-                         </div>
-                         <span class="text-sm font-medium text-gray-700">Check-in</span>
+                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">New Booking</span>
                     </a>
                     
-                    <!-- Row 2 -->
-                    <a href="#" onclick="openCheckOutModal()"
-                         class="p-4 bg-green-50 rounded-lg text-center hover:bg-green-100 transition-colors group hover-scale">
-                         <div
-                              class="mx-auto h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
+                    <a href="#" onclick="openCheckInModal()"
+                         class="p-4 bg-blue-100 rounded-lg text-center hover:bg-blue-200 transition-all group hover:-translate-y-0.5">
+                         <div class="mx-auto h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                         </svg>
                          </div>
-                         <span class="text-sm font-medium text-gray-700">Check-out</span>
+                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Check-in</span>
                     </a>
-
-                    <a href="#"
-                         class="p-4 bg-purple-50 rounded-lg text-center hover:bg-purple-100 transition-colors group hover-scale">
-                         <div
-                              class="mx-auto h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                              </svg>
+                    
+                    <a href="#" onclick="openCheckOutModal()"
+                         class="p-4 bg-green-100 rounded-lg text-center hover:bg-green-200 transition-all group hover:-translate-y-0.5">
+                         <div class="mx-auto h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                         </svg>
                          </div>
-                         <span class="text-sm font-medium text-gray-700">Payments</span>
+                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Check-out</span>
+                    </a>
+                    
+                    <a href="#"
+                         class="p-4 bg-purple-100 rounded-lg text-center hover:bg-purple-200 transition-all group hover:-translate-y-0.5">
+                         <div class="mx-auto h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                         </svg>
+                         </div>
+                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Payments</span>
                     </a>
                </div>
           </div>
@@ -480,9 +476,9 @@ $active = 'dashboard';
 
 <!-- Modal for check-in options -->
 <div id="checkInModal"
-     class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+     class="modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden z-50">
      <div
-          class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4 transform transition-all duration-300 scale-95 hover:scale-100">
+          class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
           <!-- Modal Header - Updated to blue color scheme -->
           <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
                <h3 class="text-xl font-semibold text-white">Check-in Method</h3>
@@ -599,6 +595,7 @@ $active = 'dashboard';
           </div>
      </div>
 </div>
+
 <!-- Manual Search Container (hidden by default) -->
 <div id="manualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50">
      <div class="max-w-md mx-auto">
@@ -631,8 +628,8 @@ $active = 'dashboard';
 
 
 <!-- Add this modal near your checkInModal in the HTML section -->
-<div id="checkOutModal" class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
-     <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4 transform transition-all duration-300 scale-95 hover:scale-100">
+<div id="checkOutModal" class="modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden z-50">
+     <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
           <!-- Modal Header -->
           <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
                <h3 class="text-xl font-semibold text-white">Check-out Method</h3>
@@ -728,7 +725,7 @@ $active = 'dashboard';
 </div>
 
 <!-- Manual Checkout Search Container -->
-<div id="checkoutManualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50">
+<div id="checkoutManualSearchContainer" class="modal fixed inset-0 bg-white p-4 hidden z-50">
      <div class="max-w-md mx-auto">
           <div class="flex justify-between items-center mb-4">
                <h3 class="text-lg font-medium">Search Guest for Check-out</h3>
@@ -753,6 +750,109 @@ $active = 'dashboard';
      </div>
 </div>
 
+<!-- Day Tour Modal -->
+<div id="dayTourModal" class="modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 p-6">
+            <h3 class="text-xl font-semibold text-white">Day Tour Registration</h3>
+            <p class="text-yellow-100 text-sm mt-1">Register a new day tour guest</p>
+        </div>
+
+        <div class="p-6">
+            <form id="dayTourForm">
+                <!-- Customer Information -->
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email (Optional)</label>
+                        <input type="email" id="email" name="email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                    </div>
+
+                    <!-- Facility Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Facility Usage</label>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input id="useCottage" name="facility" type="radio" value="cottage" class="h-4 w-4 text-yellow-600 focus:ring-yellow-500">
+                                <label for="useCottage" class="ml-2 block text-sm text-gray-700">Use Cottage</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="usePark" name="facility" type="radio" value="park" checked class="h-4 w-4 text-yellow-600 focus:ring-yellow-500">
+                                <label for="usePark" class="ml-2 block text-sm text-gray-700">Use Park Only</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Entrance Fees -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Entrance Fees</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-3 gap-4 items-center">
+                                <label class="block text-sm text-gray-700">Adults (₱200)</label>
+                                <input type="number" id="adultCount" name="adultCount" min="0" value="0"
+                                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                                <div class="text-sm font-medium">₱<span id="adultTotal">0</span></div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4 items-center">
+                                <label class="block text-sm text-gray-700">Kids (₱100)</label>
+                                <input type="number" id="kidCount" name="kidCount" min="0" value="0"
+                                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                                <div class="text-sm font-medium">₱<span id="kidTotal">0</span></div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4 items-center">
+                                <label class="block text-sm text-gray-700">Seniors (₱100)</label>
+                                <input type="number" id="seniorCount" name="seniorCount" min="0" value="0"
+                                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                                <div class="text-sm font-medium">₱<span id="seniorTotal">0</span></div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4 items-center pt-2 border-t border-gray-200">
+                                <label class="block text-sm font-medium text-gray-700">Total</label>
+                                <div></div>
+                                <div class="text-lg font-bold">₱<span id="grandTotal">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeDayTourModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-yellow-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        Register Guest
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
@@ -760,7 +860,65 @@ $active = 'dashboard';
 <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
+     // Function to open the day tour modal
+function openDayTourModal() {
+     document.getElementById('dayTourModal').classList.remove('hidden');
+}
+
+// Function to close the day tour modal
+function closeDayTourModal() {
+     document.getElementById('dayTourModal').classList.add('hidden');
+}
+
+// Calculate totals when counts change
+function calculateTotals() {
+     const adultCount = parseInt(document.getElementById('adultCount').value) || 0;
+     const kidCount = parseInt(document.getElementById('kidCount').value) || 0;
+     const seniorCount = parseInt(document.getElementById('seniorCount').value) || 0;
+     
+     const adultTotal = adultCount * 200;
+     const kidTotal = kidCount * 100;
+     const seniorTotal = seniorCount * 100;
+     const grandTotal = adultTotal + kidTotal + seniorTotal;
+     
+     document.getElementById('adultTotal').textContent = adultTotal;
+     document.getElementById('kidTotal').textContent = kidTotal;
+     document.getElementById('seniorTotal').textContent = seniorTotal;
+     document.getElementById('grandTotal').textContent = grandTotal;
+}
+
+// Event listeners for input changes
+document.getElementById('adultCount').addEventListener('change', calculateTotals);
+document.getElementById('kidCount').addEventListener('change', calculateTotals);
+document.getElementById('seniorCount').addEventListener('change', calculateTotals);
 // Checkout Modal Functions
+// Form submission
+document.getElementById('dayTourForm').addEventListener('submit', function(e) {
+     e.preventDefault();
+     
+     // Get form data
+     const formData = {
+          firstName: document.getElementById('firstName').value,
+          lastName: document.getElementById('lastName').value,
+          phoneNumber: document.getElementById('phoneNumber').value,
+          email: document.getElementById('email').value,
+          facility: document.querySelector('input[name="facility"]:checked').value,
+          adultCount: document.getElementById('adultCount').value,
+          kidCount: document.getElementById('kidCount').value,
+          seniorCount: document.getElementById('seniorCount').value,
+          totalAmount: document.getElementById('grandTotal').textContent
+     };
+     
+     // Here you would typically send this data to your server
+     console.log('Form submitted:', formData);
+     
+     // For demo purposes, just show an alert and close the modal
+     alert('Day tour registration submitted successfully!');
+     closeDayTourModal();
+});
+
+document.getElementById('dayTourModal').addEventListener('shown', calculateTotals);
+
 function openCheckOutModal() {
     document.getElementById('checkOutModal').classList.remove('hidden');
 }

@@ -22,20 +22,20 @@
             
             <div class="mb-4">
                 <x-input-label for="email" :value="__('Email address')" />
-                <x-text-input type="email" name="email" value="{{ old('email')}}" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <x-text-input type="email" name="email" value="{{ old('email')}}" class="w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
             <div class="mb-4">
                 <x-input-label for="password" :value="__('Password')" />
-                <x-text-input type="password" name="password" autocomplete="current-password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <x-text-input type="password" name="password" autocomplete="current-password" class="w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
             <div class="flex justify-between items-center mb-4">
-                <label class="flex items-center">
-                    <input type="checkbox" name="remember" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2">
-                    <span class="text-gray-600 text-sm"> {{ __('Remember me') }}</span>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" name="remember" class="w-4 h-4 text-blue-600 border border-darkGray rounded focus:ring-blue-500 focus:ring-2">
+                    <span class="text-gray-600 text-sm">{{ __('Remember me') }}</span>
                 </label>
-                <a href="{{ route('password.request') }}" class="text-blue-700 hover:underline">Forgot password?</a>
+                <a href="{{ route('password.request') }}" class="text-blue-700 hover:underline text-sm">Forgot password?</a>
             </div>
                     
             <x-primary-button id="button" class="w-full flex items-center justify-center gap-2">

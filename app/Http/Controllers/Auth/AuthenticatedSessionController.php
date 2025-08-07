@@ -39,8 +39,11 @@ class AuthenticatedSessionController extends Controller
         else if ($user->role == 'Customer') 
         {
             // Redirect to customer dashboard
-            return redirect()->intended(route('dashboard', absolute: false));
+            return redirect()->intended(route('index', absolute: false));
         }
+
+        // Default redirect if role is not Admin or Customer
+        return redirect('index');
     }
 
     /**

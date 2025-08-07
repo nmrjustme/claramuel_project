@@ -121,21 +121,24 @@
 @endsection
 
 @section('content')
-<div class="min-h-screen p-6">
+<div class="min-h-screen px-6 py-6">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Booking Calendar</h1>
             <p class="text-gray-600">View bookings by date</p>
         </div>
         <div class="flex space-x-3">
-            <button onclick="loadCalendar()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-800 transition-colors flex items-center">
-                Refresh Calendar
+            <button id="refreshBtn" onclick="loadCalendar()" class="flex items-center text-blue-600 hover:text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                </svg>
+                Refresh
             </button>
         </div>
     </div>
 
     <!-- Calendar Container -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+    <div class="bg-white p-6 rounded-lg border border-lightGray mb-8">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-gray-800">Booking Calendar</h2>
             <div class="flex items-center space-x-4">
@@ -166,11 +169,8 @@
 </div>
 
 <!-- Booking Details Modal -->
-<div id="booking-details-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<div id="booking-details-modal" class="fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm hidden overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">

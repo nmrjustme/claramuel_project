@@ -22,7 +22,7 @@ class NewPasswordController extends Controller
     {
         return view('auth.reset-password', ['request' => $request]);
     }
-
+    
     /**
      * Handle an incoming new password request.
      *
@@ -36,27 +36,28 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+        // Get ONLY Admin users with this email
+        $adminUsers = User::where('email', $request->email)
+                        ->where('role', 'Admin')
+                        ->get();
 
-                event(new PasswordReset($user));
-            }
-        );
+        if ($adminUsers->isEmpty()) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => __('Only Admin accounts can reset passwords.')]);
+        }
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        // Manually reset passwords for each Admin user
+        foreach ($adminUsers as $user) {
+            $user->forceFill([
+                'password' => Hash::make($request->password),
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            event(new PasswordReset($user));
+        }
+
+        return redirect()->route('login')
+            ->with('status', __('Password reset successfully.'));
     }
 }

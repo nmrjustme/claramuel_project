@@ -11,15 +11,29 @@
         <link rel="icon" href="{{ asset('/favicon.ico?v=2') }}">
         <!-- Scripts -->
         <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
- 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+        @vite(['resources/js/app.js'])
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            lightGray: '#D3D3D3',
+                            darkGray: '#A0A0A0',
+                            backgroundLightGray: '#f6f6f6'
+                        },
+                    }
+                }
+            }
+        </script>
     </head>
 
         @if(View::hasSection('content') && !View::hasSection('auth') && !View::hasSection('profile'))
-            <body class="font-sans antialiased bg-gray-200">
+            <body class="font-sans antialiased">
                 <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
-                    <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-gray-100 shadow-md overflow-hidden sm:rounded-lg">
+                    <div class="w-full sm:max-w-md mt-6 px-6 py-4 rounded-lg lg:border border-lightGray overflow-hidden sm:rounded-lg">
                         @yield('content')
                     </div>
                 </div>
@@ -27,9 +41,9 @@
         @endif
         
         @if(View::hasSection('auth') && !View::hasSection('content') && !View::hasSection('profile'))
-            <body class="font-sans antialiased bg-gray-200">
+            <body class="font-sans antialiased">
                 <div class="h-screen flex items-center justify-center">
-                    <div class="w-full max-w-4xl flex flex-col lg:flex-row bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="w-full max-w-4xl flex flex-col lg:flex-row rounded-lg lg:border border-lightGray overflow-hidden">
                         @yield('auth')
                     </div>
                 </div>
@@ -37,7 +51,7 @@
         @endif
         
         @if(View::hasSection('profile') && !View::hasSection('auth') && !View::hasSection('content') && !View::hasSection('admin_profile'))
-            <body class="font-sans antialiased bg-gray-200">
+            <body class="bg-backgroundLightGray font-sans antialiased">
                 <div class="py-12">
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                             @yield('profile')

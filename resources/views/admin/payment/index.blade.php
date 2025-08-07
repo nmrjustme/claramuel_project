@@ -6,7 +6,7 @@
 @endphp
 
 @section('content')
-<div class="min-h-screen p-6">
+<div class="min-h-screen px-6 py-6">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Payments Verification</h1>
@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-lg shadow-sm border border-lightGray overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -83,7 +83,7 @@
             <div id="paymentDetails" class="space-y-4">
                 <!-- Dynamic content loaded via AJAX -->
                 <div class="text-center py-8">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
                     <p class="mt-2 text-gray-500">Loading payment details...</p>
                 </div>
             </div>
@@ -174,6 +174,7 @@
 let currentPaymentId = null;
 let eventSource = null;
 let amountPaid = null;
+
 const notificationSound = document.getElementById('notificationSound');
 
 // Initialize SSE connection
@@ -236,7 +237,7 @@ function viewPayment(paymentId) {
     
     content.innerHTML = `
         <div class="text-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
             <p class="mt-2 text-gray-500">Loading payment details...</p>
         </div>
     `;

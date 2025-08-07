@@ -141,7 +141,7 @@
                 <a href="#services" class="hover:text-gray-300  transition duration-300 font-medium">Services</a>
                 <a href="#gallery" class="hover:text-gray-300  transition duration-300 font-medium">Gallery</a>
                 <a href="#contact" class="hover:text-gray-300  transition duration-300 font-medium">Contact</a>
-                <a href="{{ route('login') }}" class="hover:text-accent transition duration-300 font-medium">Login</a>
+                <a href="{{ route('login') }}" class="hover:text-gray-300 transition duration-300 font-medium">Login</a>
                 <a href="{{ route('dashboard.bookings') }}" class="bg-accent hover:bg-darkAccent text-white px-5 py-2 rounded-sm transition duration-300 font-medium flex items-center btn-pulse">
                     <i class="fas fa-calendar-check mr-2"></i> Book Now
                 </a>
