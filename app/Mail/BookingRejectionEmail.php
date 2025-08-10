@@ -34,7 +34,7 @@ class BookingRejectionEmail extends Mailable
     public function build()
     {
         return $this->subject('Your Booking Has Been Rejected')
-                    ->markdown('emails.booking-rejection')
+                    ->markdown('emails.booking_rejection')
                     ->with([
                         'booking' => $this->booking,
                         'customMessage' => $this->customMessage
