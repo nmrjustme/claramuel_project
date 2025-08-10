@@ -9,25 +9,11 @@
     
     <!-- Fonts and Styles -->
     <link rel="icon" href="{{ asset('/favicon.ico?v=2') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
+    {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    @vite(['resources/js/app.js'])
-    <!-- In your layout file's head or before the closing body tag -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        lightGray: '#D3D3D3',
-                        darkGray: '#A0A0A0',
-                        backgroundLightGray: '#f6f6f6'
-                    },
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
         /* Smooth transitions for overlay */
@@ -48,7 +34,7 @@
     
     @yield('content_css')
 </head>
-<body class="bg-backgroundLightGray">
+<body>
     <!-- Notification sound element -->
     <!-- <audio id="notificationSound" src="{{ asset('sounds/mixkit-software-interface-back-2575.wav') }}" preload="auto"></audio> -->
     
@@ -104,7 +90,7 @@
     <div class="flex min-h-screen">
         <div class="flex-1 flex flex-col md:ml-64">
             <!-- Desktop Header -->
-            <header class="hidden md:block bg-gradient-to-r from-red-600 to-red-800 text-white shadow-md sticky top-0 z-50">
+            <header class="hidden md:block bg-gradient-to-r from-red-600 to-red-800 text-white shadow-md sticky top-0 z-50 ">
                 <div class="px-6 py-6 flex justify-between items-center">
                     <div class="flex items-center space-x-3">
                         <span class="text-2xl font-bold">

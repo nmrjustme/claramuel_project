@@ -1,4 +1,4 @@
-<tr data-id="{{ $payment->id }}" class="{{ $payment->is_read ? '' : 'bg-blue-50 highlight-new' }}">
+<tr data-id="{{ $payment->id }}" class="{{ $payment->is_read ? '' : 'bg-red-100 highlight-new' }}">
     <td class="px-6 py-4 whitespace-nowrap">
         <div class="text-sm font-medium text-gray-900">
             ₱{{ number_format($payment->amount, 2) }}
@@ -14,7 +14,7 @@
     </td>
     <td class="px-6 py-4">
         <div class="text-sm font-medium text-gray-900">
-            {{ $payment->gcash_number ?? 'N/A' }}
+            {{ $payment->gcash_number ?? 'No GCash number provided yet' }}
         </div>
         <div class="text-sm text-gray-500">
             {{ $payment->reference_no ?? 'No reference' }}
@@ -52,7 +52,7 @@
             @endif
         @endif
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    <td class="px-6 py-4 whitespace-nowrap">
         <button onclick="viewPayment('{{ $payment->id }}')" class="text-blue-600 hover:text-blue-900">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />

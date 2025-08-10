@@ -252,7 +252,7 @@
                                         $subtotal = ($facility->price + $breakfastPrice) * $nights;
                                         $totalAmount += $subtotal;
                                     }
-
+                                    
                                     $guestsForFacility = $payment->bookingLog->guestDetails
                                         ->where('facility_id', $summary->facility_id)
                                         ->groupBy('guest_type_id')

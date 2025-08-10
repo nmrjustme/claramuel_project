@@ -433,7 +433,7 @@
      /* Sticky sidebar */
      .sticky-sidebar {
           position: sticky;
-          top: 6rem;
+          top: 2rem;
           height: calc(100vh - 7.5rem);
           overflow-y: auto;
           margin-left: 2rem;
@@ -684,89 +684,90 @@
 
                     <!-- Group rooms by category with Netflix-style horizontal scrolling -->
                     <div id="facilities-container" class="space-y-8">
-                         @php
-                         // Group facilities by category
-                         $groupedFacilities = $facilities->groupBy('category');
-                         echo "<script>
-                              console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
-                         </script>";
-                         @endphp
-                         
-                         @foreach($groupedFacilities as $category => $facilitiesInCategory)
-                         <div class="category-container">
-                              <h3 class="category-title">{{ $category }}</h3>
+                    @php
+                    // Group facilities by category
+                    $groupedFacilities = $facilities->groupBy('category');
+                    echo "<script>
+                         console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
+                    </script>";
+                    @endphp
+                    
+                    @foreach($groupedFacilities as $category => $facilitiesInCategory)
+                    <div class="category-container">
+                         <h3 class="category-title">{{ $category }}</h3>
 
-                              <div class="relative" style="overflow: visible;">
-                                   <div class="rooms-scroll-container" id="scroll-{{ $loop->index }}">
-                                        @foreach($facilitiesInCategory as $facility)
-                                        @php
-                                        $facilityId = 'facility-' . $facility->id;
-                                        $allImages = [];
-                                        if ($facility->images->isNotEmpty()) {
-                                        $allImages = $facility->images->map(function($img) {
-                                        return asset('imgs/facility_img/' . $img->path);
-                                        })->toArray();
-                                        } else {
-                                        $allImages = [$facility->main_image];
+                         <div class="relative" style="overflow: visible;">
+                              <div class="rooms-scroll-container" id="scroll-{{ $loop->index }}">
+                                   @foreach($facilitiesInCategory as $facility)
+                                   @php
+                                   $facilityId = 'facility-' . $facility->id;
+                                   $allImages = [];
+                                   if ($facility->images->isNotEmpty()) {
+                                   $allImages = $facility->images->map(function($img) {
+                                   return asset('imgs/facility_img/' . $img->path);
+                                   })->toArray();
+                                   } else {
+                                   $allImages = [$facility->main_image];
+                                   }
+
+                                   $bookedDates = [];
+                                   $today = \Carbon\Carbon::today()->format('Y-m-d');
+
+                                   if (isset($unavailable_dates[$facility->id])) {
+                                   foreach ($unavailable_dates[$facility->id] as $period) {
+                                   try {
+                                   $start = \Carbon\Carbon::parse($period['checkin_date']);
+                                   $end = \Carbon\Carbon::parse($period['checkout_date'])->subDay(); // Subtract 1
+                                   // day to exclude checkout date
+
+                                   // If the booking includes today, make sure to include it
+                                   if ($start->format('Y-m-d') === $today) {
+                                   $bookedDates[] = $today;
+                                   }
+                                   
+                                   $current = clone $start;
+                                   while ($current <= $end) { $bookedDates[]=$current->format('Y-m-d');
+                                        $current->addDay();
+                                        }
+                                        } catch (\Exception $e) {
+                                        continue;
+                                        }
+                                        }
                                         }
 
-                                        $bookedDates = [];
-                                        $today = \Carbon\Carbon::today()->format('Y-m-d');
+                                        $bookedDates = array_values(array_unique($bookedDates));
+                                        @endphp
 
-                                        if (isset($unavailable_dates[$facility->id])) {
-                                        foreach ($unavailable_dates[$facility->id] as $period) {
-                                        try {
-                                        $start = \Carbon\Carbon::parse($period['checkin_date']);
-                                        $end = \Carbon\Carbon::parse($period['checkout_date'])->subDay(); // Subtract 1
-                                        // day to exclude checkout date
+                                        <div class="room-card border-lightGray flex flex-col h-full" data-price="{{ $facility->price }}"
+                                             data-room-id="{{ $facilityId }}" data-images='@json($allImages)'
+                                             data-booked-dates='{{ json_encode($bookedDates) }}'>
 
-                                        // If the booking includes today, make sure to include it
-                                        if ($start->format('Y-m-d') === $today) {
-                                        $bookedDates[] = $today;
-                                        }
+                                             @if ($facility->included != null)
+                                             <div class="included-ribbon">
+                                                  {{ $facility->included }}
+                                             </div>
+                                             @endif
 
-                                        $current = clone $start;
-                                        while ($current <= $end) { $bookedDates[]=$current->format('Y-m-d');
-                                             $current->addDay();
-                                             }
-                                             } catch (\Exception $e) {
-                                             continue;
-                                             }
-                                             }
-                                             }
+                                             <!-- Image Section -->
+                                             <div class="room-image-container">
+                                                  <a href="{{ route('my_modals', ['id' => $facility->id]) }}"
+                                                       class="block h-full">
+                                                       @if($facility->main_image)
+                                                       <img src="{{ $facility->main_image }}"
+                                                            alt="{{ $facility->name }}"
+                                                            class="w-full h-full object-cover transition-transform duration-300"
+                                                            onerror="this.onerror=null;this.src='https://placehold.co/500x300?text=No+Image+Available&font=roboto';this.classList.add('opacity-80')">
+                                                       @else
+                                                       <img src="https://placehold.co/500x300?text=No+Image+Available&font=roboto"
+                                                            alt="{{ $facility->name }}"
+                                                            class="w-full h-full object-cover opacity-80">
+                                                       @endif
+                                                  </a>
+                                             </div>
 
-                                             $bookedDates = array_values(array_unique($bookedDates));
-                                             @endphp
-
-                                             <div class="room-card border-lightGray" data-price="{{ $facility->price }}"
-                                                  data-room-id="{{ $facilityId }}" data-images='@json($allImages)'
-                                                  data-booked-dates='{{ json_encode($bookedDates) }}'>
-
-                                                  @if ($facility->included != null)
-                                                  <div class="included-ribbon">
-                                                       {{ $facility->included }}
-                                                  </div>
-                                                  @endif
-
-                                                  <!-- Image Section -->
-                                                  <div class="room-image-container">
-                                                       <a href="{{ route('my_modals', ['id' => $facility->id]) }}"
-                                                            class="block h-full">
-                                                            @if($facility->main_image)
-                                                            <img src="{{ $facility->main_image }}"
-                                                                 alt="{{ $facility->name }}"
-                                                                 class="w-full h-full object-cover transition-transform duration-300"
-                                                                 onerror="this.onerror=null;this.src='https://placehold.co/500x300?text=No+Image+Available&font=roboto';this.classList.add('opacity-80')">
-                                                            @else
-                                                            <img src="https://placehold.co/500x300?text=No+Image+Available&font=roboto"
-                                                                 alt="{{ $facility->name }}"
-                                                                 class="w-full h-full object-cover opacity-80">
-                                                            @endif
-                                                       </a>
-                                                  </div>
-
-                                                  <!-- Room Details -->
-                                                  <div class="room-details">
+                                             <!-- Room Details -->
+                                             <div class="room-details flex flex-col flex-grow p-4">
+                                                  <div>
                                                        <h3 class="room-title">
                                                             {{ $facility->name }}
                                                             @if($facility->room_number)
@@ -798,8 +799,8 @@
                                                        </button>
 
                                                        <!-- Booked dates only -->
-                                                       @if(!empty($bookedDates))
-                                                       <div class="unavailable-dates-container mt-3">
+                                                       
+                                                       <div class="unavailable-dates-container mt-3 mb-2">
                                                             <button
                                                                  class="toggle-unavailable-dates text-sm text-primary font-medium flex items-center">
                                                                  <i class="fas fa-calendar-times mr-2"></i>
@@ -809,24 +810,32 @@
                                                             </button>
 
                                                             <div class="unavailable-dates-content hidden mt-2">
+
                                                                  <div>
-                                                                      <h4
-                                                                           class="text-xs font-semibold text-gray-500 mb-1">
-                                                                           BLOCKED DATES:</h4>
-                                                                      <div class="text-xs">
-                                                                           {{ implode(', ', array_map(fn($date) =>
-                                                                           Carbon\Carbon::parse($date)->format('M j'),
-                                                                           $bookedDates)) }}
-                                                                      </div>
+                                                                      <h4 class="text-xs font-semibold text-gray-500 mb-1">
+                                                                           BLOCKED DATES:
+                                                                      </h4>
+                                                                      @if(empty($bookedDates))
+                                                                           <h4 class="text-xs font-semibold text-gray-500 mb-1">
+                                                                                No blocked dates
+                                                                           </h4>
+                                                                      @else
+                                                                           <div class="text-xs">
+                                                                                {{ implode(', ', array_map(fn($date) =>
+                                                                                Carbon\Carbon::parse($date)->format('M j'),
+                                                                                $bookedDates)) }}
+                                                                           </div>
+                                                                      @endif
                                                                  </div>
                                                             </div>
                                                        </div>
-                                                       @endif
                                                        
-                                                       <!-- Price and Book Button -->
-                                                       <div class="price-container mt-auto w-full">
-                                                       <div class="flex flex-col xs:flex-row justify-between items-start xs:items-end gap-2 xs:gap-3 p-2 xs:p-0">
-                                                            <div class="price-details flex-grow min-h-[60px]"> <!-- Added min-height to prevent layout shift -->
+                                                  </div>
+                                                  
+                                                  <!-- Price and Book Button - Fixed at bottom -->
+                                                  <div class="mt-auto pt-3">
+                                                       <div class="flex flex-col xs:flex-row justify-between items-start xs:items-end gap-2">
+                                                            <div class="price-details flex-grow min-h-[60px]">
                                                                  @php
                                                                       $activeDiscount = $facility->discounts->first(function ($discount) {
                                                                            return \Carbon\Carbon::now()->between(
@@ -869,41 +878,40 @@
                                                                  </div>
                                                             </div>
                                                             <button 
-                                                                 class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-3 py-2 xs:px-4 xs:py-2 text-xs xs:text-sm sm:text-base rounded-lg hover:scale-[1.02] transition-transform duration-200 ease-in-out shadow-sm hover:shadow-md active:scale-95"
-                                                                 data-room="{{ $facilityId }}"
-                                                                 style="align-self: flex-end;"> <!-- Force alignment to bottom -->
+                                                                 class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-3 py-2 xs:px-4 xs:py-2 text-xs xs:text-sm sm:text-base rounded-lg hover:scale-[1.02] transition-transform duration-200 ease-in-out shadow-sm hover:shadow-md active:scale-95 flex-shrink-0"
+                                                                 data-room="{{ $facilityId }}">
                                                                  Book Now
                                                             </button>
                                                        </div>
-                                                       </div>
                                                   </div>
                                              </div>
-                                             @endforeach
-                                   </div>
+                                        </div>
+                                        @endforeach
+                              </div>
 
-                                   <div class="scroll-arrows">
-                                        <button class="scroll-arrow scroll-left"
-                                             data-target="scroll-{{ $loop->index }}">
-                                             <i class="fas fa-chevron-left"></i>
-                                        </button>
-                                        <button class="scroll-arrow scroll-right"
-                                             data-target="scroll-{{ $loop->index }}">
-                                             <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                   </div>
+                              <div class="scroll-arrows">
+                                   <button class="scroll-arrow scroll-left"
+                                        data-target="scroll-{{ $loop->index }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                   </button>
+                                   <button class="scroll-arrow scroll-right"
+                                        data-target="scroll-{{ $loop->index }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                   </button>
                               </div>
                          </div>
-                         @endforeach
+                    </div>
+                    @endforeach
                     </div>
                </div>
           </div>
-
+          
           <!-- Right Column - Order Summary -->
           <div class="lg:w-2/5 space-y-4 sticky-sidebar">
                <!-- Date Selection Card -->
-               <div class="rounded-xl p-8 border border-lightGray">
+               <div class="bg-white rounded-xl p-8 border border-lightGray">
                     <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
-                         <i class="far fa-calendar-alt text-redprimary mr-3"></i>
+                         <i class="far fa-calendar-alt text-red primary mr-3"></i>
                          Select Your Dates
                     </h2>
 
@@ -931,7 +939,7 @@
                </div>
 
                <!-- Breakfast Option Card -->
-               <div class="rounded-xl p-8 border border-lightGray">
+               <div class="bg-white rounded-xl p-8 border border-lightGray">
                     <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
                          <i class="fas fa-utensils text-primary mr-3"></i>
                          Breakfast Option
@@ -959,7 +967,7 @@
                
                <!-- Booking Summary Card -->
                <div
-                    class="rounded-xl p-8 border border-lightGray">
+                    class="bg-white rounded-xl p-8 border border-lightGray">
                     <h2 class="text-2xl font-bold text-gray-800 mb-5 flex items-center">
                          <i class="fas fa-receipt text-primary mr-3 text-2xl"></i>
                          Booking Summary
@@ -999,7 +1007,7 @@
                     <button id="checkout-btn"
                          class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-70 disabled:transform-none hover:-translate-y-0.5 active:translate-y-0 btn-primary"
                          disabled>
-                         <span id="button-text">Proceed to Information</span>
+                         <span id="button-text">Proceed to Your Details</span>
                     </button>
                </div>
           </div>

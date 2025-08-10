@@ -99,7 +99,7 @@
     <div class="flex flex-col lg:flex-row gap-4">
         <!-- Main Content -->
         <div class="lg:w-3/4">
-            <div class="glass-card bg-white p-6 hover-scale rounded-lg border border-lightGray">
+            <div class="glass-card bg-white p-6 hover-scale rounded-lg border shadow-sm border-lightgray">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Bookings Management</h1>
@@ -113,7 +113,7 @@
                                 <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                             </svg>
                         </div>
-                        <input id="search-input" type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white/50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Search bookings...">
+                        <input id="search-input" type="text" class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-lg leading-5 bg-white/50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Search bookings...">
                     </div>
                 </div>
                 
@@ -190,7 +190,7 @@
             <!-- Sticky Wrapper -->
             <div class="sticky-container space-y-4">
                 <!-- Next Check-in Section -->
-                <div class="glass-card bg-white p-4 hover-scale rounded-lg border border-lightGray">
+                <div class="glass-card bg-white p-4 hover-scale rounded-lg border shadow-sm border-lightgray">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">Next Check-in</h3>
                         <div class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center">
@@ -237,7 +237,7 @@
                 
                 
                 <!-- Booking Summary -->
-                <div class="glass-card bg-white overflow-hidden hover-scale rounded-lg border border-lightGray">
+                <div class="glass-card bg-white overflow-hidden hover-scale rounded-lg border shadow-sm border-lightgray">
                     <div class="bg-gradient-to-r from-red-600 to-red-800 p-4 text-white">
                         <h2 class="text-xl font-bold flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -633,6 +633,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to load booking summary
     async function loadBookingSummary(bookingId) {
+        console.log(`Loading booking summary for ID: ${bookingId}`);
         try {
             // Show loading state
             document.getElementById('booking-summary').innerHTML = `
@@ -657,25 +658,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const data = await response.json();
             const booking = data.data;
-            const detail = booking.details[0];
+            const detail = booking.details?.[0];
             const paymentStatus = booking.payments?.[0]?.status || booking.status;
             const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
             
+            console.log('Booking data:', booking);
             
-            const advancePaid = booking.payments?.[0]?.amount_paid || 0;
-            const totalAmount = booking.details.reduce((sum, detail) => {
-                return sum + parseFloat(detail.total_price);
-            }, 0);
-            const checkinPaid = booking.payments?.[0]?.checkin_paid || 0;
+            const advancePaid = parseFloat(booking.payments?.[0]?.amount_paid) || 0;
+            const totalAmount = booking.details?.reduce((sum, detail) => {
+                return sum + parseFloat(detail.total_price || 0);
+            }, 0) || 0;
+            const checkinPaid = parseFloat(booking.payments?.[0]?.checkin_paid) || 0;
             const balance = (totalAmount - advancePaid) - checkinPaid;
-            
-            // Calculate payment summary using amount_paid
-            // const totalPaid = booking.payments?.reduce((sum, payment) => 
-            //     sum + (payment.amount_paid ? parseFloat(payment.amount_paid) : 0), 0) || 0;
-            
-            // const checkinPaid = booking.payments?.[0].checkin_paid || 0;
-            // const totalAmount = detail?.total_price || 0;
-            // const balance = (totalAmount - totalPaid) - checkinPaid;
             
             // Generate room list HTML
             const roomListHtml = booking.summaries?.length 
@@ -689,7 +683,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).join('')
                 : '<li class="text-sm text-gray-600 py-2">No room info available</li>';
 
-            // Generate payment history HTML - updated to show amount_paid
+            // Generate payment history HTML
             const paymentHistoryHtml = booking.payments?.length
                 ? booking.payments.map(payment => `
                     <li class="flex justify-between py-2 border-b border-gray-100 last:border-0">
@@ -701,152 +695,223 @@ document.addEventListener('DOMContentLoaded', function() {
                     </li>
                 `).join('')
                 : '<li class="text-sm text-gray-600 py-2">No payment history</li>';
-
-            // Generate the HTML template - updated payment summary section
+            
+            // Generate guest composition HTML with proper type conversion
+            const guestCompositionHtml = booking.summaries?.length 
+                ? booking.summaries.map(summary => {
+                    const room = summary.facility;
+                    if (!room) return '';
+                    
+                    const roomId = Number(room.id);
+                    console.log(`Processing room ${room.name} (ID: ${roomId})`);
+                    console.log('booking.guest_details:', booking.guest_details);
+                    
+                    // Get all guest details for this facility with type conversion
+                    const guestsForRoom = (booking.guest_details || []).filter(g => {
+                        const guestFacilityId = Number(g.facility_id);
+                        console.log(`Comparing room ${roomId} with guest facility ${guestFacilityId}`);
+                        return guestFacilityId === roomId;
+                    });
+                    
+                    console.log(`Found ${guestsForRoom.length} guest records for room ${roomId}`);
+                    
+                    // Group by guest type and sum quantities
+                    const guestTypeCounts = guestsForRoom.reduce((acc, guest) => {
+                        const type = guest.guest_type?.type || 'Unknown';
+                        const quantity = Number(guest.quantity) || 1;
+                        acc[type] = (acc[type] || 0) + quantity;
+                        return acc;
+                    }, {});
+                    
+                    console.log('Guest type counts:', guestTypeCounts);
+                    
+                    // Create guest items HTML
+                    const guestItems = Object.entries(guestTypeCounts).length 
+                        ? `
+                            <table class="w-full border-collapse mt-2">
+                                <tbody>
+                                    ${Object.entries(guestTypeCounts).map(([type, quantity]) => `
+                                        <tr>
+                                            <td class="p-1 border-b border-gray-200 text-sm">${type}</td>
+                                            <td class="p-1 border-b border-gray-200 text-sm text-right">${quantity} guest${quantity !== 1 ? 's' : ''}</td>
+                                        </tr>
+                                    `).join('')}
+                                    <tr class="font-semibold">
+                                        <td class="p-1">Total Guests</td>
+                                        <td class="p-1 text-right">${Object.values(guestTypeCounts).reduce((a, b) => a + b, 0)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        `
+                        : '<p class="text-sm text-gray-500 italic mt-2">No guest details recorded</p>';
+                    
+                    return `
+                        <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-800">${room.name}</h4>
+                            ${guestItems}
+                        </div>
+                    `;
+                }).join('')
+                : '<p class="text-sm text-gray-500 italic">No room information available</p>';
+            
+            // Generate the HTML template
             const html = `
-                <div class="divide-y divide-gray-200 fade-in">
-                    <!-- Header with Status and Guest Info -->
-                    <div class="px-4 py-5 bg-white">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900">${booking.reference}</h3>
-                                <p class="text-sm text-gray-500 mt-1">Booking ID: ${booking.id}</p>
-                            </div>
-                            <span class="px-3 py-1 rounded-full text-lg font-semibold ${statusInfo.class} text-white status-badge">
-                                ${statusInfo.text}
-                            </span>
+            <div class="divide-y divide-gray-200 fade-in">
+                <!-- Header with Status and Guest Info -->
+                <div class="px-4 py-5 bg-white">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">${booking.reference || 'N/A'}</h3>
+                            <p class="text-sm text-gray-500 mt-1">Booking ID: ${booking.id || 'N/A'}</p>
                         </div>
-                        
-                        <div class="mt-4">
-                            <h4 class="text-md font-semibold text-gray-800 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                        <span class="px-3 py-1 rounded-full text-lg font-semibold ${statusInfo.class} text-white status-badge">
+                            ${statusInfo.text}
+                        </span>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                            Guest Information
+                        </h4>
+                        <div class="mt-2 pl-7">
+                            <p class="text-sm font-medium text-gray-800">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                                 </svg>
-                                Guest Information
-                            </h4>
-                            <div class="mt-2 pl-7">
-                                <p class="text-sm font-medium text-gray-800">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</p>
-                                <p class="text-sm text-gray-600 mt-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                    </svg>
-                                    ${booking.user?.email || 'N/A'}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                                    </svg>
-                                    ${booking.user?.phone || 'N/A'}
-                                </p>
-                            </div>
+                                ${booking.user?.email || 'N/A'}
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                </svg>
+                                ${booking.user?.phone || 'N/A'}
+                            </p>
                         </div>
-                    </div>
-                    
-                    <!-- Stay Details -->
-                    <div class="px-4 py-5 bg-white">
-                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                            </svg>
-                            Stay Details
-                        </h4>
-                        <div class="mt-3 pl-7 space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Check-in:</span>
-                                <span class="text-sm font-medium text-gray-800">
-                                    ${formatDate(detail?.checkin_date)}
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Check-out:</span>
-                                <span class="text-sm font-medium text-gray-800">
-                                    ${formatDate(detail?.checkout_date)}
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Nights:</span>
-                                <span class="text-sm font-medium text-gray-800">
-                                    ${getNights(detail?.checkin_date, detail?.checkout_date)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Rooms Booked -->
-                    <div class="px-4 py-5 bg-white">
-                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                            </svg>
-                            Rooms Booked
-                        </h4>
-                        <ul class="mt-3 pl-7">
-                            ${roomListHtml}
-                        </ul>
-                    </div>
-                    
-                    <!-- Payment Summary -->
-                    <div class="px-4 py-5 bg-white">
-                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-                            </svg>
-                            Payment Summary
-                        </h4>
-                        <div class="mt-3 pl-7 space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Total Amount:</span>
-                                <span class="text-sm font-medium text-gray-800">
-                                    ${formatCurrency(totalAmount)}
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Advance Paid:</span>
-                                <span class="text-sm font-medium text-green-600">
-                                    ${formatCurrency(advancePaid)}
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Check-in Paid:</span>
-                                <span class="text-sm font-medium text-green-600">
-                                    ${formatCurrency(checkinPaid)}
-                                </span>
-                            </div>
-                            <div class="flex justify-between pt-2 border-t border-gray-100">
-                                <span class="text-sm font-semibold text-gray-700">Balance:</span>
-                                <span class="text-sm font-semibold ${balance > 0 ? 'text-red-600' : 'text-green-600'}">
-                                    ${formatCurrency(Math.abs(balance))}
-                                    ${balance > 0 ? '(Due)' : '(Overpaid)'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Payment History -->
-                    <div class="px-4 py-5 bg-white">
-                        <h4 class="text-md font-semibold text-gray-800 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                            </svg>
-                            Payment History
-                        </h4>
-                        <ul class="mt-3 pl-7">
-                            ${paymentHistoryHtml}
-                        </ul>
-                    </div>
-                    
-                    <!-- Actions -->
-                    <div class="px-4 py-4 bg-gray-50 flex justify-end space-x-3">
-                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">
-                            Edit
-                        </button>
-                        <button class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
-                            Cancel Booking
-                        </button>
                     </div>
                 </div>
+                
+                <!-- Stay Details -->
+                <div class="px-4 py-5 bg-white">
+                    <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                        </svg>
+                        Stay Details
+                    </h4>
+                    <div class="mt-3 pl-7 space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Check-in:</span>
+                            <span class="text-sm font-medium text-gray-800">
+                                ${detail ? formatDate(detail.checkin_date) : 'N/A'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Check-out:</span>
+                            <span class="text-sm font-medium text-gray-800">
+                                ${detail ? formatDate(detail.checkout_date) : 'N/A'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Nights:</span>
+                            <span class="text-sm font-medium text-gray-800">
+                                ${detail ? getNights(detail.checkin_date, detail.checkout_date) : 'N/A'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guest Composition -->
+                <div class="px-4 py-5 bg-white">
+                    <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                        </svg>
+                        Guest Composition
+                    </h4>
+                    <div class="mt-3 pl-7">
+                        ${guestCompositionHtml}
+                    </div>
+                </div>
+                
+                <!-- Rooms Booked -->
+                <div class="px-4 py-5 bg-white">
+                    <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
+                        Rooms Booked
+                    </h4>
+                    <ul class="mt-3 pl-7">
+                        ${roomListHtml}
+                    </ul>
+                </div>
+                
+                <!-- Payment Summary -->
+                <div class="px-4 py-5 bg-white">
+                    <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+                        </svg>
+                        Payment Summary
+                    </h4>
+                    <div class="mt-3 pl-7 space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Total Amount:</span>
+                            <span class="text-sm font-medium text-gray-800">
+                                ${formatCurrency(totalAmount)}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Advance Paid:</span>
+                            <span class="text-sm font-medium text-green-600">
+                                ${formatCurrency(advancePaid)}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Check-in Paid:</span>
+                            <span class="text-sm font-medium text-green-600">
+                                ${formatCurrency(checkinPaid)}
+                            </span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-gray-100">
+                            <span class="text-sm font-semibold text-gray-700">Balance:</span>
+                            <span class="text-sm font-semibold ${balance > 0 ? 'text-red-600' : 'text-green-600'}">
+                                ${formatCurrency(Math.abs(balance))}
+                                ${balance > 0 ? '(Due)' : '(Overpaid)'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment History -->
+                <div class="px-4 py-5 bg-white">
+                    <h4 class="text-md font-semibold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        </svg>
+                        Payment History
+                    </h4>
+                    <ul class="mt-3 pl-7">
+                        ${paymentHistoryHtml}
+                    </ul>
+                </div>
+                
+                <!-- Actions -->
+                <div class="px-4 py-4 bg-gray-50 flex justify-end space-x-3">
+                    <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">
+                        Edit
+                    </button>
+                    <button class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                        Cancel Booking
+                    </button>
+                </div>
+            </div>
             `;
             
             // Insert HTML into DOM

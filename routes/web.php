@@ -147,9 +147,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/get/admin/bookings', [BookingController::class, 'index']);
     Route::get('/get/bookings/next-checkin', [BookingController::class, 'nextCheckin']);
+    
     Route::get('/get/show/bookings/{booking}', [BookingController::class, 'show']);
-    Route::get('/admin/bookings/export/', [BookingController::class, 'export'])->name('admin.bookings.export');
 
+    Route::get('/admin/bookings/export/', [BookingController::class, 'export'])->name('admin.bookings.export');
+    
     Route::get('/facility_management', [AdminController::class, 'facilities'])->name('admin.facilities');
     Route::get('/events_management', [AdminController::class, 'events'])->name('admin.events');
     Route::get('/users_management', [AdminController::class, 'users'])->name('admin.users');

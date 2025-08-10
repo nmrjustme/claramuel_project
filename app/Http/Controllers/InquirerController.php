@@ -34,7 +34,7 @@ class InquirerController extends Controller
             ]);
     
             $booking = FacilityBookingLog::with(['user', 'details'])->findOrFail($id);
-    
+            $referenceNumber = '#CLM' . date('Y') . '-' . $booking->id;
             // Check if booking is already confirmed
             if ($booking->status === 'confirmed') {
                 return response()->json([
@@ -46,7 +46,8 @@ class InquirerController extends Controller
             $updateData = [
                 'status' => 'confirmed',
                 'confirmed_at' => Carbon::now(),
-                'confirmation_token' => Str::random(60)
+                'confirmation_token' => Str::random(60),
+                'reference' => $referenceNumber,
             ];
     
             // Start a database transaction
@@ -106,7 +107,7 @@ class InquirerController extends Controller
             ], 500);
         }
     }
-
+    
     /**
      * Send booking confirmation email
      *
@@ -160,12 +161,9 @@ class InquirerController extends Controller
                 ->whereNotNull('confirmation_token')
                 ->firstOrFail();
             
-            $referenceNumber = '#CLM' . date('Y') . '-' . $booking->id;
-            
             $booking->update([
                 'confirmation_token' => null,
                 'verified_at' => Carbon::now(),
-                'reference' => $referenceNumber
             ]);
 
             Log::info("Booking verified via email", ['booking_id' => $booking->id]);

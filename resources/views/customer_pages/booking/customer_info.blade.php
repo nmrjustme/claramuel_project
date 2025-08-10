@@ -655,59 +655,24 @@
                     </div>
                 </form>
             </div>
-            <div class="rounded-lg p-6 border border-lightGray mb-6">
-                <h3 class="text-lg font-semibold mb-3">Your arrival time</h3>
-                
-                <div class="flex items-start mb-4">
-                    <label for="room-ready-time" class="text-gray-700">
-                        Your room will be ready for check-in between 12:00 and 01:00
-                    </label>
-                </div>
-                
-                <div class="mb-3">
-                    <p class="font-medium text-gray-800">Add your estimated arrival time <span class="text-gray-500">(optional)</span></p>
-                </div>
-                
-                <div class="relative">
-                    <select id="arrival_time" name="arrival_time" class="w-full p-3 border border-gray-300 rounded-md appearance-none bg-white pr-8">
-                        <option selected disabled>Please select</option>
-                        <option value="08:00">08:00 AM</option>
-                        <option value="09:00">09:00 AM</option>
-                        <option value="10:00">10:00 AM</option>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="12:00">12:00 PM</option>
-                        <option value="13:00">01:00 PM</option>
-                        <option value="14:00">02:00 PM</option>
-                        <option value="15:00">03:00 PM</option>
-                        <option value="16:00">04:00 PM</option>
-                        <option value="17:00">05:00 PM</option>
-                        <option value="18:00">06:00 PM</option>
-                        <option value="19:00">07:00 PM</option>
-                        <option value="20:00">08:00 PM</option>
-                        <option value="21:00">09:00 PM</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                </div>
-                
-                <p class="text-sm text-gray-500 mt-2">Time is for Isabela time zone</p>
-            </div> 
+
+            <div class="rounded-lg mb-6 p-6 border border-lightGray text-center">
+                <h3 class="booking-summary-title">
+                    Your Payment Schedule
+                </h3>
+                <span class="booking-item-value">You will pay 50% of the total price after your request is confirmed</span>
+                <p class="mt-2 text-sm">Confirmation will send to your email</p>
+            </div>
+
+            <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp" style="animation-delay: 0.6s;">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d789.1338574963425!2d121.9251491!3d17.142796!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33856b144a6449f5%3A0xea1ad60f5e068495!2sMt.%20Claramuel%20Resort%20and%20Events%20Place!5e0!3m2!1sen!2sph!4v1711431557" 
+                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
         </div>
         
         <!-- Right Column - Booking Summary -->
-        <div class="lg:w-1/3">
+        <div class="lg:w-2/5 space-y-4">
             <div class="sticky top-6 space-y-6">
-
-                
-                <div class="rounded-xl shadow-sm p-4 border border-lightGray text-center">
-                    <h3 class="booking-summary-title">
-                        Your Payment Schedule
-                    </h3>
-                    <span class="booking-item-value">You will pay 50% of the total price after your request is confirmed</span>
-                </div>
                 <!-- Date Summary Card -->
                 <div class="border border-lightGray rounded-lg p-6">
                     <h3 class="booking-summary-title">
@@ -757,8 +722,48 @@
                         </div>
                     </div>
                 </div>        
+                <div class="rounded-lg p-6 border border-lightGray mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Your arrival time</h3>
+                    
+                    <div class="flex items-start mb-4">
+                        <label for="room-ready-time" class="text-gray-700">
+                            Your room will be ready for check-in between 12:00 and 01:00
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-gray-800">Add your estimated arrival time <span class="text-gray-500">(optional)</span></p>
+                    </div>
+                    
+                    <div class="relative">
+                        <select id="arrival_time" name="arrival_time" class="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white pr-8">
+                            <option selected disabled>Please select</option>
+                            <option value="08:00">08:00 AM</option>
+                            <option value="09:00">09:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="13:00">01:00 PM</option>
+                            <option value="14:00">02:00 PM</option>
+                            <option value="15:00">03:00 PM</option>
+                            <option value="16:00">04:00 PM</option>
+                            <option value="17:00">05:00 PM</option>
+                            <option value="18:00">06:00 PM</option>
+                            <option value="19:00">07:00 PM</option>
+                            <option value="20:00">08:00 PM</option>
+                            <option value="21:00">09:00 PM</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-gray-500 mt-2">Time is for Isabela time zone</p>
+                </div> 
                 <!-- Payment CTA Card - Enhanced -->
-                <div class="rounded-xl p-6 border border-lightGray">
+                <div class="rounded-lg p-6 border border-lightGray">
                     <div class="checkbox-container">
                         <input type="checkbox" id="terms-checkbox"
                             class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary mt-0.5">
@@ -786,7 +791,7 @@
                 </div>
                 
                 <!-- Customer Support -->
-                <div class="rounded-xl shadow-sm p-4 border border-lightGray text-center">
+                <div class="rounded-lg shadow-sm p-4 border border-lightGray text-center">
                     <h4 class="font-medium text-gray-700 mb-2">Need Help?</h4>
                     <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
                         <i class="fas fa-phone-alt text-red-500"></i>

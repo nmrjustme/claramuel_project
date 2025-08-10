@@ -1,5 +1,10 @@
-@import "tailwindcss";
-@source "../views";
-@import "flowbite/src/themes/default";
-@plugin "flowbite/plugin";
-@source "../node_modules/flowbite";
+@import 'tailwindcss';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+     --color-lightgray: oklch(0.7878 0 0);
+     --color-darkgray: oklch(0.5445 0 0);
+}    

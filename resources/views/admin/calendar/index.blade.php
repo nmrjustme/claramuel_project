@@ -138,7 +138,7 @@
     </div>
 
     <!-- Calendar Container -->
-    <div class="bg-white p-6 rounded-lg border border-lightGray mb-8">
+    <div class="bg-white p-6 rounded-lg border border-lightgray mb-8">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-gray-800">Booking Calendar</h2>
             <div class="flex items-center space-x-4">

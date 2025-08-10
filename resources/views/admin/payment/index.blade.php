@@ -15,7 +15,7 @@
         <div class="flex items-center space-x-4">
             <div class="relative">
                 <input type="text" id="searchPayments"
-                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    class="pl-10 pr-4 py-2 border border-darkgray rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-sm border border-lightGray overflow-hidden">
+    <div class="bg-white rounded-lg shadow-sm border border-lightgray overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -68,8 +68,8 @@
 </div>
 
 <!-- Payment Verification Modal -->
-<div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+<div id="paymentModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-[999]">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Verify Payment</h3>
@@ -124,6 +124,7 @@
         </div>
     </div>
 </div>
+
 <!-- Confirmation Modal (Hidden by Default) -->
 <div id="verifyConfirmationModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full">
@@ -208,8 +209,8 @@ function handleNewPayment(payment) {
             wrapper.innerHTML = html;
             const newRow = wrapper.firstElementChild;
             
-            newRow.classList.add('bg-blue-50', 'animate-pulse');
-            setTimeout(() => newRow.classList.remove('bg-blue-50', 'animate-pulse'), 5000);
+            newRow.classList.add('bg-red-100', 'animate-pulse');
+            setTimeout(() => newRow.classList.remove('bg-red-100', 'animate-pulse'), 5000);
             
             const tableBody = document.getElementById('paymentsTableBody');
             const emptyRow = tableBody.querySelector('tr:first-child td[colspan]');
@@ -263,13 +264,13 @@ function viewPayment(paymentId) {
         });
     
     modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+    document.body.style.overflow = 'hidden'; 
 }
 
 // Close modal
 function closeModal() {
     document.getElementById('paymentModal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
+    document.body.style.overflow = 'auto';
     currentPaymentId = null;
 }
 
@@ -277,6 +278,7 @@ function closeModal() {
 function showRejectForm() {
     document.getElementById('actionButtons').classList.add('hidden');
     document.getElementById('rejectForm').classList.remove('hidden');
+    
 }
 
 // Hide reject form
@@ -289,6 +291,7 @@ function hideRejectForm() {
 
 // Verify payment
 function verifyPayment() {
+    document.body.style.overflow = 'hidden';
     if (!currentPaymentId) return;
     
     const paymentDetails = document.getElementById('paymentDetails');
@@ -536,6 +539,9 @@ window.addEventListener('beforeunload', function() {
 
 @section('content_css')
 <style>
+.fixed {
+    position: fixed;
+}
 .animate-fade-in {
     animation: fadeIn 0.3s ease forwards;
 }

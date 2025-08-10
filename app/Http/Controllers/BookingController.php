@@ -355,13 +355,10 @@ class BookingController extends Controller
                 'user', 
                 'details', 
                 'payments.verifiedBy',
-                'summaries.facility'
+                'summaries.facility',
+                'guestDetails.guestType'
             ])
-            ->orderBy('confirmed_at', 'desc')
-            ->whereHas('payments', function($q) {
-                $q->whereNotNull('reference_no')
-                ->where('reference_no', '!=', '');
-            });
+            ->orderBy('created_at', 'desc');
 
         // Apply search filter if search term is provided
         if (!empty($search)) {
@@ -479,16 +476,23 @@ class BookingController extends Controller
             ], 500);
         }
     }
-
+    
     public function show(FacilityBookingLog $booking)
     {
-        $booking->load(['user', 'details', 'payments', 'summaries.facility']);
+        $booking->load([
+            'user',
+            'details',
+            'payments',
+            'summaries.facility',
+            'guestDetails.guestType'
+        ]);
         
         return response()->json([
-            'data' => $booking
+            'data' => $booking,
         ]);
+    
     }
-
+    
     public function getMyBookings(Request $request)
     {
         try {

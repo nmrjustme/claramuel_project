@@ -45,17 +45,19 @@
                                     </td>
                                 </tr>
                             </table>
-
+                            
                             <!-- Main Content -->
                             <h1 style="font-size:24px; font-weight:700; color:#1f2937; margin:0 0 16px 0;">Booking Confirmation</h1>
-                            <p style="margin:0 0 24px 0;">Dear {{ $booking->user->firstname }},</p>
+                            <p style="margin:0 0 8px 0;">Dear {{ $booking->user->firstname }},</p>
+                            
+                            <p style="margin:0 0 16px 0; font-weight:500; color:#dc2626;">Booking id: <span style="font-family:monospace;">{{ $booking->reference }}</span></p>
                             
                             <p style="margin:0 0 24px 0;">Your booking request has been confirmed!</p>
-
+                            
                             @if($customMessage)
                             <p style="margin:0 0 24px 0;">{{ $customMessage }}</p>
                             @endif
-
+                            
                             <!-- Booking Details -->
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f9fafb; padding:24px; border-radius:8px; margin-bottom:32px; border:1px solid #e5e7eb;">
                                 <tr>

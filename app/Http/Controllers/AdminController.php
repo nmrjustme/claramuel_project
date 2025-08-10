@@ -81,11 +81,11 @@ class AdminController extends Controller
             ->whereDate('checkin_date', '<=', $today)
             ->whereDate('checkout_date', '>=', $today)
             ->whereHas('bookingLog', function ($query) {
-                $query->where('status', 'confirmed')
-                      ->whereNotNull('checked_in_at')
-                      ->whereHas('payments', function ($q) {
-                          $q->where('status', 'paid');
-                      });
+                    $query->where('status', 'confirmed')
+                        ->whereNotNull('checked_in_at')
+                        ->whereHas('payments', function ($q) {
+                            $q->where('status', 'paid');
+                        });
             })
             ->get()
             ->map(function ($detail) {

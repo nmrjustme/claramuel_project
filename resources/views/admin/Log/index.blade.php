@@ -9,7 +9,7 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Request Monitoring</h1>
-            <p class="text-gray-600">Manually verify customer GCash payments by reference number</p>
+            <p class="text-gray-600">Confirm customer booking request</p>
         </div>
 
         <div class="flex items-center space-x-4">
@@ -36,12 +36,12 @@
                     <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                 </svg>
             </div>
-            <input id="searchInput" type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Search by name, ID or status">
+            <input id="searchInput" type="text" class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Search by name, ID or status">
         </div>
     </div>
 
     <!-- Booking List -->
-    <div class="bg-white rounded-lg overflow-hidden border border-lightGray">
+    <div class="bg-white rounded-lg overflow-hidden border border-lightgray">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -120,9 +120,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function getStatusInfo(status) {
         switch(status.toLowerCase()) {
             case 'confirmed':
-                return { class: 'bg-green-100 text-green-800', text: 'Confirmed' };
+                return { class: 'bg-green-600 text-white', text: 'Confirmed' };
             case 'pending_confirmation':
-                return { class: 'bg-yellow-100 text-yellow-800', text: 'Pending' };
+                return { class: 'bg-yellow-600 text-white', text: 'Pending' };
             case 'rejected':
                 return { class: 'bg-red-100 text-red-800', text: 'Rejected' };
             case 'completed':
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
         row.className = `hover:bg-gray-50 bg-blue-50 animate-pulse ${booking.is_read ? '' : 'bg-red-50'}`;
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${booking.id}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 ${booking.user.firstname} ${booking.user.lastname}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -156,11 +156,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${timeAgo(booking.created_at)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                </svg>
-                <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+                <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                    </svg>
+                    View
+                </button>
             </td>
         `;
         
@@ -205,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.className = `hover:bg-gray-50 ${booking.is_read ? '' : 'bg-red-50'}`;
             row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${booking.id}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     ${booking.user.firstname} ${booking.user.lastname}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -222,11 +224,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${timeAgo(booking.created_at)}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                    </svg>
-                    <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+                    <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                        </svg>
+                        View
+                    </button>
                 </td>
             `;
             bookingsTableBody.appendChild(row);
@@ -420,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function viewBooking(bookingId, buttonElement) {
     try {
         // Show loading state on the button
-        const originalText = buttonElement.textContent;
+        const originalContent = buttonElement.innerHTML; // Store the full HTML content
         buttonElement.innerHTML = '<span class="animate-spin">↻</span> Loading...';
         buttonElement.disabled = true;
 
@@ -475,15 +479,15 @@ async function viewBooking(bookingId, buttonElement) {
 
         // Reset button state after modal is shown
         setTimeout(() => {
-            buttonElement.innerHTML = originalText;
+            buttonElement.innerHTML = originalContent; // Restore the full HTML content
             buttonElement.disabled = false;
         }, 1000);
         
     } catch (error) {
         console.error('Error viewing booking:', error);
-        buttonElement.textContent = 'Error';
+        buttonElement.innerHTML = 'Error';
         setTimeout(() => {
-            buttonElement.textContent = originalText;
+            buttonElement.innerHTML = originalContent; // Restore the full HTML content
             buttonElement.disabled = false;
         }, 1000);
     }
