@@ -504,19 +504,8 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 bookings.forEach(booking => {
                     // Get the payment status from the first payment or use booking status as fallback
-                    let paymentStatus;
-                    if (booking.payments && booking.payments.length > 0) {
-                        const payment = booking.payments[0];
-                        if (payment.remaining_balance_status === 'fully_paid') {
-                            paymentStatus = 'fully_paid';
-                        } else if (payment.status === 'verified') {
-                            paymentStatus = 'verified';
-                        } else {
-                            paymentStatus = payment.status || booking.status;
-                        }
-                    } else {
-                        paymentStatus = booking.status;
-                    }
+                    let paymentStatus = status === 'fully_paid' ? 'fully_paid' : 
+                        booking.payments?.[0]?.status || booking.status;
                     
                     const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
                     const verifiedBy = booking.payments?.[0]?.verified_by?.firstname || 'System Admin';
@@ -674,12 +663,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const detail = booking.details?.[0];
 
             let paymentStatus;
-            if (booking.payments?.[0]?.status === 'verified') {
-                paymentStatus = 'verified';
+            const payment = booking.payments?.[0];
+
+            if (currentStatus === 'fully_paid') {
+                paymentStatus = 'fully_paid'; // Force fully_paid status for this tab
+            } else if (payment) {
+                if (payment.remaining_balance_status === 'fully_paid') {
+                    paymentStatus = 'fully_paid';
+                } else {
+                    paymentStatus = payment.status || booking.status;
+                }
             } else {
-                paymentStatus = booking.payments?.[0]?.remaining_balance_status === 'fully_paid' 
-                    ? 'fully_paid' 
-                    : 'with_balance';
+                paymentStatus = booking.status;
             }
 
             const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;

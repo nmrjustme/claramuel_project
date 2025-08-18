@@ -372,7 +372,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-
+    
     public function WaitConfirmation(Request $request)
     {
         $email = $request->query('email');
@@ -384,7 +384,7 @@ class BookingController extends Controller
         $email = $request->query('email');
         return view('customer_pages.booking.wait_for_confirmation', ['email' => $email]);
     }
-
+    
     public function index(Request $request)
     {
         $status = $request->input('status', 'fully_paid');
@@ -420,7 +420,7 @@ class BookingController extends Controller
                 });
             });
         }
-
+        
         // Status filter based on payments
         if (in_array($status, ['fully_paid', 'verified', 'pending', 'rejected', 'under_verification'])) {
             $query->whereHas('payments', function($q) use ($status) {
