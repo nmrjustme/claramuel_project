@@ -28,8 +28,9 @@
                                         <dt class="text-sm text-gray-500">Amount Paid</dt>
                                         <dd>
                                                 <input type="number" step="0.01" name="amount_paid" id="amountPaid"
-                                                        class="form-input border border-gray-300 rounded-md px-2 py-1 text-sm w-32"
-                                                        placeholder="₱0.00" value="{{ old('amount_paid') }}">
+                                                class="form-input border border-gray-300 rounded-md px-2 py-1 text-sm w-32"
+                                                placeholder="₱0.00" value="{{ old('amount_paid') }}" required>
+                                                <span class="text-xs text-red-500 hidden" id="amountError">Please enter the amount paid</span>
                                         </dd>
                                 </div>
                         </dl>

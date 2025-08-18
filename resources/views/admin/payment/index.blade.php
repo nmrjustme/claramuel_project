@@ -133,16 +133,22 @@
             </div>
 
                 <!-- Action Buttons (hidden by default) -->
-                <div id="actionButtons" class="mt-6">
-                    <div class="flex justify-end space-x-3">
-                        <button onclick="verifyPayment()" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            Verify Payment
-                        </button>
-                        <button onclick="showRejectForm()" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                            Reject Payment
-                        </button>
-                    </div>
+            <div id="actionButtons" class="mt-6">
+                <div class="flex justify-end space-x-3">
+                    <button onclick="verifyPayment()" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        Verify Payment
+                    </button>
+                    <button onclick="showRejectForm()" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Reject Payment
+                    </button>
                 </div>
+            </div>
           
             <!-- Rejection Form (hidden by default) -->
             <div id="rejectForm" class="mt-4 hidden">
@@ -403,6 +409,21 @@ function hideRejectForm() {
 
 // Verify payment
 function verifyPayment() {
+    const amountPaidInput = document.getElementById('amountPaid');
+    const amountError = document.getElementById('amountError');
+    const amountPaid = amountPaidInput.value.trim();
+    
+    // Validate amount
+    if (!amountPaid || isNaN(amountPaid) || parseFloat(amountPaid) <= 0) {
+        amountError.classList.remove('hidden');
+        amountPaidInput.classList.add('border-red-500');
+        amountPaidInput.focus();
+        return;
+    } else {
+        amountError.classList.add('hidden');
+        amountPaidInput.classList.remove('border-red-500');
+    }
+
     const button = document.querySelector('#actionButtons button:first-child');
     const originalText = button.innerHTML;
     
@@ -411,13 +432,10 @@ function verifyPayment() {
     if (!confirmed) {
         return; // Exit if user cancels
     }
-
+    
     button.innerHTML = '<span class="animate-pulse">Verifying...</span>';
     button.disabled = true;
-
-    // Get the amount from the modal
-    const amountPaid = document.getElementById('amountPaid').value;
-
+    
     fetch(`/payments/${currentPaymentId}/verify-with-receipt`, {
         method: 'POST',
         headers: {

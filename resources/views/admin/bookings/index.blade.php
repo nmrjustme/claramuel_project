@@ -505,14 +505,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 bookings.forEach(booking => {
                     // Get the payment status from the first payment or use booking status as fallback
                     let paymentStatus;
-                    if (currentStatus === 'verified') {
-                        paymentStatus = booking.payments?.[0]?.status || booking.status;
-                    } else if (currentStatus === 'fully_paid') {
-                        paymentStatus = booking.payments?.[0]?.remaining_balance_status === 'fully_paid' 
-                            ? 'fully_paid' 
-                            : 'with_balance';
+                    if (booking.payments && booking.payments.length > 0) {
+                        const payment = booking.payments[0];
+                        if (payment.remaining_balance_status === 'fully_paid') {
+                            paymentStatus = 'fully_paid';
+                        } else if (payment.status === 'verified') {
+                            paymentStatus = 'verified';
+                        } else {
+                            paymentStatus = payment.status || booking.status;
+                        }
                     } else {
-                        paymentStatus = booking.payments?.[0]?.status || booking.status;
+                        paymentStatus = booking.status;
                     }
                     
                     const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
