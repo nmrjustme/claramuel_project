@@ -405,10 +405,17 @@ function hideRejectForm() {
 function verifyPayment() {
     const button = document.querySelector('#actionButtons button:first-child');
     const originalText = button.innerHTML;
+    
+    // Show confirmation dialog
+    const confirmed = confirm('Are you sure you want to verify this payment?');
+    if (!confirmed) {
+        return; // Exit if user cancels
+    }
+
     button.innerHTML = '<span class="animate-pulse">Verifying...</span>';
     button.disabled = true;
 
-    // Get the amount from the modal (you'll need to add this field to your modal)
+    // Get the amount from the modal
     const amountPaid = document.getElementById('amountPaid').value;
 
     fetch(`/payments/${currentPaymentId}/verify-with-receipt`, {
