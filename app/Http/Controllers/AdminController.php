@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FacilityBookingLog;
-use App\Events\InquiryRead;
-use App\Events\AllInquiriesRead;
 use Illuminate\Support\Facades\DB;
-use App\Models\Facility;
+use Illuminate\Support\Facades\Auth;
 use App\Models\FacilityBookingDetails;
+use Webklex\IMAP\Facades\Client;
+use App\Models\User;
+use App\Models\Payments;
+use App\Events\UnreadCountsUpdated;
 
 class AdminController extends Controller
 {
@@ -48,7 +50,8 @@ class AdminController extends Controller
         ]);
     }
     
-    public function inquiries(){
+    public function inquiries()
+    {
         $inquiries = FacilityBookingLog::with(['user', 'details', 'payments'])->get();
         return view('admin.Log.index', compact('inquiries'));
     }
@@ -62,12 +65,7 @@ class AdminController extends Controller
     {
         return view('admin.calendar.index');
     }
-    
-    private function BookingFacilityData()
-    {
-        return Facility::all(['id', 'name', 'category', 'price', 'description']);
-    }
-    
+
     public function getOccupiedFacilities()
     {
         $today = now()->toDateString();
@@ -106,14 +104,92 @@ class AdminController extends Controller
     
     public function getStats()
     {
+        $totalBookings = FacilityBookingLog::get()->count();
+        $pendingConfirmation = FacilityBookingLog::where('status', 'pending_confirmation')->count();
+        $under_verification_payments = FacilityBookingLog::whereHas('payments', function ($query) {
+                $query->where('status', 'under_verification');
+            })->count();
+
+        $pending_payments = FacilityBookingLog::whereHas('payments', function ($query) {
+                $query->where('status', 'Pending');
+            })->count();
+        
         return response()->json([
-            'pending' => FacilityBookingLog::where('status', 'pending_confirmation')->count(),
-            
-            'pending_payments' => FacilityBookingLog::whereHas('payments', function ($query) {
-                $query->where('status', 'not_paid');
-            })->count(),
-            
+            'total_booking' => $totalBookings,
+            'pending' => $pendingConfirmation,
+            'under_verification_payments' => $under_verification_payments,
+            'pending_payments' => $pending_payments
         ]);
+    }
+    
+    public function getActiveAdmins()
+    {
+        $activeAdmins = User::where('role', 'Admin')
+                            ->select('id', 'firstname', 'lastname', 'email', 'phone', 'profile_img', 'is_active')
+                            ->orderBy('created_at', 'desc')
+                            ->get()
+                            ->map(function ($admin) {
+                                return [
+                                    'id' => $admin->id,
+                                    'fullname' => $admin->firstname . ' ' . $admin->lastname,
+                                    'email' => $admin->email,
+                                    'phone' => $admin->phone,
+                                    'profile_img' => $admin->profile_img,
+                                    'is_active' => $admin->is_active
+                                ];
+                            });
+        
+        return response()->json($activeAdmins);
+    }
+
+    public function updateActiveHost(Request $request)
+    {
+        $request->validate([
+            'is_active' => 'required|boolean'
+        ]);
+
+        // authenticated user with proper type hinting
+        $user = Auth::user();
+        
+        if (!$user instanceof User) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid user instance'
+            ], 401);
+        }
+
+        // Update using both methods for maximum compatibility
+        $user->is_active = $request->is_active;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'is_active' => $user->is_active_host
+        ]);
+    }
+
+    public function getAllUnreadCounts()
+    {
+        // Email Badge 
+        $client = Client::account('default');
+        $client->connect();
+        $folder = $client->getFolder('INBOX');
+        $unreadMessages = $folder->query()->unseen()->get();
+        
+        // Sidebar Badge
+        $inquiriesCount = FacilityBookingLog::where('is_read', false)->count();
+        $paymentCount = Payments::where('is_read', false)->count();
+        
+        $counts = [
+            'emailBadgeCount' => $unreadMessages->count(),
+            'inquiriesCount' => $inquiriesCount,
+            'paymentCount' => $paymentCount // Fixed: Changed comma to =>
+        ];
+        
+        // Broadcast the event
+        event(new UnreadCountsUpdated($counts));
+        
+        return response()->json($counts);
     }
     
 }

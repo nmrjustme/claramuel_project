@@ -44,16 +44,16 @@ window.handleViewInquiry = function(button) {
     
     // Mark as read before opening modal
     markInquiryAsRead(id)
-         .then(() => {
-             // Call the modal's open function after marking as read
-             if (typeof window.openModal_accept_inquirer === 'function') {
-                 window.openModal_accept_inquirer(button);
-             }
-         })
-         .catch(error => {
-            console.error('Error:', error);
-         });
-};
+            .then(() => {
+                // Call the modal's open function after marking as read
+                if (typeof window.openModal_accept_inquirer === 'function') {
+                    window.openModal_accept_inquirer(button);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    };
 
 // Function to load inquiries via AJAX
 function loadInquiries(search = '') {

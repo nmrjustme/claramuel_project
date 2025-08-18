@@ -138,7 +138,7 @@
     </div>
 
     <!-- Calendar Container -->
-    <div class="bg-white p-6 rounded-lg border border-lightgray mb-8">
+    <div class="bg-white p-6 rounded-lg mb-8 shadow-sm">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-gray-800">Booking Calendar</h2>
             <div class="flex items-center space-x-4">
@@ -182,7 +182,7 @@
                         <div class="mt-4" id="modal-content">
                             <!-- Booking details will be loaded here -->
                             <div class="text-center py-8">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                                <div class="animate-spin rounded-full h-8 w-8 border border-red-600 mx-auto"></div>
                                 <p class="mt-2 text-gray-500">Loading booking details...</p>
                             </div>
                         </div>
@@ -521,7 +521,7 @@ function renderBookingsModal(bookings) {
                 
                 return `
                     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                        <div class="bg-gray-50 px-4 py-3 border border-gray-50">
                             <div class="flex justify-between items-center">
                                 <div>
                                     <h4 class="font-medium text-gray-900">${booking.user_name}</h4>
@@ -531,9 +531,6 @@ function renderBookingsModal(bookings) {
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
                                         ${statusText}
                                     </span>
-                                    <div class="mt-1 text-xs ${booking.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'}">
-                                        ${booking.payment_status || 'N/A'}
-                                    </div>
                                 </div>
                             </div>
                             <div class="mt-2 flex items-center text-sm text-gray-500">

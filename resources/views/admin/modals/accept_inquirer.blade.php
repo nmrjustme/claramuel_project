@@ -245,6 +245,18 @@
         color: #166534;
         margin-top: 0.25rem;
     }
+
+    /* Add this to your existing styles */
+    .arriving-time {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background-color: #eff6ff;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        color: #1d4ed8;
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
 </style>
 
 <!-- Modal Container -->
@@ -569,6 +581,12 @@
                             <span class="font-medium text-gray-600">Email:</span>
                             <span class="ml-2">${data.user?.email || 'Not provided'}</span>
                         </p>
+                        ${data.arriving_time ? `
+                        <p class="text-sm mt-1">
+                            <span class="font-medium text-gray-600">Estimated Arrival:</span>
+                            <span class="ml-2 arriving-time">${data.arriving_time}</span>
+                        </p>
+                        ` : ''}
                     </div>
                     <div>
                         <p class="text-sm">
@@ -705,7 +723,7 @@
                 });
             });
     };
-
+    
     // ======================
     // DATA FETCHING FUNCTIONS
     // ======================

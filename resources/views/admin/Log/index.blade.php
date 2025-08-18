@@ -11,13 +11,10 @@
             <h1 class="text-3xl font-bold text-gray-800">Request Monitoring</h1>
             <p class="text-gray-600">Confirm customer booking request</p>
         </div>
-
+        
         <div class="flex items-center space-x-4">
             <span class="text-sm text-gray-600">
                 Total Inquiries: <span id="bookingCount" class="font-bold">0</span>
-            </span>
-            <span class="text-sm text-gray-600 ml-4">
-                <span class="inline-block w-3 h-3 bg-red-200 rounded-full mr-1"></span> Unread requests
             </span>
             <button id="refreshBtn" class="flex items-center text-blue-600 hover:text-blue-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -27,27 +24,51 @@
             </button>
         </div>
     </div>
-
-    <!-- Search Section -->
-    <div class="mb-6">
-        <div class="relative max-w-md">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                </svg>
+    
+    <!-- Search and Filter Section -->
+    <div class="mb-6 flex justify-between items-center">
+        <div class="relative max-w-md flex items-center gap-2">
+            <div class="flex-1 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <input id="searchInput" type="text" class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Search by name, ID or status">
             </div>
-            <input id="searchInput" type="text" class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Search by name, ID or status">
+            <div class="flex gap-2">
+                <button id="filterRead" class="px-4 py-2 rounded-md text-xs font-medium bg-green-100 text-green-800 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Read
+                </button>
+                <button id="filterUnread" class="px-4 py-2 rounded-md text-xs font-medium bg-red-100 text-red-800 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    Unread
+                </button>
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button id="filterPending" class="px-4 py-2 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                Pending
+            </button>
+            <button id="filterConfirmed" class="px-4 py-2 rounded-md text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-500">
+                Confirmed
+            </button>
+            <button id="filterRejected" class="px-4 py-2 rounded-md text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500">
+                Rejected
+            </button>
+            <button id="filterAll" class="px-4 py-2 rounded-md text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                All
+            </button>
         </div>
     </div>
 
     <!-- Booking List -->
-    <div class="bg-white rounded-lg overflow-hidden border border-lightgray">
+    <div class="bg-white rounded-lg overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-100">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Read Status</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Status</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Time</th>
@@ -75,11 +96,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookingCount = document.getElementById('bookingCount');
     const searchInput = document.getElementById('searchInput');
     const paginationDiv = document.getElementById('pagination');
+    const filterPending = document.getElementById('filterPending');
+    const filterConfirmed = document.getElementById('filterConfirmed');
+    const filterRejected = document.getElementById('filterRejected');
+    const filterRead = document.getElementById('filterRead');
+    const filterUnread = document.getElementById('filterUnread');
+    const filterAll = document.getElementById('filterAll');
     
     let allBookings = [];
     let currentPage = 1;
     let totalPages = 1;
     let currentSearchTerm = '';
+    let currentFilter = 'all'; // 'all', 'pending', 'confirmed', 'rejected'
+    let currentReadFilter = 'all'; // 'all', 'read', 'unread'
 
     const searchInquiryId = sessionStorage.getItem('searchInquiryId');
     if (searchInquiryId) {
@@ -131,7 +160,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return { class: 'bg-gray-100 text-gray-800', text: status };
         }
     }
-
+    
+    function getDateCreated(dateInput) {
+        const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        return date.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        });
+    }
+    
     // Function to add a new booking to the table with animation
     function addNewBooking(booking) {
         const statusInfo = getStatusInfo(booking.status);
@@ -141,6 +179,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${booking.id}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 ${booking.user.firstname} ${booking.user.lastname}
+                <div class="text-sm text-gray-500">
+                    ${booking.user.email}
+                </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.is_read ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
@@ -154,6 +195,9 @@ document.addEventListener('DOMContentLoaded', function() {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title="${new Date(booking.created_at).toLocaleString()}">
                 ${timeAgo(booking.created_at)}
+                <div class="text-sm text-gray-500">
+                    ${getDateCreated(booking.created_at)}
+                </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
@@ -209,6 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${booking.id}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     ${booking.user.firstname} ${booking.user.lastname}
+                    <div class="text-sm text-gray-500">
+                        ${booking.user.email}
+                    </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.is_read ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
@@ -222,6 +269,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title="${new Date(booking.created_at).toLocaleString()}">
                     ${timeAgo(booking.created_at)}
+                    <div class="text-sm text-gray-500">
+                        ${getDateCreated(booking.created_at)}
+                    </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
@@ -366,6 +416,28 @@ document.addEventListener('DOMContentLoaded', function() {
             url += `&search=${encodeURIComponent(currentSearchTerm)}`;
         }
         
+        // Add status filter to the URL
+        if (currentFilter !== 'all') {
+            let statusParam = '';
+            switch(currentFilter) {
+                case 'pending':
+                    statusParam = 'pending_confirmation';
+                    break;
+                case 'confirmed':
+                    statusParam = 'confirmed';
+                    break;
+                case 'rejected':
+                    statusParam = 'rejected';
+                    break;
+            }
+            url += `&status=${statusParam}`;
+        }
+        
+        // Add read status filter to the URL
+        if (currentReadFilter !== 'all') {
+            url += `&read_status=${currentReadFilter}`;
+        }
+        
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -409,6 +481,111 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     });
 
+    // Filter button event listeners
+    filterPending.addEventListener('click', function() {
+        currentFilter = 'pending';
+        currentReadFilter = 'all';
+        currentPage = 1;
+        updateActiveFilter();
+        fetchBookings();
+    });
+
+    filterConfirmed.addEventListener('click', function() {
+        currentFilter = 'confirmed';
+        currentReadFilter = 'all';
+        currentPage = 1;
+        updateActiveFilter();
+        fetchBookings();
+    });
+
+    filterRejected.addEventListener('click', function() {
+        currentFilter = 'rejected';
+        currentReadFilter = 'all';
+        currentPage = 1;
+        updateActiveFilter();
+        fetchBookings();
+    });
+
+    filterRead.addEventListener('click', function() {
+        currentReadFilter = 'read';
+        currentFilter = 'all';
+        currentPage = 1;
+        updateActiveFilter();
+        fetchBookings();
+    });
+
+    filterUnread.addEventListener('click', function() {
+        currentReadFilter = 'unread';
+        currentFilter = 'all';
+        currentPage = 1;
+        updateActiveFilter();
+        fetchBookings();
+    });
+
+    filterAll.addEventListener('click', function() {
+        currentFilter = 'all';
+        currentReadFilter = 'all';
+        currentPage = 1;
+        updateActiveFilter();
+        fetchBookings();
+    });
+
+    // Function to update active filter button styles
+    function updateActiveFilter() {
+        // Reset all buttons
+        [filterPending, filterConfirmed, filterRejected, filterRead, filterUnread, filterAll].forEach(btn => {
+            btn.classList.remove('ring-2', 'ring-offset-2');
+            // Restore original classes - you might need to adjust these based on your actual button classes
+            btn.className = 'px-4 py-2 rounded-md text-xs font-medium focus:outline-none focus:ring-2';
+            
+            // Add back the specific color classes for each button
+            if (btn === filterPending) {
+                btn.classList.add('bg-yellow-100', 'text-yellow-800', 'hover:bg-yellow-200', 'focus:ring-yellow-500');
+            } else if (btn === filterConfirmed) {
+                btn.classList.add('bg-green-100', 'text-green-800', 'hover:bg-green-200', 'focus:ring-green-500');
+            } else if (btn === filterRejected) {
+                btn.classList.add('bg-red-100', 'text-red-800', 'hover:bg-red-200', 'focus:ring-red-500');
+            } else if (btn === filterRead) {
+                btn.classList.add('bg-green-100', 'text-green-800', 'hover:bg-blue-200', 'focus:ring-blue-500');
+            } else if (btn === filterUnread) {
+                btn.classList.add('bg-red-100', 'text-red-800', 'hover:bg-purple-200', 'focus:ring-purple-500');
+            } else if (btn === filterAll) {
+                btn.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200', 'focus:ring-gray-500');
+            }
+        });
+                
+        // Highlight active button
+        let activeButton;
+        if (currentReadFilter !== 'all') {
+            activeButton = currentReadFilter === 'read' ? filterRead : filterUnread;
+        } else {
+            switch(currentFilter) {
+                case 'pending':
+                    activeButton = filterPending;
+                    break;
+                case 'confirmed':
+                    activeButton = filterConfirmed;
+                    break;
+                case 'rejected':
+                    activeButton = filterRejected;
+                    break;
+                default:
+                    activeButton = filterAll;
+            }
+        }
+        
+        activeButton.classList.add('ring-2', 'ring-offset-2');
+        if (activeButton === filterPending) activeButton.classList.add('ring-yellow-500');
+        if (activeButton === filterConfirmed) activeButton.classList.add('ring-green-500');
+        if (activeButton === filterRejected) activeButton.classList.add('ring-red-500');
+        if (activeButton === filterRead) activeButton.classList.add('ring-blue-500');
+        if (activeButton === filterUnread) activeButton.classList.add('ring-purple-500');
+        if (activeButton === filterAll) activeButton.classList.add('ring-gray-500');
+    }
+
+    // Initialize active filter
+    updateActiveFilter();
+
     // Listen for new booking events
     if (typeof Echo !== 'undefined') {
         window.Echo.channel('bookings')
@@ -418,7 +595,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 });
-
 
 // View booking function
 async function viewBooking(bookingId, buttonElement) {

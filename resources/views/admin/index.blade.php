@@ -40,7 +40,6 @@ $active = 'dashboard';
           background: rgba(255, 255, 255, 0.7);
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.128);
-          box-shadow: 0 4px 12px 0 rgba(108, 29, 32, 0.15);
      }
      
      .animated-gradient {
@@ -52,7 +51,7 @@ $active = 'dashboard';
           0% {
                background-position: 0% 50%;
           }
-
+          
           50% {
                background-position: 100% 50%;
           }
@@ -60,10 +59,6 @@ $active = 'dashboard';
           100% {
                background-position: 0% 50%;
           }
-     }
-
-     .hover-scale {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
      }
 
      .status-pulse {
@@ -160,6 +155,139 @@ $active = 'dashboard';
           width: 100%;
           height: 100%
      }
+     
+     /* Status Cards - High Contrast Version */
+     .status-card {
+          background: white;
+          border-radius: 12px;
+          padding: 1.5rem;
+          position: relative;
+          overflow: hidden;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          transition: all 0.2s ease;
+     }
+
+     .status-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 5px;
+          height: 100%;
+     }
+
+     .status-card.total-bookings::before {
+          background: #2563EB; /* Vibrant blue */
+     }
+
+     .status-card.pending-confirmations::before {
+          background: #D97706; /* Vibrant amber */
+     }
+
+     .status-card.awaiting-payments::before {
+          background: #7C3AED; /* Vibrant violet */
+     }
+
+     .status-card.verified-bookings::before {
+          background: #059669; /* Vibrant emerald */
+     }
+
+     .status-card .card-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+     }
+
+     .status-card .text-content {
+     flex: 1;
+     }
+
+     .status-card .icon-wrapper {
+          width: 2.75rem;
+          height: 2.75rem;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: 1rem;
+     }
+
+     .status-card.total-bookings .icon-wrapper {
+          background: #EFF6FF;
+     }
+
+     .status-card.pending-confirmations .icon-wrapper {
+          background: #FFFBEB;
+     }
+
+     .status-card.awaiting-payments .icon-wrapper {
+          background: #F5F3FF;
+     }
+
+     .status-card.verified-bookings .icon-wrapper {
+          background: #ECFDF5;
+     }
+
+     .status-card .stat-value {
+          font-size: 1.875rem;
+          font-weight: 700;
+          line-height: 1;
+          margin: 0.5rem 0 0.25rem;
+          font-family: 'Inter', sans-serif;
+     }
+
+     .status-card.total-bookings .stat-value {
+          color: #1E40AF;
+     }
+
+     .status-card.pending-confirmations .stat-value {
+          color: #92400E;
+     }
+
+     .status-card.awaiting-payments .stat-value {
+          color: #5B21B6;
+     }
+
+     .status-card.verified-bookings .stat-value {
+          color: #065F46;
+     }
+
+     .status-card .stat-label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #4B5563;
+          letter-spacing: 0.025em;
+     }
+
+     .status-card .stat-change {
+          font-size: 0.75rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          margin-top: 0.25rem;
+     }
+
+     .status-card.total-bookings .stat-change {
+          color: #1E40AF;
+     }
+
+     .status-card.pending-confirmations .stat-change {
+          color: #B45309;
+     }
+
+     .status-card.awaiting-payments .stat-change {
+          color: #6D28D9;
+     }
+
+     .status-card.verified-bookings .stat-change {
+          color: #047857;
+     }
+
+     .status-card .stat-change svg {
+          width: 0.875rem;
+          height: 0.875rem;
+          margin-right: 0.25rem;
+     }
 </style>
 @endsection
 
@@ -174,27 +302,55 @@ $active = 'dashboard';
                          <div>
                               <h1 class="text-3xl font-bold">Dashboard Overview</h1>
                               @auth
-                              <p class="opacity-90 mt-2">Welcome back,
-                                   {{ auth()->user()->firstname }}! Here's what's happening today.
+                              <p class="opacity-90 mt-2">
+                              Welcome back, {{ auth()->user()->firstname }}! Here's what's happening today.
                               </p>
                               @endauth
                          </div>
-                         <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
+                         <div class="flex items-center space-x-4">
+                              <!-- Active Host Toggle with Indicator -->
+                              <div class="flex flex-col items-end">
+                              <div class="flex items-center mb-1">
+                                   <label for="activeHost" class="mr-2 text-sm font-medium">Active Admin</label>
+                                   <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="activeHost" class="sr-only peer" 
+                                             onchange="toggleActiveHost(this)" {{ auth()->user()->is_active ? 'checked' : '' }}>
+                                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer 
+                                                  peer-checked:bg-green-500 after:content-[''] after:absolute 
+                                                  after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 
+                                                  after:border after:rounded-full after:h-5 after:w-5 
+                                                  after:transition-all peer-checked:after:translate-x-full"></div>
+                                   </label>
+                              </div>
+                              <div id="hostStatusIndicator" class="text-xs font-medium px-2 py-1 rounded-full 
+                                   {{ auth()->user()->is_active ? 'bg-green-100/20 text-green-100' : 'bg-gray-100/20 text-gray-200' }}">
+                                   {{ auth()->user()->is_active ? 
+                                        '✓ Booking email notifications are enabled.' : 
+                                        '✗ Booking email notifications are turned off.' }}
+                              </div>
+                              </div>
+                              
+                              <!-- User Icon -->
+                              <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
                               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
                                    stroke="currentColor">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
+                              </div>
                          </div>
                     </div>
+
+                    <!-- Date and Time -->
                     <div class="mt-6 flex items-center space-x-2">
-                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">@php echo
-                              \Carbon\Carbon::now('Asia/Manila')->format('l, F j, Y'); @endphp</span>
+                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
+                              @php echo \Carbon\Carbon::now('Asia/Manila')->format('l, F j, Y'); @endphp
+                         </span>
                          <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium flex items-center">
                               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               @php echo \Carbon\Carbon::now('Asia/Manila')->format('g:i A'); @endphp
                          </span>
@@ -202,95 +358,117 @@ $active = 'dashboard';
                </div>
           </div>
      </div>
-
-     <!-- Status Cards with hover effects -->
-     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-               <!-- Total Bookings -->
-               <div
-                    class="p-5 rounded-lg border relative overflow-hidden glassy-card">
-                    <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-blue-200 opacity-30"></div>
-                    <div class="relative z-10 flex justify-between items-start">
-                         <div>
-                              <p class="text-sm font-medium text-blue-700">Total Bookings</p>
-                              <h3 class="text-2xl font-bold text-blue-900 mt-1" id="total-bookings">24</h3>
-                              <p class="text-xs text-blue-600 mt-1">+5 this week</p>
-                         </div>
-                         <div class="p-2 bg-white rounded-lg shadow-inner">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+     
+     <!-- Status Cards -->
+     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+     <!-- Total Bookings -->
+          <div class="status-card total-bookings shadow-sm">
+               <div class="card-content">
+                    <div class="text-content">
+                         <p class="stat-label">Total Bookings</p>
+                         <h3 class="stat-value" id="total-bookings">0</h3>
+                         <p class="stat-change">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                               </svg>
-                         </div>
+                              +5 This Week
+                         </p>
+                    </div>
+                    <div class="icon-wrapper">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                         </svg>
                     </div>
                </div>
+          </div>
 
-               <!-- Pending Confirmations -->
-               <div
-                    class="bg-white p-5 rounded-lg border border-lightGray hover-scale relative overflow-hidden glassy-card">
-                    <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-yellow-100 opacity-20"></div>
-                    <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-yellow-200 opacity-30"></div>
-                    <div class="relative z-10 flex justify-between items-start">
-                         <div>
-                              <p class="text-sm font-medium text-yellow-700">Pending Confirmations</p>
-                              <h3 class="text-2xl font-bold text-yellow-900 mt-1" id="total-pending">8</h3>
-                              <p class="text-xs text-yellow-600 mt-1">3 awaiting response</p>
-                         </div>
-                         <div class="p-2 bg-white rounded-lg shadow-inner">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <!-- Pending Confirmations -->
+          <div class="status-card pending-confirmations shadow-sm">
+               <div class="card-content">
+                    <div class="text-content">
+                         <p class="stat-label">Pending Confirmations</p>
+                         <h3 class="stat-value" id="total-pending">8</h3>
+                         <p class="stat-change">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                         </div>
+                              Awaiting response
+                         </p>
+                    </div>
+                    <div class="icon-wrapper">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                         </svg>
                     </div>
                </div>
+          </div>
 
-               <!-- Awaiting Payments -->
-               <div
-                    class="bg-white p-5 rounded-lg border border-lightGray hover-scale relative overflow-hidden glassy-card">
-                    <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-purple-100 opacity-20"></div>
-                    <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-purple-200 opacity-30"></div>
-                    <div class="relative z-10 flex justify-between items-start">
-                         <div>
-                              <p class="text-sm font-medium text-purple-700">Awaiting Payments</p>
-                              <h3 class="text-2xl font-bold text-purple-900 mt-1" id="pending-payments">5</h3>
-                              <p class="text-xs text-purple-600 mt-1">Under Verification</p>
-                         </div>
-                         <div class="p-2 bg-white rounded-lg shadow-inner flex items-center justify-center">
-                              <span class="text-purple-600 text-2xl font-bold">₱</span>
-                         </div>
-                    </div>
-               </div>
-
-               <!-- Verified Bookings -->
-               <div
-                    class="bg-white p-5 rounded-lg border border-lightGray hover-scale relative overflow-hidden glassy-card">
-                    <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-green-100 opacity-20"></div>
-                    <div class="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-green-200 opacity-30"></div>
-                    <div class="relative z-10 flex justify-between items-start">
-                         <div>
-                              <p class="text-sm font-medium text-green-700">Verified Bookings</p>
-                              <h3 class="text-2xl font-bold text-green-900 mt-1">11</h3>
-                              <p class="text-xs text-green-600 mt-1">+3 confirmed today</p>
-                         </div>
-                         <div class="p-2 bg-white rounded-lg shadow-inner">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <!-- Awaiting Payments -->
+          <div class="status-card awaiting-payments shadow-sm">
+               <div class="card-content">
+                    <div class="text-content">
+                         <p class="stat-label">Under Verification</p>
+                         <h3 class="stat-value" id="under-verification-payments">0</h3>
+                         <p class="stat-change">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                         </div>
+                              Customer Advance Payment
+                         </p>
+                    </div>
+                    <div class="icon-wrapper">
+                         <span class="text-violet-600 text-xl font-bold">₱</span>
                     </div>
                </div>
+          </div>
+          
+          <!-- Pending Confirmations -->
+          <div class="status-card pending-confirmations shadow-sm">
+               <div class="card-content">
+                    <div class="text-content">
+                         <p class="stat-label">Pending Advance Payment</p>
+                         <h3 class="stat-value" id="total-pending-payments">8</h3>
+                         <p class="stat-change">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Awaiting Payments
+                         </p>
+                    </div>
+                    <div class="icon-wrapper">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                         </svg>
+                    </div>
+               </div>
+          </div>
 
      </div>
      
      <!-- Main Content Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6"> 
+          <!-- Admins -->       
+          <div class="p-6 rounded-lg shadow-sm bg-white" id="active-admins-container">
+               <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
+                    <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                         </svg>
+                    </button>
+               </div>
+               <div id="active-admins-list" class="overflow-y-auto max-h-64 space-y-4 pr-2">
+                    <!-- Loading state -->
+                    <div class="text-center py-8">
+                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                         <p class="mt-2 text-gray-500">Loading active admins...</p>
+                    </div>
+               </div>
+          </div>
+          
           <!-- Recent Enquiries -->
           <div
-               class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 shadow-sm bg-white p-6 rounded-lg border border-lightgray hover-scale">
+               class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 rounded-lg shadow-sm border-gray-200 bg-white">
                <div class="flex justify-between items-center mb-6">
                     <div class="flex items-center">
                          <h2 class="text-xl font-semibold text-gray-800">Recent Inquiries</h2>
@@ -317,7 +495,7 @@ $active = 'dashboard';
                     </div>
                     <input type="text" id="inquiry-search"
                          class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                         placeholder="Search inquiries..." onkeyup="filterInquiries()">
+                         placeholder="Search by id, reference, or name..." onkeyup="filterInquiries()">
                </div>
                
                <div class="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scroll" id="inquiries-container">
@@ -333,7 +511,7 @@ $active = 'dashboard';
           @include('admin.inquirers.recent_inquirers')
           
           <!-- Facilities Occupied Today -->
-          <div class="lg:col-span-2 shadow-sm bg-white p-6 rounded-lg border border-lightgray hover-scale">
+          <div class="lg:col-span-2 shadow-sm bg-white p-6 rounded-lg">
                <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">Facilities Occupied Today</h2>
                     <div class="flex items-center">
@@ -379,9 +557,9 @@ $active = 'dashboard';
      </div>
      
      <!-- Bottom Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <!-- Left Column (Next Check-in) -->
-          <div class="bg-white p-6 rounded-lg border shadow-sm border-lightgray hover-scale">
+          <div class="bg-white p-6 rounded-lg shadow-sm">
                <!-- Next Check-in Section -->
                <div class="glass-card">
                     <div class="flex items-center justify-between mb-4">
@@ -428,9 +606,9 @@ $active = 'dashboard';
                     </div>
                </div>
           </div>
-          
+
           <!-- Quick Actions -->
-          <div class="lg:col-span-2 bg-white p-6 rounded-lg border shadow-sm border-lightgray">
+          <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
                <div class="grid grid-cols-2 gap-4">
                
@@ -792,7 +970,7 @@ $active = 'dashboard';
                                    <div id="customerInfoSection" class="mt-4 space-y-4">
                                         <div class="grid grid-cols-2 gap-4">
                                              <div>
-                                                  <label for="firstName" class="block text-sm font-mediumtext-gray-700 mb-1">First Name *</label>
+                                                  <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
                                                   <input type="text" id="firstName" name="firstName" required
                                                        class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                                              </div>
@@ -819,28 +997,48 @@ $active = 'dashboard';
 
                               <!-- Tour Options -->
                               <div class="mb-6">
-                                   <h4 class="text-lg font-medium text-gray-900 mb-3">Tour Options *</h4>
-                                   <div class="grid grid-cols-3 gap-3">
+                                   <h4 class="text-lg font-semibold text-gray-800 mb-4">Tour Options <span class="text-red-500">*</span></h4>
+                                   <div class="grid grid-cols-3 gap-4">
+                                        
+                                        <!-- Pool Only -->
                                         <div>
                                              <input id="poolOption" name="tourOption" type="radio" value="pool" class="hidden peer" checked>
-                                             <label for="poolOption" class="block p-3 border border-lightgray rounded-lg text-center cursor-pointer peer-checked:border-yellow-500 peer-checked:bg-yellow-50">
-                                                  <span class="block text-sm font-medium">Pool Only</span>
+                                             <label for="poolOption" class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
+                                                  transition-all duration-200 ease-in-out 
+                                                  hover:border-yellow-400 hover:shadow-lg
+                                                  peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
+                                                  <span class="block text-base font-medium text-gray-700">Pool Only</span>
+                                                  <span class="block text-xs text-gray-500 mt-1">₱150/₱100</span>
                                              </label>
                                         </div>
+
+                                        <!-- Park Only -->
                                         <div>
                                              <input id="parkOption" name="tourOption" type="radio" value="park" class="hidden peer">
-                                             <label for="parkOption" class="block p-3 border border-lightgray rounded-lg text-center cursor-pointer peer-checked:border-yellow-500 peer-checked:bg-yellow-50">
-                                                  <span class="block text-sm font-medium">Park Only</span>
+                                             <label for="parkOption" class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
+                                                  transition-all duration-200 ease-in-out 
+                                                  hover:border-yellow-400 hover:shadow-lg
+                                                  peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
+                                                  <span class="block text-base font-medium text-gray-700">Park Only</span>
+                                                  <span class="block text-xs text-gray-500 mt-1">₱80/₱50</span>
                                              </label>
                                         </div>
+                                        
+                                        <!-- Both -->
                                         <div>
                                              <input id="bothOption" name="tourOption" type="radio" value="both" class="hidden peer">
-                                             <label for="bothOption" class="block p-3 border border-lightgray rounded-lg text-center cursor-pointer peer-checked:border-yellow-500 peer-checked:bg-yellow-50">
-                                                  <span class="block text-sm font-medium">Both</span>
+                                             <label for="bothOption" class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
+                                                  transition-all duration-200 ease-in-out 
+                                                  hover:border-yellow-400 hover:shadow-lg
+                                                  peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
+                                                  <span class="block text-base font-medium text-gray-700">Both</span>
+                                                  <span class="block text-xs text-gray-500 mt-1">Pool + Park</span>
                                              </label>
                                         </div>
+                                   
                                    </div>
                               </div>
+                         
                          </div>
 
                          <!-- Right Column - Pricing -->
@@ -861,21 +1059,24 @@ $active = 'dashboard';
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Adults (₱150)</label>
                                                   <input type="number" id="poolAdultCount" name="poolAdultCount" min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
+                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                                       onchange="calculateTotals()">
                                                   <div class="text-sm font-medium text-right">₱<span id="poolAdultTotal">0</span></div>
                                              </div>
                                              
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Kids (₱100)</label>
                                                   <input type="number" id="poolKidCount" name="poolKidCount" min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
+                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                                       onchange="calculateTotals()">
                                                   <div class="text-sm font-medium text-right">₱<span id="poolKidTotal">0</span></div>
                                              </div>
                                              
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Seniors (₱100)</label>
                                                   <input type="number" id="poolSeniorCount" name="poolSeniorCount" min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
+                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                                       onchange="calculateTotals()">
                                                   <div class="text-sm font-medium text-right">₱<span id="poolSeniorTotal">0</span></div>
                                              </div>
                                         </div>
@@ -886,21 +1087,24 @@ $active = 'dashboard';
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Adults (₱80)</label>
                                                   <input type="number" id="parkAdultCount" name="parkAdultCount" min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
+                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                                       onchange="calculateTotals()">
                                                   <div class="text-sm font-medium text-right">₱<span id="parkAdultTotal">0</span></div>
                                              </div>
                                              
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Kids (₱50)</label>
                                                   <input type="number" id="parkKidCount" name="parkKidCount" min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
+                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                                       onchange="calculateTotals()">
                                                   <div class="text-sm font-medium text-right">₱<span id="parkKidTotal">0</span></div>
                                              </div>
                                              
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Seniors (₱50)</label>
                                                   <input type="number" id="parkSeniorCount" name="parkSeniorCount" min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
+                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                                       onchange="calculateTotals()">
                                                   <div class="text-sm font-medium text-right">₱<span id="parkSeniorTotal">0</span></div>
                                              </div>
                                         </div>
@@ -934,6 +1138,7 @@ $active = 'dashboard';
                                         </div>
                                    </div>
                               </div>
+                         
                          </div>
                     </div>
 
@@ -968,6 +1173,45 @@ $active = 'dashboard';
 <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
+
+function toggleActiveHost(checkbox) {
+     const isActive = checkbox.checked;
+     const indicator = document.getElementById('hostStatusIndicator');
+     
+     // Send AJAX request to update host status
+     fetch('/host/status', {
+          method: 'POST',
+          headers: {
+               'Content-Type': 'application/json',
+               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+               'Accept': 'application/json'
+          },
+          body: JSON.stringify({ is_active: isActive })
+     })
+     .then(response => {
+          if (!response.ok) {
+               throw new Error('Network response was not ok');
+          }
+          return response.json();
+     })
+     .then(data => {
+          // Update indicator
+          if(data.is_active) {
+               indicator.textContent = '✓ Receiving booking notifications';
+               indicator.classList.remove('bg-gray-100/20', 'text-gray-200');
+               indicator.classList.add('bg-green-100/20', 'text-green-100');
+          } else {
+               indicator.textContent = '✗ Not accepting bookings';
+               indicator.classList.remove('bg-green-100/20', 'text-green-100');
+               indicator.classList.add('bg-gray-100/20', 'text-gray-200');
+          }
+     })
+     .catch(error => {
+          console.error('Error:', error);
+          // Revert checkbox if update failed
+          checkbox.checked = !isActive;
+     });
+}
 // Global functions for modal operations
 function openCheckInModal() {
      document.body.classList.add('modal-open');
@@ -1016,11 +1260,17 @@ function openDayTourModal() {
      document.body.classList.add('modal-open');
      document.getElementById('dayTourModal').classList.remove('hidden');
      loadCottageOptions();
+     calculateTotals(); // Initialize totals
 }
 
 function closeDayTourModal() {
      document.body.classList.remove('modal-open');
      document.getElementById('dayTourModal').classList.add('hidden');
+     // Reset form when closing
+     document.getElementById('dayTourForm').reset();
+     document.getElementById('grandTotal').textContent = '0';
+     document.getElementById('finalTotal').textContent = '0';
+     document.getElementById('cottageTotal').textContent = '0';
 }
 
 function toggleSection(sectionId) {
@@ -1111,7 +1361,7 @@ function loadOccupiedFacilities() {
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                          </svg>
                          <p class="mt-2 text-gray-600">No facilities occupied today</p>
-                    </div>
+                    </div>Active Admins
                `;
                return;
           }
@@ -1175,7 +1425,7 @@ function loadOccupiedFacilities() {
 }
 
 function loadCottageOptions() {
-     fetch('/admin/cottages')
+     fetch('/get/admin/cottages')
           .then(response => response.json())
           .then(data => {
                const container = document.getElementById('cottageOptions');
@@ -1183,14 +1433,33 @@ function loadCottageOptions() {
                     let html = '';
                     data.forEach(cottage => {
                          html += `
-                         <div class="flex items-center justify-between">
-                         <div>
-                              <label class="block text-sm text-gray-700">${cottage.name} (₱${cottage.price})</label>
-                              <p class="text-xs text-gray-500">${cottage.description || ''}</p>
+                         <div class="border-b border-gray-100 pb-3">
+                         <div class="flex items-start justify-between">
+                              <div class="flex-1">
+                                   <label class="block text-sm text-gray-700">${cottage.name} (₱${cottage.price})</label>
+                                   <p class="text-xs text-gray-500">${cottage.description || ''}</p>
+                                   <p class="text-xs text-gray-500">Max: ${cottage.quantity || 1} per booking</p>
+                              </div>
+                              <div class="text-sm font-medium text-right">
+                                   ₱<span id="cottage_subtotal_${cottage.id}">0</span>
+                              </div>
                          </div>
-                         <input type="checkbox" id="cottage_${cottage.id}" name="cottages[]" value="${cottage.id}" 
-                              data-price="${cottage.price}" class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 rounded"
-                              onchange="calculateCottageTotal()">
+                         <div class="flex items-center space-x-2 mt-2">
+                              <button type="button" onclick="decrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
+                                   class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
+                                   -
+                              </button>
+                              <input type="number" id="cottage_qty_${cottage.id}" 
+                                   name="cottages[${cottage.id}][quantity]" 
+                                   value="0" min="0" max="${cottage.quantity || 1}"
+                                   data-price="${cottage.price}"
+                                   class="w-12 px-2 py-1 text-sm border border-darkgray rounded-md text-center focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                   onchange="updateCottageSubtotal('${cottage.id}', ${cottage.price})">
+                              <button type="button" onclick="incrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
+                                   class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
+                                   +
+                              </button>
+                         </div>
                          </div>
                          `;
                     });
@@ -1205,6 +1474,47 @@ function loadCottageOptions() {
           });
 }
 
+function incrementCottageQuantity(cottageId, price, maxQuantity) {
+     const input = document.getElementById(`cottage_qty_${cottageId}`);
+     let value = parseInt(input.value) || 0;
+     if (value < maxQuantity) {
+          input.value = value + 1;
+          updateCottageSubtotal(cottageId, price);
+     }
+}
+
+function decrementCottageQuantity(cottageId, price) {
+     const input = document.getElementById(`cottage_qty_${cottageId}`);
+     let value = parseInt(input.value) || 0;
+     if (value > 0) {
+          input.value = value - 1;
+          updateCottageSubtotal(cottageId, price);
+     }
+}
+
+function updateCottageSubtotal(cottageId, price) {
+     const input = document.getElementById(`cottage_qty_${cottageId}`);
+     const quantity = parseInt(input.value) || 0;
+     const subtotal = quantity * price;
+     
+     document.getElementById(`cottage_subtotal_${cottageId}`).textContent = subtotal.toFixed(2);
+     calculateCottageTotal();
+}
+
+function calculateCottageTotal() {
+     let total = 0;
+     const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
+     
+     quantityInputs.forEach(input => {
+          const quantity = parseInt(input.value) || 0;
+          const price = parseFloat(input.dataset.price) || 0;
+          total += quantity * price;
+     });
+     
+     document.getElementById('cottageTotal').textContent = total.toFixed(2);
+     calculateFinalTotal();
+}
+
 // Utility Functions
 function formatDate(dateString) {
      if (!dateString) return '-';
@@ -1212,7 +1522,8 @@ function formatDate(dateString) {
      return new Date(dateString).toLocaleDateString(undefined, options);
      }
 
-function getNights(checkin, checkout) {
+
+     function getNights(checkin, checkout) {
      if (!checkin || !checkout) return 0;
      const diff = new Date(checkout) - new Date(checkin);
      return Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -1313,7 +1624,17 @@ function calculateTotals() {
      // Show/hide sections based on selection
      document.getElementById('poolFees').classList.toggle('hidden', tourOption === 'park');
      document.getElementById('parkFees').classList.toggle('hidden', tourOption === 'pool');
-     document.getElementById('cottagesSection').classList.toggle('hidden', tourOption === 'park');
+
+     if (tourOption === 'park') {
+          cottageSection.classList.add('hidden');
+          // Reset cottage selections
+          document.querySelectorAll('input[id^="cottage_qty_"]').forEach(input => {
+               input.value = 0;
+               updateCottageSubtotal(input.id.replace('cottage_qty_', ''), parseFloat(input.dataset.price));
+          });
+     } else {
+          cottageSection.classList.remove('hidden');
+     }
      
      // Calculate pool fees if selected
      if (tourOption === 'pool' || tourOption === 'both') {
@@ -1328,9 +1649,17 @@ function calculateTotals() {
           document.getElementById('poolAdultTotal').textContent = poolAdultTotal;
           document.getElementById('poolKidTotal').textContent = poolKidTotal;
           document.getElementById('poolSeniorTotal').textContent = poolSeniorTotal;
+     } else {
+          // Reset pool values if not selected
+          document.getElementById('poolAdultCount').value = 0;
+          document.getElementById('poolKidCount').value = 0;
+          document.getElementById('poolSeniorCount').value = 0;
+          document.getElementById('poolAdultTotal').textContent = '0';
+          document.getElementById('poolKidTotal').textContent = '0';
+          document.getElementById('poolSeniorTotal').textContent = '0';
      }
      
-    // Calculate park fees if selected
+     // Calculate park fees if selected
      if (tourOption === 'park' || tourOption === 'both') {
           const parkAdultCount = parseInt(document.getElementById('parkAdultCount').value) || 0;
           const parkKidCount = parseInt(document.getElementById('parkKidCount').value) || 0;
@@ -1343,24 +1672,36 @@ function calculateTotals() {
           document.getElementById('parkAdultTotal').textContent = parkAdultTotal;
           document.getElementById('parkKidTotal').textContent = parkKidTotal;
           document.getElementById('parkSeniorTotal').textContent = parkSeniorTotal;
+     } else {
+          // Reset park values if not selected
+          document.getElementById('parkAdultCount').value = 0;
+          document.getElementById('parkKidCount').value = 0;
+          document.getElementById('parkSeniorCount').value = 0;
+          document.getElementById('parkAdultTotal').textContent = '0';
+          document.getElementById('parkKidTotal').textContent = '0';
+          document.getElementById('parkSeniorTotal').textContent = '0';
      }
-     
-     calculateFinalTotal();
+     calculateCottageTotal();
 }
 
 function calculateCottageTotal() {
      let total = 0;
-     document.querySelectorAll('input[name="cottages[]"]:checked').forEach(checkbox => {
-          total += parseFloat(checkbox.dataset.price);
+     const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
+     
+     quantityInputs.forEach(input => {
+          const quantity = parseInt(input.value) || 0;
+          const price = parseFloat(input.dataset.price) || 0;
+          total += quantity * price;
      });
+     
      document.getElementById('cottageTotal').textContent = total.toFixed(2);
-     calculateFinalTotal();
+     calculateFinalTotal(); // Update the final total
 }
 
 function calculateFinalTotal() {
      const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
      let entranceTotal = 0;
-     
+
      if (tourOption === 'pool' || tourOption === 'both') {
           entranceTotal += parseInt(document.getElementById('poolAdultTotal').textContent) || 0;
           entranceTotal += parseInt(document.getElementById('poolKidTotal').textContent) || 0;
@@ -1373,7 +1714,7 @@ function calculateFinalTotal() {
           entranceTotal += parseInt(document.getElementById('parkSeniorTotal').textContent) || 0;
      }
      
-     const cottageTotal = tourOption === 'park' ? 0 : (parseFloat(document.getElementById('cottageTotal').textContent) || 0);
+     const cottageTotal = parseFloat(document.getElementById('cottageTotal').textContent) || 0;
      const finalTotal = entranceTotal + cottageTotal;
      
      document.getElementById('grandTotal').textContent = entranceTotal.toFixed(2);
@@ -1414,6 +1755,81 @@ async function readQRCodeFromImage(file) {
      });
 }
 
+function fetchActiveAdmins() {
+     // Show loading state
+     document.getElementById('active-admins-list').innerHTML = `
+          <div class="text-center py-4">
+               <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+               <p class="mt-2 text-gray-500">Loading active admins...</p>
+          </div>
+     `;
+     
+     // Make AJAX request
+     fetch(`/admin/active-admins`, {
+          headers: {
+               'X-Requested-With': 'XMLHttpRequest',
+               'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          }
+     })
+     .then(response => response.json())
+     .then(data => {
+          if(data.length > 0) {
+               let html = '';
+               data.forEach(admin => {
+                    html += `
+                    <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                         <div class="relative flex-shrink-0">
+                              <img src="{{ url('imgs/profiles') }}/${admin.profile_img}" 
+                                   alt="${admin.fullname}" 
+                                   class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
+                              ${admin.is_active ? `
+                                   <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                              `: ''}
+                         </div>
+                         <div class="ml-3 overflow-hidden">
+                              <h3 class="font-medium text-gray-800 truncate">${admin.fullname}</h3>
+                              <p class="text-sm text-gray-600 flex items-center mt-1">
+                                   ${admin.phone ? `
+                                        <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                        </svg>
+                                        <span class="truncate">${admin.phone}</span>
+                                   ` : `
+                                        <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span class="truncate">${admin.email}</span>
+                                   `}
+                              </p>
+                         </div>
+                    </div>
+                    `;
+               });
+               document.getElementById('active-admins-list').innerHTML = html;
+          } else {
+               document.getElementById('active-admins-list').innerHTML = `
+                    <div class="text-center py-4 text-gray-500">
+                         <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                         </svg>
+                         No active admins at the moment
+                    </div>
+               `;
+          }
+     })
+     .catch(error => {
+          console.error('Error fetching active admins:', error);
+          document.getElementById('active-admins-list').innerHTML = `
+               <div class="text-center py-4 text-red-500">
+                    <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    Failed to load active admins
+               </div>
+          `;
+     });
+}
+
 // Document Ready Function
 document.addEventListener('DOMContentLoaded', function() {
      // Initialize dashboard stats
@@ -1427,8 +1843,10 @@ document.addEventListener('DOMContentLoaded', function() {
      })
      .then(response => response.json()) 
      .then(data => {
+          document.getElementById('total-bookings').textContent = data.total_booking;
           document.getElementById('total-pending').textContent = data.pending;
-          document.getElementById('pending-payments').textContent = data.pending_payments;
+          document.getElementById('under-verification-payments').textContent = data.under_verification_payments;
+          document.getElementById('total-pending-payments').textContent = data.pending_payments;
      })
      .catch(error => {
           console.error(`Fetching error:`, error); 
@@ -1437,10 +1855,12 @@ document.addEventListener('DOMContentLoaded', function() {
      // Load initial data
      loadNextCheckin();
      loadOccupiedFacilities();
-     
+     fetchActiveAdmins();
+
      // Set up periodic refreshes
      setInterval(loadNextCheckin, 300000);
      setInterval(loadOccupiedFacilities, 300000);
+     setInterval(fetchActiveAdmins, 300000);
      
      // Set up event listeners for all View buttons
      document.querySelectorAll('[data-id]').forEach(button => {
@@ -1646,42 +2066,112 @@ document.addEventListener('DOMContentLoaded', function() {
      }
 
      // Day Tour Form Submission
-     document.getElementById('dayTourForm').addEventListener('submit', function(e) {
-          e.preventDefault();
-          
-          const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
-          const formData = {
-               firstName: document.getElementById('firstName').value,
-               lastName: document.getElementById('lastName').value,
-               phoneNumber: document.getElementById('phoneNumber').value,
-               email: document.getElementById('email').value,
-               tourOption: tourOption,
-               ...(tourOption !== 'park' && {
-                    poolAdults: document.getElementById('poolAdultCount').value,
-                    poolKids: document.getElementById('poolKidCount').value,
-                    poolSeniors: document.getElementById('poolSeniorCount').value
-               }),
-               ...(tourOption !== 'pool' && {
-                    parkAdults: document.getElementById('parkAdultCount').value,
-                    parkKids: document.getElementById('parkKidCount').value,
-                    parkSeniors: document.getElementById('parkSeniorCount').value
-               }),
-               ...(tourOption !== 'park' && {
-                    selectedCottages: Array.from(document.querySelectorAll('input[name="cottages[]"]:checked')).map(el => el.value)
-               }),
-               totalAmount: document.getElementById('finalTotal').textContent
-          };
-          
-          console.log('Form submitted:', formData);
-          alert('Day tour registration submitted successfully!');
-          closeDayTourModal();
-     });
+     const dayTourForm = document.getElementById('dayTourForm');
+     
+     if (dayTourForm) {
+          dayTourForm.addEventListener('submit', async function(e) {
+               e.preventDefault();
+               
+               const submitButton = e.target.querySelector('button[type="submit"]');
+               const originalButtonText = submitButton.innerHTML;
+               
+               try {
+                    // Disable button and show loading state
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = `
+                         <div class="flex items-center">
+                         <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10"
+                                   stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor"
+                                   d="M4 12a8 8 0 018-8V0C5.373 0 
+                                   0 5.373 0 12h4zm2 5.291A7.962 7.962 
+                                   0 014 12H0c0 3.042 1.135 5.824 3 
+                                   7.938l3-2.647z"></path>
+                         </svg>
+                         Processing...
+                         </div>
+                    
+                    `;
+
+                    const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
+                    
+                    // Collect cottage data
+                    const cottages = [];
+                    document.querySelectorAll('input[id^="cottage_qty_"]').forEach(input => {
+                         const cottageId = input.id.replace('cottage_qty_', '');
+                         const quantity = parseInt(input.value) || 0;
+                         if (quantity > 0) {
+                              cottages.push({
+                                   id: cottageId,
+                                   quantity: quantity
+                              });
+                         }
+                    });
+
+                    const formData = {
+                         first_name: document.getElementById('firstName').value,
+                         last_name: document.getElementById('lastName').value,
+                         phone: document.getElementById('phoneNumber').value,
+                         email: document.getElementById('email').value || null,
+                         tour_type: tourOption,
+                         pool_adults: tourOption !== 'park' ? document.getElementById('poolAdultCount').value : 0,
+                         pool_kids: tourOption !== 'park' ? document.getElementById('poolKidCount').value : 0,
+                         pool_seniors: tourOption !== 'park' ? document.getElementById('poolSeniorCount').value : 0,
+                         park_adults: tourOption !== 'pool' ? document.getElementById('parkAdultCount').value : 0,
+                         park_kids: tourOption !== 'pool' ? document.getElementById('parkKidCount').value : 0,
+                         park_seniors: tourOption !== 'pool' ? document.getElementById('parkSeniorCount').value : 0,
+                         cottages: cottages,
+                         total_amount: document.getElementById('finalTotal').textContent
+                    };
+
+                    // Send data to server
+                    const response = await fetch('/day-tour/register', {
+                         method: 'POST',
+                         headers: {
+                              'Content-Type': 'application/json',
+                              'Accept': 'application/json',
+                              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                         },
+                         body: JSON.stringify(formData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                         throw new Error(data.message || 'Registration failed');
+                    }
+
+                    // Show success message
+                    alert('Day tour registration successful!');
+                    
+                    // Close modal and reset form
+                    closeDayTourModal();
+                    
+                    // Optionally redirect to receipt
+                    if (data.booking_id) {
+                         window.location.href = `/day-tour/receipt/${data.booking_id}`;
+                    }
+
+               } catch (error) {
+                    console.error('Registration error:', error);
+                    alert(error.message || 'An error occurred during registration');
+               } finally {
+                    // Reset button state
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+               }
+          });
+     }
 
      // Set up event listeners for tour option changes
      document.querySelectorAll('input[name="tourOption"]').forEach(radio => {
           radio.addEventListener('change', calculateTotals);
      });
-
+     
      // Set up event listeners for input changes in day tour form
      document.getElementById('poolAdultCount').addEventListener('change', calculateTotals);
      document.getElementById('poolKidCount').addEventListener('change', calculateTotals);

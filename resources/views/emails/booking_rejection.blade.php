@@ -49,8 +49,9 @@
                             <!-- Main Content -->
                             <h1 style="font-size:24px; font-weight:700; color:#1f2937; margin:0 0 16px 0;">Booking Rejection Notice</h1>
                             <p style="margin:0 0 24px 0;">Dear {{ $booking->user->firstname }},</p>
+                                                        <p style="margin:0 0 16px 0; font-weight:500; color:#dc2626;">Booking id: <span style="font-family:monospace;">{{ $booking->reference }}</span></p>
                             
-                            <p style="margin:0 0 24px 0;">We regret to inform you that your booking request (Reference #{{ $booking->reference }}) has been rejected.</p>
+                            <p style="margin:0 0 24px 0;">We regret to inform you that your booking request has been rejected.</p>
 
                             @if($customMessage)
                             <p style="margin:0 0 24px 0; color:#dc2626; font-weight:500;">Reason: {{ $customMessage }}</p>

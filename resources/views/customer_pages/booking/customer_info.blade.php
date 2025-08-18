@@ -737,7 +737,7 @@
                     
                     <div class="relative">
                         <select id="arrival_time" name="arrival_time" class="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white pr-8">
-                            <option selected disabled>Please select</option>
+                            <option selected disabled value="Not selected">Please select</option>
                             <option value="08:00">08:00 AM</option>
                             <option value="09:00">09:00 AM</option>
                             <option value="10:00">10:00 AM</option>

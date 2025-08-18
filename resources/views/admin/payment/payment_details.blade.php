@@ -27,7 +27,7 @@
                                 <div class="flex justify-between items-center">
                                         <dt class="text-sm text-gray-500">Amount Paid</dt>
                                         <dd>
-                                                <input type="number" step="0.01" name="amount_paid" id="amount_paid"
+                                                <input type="number" step="0.01" name="amount_paid" id="amountPaid"
                                                         class="form-input border border-gray-300 rounded-md px-2 py-1 text-sm w-32"
                                                         placeholder="₱0.00" value="{{ old('amount_paid') }}">
                                         </dd>
@@ -35,7 +35,7 @@
                         </dl>
                 </div>
 
-
+                
 
                 <div class="bg-gray-50 p-4 rounded-lg">
                         <h4 class="text-sm font-medium text-gray-500">Customer Information</h4>
@@ -140,30 +140,6 @@
                                         </div>
                                 </div>
                         </div>
-                </div>
-        @endif
-
-        @if ($payment->status == 'under_verification')
-                <div class="mt-6 flex justify-end space-x-3" id="actionButtons">
-                        <button type="button" onclick="confirmVerifyPaymentButton()"
-                                class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                </svg>
-                                Verify Payment
-                        </button>
-
-                        <button type="button" onclick="showRejectForm()"
-                                class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1"
-                                        viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                clip-rule="evenodd" />
-                                </svg>
-                                Reject Payment
-                        </button>
                 </div>
         @endif
 </div>

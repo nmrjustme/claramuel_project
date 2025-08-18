@@ -23,60 +23,6 @@ class AdminPaymentController extends Controller
             'status' => $request->status // This will be null if no status filter is applied
         ]);
     }
-
-    public function stream()
-    {
-        $response = new \Symfony\Component\HttpFoundation\StreamedResponse(function() {
-            while (true) {
-                $newPayments = Payments::with(['bookingLog.user'])
-                    ->where('is_read', false)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-
-                if ($newPayments->isNotEmpty()) {
-                    foreach ($newPayments as $payment) {
-                        $payment->is_read = true;
-                        $payment->save();
-
-                        echo "data: " . json_encode([
-                            'type' => 'new_payment',
-                            'payment' => $payment
-                        ]) . "\n\n";
-                        ob_flush();
-                        flush();
-                    }
-                }
-
-                $updatedPayments = Payments::with(['bookingLog.user'])
-                    ->where('is_updated', true)
-                    ->orderBy('updated_at', 'desc')
-                    ->get();
-
-                if ($updatedPayments->isNotEmpty()) {
-                    foreach ($updatedPayments as $payment) {
-                        $payment->is_updated = false;
-                        $payment->save();
-
-                        echo "data: " . json_encode([
-                            'type' => 'payment_updated',
-                            'payment' => $payment
-                        ]) . "\n\n";
-                        ob_flush();
-                        flush();
-                    }
-                }
-
-                sleep(1);
-            }
-        });
-
-        $response->headers->set('Content-Type', 'text/event-stream');
-        $response->headers->set('Cache-Control', 'no-cache');
-        $response->headers->set('Connection', 'keep-alive');
-        $response->headers->set('X-Accel-Buffering', 'no');
-
-        return $response;
-    }
     
     public function getPaymentRow($id)
     {

@@ -95,11 +95,11 @@
 @endsection
 
 @section('content')
-<div class="min-h-screen px-4 py-4">
-    <div class="flex flex-col lg:flex-row gap-4">
+<div class="min-h-screen px-6 py-6">
+    <div class="flex flex-col lg:flex-row gap-6">
         <!-- Main Content -->
         <div class="lg:w-3/4">
-            <div class="glass-card bg-white p-6 hover-scale rounded-lg border shadow-sm border-lightgray">
+            <div class="glass-card bg-white p-6 hover-scale rounded-lg shadow-sm">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Bookings Management</h1>
@@ -188,9 +188,9 @@
         <!-- Booking Summary Sidebar -->
         <div class="lg:w-1/4">
             <!-- Sticky Wrapper -->
-            <div class="sticky-container space-y-4">
+            <div class="sticky-container space-y-6">
                 <!-- Next Check-in Section -->
-                <div class="glass-card bg-white p-4 hover-scale rounded-lg border shadow-sm border-lightgray">
+                <div class="glass-card bg-white p-4 hover-scale rounded-lg shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">Next Check-in</h3>
                         <div class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center">
@@ -237,7 +237,7 @@
                 
                 
                 <!-- Booking Summary -->
-                <div class="glass-card bg-white overflow-hidden hover-scale rounded-lg border shadow-sm border-lightgray">
+                <div class="glass-card bg-white overflow-hidden hover-scale rounded-lg shadow-sm">
                     <div class="bg-gradient-to-r from-red-600 to-red-800 p-4 text-white">
                         <h2 class="text-xl font-bold flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -504,7 +504,17 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 bookings.forEach(booking => {
                     // Get the payment status from the first payment or use booking status as fallback
-                    const paymentStatus = booking.payments?.[0]?.status || booking.status;
+                    let paymentStatus;
+                    if (currentStatus === 'verified') {
+                        paymentStatus = booking.payments?.[0]?.status || booking.status;
+                    } else if (currentStatus === 'fully_paid') {
+                        paymentStatus = booking.payments?.[0]?.remaining_balance_status === 'fully_paid' 
+                            ? 'fully_paid' 
+                            : 'with_balance';
+                    } else {
+                        paymentStatus = booking.payments?.[0]?.status || booking.status;
+                    }
+                    
                     const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
                     const verifiedBy = booking.payments?.[0]?.verified_by?.firstname || 'System Admin';
                 
@@ -659,9 +669,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             const booking = data.data;
             const detail = booking.details?.[0];
-            const paymentStatus = booking.payments?.[0]?.status || booking.status;
+
+            let paymentStatus;
+            if (booking.payments?.[0]?.status === 'verified') {
+                paymentStatus = 'verified';
+            } else {
+                paymentStatus = booking.payments?.[0]?.remaining_balance_status === 'fully_paid' 
+                    ? 'fully_paid' 
+                    : 'with_balance';
+            }
+
             const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
-            
+
             console.log('Booking data:', booking);
             
             const advancePaid = parseFloat(booking.payments?.[0]?.amount_paid) || 0;

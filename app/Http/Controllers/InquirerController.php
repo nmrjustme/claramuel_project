@@ -120,11 +120,11 @@ class InquirerController extends Controller
         if (!$booking->user) {
             throw new \Exception('No user associated with this booking');
         }
-
+        
         if (empty($booking->user->email)) {
             throw new \Exception('User does not have an email address');
         }
-
+        
         $verificationUrl = route('booking.verify', [
             'token' => $booking->confirmation_token
         ]);
@@ -133,7 +133,7 @@ class InquirerController extends Controller
             Mail::to($booking->user->email)->send(
                 new BookingConfirmationEmail($booking, $verificationUrl, $customMessage)
             );
-
+            
             Log::info("Confirmation email sent", [
                 'booking_id' => $booking->id,
                 'email' => $booking->user->email
@@ -319,9 +319,9 @@ class InquirerController extends Controller
                 } else {
                     $query->whereHas('user', function($q) use ($search) {
                         $q->where('firstname', 'like', "%{$search}%")
-                          ->orWhere('lastname', 'like', "%{$search}%")
-                          ->orWhere('email', 'like', "%{$search}%")
-                          ->orWhere('phone', 'like', "%{$search}%");
+                            ->orWhere('lastname', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
                     })
                     ->orWhere('reference', 'like', "%{$search}%");
                 }
@@ -437,7 +437,9 @@ class InquirerController extends Controller
             $checkin = \Carbon\Carbon::parse($firstDetail->checkin_date);
             $checkout = \Carbon\Carbon::parse($firstDetail->checkout_date);
             $nights = $checkin->diffInDays($checkout);
+            
         }
+        $arrivingTime = $inquiry->bookingDetails->first()->arriving_time ?? null;
 
         return [
             'id' => $inquiry->id,
@@ -445,6 +447,7 @@ class InquirerController extends Controller
             'status' => $inquiry->status,
             'total_price' => $totalPrice,
             'nights' => $nights,
+            'arriving_time' => $arrivingTime,
             'user' => [
                 'firstname' => $inquiry->user->firstname ?? null,
                 'lastname' => $inquiry->user->lastname ?? null,
@@ -559,74 +562,74 @@ class InquirerController extends Controller
         ];
     }
     
-    public function streamUpdates(Request $request)
-    {
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        header('X-Accel-Buffering: no'); // Disable buffering for Nginx
+    // public function streamUpdates(Request $request)
+    // {
+    //     header('Content-Type: text/event-stream');
+    //     header('Cache-Control: no-cache');
+    //     header('Connection: keep-alive');
+    //     header('X-Accel-Buffering: no'); // Disable buffering for Nginx
     
-        $lastEventId = $request->header('Last-Event-ID');
-        $token = $request->input('token');
+    //     $lastEventId = $request->header('Last-Event-ID');
+    //     $token = $request->input('token');
     
-        // Verify CSRF token if needed
-        if (!hash_equals($request->input('token'), csrf_token())) {
-            return response('Unauthorized', 401);
-        }
+    //     // Verify CSRF token if needed
+    //     if (!hash_equals($request->input('token'), csrf_token())) {
+    //         return response('Unauthorized', 401);
+    //     }
     
-        $response = new StreamedResponse(function() use ($lastEventId) {
-            $lastCheck = now()->subSeconds(5);
+    //     $response = new StreamedResponse(function() use ($lastEventId) {
+    //         $lastCheck = now()->subSeconds(5);
             
-            while (true) {
-                try {
-                    // Get new bookings since last check
-                    $newBookings = FacilityBookingLog::where('created_at', '>', $lastCheck)
-                        ->where('is_read', false)
-                        ->where('status', 'pending_confirmation')
-                        ->get();
+    //         while (true) {
+    //             try {
+    //                 // Get new bookings since last check
+    //                 $newBookings = FacilityBookingLog::where('created_at', '>', $lastCheck)
+    //                     ->where('is_read', false)
+    //                     ->where('status', 'pending_confirmation')
+    //                     ->get();
                     
-                    // Get updated bookings
-                    $updatedBookings = FacilityBookingLog::where('updated_at', '>', $lastCheck)
-                        ->where('created_at', '<', $lastCheck)
-                        ->get()
-                        ->map(function($booking) {
-                            $booking->status_updated = $booking->wasChanged('status');
-                            return $booking;
-                        });
+    //                 // Get updated bookings
+    //                 $updatedBookings = FacilityBookingLog::where('updated_at', '>', $lastCheck)
+    //                     ->where('created_at', '<', $lastCheck)
+    //                     ->get()
+    //                     ->map(function($booking) {
+    //                         $booking->status_updated = $booking->wasChanged('status');
+    //                         return $booking;
+    //                     });
     
-                    $lastCheck = now();
+    //                 $lastCheck = now();
                     
-                    if ($newBookings->isNotEmpty() || $updatedBookings->isNotEmpty()) {
-                        $data = [
-                            'type' => 'booking_update',
-                            'bookings' => [
-                                'new' => $newBookings,
-                                'updated' => $updatedBookings
-                            ],
-                            'time' => now()->toDateTimeString()
-                        ];
+    //                 if ($newBookings->isNotEmpty() || $updatedBookings->isNotEmpty()) {
+    //                     $data = [
+    //                         'type' => 'booking_update',
+    //                         'bookings' => [
+    //                             'new' => $newBookings,
+    //                             'updated' => $updatedBookings
+    //                         ],
+    //                         'time' => now()->toDateTimeString()
+    //                     ];
                         
-                        echo "data: " . json_encode($data) . "\n\n";
-                        ob_flush();
-                        flush();
-                    }
+    //                     echo "data: " . json_encode($data) . "\n\n";
+    //                     ob_flush();
+    //                     flush();
+    //                 }
                     
-                    // Break if client disconnected
-                    if (connection_aborted()) {
-                        break;
-                    }
+    //                 // Break if client disconnected
+    //                 if (connection_aborted()) {
+    //                     break;
+    //                 }
                     
-                    sleep(5); // Check every 5 seconds
-                } catch (\Exception $e) {
-                    // Log error and retry
-                    Log::error('SSE Error: ' . $e->getMessage());
-                    sleep(1);
-                }
-            }
-        });
+    //                 sleep(5); // Check every 5 seconds
+    //             } catch (\Exception $e) {
+    //                 // Log error and retry
+    //                 Log::error('SSE Error: ' . $e->getMessage());
+    //                 sleep(1);
+    //             }
+    //         }
+    //     });
     
-        return $response;
-    }
+    //     return $response;
+    // }
     
     // public function updateGuestInfo($id, Request $request)
     // {

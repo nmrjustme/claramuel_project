@@ -20,8 +20,9 @@ use Illuminate\Support\Facades\Log;
 // This is the excel package
 use App\Exports\BookingsExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Mail;
 use App\Events\BookingNew;
+use App\Mail\AdminNotification;
 
 class BookingController extends Controller
 {
@@ -41,7 +42,7 @@ class BookingController extends Controller
             'facilities.*.price' => 'required|numeric|min:0',
             'facilities.*.nights' => 'required|integer|min:1',
             'facilities.*.total_price' => 'required|numeric|min:0',
-
+            
             'guest_types' => 'required|array',
             'guest_types.*' => 'array', // Each facility's guest types
             'guest_types.*.*' => 'nullable|integer|min:0',
@@ -51,7 +52,7 @@ class BookingController extends Controller
             'total_price' => 'required|numeric|min:0',
             'arrival_time' => 'nullable|string',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -94,7 +95,7 @@ class BookingController extends Controller
 
         // Start database transaction
         DB::beginTransaction();
-
+        
         try {
             // Create or update user
             $user = User::create([
@@ -126,7 +127,7 @@ class BookingController extends Controller
                     $breakfastId = $breakfast->id;
                 }
             }
-
+            
             // Process each facility
             foreach ($request->facilities as $facilityData) {
                 $facility = Facility::findOrFail($facilityData['facility_id']);
@@ -171,7 +172,13 @@ class BookingController extends Controller
             DB::commit();
             
             $bookingLog->load(['user']);
-            event(new BookingNew($bookingLog));
+
+            event(new BookingNew($bookingLog)); // Event listener for new booking list
+            
+            // Sending active admin email
+            if (User::where('role', 'Admin')->where('is_active', true)->exists()) {
+                $this->sendEmailAdmin($bookingLog); 
+            }
             
             return response()->json([
                 'success' => true,
@@ -179,7 +186,7 @@ class BookingController extends Controller
                 'message' => 'Booking created successfully',
                 'redirect_url' => route('booking.submitted', ['email' => $request->email])
             ]);
-
+        
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Booking failed:', [
@@ -193,6 +200,40 @@ class BookingController extends Controller
                 'success' => false,
                 'message' => 'Booking failed: ' . $e->getMessage()
             ], 500);
+        }
+    }
+    
+    public function sendEmailAdmin(FacilityBookingLog $booking)
+    {
+        // Get all admin users who are active
+        $admins = User::where('role', 'Admin')
+            ->where('is_active', true)
+            ->whereNotNull('email')
+            ->get();
+        
+        if ($admins->isEmpty()) {
+            Log::warning("No active admin with email found");
+            return;
+        }
+        
+        foreach ($admins as $admin) {
+            try {
+                Mail::to($admin->email)->send(
+                    new AdminNotification($booking)
+                );
+                
+                Log::info("Booking email sent to admin", [
+                    'booking_id' => $booking->id,
+                    'email' => $admin->email
+                ]);
+            
+            } catch (\Exception $e) {
+                Log::error("Failed to send admin email", [
+                    'booking_id' => $booking->id,
+                    'email' => $admin->email,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
     }
 
@@ -383,7 +424,12 @@ class BookingController extends Controller
         // Status filter based on payments
         if (in_array($status, ['fully_paid', 'verified', 'pending', 'rejected', 'under_verification'])) {
             $query->whereHas('payments', function($q) use ($status) {
-                $q->where('status', $status);
+                if ($status === 'fully_paid') {
+                    // Check remaining_balance_status column for fully_paid condition
+                    $q->where('remaining_balance_status', 'fully_paid');
+                } else {
+                    $q->where('status', $status);
+                }
             });
         }
         
@@ -499,10 +545,13 @@ class BookingController extends Controller
             $perPage = $request->input('per_page', 15);
             $page = $request->input('page', 1);
             $search = $request->input('search', '');
+            $status = $request->input('status', '');
+            $readStatus = $request->input('read_status', '');
             
             $query = FacilityBookingLog::with(['user'])
                 ->orderBy('created_at', 'desc');
             
+            // Search functionality
             if ($search) {
                 $query->where(function($q) use ($search) {
                     $q->where('id', 'like', "%$search%")
@@ -511,6 +560,34 @@ class BookingController extends Controller
                                     ->orWhere('lastname', 'like', "%$search%");
                     });
                 });
+            }
+            
+            // Status filtering
+            if ($status) {
+                switch ($status) {
+                    case 'pending_confirmation':
+                        $query->where('status', 'pending_confirmation');
+                        break;
+                    case 'confirmed':
+                        $query->where('status', 'confirmed');
+                        break;
+                    case 'rejected':
+                        $query->where('status', 'rejected');
+                        break;
+                    // Add more cases if needed
+                }
+            }
+            
+            // Read status filtering
+            if ($readStatus) {
+                switch ($readStatus) {
+                    case 'read':
+                        $query->where('is_read', true);
+                        break;
+                    case 'unread':
+                        $query->where('is_read', false);
+                        break;
+                }
             }
             
             $bookings = $query->paginate($perPage, ['*'], 'page', $page);
@@ -522,10 +599,11 @@ class BookingController extends Controller
                         'user' => [
                             'firstname' => $booking->user->firstname,
                             'lastname' => $booking->user->lastname,
+                            'email' => $booking->user->email,
                         ],
                         'created_at' => $booking->created_at->toDateTimeString(),
                         'status' => $booking->status,
-                        'is_read' => $booking->is_read,
+                        'is_read' => (bool) $booking->is_read,
                     ];
                 }),
                 'current_page' => $bookings->currentPage(),

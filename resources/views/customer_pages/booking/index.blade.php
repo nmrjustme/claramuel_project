@@ -911,7 +911,7 @@
                <!-- Date Selection Card -->
                <div class="bg-white rounded-xl p-8 border border-lightGray">
                     <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
-                         <i class="far fa-calendar-alt text-red primary mr-3"></i>
+                         <i class="far fa-calendar-alt text-primary mr-3"></i>
                          Select Your Dates
                     </h2>
 
@@ -1201,7 +1201,7 @@
                'pool': 'fas fa-swimming-pool',
                'breakfast': 'fas fa-coffee',
                'gym': 'fas fa-dumbbell',
-               // Add more mappings as needed
+               // more mappings....
           };
           
           const lowerName = amenityName.toLowerCase();
@@ -1440,7 +1440,7 @@
 			
 			// Store booking data in sessionStorage to pass to next page
 			sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-			localStorage.setItem('bookingCart', JSON.stringify(this.cart));
+			//localStorage.setItem('bookingCart', JSON.stringify(this.cart));
 			
 			// Redirect to customer information page
 			window.location.href = '/bookings/customer-info';

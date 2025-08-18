@@ -15,6 +15,7 @@ class FacilitySummary extends Model
         'facility_id',
         'breakfast_id',
         'facility_booking_log_id',
+        'day_tour_log_details_id',
         'qty',
     ];
 
