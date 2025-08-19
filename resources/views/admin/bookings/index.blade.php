@@ -779,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="text-lg font-bold text-gray-900">${booking.reference || 'N/A'}</h3>
-                            <p class="text-sm text-gray-500 mt-1">Booking ID: ${booking.id || 'N/A'}</p>
+                            <p class="text-sm text-gray-500 mt-1">Record ID: ${booking.id || 'N/A'}</p>
                         </div>
                         <span class="px-3 py-1 rounded-full text-lg font-semibold ${statusInfo.class} text-white status-badge">
                             ${statusInfo.text}
