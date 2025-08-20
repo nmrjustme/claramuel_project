@@ -93,7 +93,7 @@
                 qr_data: qrData
             };
     
-            const response = await fetch('/verify-qr-codes', {
+            const response = await fetch('/verify-qr-codes/checkin', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

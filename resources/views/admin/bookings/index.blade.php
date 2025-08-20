@@ -132,6 +132,7 @@
                         Rejected
                     </button>
                 </div>
+                <hr class="border-gray-200 my-4">
                 
                 <!-- Booking Table -->
                 <div class="overflow-x-auto custom-scroll">
@@ -522,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="text-sm text-gray-900">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 font-medium">${booking.reference}</div>
+                                <div class="text-sm text-gray-900 font-medium">${booking.code}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">${formatDate(booking.details[0]?.checkin_date)}</div>
@@ -778,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="px-4 py-5 bg-white">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900">${booking.reference || 'N/A'}</h3>
+                            <h3 class="text-lg font-bold text-gray-900">${booking.code || 'N/A'}</h3>
                             <p class="text-sm text-gray-500 mt-1">Record ID: ${booking.id || 'N/A'}</p>
                         </div>
                         <span class="px-3 py-1 rounded-full text-lg font-semibold ${statusInfo.class} text-white status-badge">

@@ -24,7 +24,7 @@ class PaymentVerifiedMail extends Mailable
 
     public function build()
     {
-        $mail = $this->subject('Payment Verified - Receipt '.$this->payment->bookingLog->reference)
+        $mail = $this->subject('Payment Verified - Reservation Code '.$this->payment->bookingLog->code)
             ->view('emails.payment_receipt')
             ->with([
                 'payment' => $this->payment,

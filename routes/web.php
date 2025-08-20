@@ -265,7 +265,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/payments/search', [AdminPaymentController::class, 'search'])->name('admin.payments.search');
     
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
-    Route::post('/verify-qr-codes', [CheckinController::class, 'verifyQrCode']);
+    Route::post('/verify-qr-codes/checkin', [CheckinController::class, 'verifyQrCode']);
     Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
     Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
     Route::get('/qrScanner/customer-details/{paymentId}', [CheckinController::class, 'getCustomerDetails']);

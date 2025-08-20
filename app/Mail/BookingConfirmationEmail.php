@@ -26,6 +26,6 @@ class BookingConfirmationEmail extends Mailable
     public function build()
     {
         return $this->markdown('emails.booking_confirmation')
-                    ->subject('Booking ' . $this->booking->reference . ' Confirmation');
+                    ->subject('Your reservation ' . $this->booking->code . ' has been confirmed');
     }
 }

@@ -13,7 +13,7 @@ class CheckinController extends Controller
 {
     public function showScanner()
     {
-        return view('admin.qr_scanner.index');
+        return view('admin.qr_scanner.checkin');
     }
 
     public function verifyQrCode(Request $request)
@@ -89,9 +89,7 @@ class CheckinController extends Controller
             $payment = Payments::with(['bookingLog', 'bookingLog.user'])
                 ->where('id', $payload['id'])
                 ->first();
-
-            $this->updateCheckedin($payment);
-            $this->updateQrStatus($payment, 'in_used');
+                
             if (!$payment) {
                 \Log::error('QR code not recognized', ['payment_id' => $payload['id']]);
                 return response()->json([
@@ -140,7 +138,6 @@ class CheckinController extends Controller
         return $payment && $payment->qr_status === 'in_used';
     }
         
-
     public function processUploadQrUpload(Request $request)
     {
         \Log::debug('QR Upload Verification Request', ['request' => $request->all()]);
@@ -214,9 +211,7 @@ class CheckinController extends Controller
             $payment = Payments::with(['bookingLog', 'bookingLog.user'])
                 ->where('id', $payload['id'])
                 ->first();
-
-            $this->updateCheckedin($payment);
-            $this->updateQrStatus($payment, 'in_used');
+            
             if (!$payment) {
                 \Log::error('Payment not found for uploaded QR', ['payment_id' => $payload['id']]);
                 return response()->json([
@@ -274,48 +269,70 @@ class CheckinController extends Controller
             'bookingLog.summaries.bookingDetails',
             'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
+
+        $this->updateCheckedin($payment);
+        $this->updateQrStatus($payment, 'in_used');
         
         return view('admin.printCheckinPage.index', ['payment' => $payment]);
     }
     
     public function searchGuests(Request $request)
     {
-        $searchTerm = $request->query('q');
+        // Get search parameters
+        $firstName = $request->query('firstname', '');
+        $lastName = $request->query('lastname', '');
+        $reservationCode = $request->query('reservationCode', '');
         
-        if (empty($searchTerm)) {
+        // Return empty if no criteria provided
+        if (empty($firstName) && empty($lastName) && empty($reservationCode)) {
             return response()->json([]);
         }
-
-        // Search bookings (with payment relationship)
+        
         $bookings = FacilityBookingLog::with(['user', 'payments'])
-            ->where(function($query) use ($searchTerm) {
-                $query->where('reference', 'like', "%{$searchTerm}%")
-                    ->orWhereHas('user', function($q) use ($searchTerm) {
-                        $q->where('firstname', 'like', "%{$searchTerm}%")
-                        ->orWhere('lastname', 'like', "%{$searchTerm}%")
-                        ->orWhere('email', 'like', "%{$searchTerm}%");
+            ->where(function($query) use ($firstName, $lastName, $reservationCode) {
+                // Search by reservation code
+                if (!empty($reservationCode)) {
+                    $query->where('code', 'like', "%{$reservationCode}%")
+                        ->orWhere('reference', 'like', "%{$reservationCode}%");
+                }
+                
+                // Search by user details
+                if (!empty($firstName) || !empty($lastName)) {
+                    $query->orWhereHas('user', function($q) use ($firstName, $lastName) {
+                        if (!empty($firstName)) {
+                            $q->where('firstname', 'like', "%{$firstName}%");
+                        }
+                        if (!empty($lastName)) {
+                            $q->where('lastname', 'like', "%{$lastName}%");
+                        }
                     });
+                }
             })
-            ->limit(20)
+            ->orderBy('created_at', 'desc')
+            ->limit(50)
             ->get();
-
-        // Format results with payment ID (if exists)
+        
+        // Format results
         $results = $bookings->map(function($booking) {
-            // Get the first payment ID (assuming 1 booking : many payments)
             $paymentId = $booking->payments->first()?->id ?? null;
             
             return [
-                'id' => $booking->id, // Booking ID
+                'id' => $booking->id,
                 'name' => $booking->user ? "{$booking->user->firstname} {$booking->user->lastname}" : 'Unknown',
-                'reference_no' => $booking->reference,
+                'code' => $booking->code,
                 'email' => $booking->user->email ?? '',
-                'payment_id' => $paymentId, // Payment ID (or null)
+                'phone' => $booking->user->phone ?? '',
+                'payment_id' => $paymentId,
                 'type' => 'booking',
                 'status' => $booking->status,
                 'checked_in_at' => $booking->checked_in_at,
+                'booking_date' => $booking->created_at->format('M j, Y'),
+                'checkin_date' => $booking->checkin_date ?? null,
+                'checkout_date' => $booking->checkout_date ?? null,
             ];
         });
-
+        
         return response()->json($results);
     }
+
 }

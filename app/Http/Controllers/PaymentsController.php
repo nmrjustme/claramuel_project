@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Mail;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
+use App\Models\User;
+use App\Mail\CustomerPay;
+use Illuminate\Support\Facades\Log;
+
 
 // Encryption
 use Illuminate\Support\Facades\Crypt;
@@ -165,6 +169,9 @@ class PaymentsController extends Controller
             ]);
     
             DB::commit();
+
+            $payment->load(['bookingLog.user']);
+            $this->sendEmailAdmin($payment);
     
             return response()->json([
                 'success' => true,
@@ -181,7 +188,40 @@ class PaymentsController extends Controller
             ], 500);
         }
     }
-    
+        
+    public function sendEmailAdmin(Payments $payment)
+    {
+        // Get all admin users who are active
+        $admins = User::where('role', 'Admin')
+            ->where('is_active', true)
+            ->whereNotNull('email')
+            ->get();
+        
+        if ($admins->isEmpty()) {
+            Log::warning("No active admin with email found");
+            return;
+        }
+        
+        foreach ($admins as $admin) {
+            try {
+                Mail::to($admin->email)->send(
+                    new CustomerPay($payment)
+                );
+                
+                Log::info("Booking email sent to admin", [
+                    'payment_id' => $payment->id,
+                    'email' => $admin->email
+                ]);
+            
+            } catch (\Exception $e) {
+                Log::error("Failed to send admin email", [
+                    'payment_id' => $payment->id,
+                    'email' => $admin->email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+    }
     // public function show(Payment $payment)
     // {
     //     // Authorization check - ensure user can view this payment

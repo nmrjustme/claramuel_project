@@ -48,6 +48,7 @@ class InquirerController extends Controller
                 'confirmed_at' => Carbon::now(),
                 'confirmation_token' => Str::random(60),
                 'reference' => $referenceNumber,
+                'code' => $this->reservationCode()
             ];
     
             // Start a database transaction
@@ -106,6 +107,22 @@ class InquirerController extends Controller
                 'message' => 'Failed to confirm booking: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function reservationCode()
+    {
+        $now = Carbon::now();
+        
+        return strtoupper(
+            'CM' // Prefix
+            . $now->format('y')  // Year (e.g. 25 for 2025)
+            . $now->format('m')  // Month (e.g. 08)
+            . $now->format('d')  // Day (e.g. 19)
+            . $now->format('H')  // Hour (24h format)
+            . $now->format('i')  // Minute
+            . 'AA'               // Predefined separator
+            . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT)// Six random digits
+        );
     }
     
     /**

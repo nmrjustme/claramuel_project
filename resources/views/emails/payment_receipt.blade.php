@@ -73,7 +73,7 @@
     <div class="container">
         <div class="header">
             <h1>Payment Verified</h1>
-            <p>Booking id: {{ $payment->bookingLog->reference }}</p>
+            <p>Reservation Code: {{ $payment->bookingLog->code }}</p>
         </div>
         
         <div class="content">

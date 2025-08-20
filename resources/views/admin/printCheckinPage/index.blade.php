@@ -189,7 +189,7 @@
                             </svg>
                         </div>
                         <h1 class="text-2xl font-bold mb-1">CHECK-IN RECEIPT</h1>
-                        <p class="text-primary-100 opacity-90 text-sm">Booking Reference: {{ $payment->bookingLog->reference }}</p>
+                        <p class="text-primary-100 opacity-90 text-sm">Reservation Code: {{ $payment->bookingLog->code }}</p>
                         <p class="text-primary-100 opacity-90 text-sm">
                             Check-in Date:
                             {{ $payment->bookingLog->checked_in_at ? \Carbon\Carbon::parse($payment->bookingLog->checked_in_at)->format('F j, Y \a\t g:i A') : 'N/A' }}
@@ -393,10 +393,15 @@
                                 </div>
                                 @endif
                                 
-                                <div class="payment-row pt-3 border-t border-gray-200">
-                                    <span class="payment-label font-semibold">Balance Amount:</span>
-                                    <span class="payment-value font-bold text-primary-600">₱{{ number_format(($totalAmount - $payment->amount_paid - $payment->checkin_paid), 2) }}</span>
+                                <div class="payment-row pt-4 mt-4 border-t-2 border-gray-300 flex items-center justify-between bg-gray-50 rounded-xl p-4 shadow-sm">
+                                    <span class="payment-label text-lg font-semibold text-gray-700 flex items-center">
+                                        Balance Amount
+                                    </span>
+                                    <span class="payment-value text-2xl font-extrabold text-red-600">
+                                        ₱{{ number_format(($totalAmount - $payment->amount_paid - $payment->checkin_paid), 2) }}
+                                    </span>
                                 </div>
+                            
                             </div>
                         </div>
                         

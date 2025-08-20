@@ -12,7 +12,7 @@ class AdminNotification extends Mailable
     use Queueable, SerializesModels;
     
     public $booking;
-
+    
     /**
      * Create a new message instance.
      */

@@ -791,8 +791,8 @@ $active = 'dashboard';
 </div>
 
 <!-- Manual Search Container (hidden by default) -->
-<div id="manualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50">
-     <div class="max-w-md mx-auto">
+<div id="manualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50 overflow-y-auto">
+     <div class="max-w-2xl mx-auto">
           <div class="flex justify-between items-center mb-4">
                <h3 class="text-lg font-medium">Search Guest</h3>
                <button onclick="closeManualSearch()" class="text-gray-500 hover:text-gray-700">
@@ -803,18 +803,42 @@ $active = 'dashboard';
                     </svg>
                </button>
           </div>
-
+          
+          <!-- Quick Search Field -->
           <div class="mb-4">
-               <input type="text" id="searchInput" placeholder="Enter name or reference number"
-                    class="w-full p-2 border rounded-lg">
+               <label class="block text-sm font-medium mb-2 text-gray-700">Reservation Code</label>
+               <input type="text" id="reservationCode"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onkeypress="if(event.key==='Enter')performSearch()">
           </div>
-
+          
+          <!-- Advanced Search Fields -->
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+               <h4 class="text-sm font-medium mb-3 text-gray-700">Advanced Search</h4>
+               
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                         <label class="block text-xs font-medium mb-1 text-gray-600">First Name</label>
+                         <input type="text" id="firstNameInput" placeholder="First name" 
+                              class="w-full p-2 border rounded text-sm"
+                              onkeypress="if(event.key==='Enter')performSearch()">
+                    </div>
+                    
+                    <div>
+                         <label class="block text-xs font-medium mb-1 text-gray-600">Last Name</label>
+                         <input type="text" id="lastNameInput" placeholder="Last name" 
+                              class="w-full p-2 border rounded text-sm"
+                              onkeypress="if(event.key==='Enter')performSearch()">
+                    </div>
+               </div>
+          </div>
+          
           <button onclick="performSearch()"
-               class="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-               Search
+               class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
+               Search Guests
           </button>
-
-          <div id="searchResults" class="mt-4">
+          
+          <div id="searchResults" class="mt-4 space-y-2">
                <!-- Search results will appear here -->
           </div>
      </div>
@@ -919,30 +943,62 @@ $active = 'dashboard';
 </div>
 
 <!-- Manual Checkout Search Container -->
-<div id="checkoutManualSearchContainer" class="main-modal fixed inset-0 bg-white p-4 hidden z-50">
-     <div class="max-w-md mx-auto">
+<div id="" class="fixed inset-0 bg-white p-4 hidden z-50 overflow-y-auto">
+     <div class="max-w-2xl mx-auto">
           <div class="flex justify-between items-center mb-4">
-               <h3 class="text-lg font-medium">Search Guest for Check-out</h3>
-               <button onclick="closeCheckoutManualSearch()" class="text-gray-500 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+               <h3 class="text-lg font-medium">Search Guest</h3>
+               <button onclick="closeManualSearch()" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12" />
                     </svg>
                </button>
           </div>
-
+          
+          <!-- Quick Search Field -->
           <div class="mb-4">
-               <input type="text" id="checkoutSearchInput" placeholder="Enter name or reference number" class="w-full p-2 border rounded-lg">
+               <label class="block text-sm font-medium mb-2 text-gray-700">Reservation Code</label>
+               <input type="text" id="reservationCode"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    {{-- onkeypress="if(event.key==='Enter')performSearch()"> --}}
+               >
           </div>
-
-          <button onclick="performCheckoutSearch()" class="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-               Search
+          
+          <!-- Advanced Search Fields -->
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+               <h4 class="text-sm font-medium mb-3 text-gray-700">Advanced Search</h4>
+               
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                         <label class="block text-xs font-medium mb-1 text-gray-600">First Name</label>
+                         <input type="text" id="firstNameInput" placeholder="First name" 
+                              class="w-full p-2 border rounded text-sm"
+                              {{-- onkeypress="if(event.key==='Enter')performSearch()" --}}
+                              >
+                    </div>
+                    
+                    <div>
+                         <label class="block text-xs font-medium mb-1 text-gray-600">Last Name</label>
+                         <input type="text" id="lastNameInput" placeholder="Last name" 
+                              class="w-full p-2 border rounded text-sm"
+                              {{-- onkeypress="if(event.key==='Enter')performSearch()" --}}
+                         >
+                    </div>
+               </div>
+          </div>
+          
+          <button onclick=""
+               class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
+               Search Guests
           </button>
-
-          <div id="checkoutSearchResults" class="mt-4">
-               <!-- Checkout search results will appear here -->
+          
+          <div id="" class="mt-4 space-y-2">
+               <!-- Search results will appear here -->
           </div>
      </div>
 </div>
+
 
 <!-- Day Tour Modal -->
 <div id="dayTourModal" class="modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden">
@@ -1531,37 +1587,101 @@ function formatDate(dateString) {
 
 // Search Functions
 function performSearch() {
-     const searchTerm = document.getElementById('searchInput').value.trim();
-     if (!searchTerm) return;
+     // Get all search field values
+     const firstName = document.getElementById('firstNameInput').value.trim();
+     const lastName = document.getElementById('lastNameInput').value.trim();
+     const reservationCode = document.getElementById('reservationCode').value.trim();
+     
+     // Check if any search field has value
+     if (!firstName && !lastName && !reservationCode) {
+          alert('Please enter at least one search criteria');
+          return;
+     }
      
      const resultsContainer = document.getElementById('searchResults');
-     resultsContainer.innerHTML = '<p class="text-center py-4">Searching...</p>';
+     resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
      
-     fetch(`/check-in/search-guests?q=${encodeURIComponent(searchTerm)}`)
+     // Build query string with all parameters
+     const params = new URLSearchParams();
+     
+     if (reservationCode) params.append('reservationCode', reservationCode);
+     if (firstName) params.append('firstname', firstName);
+     if (lastName) params.append('lastname', lastName);
+     
+     fetch(`/check-in/search-guests?${params.toString()}`)
           .then(response => response.json())
           .then(data => {
                if (data.length > 0) {
-                    let html = '<div class="space-y-2">';
+                    let html = '<div class="space-y-3">';
+                    
+                    // Group by user for better organization (optional)
+                    const bookingsByUser = {};
                     data.forEach(guest => {
-                         if (guest.payment_id) {
+                         const userKey = guest.email || guest.name;
+                         if (!bookingsByUser[userKey]) {
+                         bookingsByUser[userKey] = [];
+                         }
+                         bookingsByUser[userKey].push(guest);
+                    });
+                    
+                    // Display all bookings
+                    Object.values(bookingsByUser).forEach(userBookings => {
+                         if (userBookings.length > 0) {
+                         const firstBooking = userBookings[0];
+                         
+                         // User header
                          html += `
-                              <div class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" 
-                                   onclick="selectGuest('${guest.payment_id}')">
-                                   <h4 class="font-medium">${guest.name}</h4>
-                                   <p class="text-sm text-gray-600">Booking Ref: ${guest.reference_no}</p>
-                                   <p class="text-sm text-green-600 font-medium">Payment ID: ${guest.payment_id}</p>
+                              <div class="bg-gray-50 p-3 rounded-lg">
+                                   <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
+                                   <div class="text-sm text-gray-600 mt-1">
+                                        ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
+                                        ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
+                                   </div>
                               </div>
                          `;
+                         
+                         // Individual bookings
+                         userBookings.forEach(guest => {
+                              if (guest.payment_id) {
+                                   html += `
+                                        <div class="p-4 border rounded-lg hover:bg-gray-100 cursor-pointer ml-4 transition-colors shadow-sm" 
+                                             onclick="selectGuest('${guest.payment_id}')">
+                                             <div class="flex justify-between items-start">
+                                             <div>
+                                                  <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
+                                                  ${guest.checkin_date ? `
+                                                       <p class="text-sm text-gray-600">
+                                                            Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
+                                                       </p>
+                                                  ` : ''}
+                                                  <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
+                                             </div>
+                                             <div class="text-right">
+                                                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                       ${guest.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                                                       guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                                       guest.status === 'checked_in' ? 'bg-blue-100 text-blue-800' : 
+                                                       'bg-gray-100 text-gray-800'}">
+                                                       ${guest.status}
+                                                  </span>
+                                                  <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
+                                             </div>
+                                             </div>
+                                        </div>
+                                   `;
+                              }
+                         });
                          }
                     });
+                    
                     html += '</div>';
                     resultsContainer.innerHTML = html;
                } else {
-                    resultsContainer.innerHTML = '<p class="text-center py-4">No guests found</p>';
+                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No bookings found matching your criteria</p></div>';
                }
           })
           .catch(error => {
-               resultsContainer.innerHTML = '<p class="text-center py-4 text-red-500">Error searching</p>';
+               resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
                console.error('Search error:', error);
           });
 }
