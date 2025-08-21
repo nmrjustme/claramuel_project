@@ -880,7 +880,7 @@
                                                             <button 
                                                                  class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-3 py-2 xs:px-4 xs:py-2 text-xs xs:text-sm sm:text-base rounded-lg hover:scale-[1.02] transition-transform duration-200 ease-in-out shadow-sm hover:shadow-md active:scale-95 flex-shrink-0"
                                                                  data-room="{{ $facilityId }}">
-                                                                 Book Now
+                                                                 Select Room
                                                             </button>
                                                        </div>
                                                   </div>
@@ -888,7 +888,7 @@
                                         </div>
                                         @endforeach
                               </div>
-
+                              
                               <div class="scroll-arrows">
                                    <button class="scroll-arrow scroll-left"
                                         data-target="scroll-{{ $loop->index }}">
@@ -1818,7 +1818,7 @@
           
           const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
           buttons.forEach(button => {
-               button.innerHTML = 'Book Now';
+               button.innerHTML = 'Select Room';
                button.classList.remove('bg-green-500', 'bg-primary');
                button.classList.add('bg-primary');
                button.disabled = false;
