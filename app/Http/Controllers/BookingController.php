@@ -110,11 +110,9 @@ class BookingController extends Controller
             $bookingLog = FacilityBookingLog::create([
                 'user_id' => $user->id,
                 'booking_date' => now(),
-                'status' => 'pending_confirmation',
                 'confirmation_token' => Str::random(60),
             ]);
-    
-            
+
             \Log::info('Booking created', [
                 'booking_id' => $bookingLog->id,
                 'user_id' => $user->id
@@ -122,10 +120,13 @@ class BookingController extends Controller
             
             // Get active breakfast price if included
             $breakfastId = null;
+            $breakfastPricePerFacilityPerDay = 0;
+            
             if ($request->breakfast_included) {
                 $breakfast = Breakfast::where('status', 'Active')->first();
                 if ($breakfast) {
                     $breakfastId = $breakfast->id;
+                    $breakfastPricePerFacilityPerDay = $breakfast->price;
                 }
             }
             
@@ -140,12 +141,15 @@ class BookingController extends Controller
                     'facility_booking_log_id' => $bookingLog->id,
                 ]);
 
-                // Calculate price including breakfast if applicable
-                $facilityPrice = $facilityData['total_price'];
+                // Calculate breakfast cost for this facility (per facility per night)
+                $breakfastCost = 0;
                 if ($request->breakfast_included) {
-                    $facilityPrice += ($request->breakfast_price / count($request->facilities));
+                    $breakfastCost = $breakfastPricePerFacilityPerDay * $facilityData['nights'];
                 }
-
+                
+                // Calculate total price for this facility (room + breakfast)
+                $facilityTotalPrice = $facilityData['total_price'] + $breakfastCost;
+                
                 // Create booking details
                 FacilityBookingDetails::create([
                     'facility_summary_id' => $facilitySummary->id,
@@ -153,7 +157,8 @@ class BookingController extends Controller
                     'arriving_time' => $request->arrival_time,
                     'checkin_date' => $checkinDate->format('Y-m-d'),
                     'checkout_date' => $checkoutDate->format('Y-m-d'),
-                    'total_price' => $facilityPrice,
+                    'total_price' => $facilityTotalPrice,
+                    'breakfast_cost' => $breakfastCost,
                 ]);
 
                 // Process guest types for this facility
@@ -172,8 +177,8 @@ class BookingController extends Controller
             // Commit transaction
             DB::commit();
             
-            $bookingLog->refresh();
             $bookingLog->load(['user']);
+            
             event(new BookingNew($bookingLog)); // Event listener for new booking list
             
             // Sending active admin email

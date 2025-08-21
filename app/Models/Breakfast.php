@@ -13,6 +13,7 @@ class Breakfast extends Model
     
     protected $fillable = [
         'facility_id',
+        'price'
     ];
 
     public function facility()
