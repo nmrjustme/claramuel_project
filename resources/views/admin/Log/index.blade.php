@@ -67,7 +67,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record ID</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Read Status</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Status</th>
@@ -89,7 +89,7 @@
 @endsection
 
 @section('content_js')
-<script>
+<script type="module">
 document.addEventListener('DOMContentLoaded', function() {
     const bookingsTableBody = document.getElementById('bookings-table-body');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -144,10 +144,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return Math.floor(seconds) + " second" + (Math.floor(seconds) === 1 ? "" : "s") + " ago";
     }
-
+    
     // Function to get status color and text
     function getStatusInfo(status) {
-        switch(status.toLowerCase()) {
+        switch(status) {
             case 'confirmed':
                 return { class: 'bg-green-600 text-white', text: 'Confirmed' };
             case 'pending_confirmation':
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'completed':
                 return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
             default:
-                return { class: 'bg-gray-100 text-gray-800', text: status };
+                return { class: 'bg-gray-100 text-gray-800', text: status };    
         }
     }
     
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${booking.is_read ? 'Read' : 'Unread'}
                     </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm  text-gray-500">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.class}">
                         ${statusInfo.text}
                     </span>
@@ -591,6 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.Echo.channel('bookings')
             .listen('.booking.created', (e) => {
                 console.log('New booking received:', e);
+                console.log('Booking status:', e.booking.status);
                 addNewBooking(e.booking);
             });
     }

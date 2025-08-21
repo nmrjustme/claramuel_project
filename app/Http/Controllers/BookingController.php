@@ -110,6 +110,7 @@ class BookingController extends Controller
             $bookingLog = FacilityBookingLog::create([
                 'user_id' => $user->id,
                 'booking_date' => now(),
+                'status' => 'pending_confirmation',
                 'confirmation_token' => Str::random(60),
             ]);
     
@@ -171,8 +172,8 @@ class BookingController extends Controller
             // Commit transaction
             DB::commit();
             
+            $bookingLog->refresh();
             $bookingLog->load(['user']);
-
             event(new BookingNew($bookingLog)); // Event listener for new booking list
             
             // Sending active admin email

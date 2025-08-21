@@ -4,8 +4,6 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -21,6 +19,8 @@ class BookingNew implements ShouldBroadcast
     {
         $this->booking = [
             'id' => $booking->id,
+            'status' => $booking->status ?? 'pending_confirmation',
+            'is_read' => $booking->is_read,
             'user' => [
                 'firstname' => $booking->user->firstname,
                 'lastname' => $booking->user->lastname,
@@ -30,7 +30,7 @@ class BookingNew implements ShouldBroadcast
             'created_at' => $booking->created_at->toDateTimeString()
         ];
     }
-
+    
     public function broadcastOn(): Channel
     {
         return new Channel('bookings');
