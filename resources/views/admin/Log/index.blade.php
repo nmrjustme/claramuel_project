@@ -89,7 +89,7 @@
 @endsection
 
 @section('content_js')
-<script type="module">
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     const bookingsTableBody = document.getElementById('bookings-table-body');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -120,7 +120,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to format time as "X time ago"
     function timeAgo(dateTime) {
-        const seconds = Math.floor((new Date() - new Date(dateTime)) / 1000);
+        const now = new Date();
+        const pastDate = new Date(dateTime);
+        const seconds = Math.floor((now - pastDate) / 1000);
+        
+        // Handle cases where date might be in the future (server/client time differences)
+        if (seconds < 0) {
+            return "just now";
+        }
         
         let interval = Math.floor(seconds / 31536000);
         if (interval >= 1) {
@@ -174,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function addNewBooking(booking) {
         const statusInfo = getStatusInfo(booking.status);
         const row = document.createElement('tr');
-        row.className = `hover:bg-gray-50 bg-blue-50 animate-pulse ${booking.is_read ? '' : 'bg-red-50'}`;
+        row.className = `hover:bg-gray-50 bg-blue-50 animate-pulse ${booking.is_read ? 'bg-green-50' : 'bg-red-50'}`;
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${booking.id}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
