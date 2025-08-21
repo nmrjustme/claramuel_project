@@ -34,7 +34,7 @@
                             <li>Select "Express Send"</li>
                             <li>Enter our GCash number: <span class="font-bold">---- --- 4567</span></li>
                             <li>Input the amount: <span class="font-bold">₱{{ number_format($half_of_total_price, 2) }}</span></li>
-                            <li>Add note: <span class="font-bold">My Booking {{ $reference }}</span></li>
+                            <li>Add note(Optional): <span class="font-bold">My reservation code {{ $reservation_code }}</span></li>
                             <li>Complete the transaction</li>
                         </ol>
                     </div>
@@ -63,7 +63,7 @@
                                 GCash Reference Number <span class="text-red-500">*</span>
                             </label>
                             <input class="w-full px-3 py-2 border border-darkGray rounded-lg" 
-                                   id="reference" name="reference_no" type="text" placeholder="Ex: 1234567890" required>
+                                id="reference" name="reference_no" type="text" placeholder="Ex: 1234567890" required>
                             <p class="text-xs text-gray-500 mt-1">Found in your GCash transaction receipt</p>
                         </div>
     
@@ -99,7 +99,7 @@
                                     
                                     <div class="flex justify-center bg-white p-2 rounded border border-gray-300">
                                         <img id="previewImage" src="#" alt="GCash Payment Proof Preview" 
-                                             class="w-auto max-h-[70vh] object-contain mx-auto 
+                                            class="w-auto max-h-[70vh] object-contain mx-auto 
                                                     md:max-h-[60vh] lg:max-h-[50vh] xl:max-h-[45vh]
                                                     shadow-sm">
                                     </div>
@@ -129,8 +129,8 @@
                     <h2 class="text-2xl font-semibold text-primary mb-6">Booking Summary</h2>
                     
                     <div class="mb-6 bg-white p-4 rounded-lg shadow-sm">
-                        <h3 class="font-medium text-gray-800 mb-3">Booking Reference</h3>
-                        <p class="text-lg font-bold text-primary">{{ $reference }}</p>
+                        <h3 class="font-medium text-gray-800 mb-3">Reservation Code</h3>
+                        <p class="text-lg font-bold text-primary">{{ $reservation_code }}</p>
                     </div>
     
                     <div class="mb-6 bg-white p-4 rounded-lg shadow-sm">
@@ -213,7 +213,7 @@
     
                     <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <h3 class="font-medium text-yellow-800 mb-2">Important Reminder</h3>
-                        <p class="text-sm text-yellow-700">Your booking will be confirmed only after we verify your GCash payment. Please allow 1-2 business hours for processing.</p>
+                        <p class="text-sm text-yellow-700">Your booking will be complete only after we verify your GCash payment. Please allow 1-2 business hours for processing.</p>
                     </div>
                 </div>
             </div>

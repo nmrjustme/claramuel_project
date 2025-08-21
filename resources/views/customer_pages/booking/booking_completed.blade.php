@@ -1,9 +1,9 @@
 @extends('layouts.bookings')
-@section('title', 'Booking Confirmation')
+@section('title', 'Awaiting Verification')
 @section('bookings')
     <x-header />
     <div class="container mx-auto px-4 sm:px-6 py-6 md:py-8 max-w-12xl">
-        <!-- Progress Steps -->
+        
         <!-- Progress Steps -->
         <x-progress-step :currentStep="4" :steps="[
             ['label' => 'Select Rooms'],
@@ -34,8 +34,8 @@
                             <p class="text-gray-700 mb-2 md:mb-4 text-sm sm:text-base">Your booking payment has been received. We've sent the details to your email at <span class="font-semibold">{{ $booking->user->email }}</span>.</p>
                             <p class="text-gray-700 mb-3 md:mb-4 text-sm sm:text-base">You will receive your payment receipt via email once it has been verified</p>
                             <div class="bg-white p-3 md:p-4 rounded border border-green-100">
-                                <p class="text-xs md:text-sm text-gray-600 mb-1">Booking Reference:</p>
-                                <p class="font-bold text-green-700 text-base md:text-lg">{{ $booking->reference}}</p>
+                                <p class="text-xs md:text-sm text-gray-600 mb-1">Reservation Code:</p>
+                                <p class="font-bold text-green-700 text-base md:text-lg">{{ $booking->code}}</p>
                             </div>
                         </div>
                     </div>

@@ -46,6 +46,7 @@ class PaymentsController extends Controller
         $total_price = $booking->details->sum('total_price') ?? 0;
         $half_of_total_price = ($total_price * 0.5) ?? 0;
         $reference = $booking->reference ?? 'No reference found';
+        $reservation_code = $booking->code ?? 'No reservation code';
         
         $facilities = $booking->summaries->map(function ($summary) use ($booking) {
             // Get guest details for this specific facility
@@ -96,6 +97,7 @@ class PaymentsController extends Controller
                     'half_of_total_price' => $half_of_total_price,
                     'total_price' => $total_price,
                     'reference' => $reference,
+                    'reservation_code' => $reservation_code,
                     'facilities' => $facilities,
                     'checkin' => $checkin,
                     'checkout' => $checkout,
