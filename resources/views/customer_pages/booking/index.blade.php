@@ -877,11 +877,27 @@
                                                                       per night
                                                                  </div>
                                                             </div>
-                                                            <button 
-                                                                 class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-3 py-2 xs:px-4 xs:py-2 text-xs xs:text-sm sm:text-base rounded-lg hover:scale-[1.02] transition-transform duration-200 ease-in-out shadow-sm hover:shadow-md active:scale-95 flex-shrink-0"
-                                                                 data-room="{{ $facilityId }}">
-                                                                 Select Room
-                                                            </button>
+                                                            <div class="flex flex-col items-start">
+                                                                 <button 
+                                                                      class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-4 py-3 xs:px-5 xs:py-3 text-sm xs:text-base font-medium rounded-xl hover:scale-[1.02] transition-all duration-300 ease-out shadow-md hover:shadow-lg active:scale-[0.98] flex-shrink-0 bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                                                                      data-room="{{ $facilityId }}">
+                                                                      <span class="flex items-center justify-center">
+                                                                           Select Room
+                                                                           <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                                           </svg>
+                                                                      </span>
+                                                                 </button>
+                                                                 
+                                                                 <!-- Indicator text -->
+                                                                 <span class="mt-3 text-xs xs:text-sm text-gray-600 room-indicator transition-opacity duration-300 flex items-center">
+                                                                      Room will appear in your Booking Summary
+                                                                      <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                                      </svg>
+                                                                 </span>
+                                                            </div>
+                                                       
                                                        </div>
                                                   </div>
                                              </div>
