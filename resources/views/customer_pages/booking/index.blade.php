@@ -272,27 +272,32 @@
           border-right: 0 solid transparent;
           border-top: 5px solid #B91C1C;
      }
-
+     
      /* Responsive adjustments */
      @media (max-width: 768px) {
-          .category-title {
-               font-size: 1.5rem;
+          .amenities-modal-container {
+               width: 95%;
+               margin: 1rem;
           }
-
-          .room-card {
-               min-width: 260px;
-               width: 260px;
+          
+          .amenities-grid {
+               grid-template-columns: 1fr;
           }
-
-          .scroll-arrow {
-               width: 36px;
-               height: 36px;
-               opacity: 0.9;
+          
+          .amenity-item {
+               padding: 0.75rem;
+               min-height: 70px;
           }
-
-          .container {
-               padding-left: 1rem;
-               padding-right: 1rem;
+          
+          .amenity-icon {
+               width: 28px;
+               height: 28px;
+               font-size: 1rem;
+               margin-right: 0.75rem;
+          }
+          
+          .amenity-name {
+               font-size: 0.9375rem;
           }
      }
 
@@ -530,13 +535,73 @@
 
      /* Amenities Modal Styles */
      #amenities-modal {
-          transition: opacity 0.8s ease, visibility 0.3s ease;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+     }
+
+     .amenities-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1rem;
+     }
+
+     #amenities-modal.hidden {
+          opacity: 0;
+          visibility: hidden;
      }
      
+     #amenities-modal:not(.hidden) {
+          opacity: 1;
+          visibility: visible;
+     }
+
+     .amenities-modal-container {
+          background: white;
+          border-radius: 1rem;
+          width: 90%;
+          max-width: 800px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+     }
+
+     .amenities-modal-header {
+          padding: 1.5rem 2rem;
+          border-bottom: 1px solid #e5e7eb;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+     }
+     .amenities-modal-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #1F2937;
+          margin: 0;
+     }
+     
+     .amenities-modal-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: #6B7280;
+          padding: 0.25rem;
+          border-radius: 0.25rem;
+     }
+     
+     .amenities-modal-close:hover {
+          color: #374151;
+          background: #F3F4F6;
+     }
+     .amenities-modal-body {
+          padding: 2rem;
+     }
      .amenity-item {
           display: flex;
           align-items: center;
-          padding: 1.25rem 1.5rem;
+          padding: 1rem;
           border-radius: 0.75rem;
           background-color: #f8fafc;
           transition: all 0.2s ease;
@@ -573,21 +638,29 @@
           }
      }
 
+     .amenity-item:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          border-color: #DC2626;
+     }
+     
      .amenity-icon {
-          width: 24px;
-          height: 24px;
+          width: 32px;
+          height: 32px;
           display: flex;
           align-items: center;
           justify-content: center;
           margin-right: 1rem;
           color: #DC2626;
-          font-size: 1rem;
+          font-size: 1.25rem;
+          flex-shrink: 0;
      }
 
      .amenity-name {
-          font-size: 0.9375rem;
+          font-size: 1rem;
           color: #1F2937;
           font-weight: 500;
+          text-align: left;
      }
 
      #checkout-btn {
@@ -619,7 +692,7 @@
           transform: translateY(0);
           box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
      }
-
+     
      #checkout-btn::after {
           content: '';
           position: absolute;
@@ -642,7 +715,25 @@
           transform: none !important;
           box-shadow: none !important;
      }    
+         /* Loading Spinner - Enhanced */
+     .loading-spinner {
+          display: none;
+          width: 1.25rem;
+          height: 1.25rem;
+          border: 3px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          border-top-color: white;
+          animation: spin 1s ease-in-out infinite;
+     }
 
+     .loading-spinner:not(.hidden) {
+          display: inline-block; /* Show when not hidden */
+     }
+     
+     @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+     }
 </style>
 
 <x-header />
@@ -651,11 +742,12 @@
      
      <!-- Progress Steps -->
      <x-progress-step :currentStep="1" :steps="[
-               ['label' => 'Select Rooms'],
-               ['label' => 'Your Details'],
-               ['label' => 'Payment'],
-               ['label' => 'Completed']
-          ]" />
+          ['label' => 'Select Rooms'],
+          ['label' => 'Your Details'],
+          ['label' => 'Payment'],
+          ['label' => 'Processing']
+     ]" />
+     
      <!-- Main Content -->
      <div class="flex flex-col lg:flex-row gap-12">
           <!-- Left Column -->
@@ -738,7 +830,7 @@
                                         $bookedDates = array_values(array_unique($bookedDates));
                                         @endphp
 
-                                        <div class="room-card border-lightGray flex flex-col h-full" data-price="{{ $facility->price }}"
+                                        <div class="room-card border-lightgray flex flex-col h-full" data-price="{{ $facility->price }}"
                                              data-room-id="{{ $facilityId }}" data-images='@json($allImages)'
                                              data-booked-dates='{{ json_encode($bookedDates) }}'>
 
@@ -820,12 +912,19 @@
                                                                                 No blocked dates
                                                                            </h4>
                                                                       @else
+                                                                      @php
+                                                                           // Sort dates before displaying
+                                                                           $sortedDates = collect($bookedDates)->sort()->values()->all();
+                                                                      @endphp
+                                                                      
                                                                            <div class="text-xs">
                                                                                 {{ implode(', ', array_map(fn($date) =>
-                                                                                Carbon\Carbon::parse($date)->format('M j'),
-                                                                                $bookedDates)) }}
+                                                                                     Carbon\Carbon::parse($date)->format('M j'),
+                                                                                     $sortedDates
+                                                                                )) }}
                                                                            </div>
                                                                       @endif
+                                                                 
                                                                  </div>
                                                             </div>
                                                        </div>
@@ -879,7 +978,7 @@
                                                             </div>
                                                             <div class="flex flex-col items-start">
                                                                  <button 
-                                                                      class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-4 py-3 xs:px-5 xs:py-3 text-sm xs:text-base font-medium rounded-xl hover:scale-[1.02] transition-all duration-300 ease-out shadow-md hover:shadow-lg active:scale-[0.98] flex-shrink-0 bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                                                                      class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-4 py-3 xs:px-5 xs:py-3 text-sm xs:text-base font-medium rounded-xl hover:scale-[1.02] transition-all duration-300 ease-out shadow-md hover:shadow-lg active:scale-[0.98] flex-shrink-0 bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-2 focus:ring-red-300 focus:outline-none"
                                                                       data-room="{{ $facilityId }}">
                                                                       <span class="flex items-center justify-center">
                                                                            Select Room
@@ -925,7 +1024,7 @@
           <!-- Right Column - Order Summary -->
           <div class="lg:w-2/5 space-y-4 sticky-sidebar">
                <!-- Date Selection Card -->
-               <div class="bg-white rounded-xl p-8 border border-lightGray">
+               <div class="bg-white rounded-xl p-8 border border-lightgray">
                     <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
                          <i class="far fa-calendar-alt text-primary mr-3"></i>
                          Select Your Dates
@@ -937,14 +1036,14 @@
                                    Check-in Date <span class="text-gray-500 font-normal">(from 12:00 PM)</span>
                               </label>
                               <input type="text" id="checkin" placeholder="Select date"
-                                   class="w-full px-4 py-3 border border-darkGray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
+                                   class="w-full px-4 py-3 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
                          </div>
                          <div>
                               <label for="checkout" class="block text-sm font-medium text-gray-700 mb-2">
                                    Check-out Date <span class="text-gray-500 font-normal">(until 10:00 AM)</span>
                               </label>
                               <input type="text" id="checkout" placeholder="Select date"
-                                   class="w-full px-4 py-3 border border-darkGray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
+                                   class="w-full px-4 py-3 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
                          </div>
                     </div>
 
@@ -955,7 +1054,7 @@
                </div>
 
                <!-- Breakfast Option Card -->
-               <div class="bg-white rounded-xl p-8 border border-lightGray">
+               <div class="bg-white rounded-xl p-8 border border-lightgray">
                     <h2 class="text-xl font-bold text-dark mb-4 flex items-center">
                          <i class="fas fa-utensils text-primary mr-3"></i>
                          Breakfast Option
@@ -983,7 +1082,7 @@
                
                <!-- Booking Summary Card -->
                <div
-                    class="bg-white rounded-xl p-8 border border-lightGray">
+                    class="bg-white rounded-xl p-8 border border-lightgray">
                     <h2 class="text-2xl font-bold text-gray-800 mb-5 flex items-center">
                          <i class="fas fa-receipt text-primary mr-3 text-2xl"></i>
                          Booking Summary
@@ -1024,6 +1123,7 @@
                          class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-70 disabled:transform-none hover:-translate-y-0.5 active:translate-y-0 btn-primary"
                          disabled>
                          <span id="button-text">Proceed to Your Details</span>
+                         <div id="button-spinner" class="loading-spinner hidden"></div>
                     </button>
                </div>
           </div>
@@ -1031,39 +1131,27 @@
 </div>
 
 <!-- Amenities Modal -->
-<div id="amenities-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <!-- Background overlay -->
-          <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-               <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-          </div>
-          
-          <!-- Modal container - Made larger and centered -->
-          <div
-               class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
-               <div class="bg-white px-8 pt-8 pb-6 sm:p-8 sm:pb-6">
-                    <div class="sm:flex sm:items-start">
-                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                              <h3 class="text-2xl font-bold text-gray-900 mb-6" id="modal-title">
-                                   Room Amenities
-                              </h3>
-                              <div class="mt-2">
-                                   <div id="amenities-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        <!-- Amenities will be populated here -->
-                                   </div>
-                              </div>
-                         </div>
-                    </div>
-               </div>
-               <div class="bg-gray-50 px-8 py-6 sm:px-8 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="close-amenities-modal"
-                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-6 py-3 bg-primary text-base font-medium text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm">
-                         Close
+<div id="amenities-modal" class="fixed inset-0 z-[999] hidden">
+     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+     
+     <div class="fixed inset-0 flex items-center justify-center p-4">
+          <div class="amenities-modal-container">
+               <div class="amenities-modal-header">
+                    <h3 class="amenities-modal-title">Room Amenities</h3>
+                    <button type="button" class="amenities-modal-close" id="close-amenities-modal">
+                         <i class="fas fa-times"></i>
                     </button>
+               </div>
+               
+               <div class="amenities-modal-body">
+                    <div id="amenities-list" class="amenities-grid">
+                         <!-- Amenities will be populated here -->
+                    </div>
                </div>
           </div>
      </div>
 </div>
+
 
 
 <!-- Notification element -->
@@ -1100,7 +1188,7 @@
      }
      saveCartToStorage() {
           sessionStorage.setItem('bookingCart', JSON.stringify(this.cart));
-          localStorage.setItem('bookingCart', JSON.stringify(this.cart));
+          //localStorage.setItem('bookingCart', JSON.stringify(this.cart));
           sessionStorage.setItem('breakfastIncluded', this.breakfastIncluded);
      }
      initializeRoomsData() {
@@ -1155,19 +1243,32 @@
           const amenitiesList = document.getElementById('amenities-list');
           
           // Close handlers
-          closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+          const closeModal = () => {
+               modal.classList.add('hidden');
+               document.body.style.overflow = 'auto'; // Re-enable scrolling
+          };
+          
+          closeBtn.addEventListener('click', closeModal);
+          
           modal.addEventListener('click', (e) => {
-               if (e.target === modal) modal.classList.add('hidden');
+               if (e.target === modal) closeModal();
+          });
+          
+          // Escape key to close
+          document.addEventListener('keydown', (e) => {
+               if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+               }
           });
           
           // View amenities button handler
           document.addEventListener('click', async (e) => {
                if (e.target.closest('.view-amenities-btn')) {
                     const button = e.target.closest('.view-amenities-btn');
-                    const facilityId = button.dataset.roomId.replace('facility-', '');
+                    const facilityId = button.dataset.roomId;
                     
                     try {
-                         // Show loading state with centered spinner
+                         // Show loading state
                          amenitiesList.innerHTML = `
                          <div class="col-span-3 py-8 flex flex-col items-center justify-center">
                               <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
@@ -1175,17 +1276,18 @@
                          </div>`;
                          
                          modal.classList.remove('hidden');
+                         document.body.style.overflow = 'hidden'; // Prevent background scrolling
                          
                          // Fetch amenities via API
                          const response = await fetch(`/api/facilities/${facilityId}/amenities`);
                          const data = await response.json();
                          
                          if (response.ok && data.success) {
-                              // Populate amenities list with larger items
+                              // Populate amenities list
                               amenitiesList.innerHTML = data.amenities.map(amenity => `
                                    <div class="amenity-item">
                                         <div class="amenity-icon">
-                                             <i class="${amenity.icon || this.getAmenityIcon(amenity.name)} text-xl"></i>
+                                             <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
                                         </div>
                                         <div class="amenity-name">${amenity.name}</div>
                                    </div>
@@ -1208,21 +1310,43 @@
      }
 
      getAmenityIcon(amenityName) {
-          const iconMap = {
-               'wifi': 'fas fa-wifi',
-               'tv': 'fas fa-tv',
-               'air conditioning': 'fas fa-snowflake',
-               'kitchen': 'fas fa-utensils',
-               'parking': 'fas fa-parking',
-               'pool': 'fas fa-swimming-pool',
-               'breakfast': 'fas fa-coffee',
-               'gym': 'fas fa-dumbbell',
-               // more mappings....
-          };
-          
-          const lowerName = amenityName.toLowerCase();
-          return iconMap[lowerName] || 'fas fa-check-circle';
-     }
+               const iconMap = {
+                    'wifi': 'fas fa-wifi',
+                    'tv': 'fas fa-tv',
+                    'air conditioning': 'fas fa-snowflake',
+                    'kitchen': 'fas fa-utensils',
+                    'parking': 'fas fa-parking',
+                    'pool': 'fas fa-swimming-pool',
+                    'breakfast': 'fas fa-coffee',
+                    'gym': 'fas fa-dumbbell',
+                    'bathroom': 'fas fa-bath',
+                    'shower': 'fas fa-shower',
+                    'bed': 'fas fa-bed',
+                    'hot tub': 'fas fa-hot-tub',
+                    'fireplace': 'fas fa-fire',
+                    'washing machine': 'fas fa-soap',
+                    'dryer': 'fas fa-wind',
+                    'heating': 'fas fa-temperature-high',
+                    'balcony': 'fas fa-door-open',
+                    'garden': 'fas fa-seedling',
+                    'terrace': 'fas fa-umbrella-beach',
+                    'view': 'fas fa-mountain',
+                    'security': 'fas fa-shield-alt',
+                    'accessible': 'fas fa-wheelchair',
+                    'pet friendly': 'fas fa-paw',
+                    'smoke free': 'fas fa-smoking-ban',
+                    'family friendly': 'fas fa-child',
+                    'workspace': 'fas fa-laptop',
+                    'iron': 'fas fa-tshirt',
+                    'hair dryer': 'fas fa-wind',
+                    'essentials': 'fas fa-soap',
+                    'hot water': 'fas fa-faucet',
+                    // Add more mappings as needed
+               };
+               
+               const lowerName = amenityName.toLowerCase();
+               return iconMap[lowerName] || 'fas fa-check-circle';
+          }
 
      setupUnavailableDatesToggle() {
           document.addEventListener('click', (e) => {
@@ -1419,13 +1543,17 @@
 
 	async handleCheckout() {
 		if (this.cart.length === 0 || this.isSubmitting) return;
-
-		const button = document.getElementById('checkout-btn');
+		
+          const button = document.getElementById('checkout-btn');
+          const buttonText = document.getElementById('button-text');
+          const spinner = document.getElementById('button-spinner');
 		
 		try {
 			// Show loading state
-			button.disabled = true;
-			this.isSubmitting = true;
+               button.disabled = true;
+               this.isSubmitting = true;
+               spinner.classList.add('hidden');
+               buttonText.textContent = 'Processing...';
 			
 			// Get pax information from each room card
 			const bookingData = {
@@ -1437,7 +1565,7 @@
 					const pax = roomCard ? parseInt(roomCard.querySelector('.feature-item:last-child span').textContent.match(/\d+/)[0]) : 1;
                          const categoryContainer = roomCard.closest('.category-container');
 					const category = categoryContainer ? categoryContainer.querySelector('.category-title').textContent.trim() : 'Standard';
-
+					
 					return {
 						facility_id: item.facilityId,
 						name: item.name,
@@ -1466,10 +1594,11 @@
 			showNotification('Failed to proceed to checkout. Please try again.', true);
                
                button.textContent = 'Proceed to Customer Information';
-               spinner.classList.add('hidden');
+               spinner.classList.remove('hidden');
                button.disabled = this.cart.length === 0;
 		} finally {
 			this.isSubmitting = false;
+               spinner.classList.remove('hidden');
 		}
 	}
      
@@ -1854,7 +1983,7 @@
           
           window.addEventListener('beforeunload', () => {
                if (window.bookingSystem?.cart?.length > 0) {
-                    localStorage.setItem('bookingCart', JSON.stringify(window.bookingSystem.cart));
+                    sessionStorage.setItem('bookingCart', JSON.stringify(window.bookingSystem.cart));
                     sessionStorage.setItem('breakfastIncluded', window.bookingSystem.breakfastIncluded);
                }
           });

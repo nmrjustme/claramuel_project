@@ -246,7 +246,7 @@
         margin-top: 0.25rem;
     }
 
-    /* Add this to your existing styles */
+    /* Payments */
     .arriving-time {
         display: inline-block;
         padding: 0.25rem 0.5rem;
@@ -256,6 +256,37 @@
         color: #1d4ed8;
         margin-top: 0.25rem;
         font-weight: 500;
+    }
+
+    .payment-info-card {
+        background-color: #f0f9ff;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #bae6fd;
+    }
+    
+    .payment-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .payment-detail:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .payment-label {
+        font-weight: 500;
+        color: #4b5563;
+    }
+    
+    .payment-value {
+        font-weight: 600;
+        color: #1e40af;
     }
 </style>
 
@@ -534,9 +565,49 @@
         // Check if booking is already confirmed or rejected
         const isConfirmed = data.status === 'confirmed';
         const isRejected = data.status === 'rejected';
-
+        
+        let paymentHtml = '';
+        if (data.payment && data.payment.amount !== null && data.payment.amount !== undefined) {
+            paymentHtml = `
+                <div class="payment-info-card">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Payment Information</h3>
+                    <div class="payment-details">
+                        <div class="payment-detail">
+                            <span class="payment-label">To be paid:</span>
+                            <span class="payment-value">${formatPrice(data.payment.amount)}</span>
+                        </div>
+                        ${data.payment.gcash_number ? `
+                        <div class="payment-detail">
+                            <span class="payment-label">GCash Number:</span>
+                            <span class="payment-value">${data.payment.gcash_number}</span>
+                        </div>
+                        ` : ''}
+                        ${data.payment.reference_no ? `
+                        <div class="payment-detail">
+                            <span class="payment-label">Reference No:</span>
+                            <span class="payment-value">${data.payment.reference_no}</span>
+                        </div>
+                        ` : ''}
+                        ${data.payment.payment_date ? `
+                        <div class="payment-detail">
+                            <span class="payment-label">Payment Date:</span>
+                            <span class="payment-value">${formatDate(data.payment.payment_date)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        } else {
+            paymentHtml = `
+                <div class="payment-info-card">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Payment Information</h3>
+                    <p class="text-gray-500 italic">No payment information available</p>
+                </div>
+            `;
+        }
         // Main modal HTML
         modalBody.innerHTML = `
+            ${paymentHtml}
             <!-- Booking Dates -->
             <div class="info-card">
                 <h3 class="text-lg font-semibold mb-3 text-gray-800">Booking Period</h3>

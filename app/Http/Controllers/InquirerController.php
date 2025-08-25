@@ -14,6 +14,11 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode; 
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\File;
+use App\Mail\BookingVerifiedMail;
 
 class InquirerController extends Controller
 {
@@ -421,7 +426,8 @@ class InquirerController extends Controller
                 'summaries.facility:id,name,room_number,bed_number,price,category',
                 'summaries.breakfast:id,price',
                 'summaries.bookingDetails',
-                'guestDetails.guestType'
+                'guestDetails.guestType',
+                'payments',
             ])->findOrFail($id);
         
         $formattedData = $this->formatInquiryData($inquiry);
@@ -457,14 +463,30 @@ class InquirerController extends Controller
             
         }
         $arrivingTime = $inquiry->bookingDetails->first()->arriving_time ?? null;
+        $reservationCode = $inquiry->code ?? null;
+        // Get payment information if available
+        $paymentData = null;
+        if ($inquiry->payments && $inquiry->payments->count() > 0) {
+            $payment = $inquiry->payments->first();
+            $paymentData = [
+                'amount' => $payment->amount,
+                'gcash_number' => $payment->gcash_number,
+                'reference_no' => $payment->reference_no,
+                'payment_date' => $payment->payment_date,
+                'receipt_path' => $payment->receipt_path,
+                'amount_paid' => $payment->amount_paid,
+            ];
+        }
 
         return [
             'id' => $inquiry->id,
             'reference' => $inquiry->reference,
+            'code' => $reservationCode,
             'status' => $inquiry->status,
             'total_price' => $totalPrice,
             'nights' => $nights,
             'arriving_time' => $arrivingTime,
+            'payment' => $paymentData, // Add payment information
             'user' => [
                 'firstname' => $inquiry->user->firstname ?? null,
                 'lastname' => $inquiry->user->lastname ?? null,
@@ -577,6 +599,136 @@ class InquirerController extends Controller
             'is_verified' => $payment->status === 'verified',
             'payment_method' => $payment->payment_method
         ];
+    }
+
+        /**
+     * Verify payment and send receipt with QR code
+     */
+    public function verifyBookingWithReceipt(Request $request, $bookingId)
+    {
+        try {
+            $validated = $request->validate([
+                'custom_message' => 'nullable|string|max:500',
+                'send_email' => 'sometimes|boolean',
+                'amount_paid' => 'required|numeric|min:0.01'
+            ]);
+            
+            $booking = FacilityBookingLog::with([
+                'payments', 
+                'details',
+                'summaries.facility',
+                'summaries.breakfast',
+                'summaries.bookingDetails',
+                'guestDetails.guestType',
+                'user' // Make sure user relationship exists for email
+            ])->findOrFail($bookingId);
+
+            Payments::where('facility_log_id', $bookingId)
+                ->update(['amount_paid' => $validated['amount_paid']]);
+            
+            $checkout_date = $booking->details->first()->checkout_date;
+            $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
+            
+            // ✅ Generate a unique token
+            do {
+                $verificationToken = Str::random(64);
+            } while (Payments::where('verification_token', $verificationToken)->exists());
+
+            // ✅ Encrypt QR code payload
+            $payload = [
+                'id' => $booking->id,
+                'expires_at' => $expire_date
+            ];
+
+            // ✅ Build QR Code with encrypted string
+            $result = Builder::create()
+                ->writer(new PngWriter())
+                ->data(json_encode($payload))
+                ->size(300)
+                ->margin(10)
+                ->build();
+
+            // ✅ Save QR Code Image
+            $directory = public_path('imgs/qr_code/');
+            $fileName = 'qr_payment_'.$booking->id.'_'.time().'.png';
+            $filePath = $directory . $fileName;
+
+            if (!File::exists($directory)) {
+                File::makeDirectory($directory, 0755, true);
+            }
+
+            $result->saveToFile($filePath);
+
+            // ✅ Update booking record
+            $booking->update([
+                'status' => 'confirmed',
+                'qr_code_path' => 'imgs/qr_code/' . $fileName
+            ]);
+
+
+            // ✅ Send Email with QR Code if requested
+            $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
+            $customMessage = $validated['custom_message'] ?? '';
+
+            if ($request->input('send_email', true)) {
+                $this->sendVerificationEmail($booking, $qrCodeUrl, $customMessage);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking confirmed successfully',
+                'booking_id' => $booking->id,
+                'qr_code_url' => $qrCodeUrl
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            \Log::error("Error confirming booking {$bookingId}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Send verification email with QR code
+     */
+    private function sendVerificationEmail($booking, $qrCodeUrl, $customMessage): void
+    {
+        try {
+            if (!$booking->user || !$booking->user->email) {
+                throw new \Exception('No user or email associated with this booking');
+            }
+            
+            $customer_email = $booking->user->email;
+            
+            // Validate email format
+            if (!filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
+                throw new \Exception('Invalid email format: ' . $customer_email);
+            }
+            
+            // Send email with error handling
+            Mail::to($customer_email)->send(new BookingVerifiedMail(
+                $booking,
+                $qrCodeUrl,
+                $customMessage
+            ));
+            
+            // Log successful email sending
+            \Log::info("Verification email sent to {$customer_email} for booking {$booking->id}");
+        
+        } catch (\Exception $e) {
+            \Log::error("Failed to send verification email for booking {$booking->id}: " . $e->getMessage());
+            throw $e; // Re-throw to be handled by the main method
+        }
     }
     
     // public function streamUpdates(Request $request)

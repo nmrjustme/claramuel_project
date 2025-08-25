@@ -62,19 +62,35 @@
     </div>
 
     <!-- Booking List -->
-    <div class="bg-white rounded-lg overflow-hidden shadow-sm">
+    <div class="bg-white rounded-lg overflow-hidden shadow-lg border border-lightgray">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
+                <thead class="bg-gradient-to-r from-blue-50 to-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record ID</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Read Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Time</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                            Record ID
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                            Customer
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                            Read Status
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                            Booking Status
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                            Reservation Code
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                            Request Time
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-center text-sm font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
+                
                 <tbody id="bookings-table-body" class="bg-white divide-y divide-gray-200">
                     <!-- Data will be loaded here via JavaScript -->
                 </tbody>
@@ -180,6 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to add a new booking to the table with animation
     function addNewBooking(booking) {
         const statusInfo = getStatusInfo(booking.status);
+
         const row = document.createElement('tr');
         row.className = `hover:bg-gray-50 bg-blue-50 animate-pulse ${booking.is_read ? 'bg-green-50' : 'bg-red-50'}`;
         row.innerHTML = `
@@ -200,14 +217,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${statusInfo.text}
                 </span>
             </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <div class="text-sm text-gray-500">
+                    ${booking.code}
+                </div>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title="${new Date(booking.created_at).toLocaleString()}">
                 ${timeAgo(booking.created_at)}
                 <div class="text-sm text-gray-500">
                     ${getDateCreated(booking.created_at)}
                 </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                <button onclick="viewBookingDetails(${booking.id}, this)" 
+                    class="text-blue-600 hover:text-blue-900 inline-flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                         <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
@@ -274,14 +297,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${statusInfo.text}
                     </span>
                 </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="text-sm text-gray-500">
+                        ${booking.code}
+                    </div>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title="${new Date(booking.created_at).toLocaleString()}">
                     ${timeAgo(booking.created_at)}
                     <div class="text-sm text-gray-500">
                         ${getDateCreated(booking.created_at)}
                     </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button onclick="viewBooking(${booking.id}, this)" data-id="${booking.id}" class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                    <button onclick="viewBookingDetails(${booking.id}, this)" 
+                        class="text-blue-600 hover:text-blue-900 inline-flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
@@ -289,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         View
                     </button>
                 </td>
+            
             `;
             bookingsTableBody.appendChild(row);
         });
@@ -604,6 +634,63 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+async function viewBookingDetails(bookingId, buttonElement) {
+    // Show loading state on the button
+    const originalContent = buttonElement.innerHTML;
+    buttonElement.innerHTML = '<span class="animate-spin">↻ </span> Redirecting...';
+    buttonElement.disabled = true;
+
+    try {
+        // First mark the booking as read
+        const markReadResponse = await fetch(`/api/inquiries/mark-read/${bookingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        });
+
+        const result = await markReadResponse.json();
+
+        if (result.success) {
+            // Update UI
+            const row = buttonElement.closest('tr');
+            if (row) {
+                row.classList.remove('bg-red-50', 'animate-pulse');
+
+                const statusBadge = row.querySelector('span.bg-red-100');
+                if (statusBadge) {
+                    statusBadge.classList.remove('bg-red-200', 'text-red-800');
+                    statusBadge.classList.add('bg-green-200', 'text-green-800');
+                    statusBadge.textContent = 'Read';
+                }
+
+                const unreadBadge = row.querySelector('.unread-badge');
+                if (unreadBadge) unreadBadge.remove();
+            }
+
+            const newBookingsCount = document.getElementById('newBookingsCount');
+            if (newBookingsCount) {
+                const currentCount = parseInt(newBookingsCount.textContent) || 0;
+                if (currentCount > 0) {
+                    newBookingsCount.textContent = currentCount - 1;
+                    if (currentCount - 1 <= 0) {
+                        newBookingsCount.classList.add('hidden');
+                    }
+                }
+            }
+
+            // ✅ Redirect to booking details page after marking as read
+            window.location.href = `/admin/booking-details/${bookingId}`;
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        buttonElement.innerHTML = originalContent; // restore button
+        buttonElement.disabled = false;
+    }
+}
+
+
 // View booking function
 async function viewBooking(bookingId, buttonElement) {
     try {
@@ -611,7 +698,7 @@ async function viewBooking(bookingId, buttonElement) {
         const originalContent = buttonElement.innerHTML; // Store the full HTML content
         buttonElement.innerHTML = '<span class="animate-spin">↻</span> Loading...';
         buttonElement.disabled = true;
-
+        
         // First mark the booking as read
         const markReadResponse = await fetch(`/api/inquiries/mark-read/${bookingId}`, {
             method: 'POST',
@@ -677,6 +764,4 @@ async function viewBooking(bookingId, buttonElement) {
     }
 }
 </script>
-
-@include('admin.modals.accept_inquirer')
 @endsection

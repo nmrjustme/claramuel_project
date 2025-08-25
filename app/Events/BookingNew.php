@@ -21,6 +21,7 @@ class BookingNew implements ShouldBroadcast
             'id' => $booking->id,
             'status' => $booking->status ?? 'pending_confirmation',
             'is_read' => $booking->is_read,
+            'code' => $booking->code,
             'user' => [
                 'firstname' => $booking->user->firstname,
                 'lastname' => $booking->user->lastname,

@@ -24,7 +24,6 @@
     .form-input {
         width: 100%;
         padding: 0.75rem 1rem;
-        border: 1px solid 	#696969;
         border-radius: 0.375rem;
         font-size: 0.9375rem;
         transition: all 0.2s ease;
@@ -579,9 +578,10 @@
             ['label' => 'Select Rooms'],
             ['label' => 'Your Details'],
             ['label' => 'Payment'],
-            ['label' => 'Completed']
+            ['label' => 'Processing']
         ]"
     />
+    
     
     <div class="flex flex-col lg:flex-row gap-8">
         
@@ -590,7 +590,7 @@
         <div class="lg:w-2/3">
             <h3 class="page-title font-semibold text-dark mb-2">Request To Book</h3>
             
-            <div class="rounded-lg p-8 mb-6 border border-lightGray">
+            <div class="rounded-lg p-8 mb-6 border border-lightgray">
                 <h2 class="section-title">
                     <i class="fas fa-user-circle"></i>
                     Guest Information
@@ -600,7 +600,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- First Name with Floating Label -->
                         <div class="floating-label-group">
-                            <input type="text" id="firstname" name="firstname" class="form-input uppercase-input floating-input"
+                            <input type="text" id="firstname" name="firstname" class="form-input border border-darkgray uppercase-input floating-input"
                                 required placeholder=" " oninput="this.value = this.value.toUpperCase()">
                             <label class="floating-label">First Name <span class="text-red-500">*</span></label>
                             <div id="firstname-error" class="error-message">Please enter your first name</div>
@@ -608,7 +608,7 @@
 
                         <!-- Last Name with Floating Label -->
                         <div class="floating-label-group">
-                            <input type="text" id="lastname" name="lastname" class="form-input uppercase-input floating-input"
+                            <input type="text" id="lastname" name="lastname" class="form-input border border-darkgray uppercase-input floating-input"
                                 required placeholder=" " oninput="this.value = this.value.toUpperCase()">
                             <label class="floating-label">Last Name <span class="text-red-500">*</span></label>
                             <div id="lastname-error" class="error-message">Please enter your last name</div>
@@ -618,7 +618,7 @@
                         <div class="input-group">
                             <label for="email">Email Address <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="email" id="email" name="email" class="form-input input-with-icon" required
+                                <input type="email" id="email" name="email" class="form-input border border-darkgray input-with-icon" required
                                     placeholder="john.doe@example.com">
                                 <i class="fas fa-envelope input-icon"></i>
                             </div>
@@ -630,7 +630,7 @@
                         <div class="input-group">
                             <label for="phone">Phone Number <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="tel" id="phone" name="phone" class="form-input input-with-icon" maxlength="12"
+                                <input type="tel" id="phone" name="phone" class="form-input border border-darkgray input-with-icon" maxlength="12"
                                     placeholder="9123 456 789" oninput="formatPhone(this)"
                                     onblur="validatePhone(this)">
                                 <i class="fas fa-phone input-icon"></i>
@@ -656,12 +656,11 @@
                 </form>
             </div>
 
-            <div class="rounded-lg mb-6 p-6 border border-lightGray text-center">
+            <div class="rounded-lg mb-6 p-6 border border-lightgray text-center">
                 <h3 class="booking-summary-title">
                     Your Payment Schedule
                 </h3>
-                <span class="booking-item-value">You will pay 50% of the total price after your request is confirmed</span>
-                <p class="mt-2 text-sm">Confirmation will send to your email</p>
+                <span class="booking-item-value">You will pay 50% of the total price.</span>
             </div>
 
             <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp" style="animation-delay: 0.6s;">
@@ -674,7 +673,7 @@
         <div class="lg:w-2/5 space-y-4">
             <div class="sticky top-6 space-y-6">
                 <!-- Date Summary Card -->
-                <div class="border border-lightGray rounded-lg p-6">
+                <div class="border border-lightgray rounded-lg p-6">
                     <h3 class="booking-summary-title">
                         Booking Summary
                     </h3>
@@ -683,18 +682,25 @@
                         <span class="booking-item-label">Check-in</span>
                         <span class="booking-item-value" id="summary-checkin">-</span>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1 ml-1">
+                        Reminder: Check-in time starts at <span class="font-medium">12:00 PM</span>
+                    </p>
+                    
                     <div class="booking-item">
                         <span class="booking-item-label">Check-out</span>
                         <span class="booking-item-value" id="summary-checkout">-</span>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1 ml-1">
+                        Reminder: Check-out time is until <span class="font-medium">10:00 AM</span>
+                    </p>
+                    
                     <div class="booking-item">
                         <span class="booking-item-label">Duration</span>
                         <span class="booking-item-value" id="summary-nights">-</span>
                     </div>
                 </div>
-
                 <!-- Rooms Summary Card - Enhanced -->
-                <div class="rounded-lg p-8 mb-6 border border-lightGray">
+                <div class="rounded-lg p-8 mb-6 border border-lightgray">
                     <h3 class="booking-summary-title">
                         Your Rooms
                     </h3>
@@ -721,49 +727,10 @@
                             <span class="total-amount" id="summary-total">₱0.00</span>
                         </div>
                     </div>
-                </div>        
-                <div class="rounded-lg p-6 border border-lightGray mb-6">
-                    <h3 class="text-lg font-semibold mb-3">Your arrival time</h3>
-                    
-                    <div class="flex items-start mb-4">
-                        <label for="room-ready-time" class="text-gray-700">
-                            Your room will be ready for check-in between 12:00 and 01:00
-                        </label>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-medium text-gray-800">Add your estimated arrival time <span class="text-gray-500">(optional)</span></p>
-                    </div>
-                    
-                    <div class="relative">
-                        <select id="arrival_time" name="arrival_time" class="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white pr-8">
-                            <option selected disabled value="Not selected">Please select</option>
-                            <option value="08:00">08:00 AM</option>
-                            <option value="09:00">09:00 AM</option>
-                            <option value="10:00">10:00 AM</option>
-                            <option value="11:00">11:00 AM</option>
-                            <option value="12:00">12:00 PM</option>
-                            <option value="13:00">01:00 PM</option>
-                            <option value="14:00">02:00 PM</option>
-                            <option value="15:00">03:00 PM</option>
-                            <option value="16:00">04:00 PM</option>
-                            <option value="17:00">05:00 PM</option>
-                            <option value="18:00">06:00 PM</option>
-                            <option value="19:00">07:00 PM</option>
-                            <option value="20:00">08:00 PM</option>
-                            <option value="21:00">09:00 PM</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    
-                    <p class="text-sm text-gray-500 mt-2">Time is for Isabela time zone</p>
-                </div> 
+                </div>     
+
                 <!-- Payment CTA Card - Enhanced -->
-                <div class="rounded-lg p-6 border border-lightGray">
+                <div class="rounded-lg p-6 border border-lightgray">
                     <div class="checkbox-container">
                         <input type="checkbox" id="terms-checkbox"
                             class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary mt-0.5">
@@ -791,7 +758,7 @@
                 </div>
                 
                 <!-- Customer Support -->
-                <div class="rounded-lg shadow-sm p-4 border border-lightGray text-center">
+                <div class="rounded-lg shadow-sm p-4 border border-lightgray text-center">
                     <h4 class="font-medium text-gray-700 mb-2">Need Help?</h4>
                     <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
                         <i class="fas fa-phone-alt text-red-500"></i>
@@ -802,7 +769,6 @@
                         <span>mtclaramuelresort@gmail.com</span>
                     </div>
                 </div>
-
 
             </div>
         </div>
@@ -1087,7 +1053,7 @@
             }
 
             if (validateForm()) {
-                submitBooking(bookingData);
+                proceedEmailConfirmation(bookingData);
             }
         });
     }
@@ -1167,8 +1133,8 @@
             year: 'numeric'
         });
     }
-
-    function submitBooking(bookingData) {
+    
+    function proceedEmailConfirmation(bookingData) {
         const button = document.getElementById('confirm-booking-btn');
         const buttonText = document.getElementById('button-text');
         const spinner = document.getElementById('button-spinner');
@@ -1182,7 +1148,6 @@
             lastname: document.getElementById('lastname').value.trim(),
             email: document.getElementById('email').value.trim(),
             phone: document.getElementById('phone').value.trim(),
-            arrival_time: document.getElementById('arrival_time').value || null,
             checkin_date: bookingData.checkin_date,
             checkout_date: bookingData.checkout_date,
             facilities: bookingData.facilities.map(facility => ({
@@ -1214,7 +1179,8 @@
             }
         });
         
-        fetch(`{{ route('booking.stores') }}`, {
+        // Changed route to email confirmation
+        fetch(`{{ route('booking.send_otp') }}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1228,7 +1194,7 @@
             
             if (!response.ok) {
                 console.error('Server error response:', data);
-                showNotification(data.message || 'Booking failed. Please try again.', true);
+                showNotification(data.message || 'Failed to send confirmation email.', true);
                 button.disabled = false;
                 buttonText.textContent = 'Confirm Booking';
                 spinner.classList.add('hidden');
@@ -1237,13 +1203,16 @@
 
             if (data.success) {
                 button.classList.add('bg-green-500');
-                buttonText.textContent = 'Success!';
+                buttonText.textContent = 'OTP Sent!';
                 spinner.classList.add('hidden');
-                setTimeout(() => {
-                    window.location.href = data.redirect_url;
-                }, 1000);
+
+                // Redirect with both email AND token
+                window.location.href = '{{ route("booking.pending") }}?email=' + 
+                                    encodeURIComponent(formData.email) + 
+                                    '&token=' + encodeURIComponent(data.token);
+                
             } else {
-                showNotification(data.message || 'Booking failed. Please try again.', true);
+                showNotification(data.message || 'Failed to send confirmation email.', true);
                 button.disabled = false;
                 buttonText.textContent = 'Confirm Booking';
                 spinner.classList.add('hidden');

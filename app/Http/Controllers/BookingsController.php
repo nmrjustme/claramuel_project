@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Breakfast;
 use App\Models\FacilityBookingLog;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class BookingsController extends Controller
 {
@@ -161,9 +162,24 @@ class BookingsController extends Controller
         return $dates;
     }
     
-    public function booking_completed(FacilityBookingLog $booking)
+    public function pendingVerification()
     {
-        return view('customer_pages.booking.booking_completed', ['booking' => $booking]);
+
+        return view('customer_pages.booking.waiting_verification');
+
+        
+        // $bookingData = Cache::get('booking_confirmation_' . $token);
+        
+        // $reservationCode = $bookingData['reservation_code'];
+        // $user_email = $bookingData['email'];
+        // $user_phone = $bookingData['phone'];
+
+        
+        // return view('customer_pages.booking.waiting_verification', [
+        //     'reservation_code' => $reservationCode,
+        //     'user_email' => $user_email,
+        //     'user_phone' => $user_phone
+        // ]);
     }
     
 }

@@ -24,6 +24,7 @@ class FacilityBookingLog extends Model
         'is_read',
         'checked_in_at',
         'checked_in_by',
+        'qr_code_path'
     ];
 
     public function user()

@@ -12,6 +12,7 @@ use App\Http\Controllers\AccommodationImgController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\VerifyEmailController;
 use App\Http\Controllers\PaymentsController;
+use App\Http\Controllers\EmailConfirmationController;
 
 // admins
 use App\Http\Controllers\AdminController;
@@ -41,10 +42,9 @@ Route::get('/customer/guest-types', [GuestTypeController::class, 'index'])->name
 Route::get('/dashboard/checkin_page/{id}', [CustomerBookingPageController::class, 'Data'])->name('facility.deal');
 
 // =======================
-// Completed page 
+// Awaiting verification page 
 // =======================
-Route::get('/booking/completed/{booking}', [BookingsController::class, 'booking_completed'])->name('booking.completed');
-
+Route::get('/booking-awaiting', [BookingsController::class, 'pendingVerification']);
 
 Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
     ->name('booking.WaitConfirmation');
@@ -55,8 +55,38 @@ Route::get('/booking-submitted', [BookingController::class, 'bookingSubmitted'])
 
 Route::get('/Bookings', [BookingsController::class, 'index'])->name('customer_bookings');
 Route::get('/dashboard/Bookings', [BookingsController::class, 'bookings_page'])->name('dashboard.bookings');
-
 Route::get('/bookings/customer-info', [BookingsController::class, 'customerInfo'])->name('bookings.customer-info');
+
+// =======================
+// Email Confirmation
+// =======================
+
+// Send email
+Route::post('/customer/send-email-otp', [EmailConfirmationController::class, 'sendOTP'])
+->name('booking.send_otp');
+
+// Confirm the email
+Route::post('/verify/otp', [EmailConfirmationController::class, 'verifyOtp'])
+    ->name('verify.otp');
+
+// Redirect to email front-end
+Route::get('/booking/pending', function (Request $request) {
+    // Validate that both email and token are present
+    $request->validate([
+        'email' => 'required|email',
+        'token' => 'required|string'
+    ]);
+    
+    return view('customer_pages.booking.otp_confirmation', [
+        'email' => $request->email,
+        'token' => $request->token
+    ]);
+})->name('booking.pending');
+
+Route::post('/resend-otp', [EmailConfirmationController::class, 'resendOtp'])
+    ->name('resend.otp'); // 3 attempts every 10 minutes
+// =======================
+
 
 Route::get('/bookings/get-facilities', [BookingsController::class, 'getFacilities'])->name('bookings.get-facilities');
 Route::get('/Book', [PoolParkbookingController::class, 'index'])->name('Pools_Park');
@@ -184,13 +214,15 @@ Route::middleware(['auth'])->group(function () {
     
     // open modal booking details each customer
     Route::get('/booking-details/{id}', [InquirerController::class, 'getBookingDetails'])->name('admin.inquirer.show');
+    
+    Route::get('/admin/booking-details/{id}', [BookingController::class, 'bookingDetails'])->name('admin.booking.details');
     // open modal payment details each customer
     Route::get('/payment-details/{id}', [InquirerController::class, 'getPaymentDetails'])->name('admin.inquirerPayment.show');
     Route::post('/payment-details/{id}/verify', [InquirerController::class, 'verifyPayment'])->name('admin.inquirerPayment.verify');
     
     Route::post('/admin/inquiries/mark-all-as-read', [AdminController::class, 'markAllAsRead'])
         ->name('admin.inquiries.mark-all-as-read');
-
+    
     // =======================
     // ajax fetching data in recent Inquirers at admin index
     // =======================
@@ -252,13 +284,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Add these routes to your web.php
     
-    Route::post('/payments/{payment}/verify-with-receipt', [PaymentsController::class, 'verifyPaymentWithReceipt'])
+    Route::post('/bookings/{booking}/verify-with-receipt', [InquirerController::class, 'verifyBookingWithReceipt'])
         ->name('payments.verify-with-receipt');
     
     // Route::post('/payments/verify-qr', [PaymentsController::class, 'verifyQrCode'])
     //     ->name('payments.verify-qr');
     
-
+    
     Route::post('/admin/payments/verify/{payment_id}', [PaymentsController::class, 'verifyScannedPayment'])
         ->name('admin.payments.verify');
 
@@ -283,7 +315,7 @@ Route::middleware(['auth'])->group(function () {
 // =======================
 // storing customer payment proof
 // =======================
-Route::post('/payment/update/{booking}', [PaymentsController::class, 'updateCustomerPayment'])->name('payments.update');
+Route::post('/submit/booking/{token}', [PaymentsController::class, 'submitBooking'])->name('payments.booking.submit');
 
 Route::get('/booked_date', [BookingsController::class, 'getUnavailableDates']);
 
@@ -295,7 +327,7 @@ Route::get('/booking/verify/{token}', [InquirerController::class, 'verifyBooking
 // =======================
 // Payments Redirection
 // =======================
-Route::get('/payment/create/{booking}', [PaymentsController::class, 'payments'])->name('payments'); 
+Route::get('/payment/create/{token}', [PaymentsController::class, 'payments'])->name('customer.booking.payments');
 // =======================
 
 Route::get('/NotVerified', [PaymentsController::class, 'notVerified'])->name('not.verified');
@@ -304,11 +336,12 @@ Route::get('/NotVerified', [PaymentsController::class, 'notVerified'])->name('no
 Route::get('/link-expired', function () {
     return view('customer_pages.invalid_link');
 })->name('invalid_link');
+
 Route::get('/admin/inquiries/check-new', [InquirerController::class, 'checkNewInquiries'])
     ->name('admin.inquiries.check-new');
 
-Route::get('/booking/redirect/{booking}', function ($booking) {
-    return view('booking-redirect', ['booking' => $booking]);
+Route::get('/booking/redirect/{token}', function ($token) {
+    return view('booking-redirect', ['token' => $token]);
 })->name('booking.redirect');
 
 

@@ -50,7 +50,6 @@ class BookingController extends Controller
             'breakfast_included' => 'sometimes|boolean',
             'breakfast_price' => 'required_if:breakfast_included,true|numeric|min:0',
             'total_price' => 'required|numeric|min:0',
-            'arrival_time' => 'nullable|string',
         ]);
         
         if ($validator->fails()) {
@@ -154,7 +153,6 @@ class BookingController extends Controller
                 FacilityBookingDetails::create([
                     'facility_summary_id' => $facilitySummary->id,
                     'facility_booking_log_id' => $bookingLog->id,
-                    'arriving_time' => $request->arrival_time,
                     'checkin_date' => $checkinDate->format('Y-m-d'),
                     'checkout_date' => $checkoutDate->format('Y-m-d'),
                     'total_price' => $facilityTotalPrice,
@@ -610,6 +608,7 @@ class BookingController extends Controller
                         'created_at' => $booking->created_at->toDateTimeString(),
                         'status' => $booking->status,
                         'is_read' => (bool) $booking->is_read,
+                        'code' => $booking->code,
                     ];
                 }),
                 'current_page' => $bookings->currentPage(),
@@ -624,6 +623,13 @@ class BookingController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+    
+    public function bookingDetails($bookingId)
+    {   
+        return view('admin.log.details', [
+            'bookingId' => $bookingId
+        ]);
     }
 
 }

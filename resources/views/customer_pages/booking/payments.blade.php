@@ -9,17 +9,17 @@
             ['label' => 'Select Rooms'],
             ['label' => 'Your Details'],
             ['label' => 'Payment'],
-            ['label' => 'Completed']
+            ['label' => 'Processing']
         ]" />
     
-        <div class="max-w-4xl mx-auto rounded-lg border border-lightGray overflow-hidden">
+        <div class="max-w-4xl mx-auto rounded-lg border border-lightgray overflow-hidden">
             <div class="md:flex">
                 <!-- GCash Payment Form -->
                 <div class="md:w-1/2 p-8">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-semibold text-primary">GCash Payment</h2>
                     </div>
-                    
+
                     <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
                         <p class="text-sm text-gray-600 mb-1">Hi {{ $user_firstname }}, you're paying 50% of the total amount</p>
                         <p class="text-3xl font-bold text-primary">₱{{ number_format($half_of_total_price, 2) }}</p>
@@ -38,100 +38,140 @@
                             <li>Complete the transaction</li>
                         </ol>
                     </div>
+                    
+                    <div class="mb-6 text-center">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Or scan to pay via GCash</h3>
+                        <div class="bg-white p-4 rounded-2xl border-2 border-red-400 shadow-lg inline-block">
+                            <img src="{{ asset('imgs/gcashQR/qr_code.jpg') }}" 
+                                alt="GCash QR Code" 
+                                class="w-56 h-56 mx-auto object-contain">
+                        </div>
+                        <p class="mt-3 text-sm text-gray-600">
+                            Open your GCash app and scan this QR code to pay 
+                            <span class="font-bold text-primary">₱{{ number_format($half_of_total_price, 2) }}</span>
+                        </p>
+                    </div>
     
-                    <form id="paymentForm" enctype="multipart/form-data">
+                    <form id="paymentForm" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+                        <input type="hidden" name="token" value="{{ $token }}">
                         
-                        <!-- Phone Number Field - Updated for pure numbers -->
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-medium mb-2" for="gcash_number">
-                                Your GCash Registered Mobile Number <span class="text-red-500">*</span>
-                            </label>
-                            <input type="tel" name="gcash_number" id="gcash_number"
-                                class="w-full px-3 py-2 border border-darkGray rounded-lg"
-                                maxlength="11" placeholder="09123456789"
-                                oninput="validatePhoneInput(this)"
-                                onblur="validatePhone(this)" required>
-                            <div id="phone-error" class="hidden text-red-500 text-xs mt-1">
-                                Please enter a valid 11-digit phone number starting with 09
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Kindly provide a valid contact number starting with 09 (11 digits)</p>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-medium mb-2" for="reference">
-                                GCash Reference Number <span class="text-red-500">*</span>
-                            </label>
-                            <input class="w-full px-3 py-2 border border-darkGray rounded-lg" 
-                                id="reference" name="reference_no" type="text" placeholder="Ex: 1234567890" required>
-                            <p class="text-xs text-gray-500 mt-1">Found in your GCash transaction receipt</p>
-                        </div>
-    
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-medium mb-2" for="proof">
-                                Upload GCash Payment Proof <b>(Screenshot)</b> <span class="text-red-500">*</span>
-                            </label>
-                            <div class="flex items-center justify-center w-full">
-                                <label class="flex flex-col w-full h-32 border-2 border-dashed border-lightGray hover:border-primary hover:bg-blue-50 rounded-md cursor-pointer transition duration-150">
-                                    <div class="flex flex-col items-center justify-center pt-7">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                        </svg>
-                                        <p class="pt-2 text-sm tracking-wider text-gray-400 group-hover:text-primary">
-                                            Click to upload screenshot of your GCash transaction
-                                        </p>
-                                    </div>
-                                    <input type="file" class="opacity-0" id="proof" name="receipt" accept="image/*" required />
+                        <!-- Phone Number & Reference side by side (on large screens) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Phone -->
+                            <div>
+                                <label for="gcash_number" class="block text-sm font-medium text-gray-700 mb-1">
+                                    GCash Registered Mobile Number <span class="text-blue-500">*</span>
                                 </label>
+                                <input type="tel" name="gcash_number" id="gcash_number"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    maxlength="11" placeholder="09123456789"
+                                    oninput="validatePhoneInput(this)"
+                                    onblur="validatePhone(this)" required>
+                                <div id="phone-error" class="hidden text-blue-500 text-xs mt-1">
+                                    Please enter a valid 11-digit phone number starting with 09
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Kindly provide a valid contact number starting with 09 (11 digits)</p>
                             </div>
-                            
+
+                            <!-- Reference -->
+                            <div>
+                                <label for="reference" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Transaction Reference Number <span class="text-blue-500">*</span>
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    id="reference" name="reference_no" type="text"
+                                    placeholder="Ex: 1234567890" required>
+                                <p class="text-xs text-gray-500 mt-1">Found in your GCash transaction receipt</p>
+                            </div>
+                        </div>
+
+                        <!-- Upload Proof -->
+                        <div>
+                            <label for="proof" class="block text-sm font-medium text-gray-700 mb-2">
+                                Upload GCash Payment Proof <b>(Screenshot)</b> <span class="text-blue-500">*</span>
+                            </label>
+                            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 hover:border-primary hover:bg-blue-50 rounded-md cursor-pointer transition duration-150">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <p class="pt-2 text-sm tracking-wider text-gray-400 group-hover:text-primary">
+                                    Click to upload screenshot of your GCash transaction
+                                </p>
+                                <input type="file" class="hidden" id="proof" name="receipt" accept="image/*" required />
+                            </label>
+
+                            <!-- Preview -->
                             <div id="imagePreview" class="mt-4 hidden">
                                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <div class="flex justify-between items-center mb-3">
                                         <h4 class="text-base font-medium text-gray-800">Payment Proof Preview</h4>
-                                        <button type="button" id="removeImage" class="text-sm font-medium text-red-600 hover:text-red-800 flex items-center">
+                                        <button type="button" id="removeImage" class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                <path fill-rule="evenodd"
+                                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                                    clip-rule="evenodd" />
                                             </svg>
                                             Remove Image
                                         </button>
                                     </div>
-                                    
                                     <div class="flex justify-center bg-white p-2 rounded border border-gray-300">
-                                        <img id="previewImage" src="#" alt="GCash Payment Proof Preview" 
-                                            class="w-auto max-h-[70vh] object-contain mx-auto 
-                                                    md:max-h-[60vh] lg:max-h-[50vh] xl:max-h-[45vh]
-                                                    shadow-sm">
+                                        <img id="previewImage" src="#" alt="GCash Payment Proof Preview"
+                                            class="w-auto max-h-[50vh] object-contain shadow-sm">
                                     </div>
-                                    
-                                    <div class="mt-3 px-2">
-                                        <p class="text-xs text-gray-600">
-                                            <span class="font-medium">Verify:</span> Reference number and payment amount (₱{{ number_format($half_of_total_price, 2) }}) must be clearly visible
-                                        </p>
-                                    </div>
+                                    <p class="mt-3 text-xs text-gray-600">
+                                        <span class="font-medium">Verify:</span> Reference number and payment amount (₱{{ number_format($half_of_total_price, 2) }}) must be clearly visible
+                                    </p>
                                 </div>
                             </div>
-                            
                             <p class="text-xs text-gray-500 mt-1">Accepted formats: JPG, PNG (Max: 2MB)</p>
                         </div>
-    
-                        <button type="submit" id="submitBtn" class="w-full bg-primary hover:bg-secondary text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center">
+
+                        <!-- Why We Need -->
+                        <div class="py-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <h3 class="font-medium text-yellow-800 mb-2">Why do we need these details?</h3>
+                            <ul class="text-sm text-yellow-700 list-disc list-inside space-y-1">
+                                <li><b>GCash Number:</b> To confirm the payment came from the registered account.</li>
+                                <li><b>Transaction Reference Number:</b> This unique transaction ID allows us to verify your payment in our records.</li>
+                                <li><b>Screenshot of Transaction:</b> Serves as proof of payment and helps us process your booking faster in case of system delays.</li>
+                            </ul>
+                            <p class="mt-2 text-xs text-yellow-600">
+                                Providing these ensures we can quickly verify and secure your reservation without delays.
+                            </p>
+                        </div>
+                        
+                        <!-- Submit -->
+                        <button type="submit" id="submitBtn"
+                                class="w-full bg-primary hover:bg-secondary text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
                             </svg>
                             Submit Payment Verification
                         </button>
                     </form>
+                
                 </div>
     
                 <!-- Booking Summary -->
                 <div class="md:w-1/2 bg-red-50 p-8">
                     <h2 class="text-2xl font-semibold text-primary mb-6">Booking Summary</h2>
                     
-                    <div class="mb-6 bg-white p-4 rounded-lg shadow-sm">
-                        <h3 class="font-medium text-gray-800 mb-3">Reservation Code</h3>
-                        <p class="text-lg font-bold text-primary">{{ $reservation_code }}</p>
+                    <!-- Reservation Code -->
+                    <div class="mb-6 bg-white p-4 shadow-sm rounded-lg border border-red-200">
+                        <!-- Section Title -->
+                        <h3 class="font-medium text-gray-800 mb-3">
+                            Reservation Code
+                        </h3>
+                        
+                        <!-- Reservation Code Display -->
+                        <p class="mt-2 text-lg font-mono font-bold tracking-widest text-center text-red-700 bg-red-50 px-6 py-4 rounded-xl border border-red-300 shadow-sm">
+                            {{ $reservation_code }}
+                        </p>
                     </div>
+                    
     
                     <div class="mb-6 bg-white p-4 rounded-lg shadow-sm">
                         <h3 class="font-medium text-gray-800 mb-3">Stay Details</h3>
@@ -146,6 +186,22 @@
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Duration:</span>
                             <span class="font-medium">{{ $nights }} night(s)</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 bg-white p-4 rounded-lg shadow-sm">
+                        <h3 class="font-medium text-gray-800 mb-3">Personal Information</h3>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600">Name:</span>
+                            <span class="font-medium">{{ $user_firstname }}  {{ $user_lastname }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600">Phone:</span>
+                            <span class="font-medium">{{ $user_phone }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Email:</span>
+                            <span class="font-medium">{{ $user_email }}</span>
                         </div>
                     </div>
                     
@@ -225,9 +281,9 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
-    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+    <!-- Success Modal - Fixed -->
+    <div id="successModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 transform transition-all duration-300 scale-95">
             <div class="text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
                     <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,17 +292,20 @@
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mt-3">Payment Submitted Successfully!</h3>
                 <div class="mt-2">
-                    <p class="text-sm text-gray-500">Your payment details have been received. We'll verify your payment and send a confirmation email shortly.</p>
+                    <p class="text-sm text-gray-500">
+                        Your payment details have been received. We'll verify your payment and send a confirmation email shortly.
+                    </p>
                 </div>
                 <div class="mt-4">
-                    <button id="closeModal" type="button" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary focus:outline-none">
+                    <button id="closeModal" type="button" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary focus:outline-none transition-colors duration-200">
                         Continue
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
+    
+    
     <script>
         // Phone number validation - pure numbers only
         function validatePhoneInput(input) {
@@ -266,12 +325,12 @@
             
             if (digitsOnly.length > 0 && !phoneRegex.test(digitsOnly)) {
                 document.getElementById('phone-error').classList.remove('hidden');
-                input.classList.add('border-red-500');
+                input.classList.add('border-blue-500');
                 return false;
             }
             
             document.getElementById('phone-error').classList.add('hidden');
-            input.classList.remove('border-red-500');
+            input.classList.remove('border-blue-500');
             return true;
         }
 
@@ -318,6 +377,54 @@
             clearError('proof');
         });
 
+        // Modal functionality
+        const successModal = document.getElementById('successModal');
+        const modalContent = successModal.querySelector('.bg-white');
+        const closeModal = document.getElementById('closeModal');
+        
+        // Function to show modal with animation
+        function showSuccessModal() {
+            successModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            
+            // Trigger reflow for animation
+            void successModal.offsetWidth;
+            
+            // Animate modal in
+            setTimeout(() => {
+                successModal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+        
+        // Function to hide modal with animation
+        function hideSuccessModal() {
+            successModal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                successModal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                // Redirect after hiding modal/booking-awaiting/${token}
+                window.location.href = `/booking-awaiting/`;
+            }, 300);
+        }
+        
+        // Close modal when clicking the button
+        closeModal.addEventListener('click', function() {
+            hideSuccessModal();
+        });
+        
+        
+        // Close modal when clicking outside the content
+        successModal.addEventListener('click', function() {
+            if (e.target === successModal) {
+                hideSuccessModal();
+            }
+        });
+        
         // Form submission with enhanced validation
         document.getElementById('paymentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -341,8 +448,8 @@
             document.querySelectorAll('.error-message').forEach(el => {
                 if (el.id !== 'phone-error') el.remove();
             });
-            document.querySelectorAll('.border-red-500').forEach(el => {
-                if (el.id !== 'gcash_number') el.classList.remove('border-red-500');
+            document.querySelectorAll('.border-blue-500').forEach(el => {
+                if (el.id !== 'gcash_number') el.classList.remove('border-blue-500');
             });
             
             // Validate Reference Number (required, at least 6 characters)
@@ -362,7 +469,7 @@
             
             if (!isValid) {
                 // Scroll to the first error
-                const firstErrorField = document.querySelector('.border-red-500');
+                const firstErrorField = document.querySelector('.border-blue-500');
                 if (firstErrorField) {
                     firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
@@ -371,16 +478,17 @@
             
             submitBtn.disabled = true;
             submitBtn.innerHTML = `
+                Processing...
+
                 <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Processing...
             `;
             
             try {
-                const booking_id = document.querySelector('input[name="booking_id"]').value;
-                const urlCustomerPayment = `/payment/update/${booking_id}`;
+                const token = document.querySelector('input[name="token"]').value;
+                const urlCustomerPayment = `/submit/booking/${token}`;
             
                 const response = await fetch(urlCustomerPayment, {
                     method: 'POST',
@@ -399,15 +507,15 @@
                     if (data.errors) {
                         // Clear all previous errors
                         document.querySelectorAll('.error-message').forEach(el => el.remove());
-                        document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+                        document.querySelectorAll('.border-blue-500').forEach(el => el.classList.remove('border-blue-500'));
                         
                         // Display new errors
                         for (const [field, messages] of Object.entries(data.errors)) {
                             const input = document.querySelector(`[name="${field}"]`);
                             if (input) {
-                                input.classList.add('border-red-500');
+                                input.classList.add('border-blue-500');
                                 const errorElement = document.createElement('p');
-                                errorElement.className = 'error-message text-red-500 text-xs mt-1';
+                                errorElement.className = 'error-message text-blue-500 text-xs mt-1';
                                 errorElement.textContent = messages[0];
                                 input.parentNode.appendChild(errorElement);
                             }
@@ -418,7 +526,8 @@
                 }
                 
                 if (data.success) {
-                    document.getElementById('successModal').classList.remove('hidden');
+                    // Show the success modal
+                    showSuccessModal();
                 } else {
                     throw new Error(data.message || 'An error occurred. Please try again.');
                 }
@@ -439,14 +548,14 @@
         // Helper function to show error messages
         function showError(fieldId, message) {
             const field = document.getElementById(fieldId);
-            field.classList.add('border-red-500');
+            field.classList.add('border-blue-500');
             
             // Check if error message already exists
             let errorElement = field.parentNode.querySelector('.error-message');
             
             if (!errorElement) {
                 errorElement = document.createElement('p');
-                errorElement.className = 'error-message text-red-500 text-xs mt-1';
+                errorElement.className = 'error-message text-blue-500 text-xs mt-1';
                 field.parentNode.appendChild(errorElement);
             }
             
@@ -456,7 +565,7 @@
         // Helper function to clear error
         function clearError(fieldId) {
             const field = document.getElementById(fieldId);
-            field.classList.remove('border-red-500');
+            field.classList.remove('border-blue-500');
             
             const errorElement = field.parentNode.querySelector('.error-message');
             if (errorElement && errorElement.id !== 'phone-error') {
@@ -464,10 +573,5 @@
             }
         }
         
-        // Close modal and redirect
-        document.getElementById('closeModal').addEventListener('click', function() {
-            document.getElementById('successModal').classList.add('hidden');
-            window.location.href = "{{ route('booking.completed', ['booking' => $booking->id]) }}";
-        });
     </script>
 @endsection

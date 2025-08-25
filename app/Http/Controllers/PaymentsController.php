@@ -45,6 +45,9 @@ class PaymentsController extends Controller
         
         // Extract data from cached booking
         $user_firstname = $bookingData['firstname'] ?? 'Guest';
+        $user_lastname = $bookingData['lastname'] ?? 'Guest';
+        $user_phone = $bookingData['phone'] ?? 'No Phone number';
+        $user_email = $bookingData['email'] ?? 'No Email';
         $total_price = $bookingData['total_price'] ?? 0;
         $half_of_total_price = ($total_price * 0.5);
         $reservation_code = $bookingData['reservation_code'] ?? 'No reservation code';
@@ -89,6 +92,9 @@ class PaymentsController extends Controller
         return view('customer_pages.booking.payments', [
             'token' => $token,
             'user_firstname' => $user_firstname,
+            'user_lastname' => $user_lastname,
+            'user_phone' => $user_phone,
+            'user_email' => $user_email,
             'half_of_total_price' => $half_of_total_price,
             'total_price' => $total_price,
             'reservation_code' => $reservation_code,
@@ -99,7 +105,6 @@ class PaymentsController extends Controller
             'breakfastPrice' => $breakfastPrice
         ]);
     }
-    
     
     public function submitBooking(Request $request, $token)
     {
@@ -148,14 +153,14 @@ class PaymentsController extends Controller
             $total_price = $booking->details->sum('total_price');
 
             // Create payment record
-            $payment = Payments::create([
+            Payments::create([
                 'facility_log_id' => $booking->id,
                 'status' => 'under_verification',
                 'amount' => (0.5 * $total_price),
                 'gcash_number' => $request->gcash_number,
                 'reference_no' => $request->reference_no,
                 'receipt_path' => $receiptPath,
-                'payment_date' => now()->setTimezone('Asia/Manila'),
+                'payment_date' => now(),
                 'paid_at' => now(),
             ]);
 
@@ -178,10 +183,9 @@ class PaymentsController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'redirect' => route('booking.completed', ['booking' => $booking->id])
+                'success' => true
             ]);
-
+        
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Payment processing error: '.$e->getMessage());
@@ -252,7 +256,7 @@ class PaymentsController extends Controller
             $bookingLog = FacilityBookingLog::create([
                 'user_id' => $user->id,
                 'booking_date' => now(),
-                'confirmation_token' => Str::random(60),
+                'code' => $bookingData['reservation_code']
             ]);
 
             \Log::info('Booking confirmed via email', [
@@ -389,120 +393,120 @@ class PaymentsController extends Controller
     /**
      * Verify payment and send receipt with QR code
      */
-    public function verifyPaymentWithReceipt(Request $request, $id)
-    {
-        $request->validate([
-            'amount_paid' => 'required|numeric|min:0',
-        ]);
+    // public function verifyPaymentWithReceipt(Request $request, $id, ?string $customMessage = null): void
+    // {
+    //     $request->validate([
+    //         'amount_paid' => 'required|numeric|min:0',
+    //     ]);
         
-        $payment = Payments::with(
-            'bookingLog.details',    
-            'bookingLog.summaries.facility',
-            'bookingLog.summaries.breakfast',
-            'bookingLog.summaries.bookingDetails',
-            'bookingLog.guestDetails.guestType'
-        )->findOrFail($id);
+    //     $payment = Payments::with(
+    //         'bookingLog.details',    
+    //         'bookingLog.summaries.facility',
+    //         'bookingLog.summaries.breakfast',
+    //         'bookingLog.summaries.bookingDetails',
+    //         'bookingLog.guestDetails.guestType'
+    //     )->findOrFail($id);
         
-        $checkout_date = $payment->bookingLog->details->first()->checkout_date;
-        $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
+    //     $checkout_date = $payment->bookingLog->details->first()->checkout_date;
+    //     $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
     
-        // ✅ Generate a unique token
-        do {
-            $verificationToken = Str::random(64);
-        } while (Payments::where('verification_token', $verificationToken)->exists());
+    //     // ✅ Generate a unique token
+    //     do {
+    //         $verificationToken = Str::random(64);
+    //     } while (Payments::where('verification_token', $verificationToken)->exists());
     
-        // ✅ Encrypt QR code payload
-        $payload = [
-            'id' => $payment->id,
-            'expires_at' => $expire_date
-        ];
+    //     // ✅ Encrypt QR code payload
+    //     $payload = [
+    //         'id' => $payment->id,
+    //         'expires_at' => $expire_date
+    //     ];
 
     
-        // ✅ Build QR Code with encrypted string
-        $result = Builder::create()
-            ->writer(new PngWriter())
-            ->data(json_encode($payload))
-            ->size(300)
-            ->margin(10)
-            ->build();
+    //     // ✅ Build QR Code with encrypted string
+    //     $result = Builder::create()
+    //         ->writer(new PngWriter())
+    //         ->data(json_encode($payload))
+    //         ->size(300)
+    //         ->margin(10)
+    //         ->build();
     
-        // ✅ Save QR Code Image
-        $directory = public_path('imgs/qr_code/');
-        $fileName = 'qr_payment_'.$payment->id.'_'.time().'.png';
-        $filePath = $directory . $fileName;
+    //     // ✅ Save QR Code Image
+    //     $directory = public_path('imgs/qr_code/');
+    //     $fileName = 'qr_payment_'.$payment->id.'_'.time().'.png';
+    //     $filePath = $directory . $fileName;
     
-        if (!File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
+    //     if (!File::exists($directory)) {
+    //         File::makeDirectory($directory, 0755, true);
+    //     }
     
-        $result->saveToFile($filePath);
+    //     $result->saveToFile($filePath);
     
-        // ✅ Update payment record
-        $payment->update([
-            'status' => 'verified',
-            'verified_at' => now(),
-            'verified_by' => auth()->id(),
-            'amount_paid' => $request->amount_paid,
-            'verification_token' => $verificationToken,
-            'qr_code_path' => 'imgs/qr_code/' . $fileName
-        ]);
+    //     // ✅ Update payment record
+    //     $payment->update([
+    //         'status' => 'verified',
+    //         'verified_at' => now(),
+    //         'verified_by' => auth()->id(),
+    //         'amount_paid' => $request->amount_paid,
+    //         'verification_token' => $verificationToken,
+    //         'qr_code_path' => 'imgs/qr_code/' . $fileName
+    //     ]);
     
-        // ✅ Send Email with QR Code (Optional)
-        $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
-        $this->sendVerificationEmail($payment, $qrCodeUrl);
+    //     // ✅ Send Email with QR Code (Optional)
+    //     $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
+    //     $this->sendVerificationEmail($payment, $qrCodeUrl);
     
-        return response()->json([
-            'success' => true,
-            'payment' => $payment,
-            'message' => 'Payment verified and receipt sent with QR code',
-            'qr_code_url' => $qrCodeUrl,
-            'guest_details' => $payment->bookingLog->guestDetails
-        ]);
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'payment' => $payment,
+    //         'message' => 'Payment verified and receipt sent with QR code',
+    //         'qr_code_url' => $qrCodeUrl,
+    //         'guest_details' => $payment->bookingLog->guestDetails
+    //     ]);
+    // }
     
-    /**
-     * Send verification email with QR code
-     */
-    private function sendVerificationEmail($payment, $qrCodeUrl)
-    {
-        try {
-            // Validate the payment has all required data
-            if (!$payment->bookingLog || !$payment->bookingLog->user) {
-                throw new \Exception('Booking or user information missing');
-            }
+    // /**
+    //  * Send verification email with QR code
+    //  */
+    // private function sendVerificationEmail($payment, $qrCodeUrl)
+    // {
+    //     try {
+    //         // Validate the payment has all required data
+    //         if (!$payment->bookingLog || !$payment->bookingLog->user) {
+    //             throw new \Exception('Booking or user information missing');
+    //         }
     
-            $customer_email = $payment->bookingLog->user->email;
+    //         $customer_email = $payment->bookingLog->user->email;
             
-            // Validate email format
-            if (!filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
-                throw new \Exception('Invalid email format: ' . $customer_email);
-            }
+    //         // Validate email format
+    //         if (!filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
+    //             throw new \Exception('Invalid email format: ' . $customer_email);
+    //         }
     
-            $customMessage = "Thank you for your payment. Please present this QR code upon arrival at the resort to verify your reservation.";
+    //         $customMessage = "Thank you for your payment. Please present this QR code upon arrival at the resort to verify your reservation.";
     
-            // Validate payment has required fields
-            $requiredFields = ['reference_no', 'amount', 'verified_at'];
-            foreach ($requiredFields as $field) {
-                if (empty($payment->{$field})) {
-                    throw new \Exception("Payment missing required field: $field");
-                }
-            }
+    //         // Validate payment has required fields
+    //         $requiredFields = ['reference_no', 'amount', 'verified_at'];
+    //         foreach ($requiredFields as $field) {
+    //             if (empty($payment->{$field})) {
+    //                 throw new \Exception("Payment missing required field: $field");
+    //             }
+    //         }
     
-            // Send email with error handling
-            Mail::to($customer_email)->send(new PaymentVerifiedMail(
-                $payment,
-                $qrCodeUrl,
-                $customMessage
-            ));
+    //         // Send email with error handling
+    //         Mail::to($customer_email)->send(new PaymentVerifiedMail(
+    //             $payment,
+    //             $qrCodeUrl,
+    //             $customMessage
+    //         ));
     
-            // Log successful email sending
-            \Log::info("Verification email sent to {$customer_email} for payment {$payment->reference_no}");
+    //         // Log successful email sending
+    //         \Log::info("Verification email sent to {$customer_email} for payment {$payment->reference_no}");
     
-        } catch (\Exception $e) {
-            \Log::error("Failed to send verification email for payment {$payment->id}: " . $e->getMessage());
-            throw $e; // Re-throw if you want calling method to handle it
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         \Log::error("Failed to send verification email for payment {$payment->id}: " . $e->getMessage());
+    //         throw $e; // Re-throw if you want calling method to handle it
+    //     }
+    // }
     
     public function updateRemainingStatus(Request $request, $id)
     {
