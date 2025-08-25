@@ -19,134 +19,119 @@ use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
 use App\Models\User;
+use App\Models\Breakfast;
+use App\Models\Facility;
+use App\Models\GuestType;
+use App\Models\FacilitySummary;
+use App\Models\FacilityBookingDetails;
+use App\Models\BookingGuestDetails;
+use App\Events\BookingNew;
+
 use App\Mail\CustomerPay;
 use Illuminate\Support\Facades\Log;
-
-
-// Encryption
-use Illuminate\Support\Facades\Crypt;
-
+use Illuminate\Support\Facades\Cache;
 
 class PaymentsController extends Controller
 {
     
-    public function payments(FacilityBookingLog $booking)
+    public function payments($token)
     {
-        // Load the FacilityBookingLog relationships
-        $booking->load([
-            'user', 
-            'details', 
-            'summaries.facility', 
-            'payments',
-            'guestDetails.guestType'
-        ]); 
+        // Retrieve booking data from cache
+        $bookingData = Cache::get('booking_confirmation_' . $token);
         
-        $verified_at = $booking->verified_at;
-        $user_firstname = $booking->user->firstname ?? 'No user found';
-        $total_price = $booking->details->sum('total_price') ?? 0;
-        $half_of_total_price = ($total_price * 0.5) ?? 0;
-        $reference = $booking->reference ?? 'No reference found';
-        $reservation_code = $booking->code ?? 'No reservation code';
+        if (!$bookingData) {
+            return redirect()->route('bookings.customer-info')->with('error', 'Invalid or expired booking session.');
+        }
         
-        $facilities = $booking->summaries->map(function ($summary) use ($booking) {
-            // Get guest details for this specific facility
-            $guestDetails = $booking->guestDetails
-                ->where('facility_id', $summary->facility_id)
-                ->map(function($detail) {
-                    return [
-                        'type' => $detail->guestType->type ?? 'Unknown',
-                        'quantity' => $detail->quantity
-                    ];
-                });
-                
-            return [
-                'name' => $summary->facility->name ?? 'Unknown',
-                'price' => $summary->facility->price ?? 0,
+        // Extract data from cached booking
+        $user_firstname = $bookingData['firstname'] ?? 'Guest';
+        $total_price = $bookingData['total_price'] ?? 0;
+        $half_of_total_price = ($total_price * 0.5);
+        $reservation_code = $bookingData['reservation_code'] ?? 'No reservation code';
+        
+        // Parse dates
+        $timezone = config('app.timezone', 'Asia/Manila');
+        $checkin = Carbon::parse($bookingData['checkin_date'], $timezone);
+        $checkout = Carbon::parse($bookingData['checkout_date'], $timezone);
+        $nights = $checkin->diffInDays($checkout);
+        
+        // Get breakfast price if included
+        $breakfastPrice = null;
+        if ($bookingData['breakfast_included']) {
+            $breakfastPrice = Breakfast::where('status', 'Active')->first();
+        }
+        
+        // Prepare facilities data
+        $facilities = [];
+        foreach ($bookingData['facilities'] as $facilityData) {
+            $facility = Facility::find($facilityData['facility_id']);
+            
+            $guestDetails = [];
+            if (isset($bookingData['guest_types'][$facilityData['facility_id']])) {
+                foreach ($bookingData['guest_types'][$facilityData['facility_id']] as $guestTypeId => $quantity) {
+                    if ($quantity > 0) {
+                        $guestType = GuestType::find($guestTypeId);
+                        $guestDetails[] = [
+                            'type' => $guestType->type ?? 'Unknown',
+                            'quantity' => $quantity
+                        ];
+                    }
+                }
+            }
+            
+            $facilities[] = [
+                'name' => $facility->name ?? 'Unknown',
+                'price' => $facilityData['price'] ?? 0,
                 'guest_details' => $guestDetails
             ];
-        });
-        
-        // Improved breakfast summary handling
-        $breakfastPrice = $booking->summaries->first()->breakfast ?? 0;
-        
-        
-        $firstDetail = $booking->details->first();
-        
-        // Safer payment status check
-        $paymentStatus = $booking->payments->first()->status ?? null;
-
-        
-        if ($firstDetail && $firstDetail->checkin_date && $firstDetail->checkout_date) {
-            $checkin = Carbon::parse($firstDetail->checkin_date);
-            $checkout = Carbon::parse($firstDetail->checkout_date);
-            $nights = $checkin->diffInDays($checkout);
-        } else {
-            $checkin = null;
-            $checkout = null;
-            $nights = 0;
         }
         
-        if (!empty($verified_at)) {
-            if ($paymentStatus == 'under_verification') {
-                return redirect()->route('payments.submitted');
-            } else {
-                return view('customer_pages.booking.payments', [
-                    'booking' => $booking,
-                    'verified_at' => $verified_at,
-                    'user_firstname' => $user_firstname,
-                    'half_of_total_price' => $half_of_total_price,
-                    'total_price' => $total_price,
-                    'reference' => $reference,
-                    'reservation_code' => $reservation_code,
-                    'facilities' => $facilities,
-                    'checkin' => $checkin,
-                    'checkout' => $checkout,
-                    'nights' => $nights,
-                    'breakfastPrice' => $breakfastPrice
-                ]);
-            }
-        } else {
-            return view('customer_pages.confirm_first');
-        }
+        return view('customer_pages.booking.payments', [
+            'token' => $token,
+            'user_firstname' => $user_firstname,
+            'half_of_total_price' => $half_of_total_price,
+            'total_price' => $total_price,
+            'reservation_code' => $reservation_code,
+            'facilities' => $facilities,
+            'checkin' => $checkin,
+            'checkout' => $checkout,
+            'nights' => $nights,
+            'breakfastPrice' => $breakfastPrice
+        ]);
     }
     
-    public function updateCustomerPayment(Request $request, FacilityBookingLog $booking)
+    
+    public function submitBooking(Request $request, $token)
     {
-        // Get the first payment (or however you want to determine which payment to update)
-        $payment = $booking->payments->first();
-        
-        if (!$payment) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No payment record found for this booking.'
-            ], 404);
-        }
-    
         $validator = Validator::make($request->all(), [
-            'gcash_number' => 'required|string',
-            'reference_no' => 'required|string|max:50|unique:payments,reference_no,'.$payment->id,
+            'gcash_number' => 'required|string|regex:/^09\d{9}$/',
+            'reference_no' => 'required|string|max:50|unique:payments,reference_no',
             'receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'booking_id' => 'required|exists:facility_booking_log,id'
         ]);
-    
+        
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
             ], 422);
         }
-    
+        
+        // Retrieve booking data from cache
+        $bookingData = Cache::get('booking_confirmation_' . $token);
+        
+        if (!$bookingData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking session expired. Please start over.'
+            ], 410);
+        }
+
         DB::beginTransaction();
         try {
-            // Delete old receipt if exists
-            if ($payment->receipt_path) {
-                $oldPath = public_path($payment->receipt_path);
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
-            }
-    
-            // Store new receipt using public_path()
+            // Store everything in database now
+            $booking = $this->storeBookingInDatabase($bookingData);
+            
+            // Store payment receipt
             $file = $request->file('receipt');
             $fileName = 'receipt_'.time().'_'.$booking->id.'.'.$file->getClientOriginalExtension();
             $path = 'imgs/payment_receipts/';
@@ -155,31 +140,48 @@ class PaymentsController extends Controller
             if (!file_exists(public_path($path))) {
                 mkdir(public_path($path), 0755, true);
             }
-    
+
             // Move file to public directory
             $file->move(public_path($path), $fileName);
             $receiptPath = $path.$fileName;
-    
-            // Update payment record
-            $payment->update([
+            
+            $total_price = $booking->details->sum('total_price');
+
+            // Create payment record
+            $payment = Payments::create([
+                'facility_log_id' => $booking->id,
+                'status' => 'under_verification',
+                'amount' => (0.5 * $total_price),
                 'gcash_number' => $request->gcash_number,
                 'reference_no' => $request->reference_no,
-                'receipt_path' => $receiptPath, // Store relative path
+                'receipt_path' => $receiptPath,
                 'payment_date' => now()->setTimezone('Asia/Manila'),
-                'status' => 'under_verification',
                 'paid_at' => now(),
             ]);
-    
+
+            // Remove from cache after successful database storage
+            Cache::forget('booking_confirmation_' . $token);
+            
+            // Clean up email reference
+            $email = $bookingData['email'];
+            $emailTokens = Cache::get('email_tokens_' . $email, []);
+            $updatedTokens = array_filter($emailTokens, function($t) use ($token) {
+                return $t !== $token;
+            });
+            
+            if (!empty($updatedTokens)) {
+                Cache::put('email_tokens_' . $email, $updatedTokens, now()->addHours(24));
+            } else {
+                Cache::forget('email_tokens_' . $email);
+            }
+
             DB::commit();
 
-            $payment->load(['bookingLog.user']);
-            $this->sendEmailAdmin($payment);
-    
             return response()->json([
                 'success' => true,
                 'redirect' => route('booking.completed', ['booking' => $booking->id])
             ]);
-    
+
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Payment processing error: '.$e->getMessage());
@@ -188,6 +190,158 @@ class PaymentsController extends Controller
                 'success' => false,
                 'message' => 'An error occurred while processing your payment.'
             ], 500);
+        }
+    }
+
+    private function storeBookingInDatabase($bookingData)
+    {
+        // Start database transaction
+        DB::beginTransaction();
+        
+        try {
+            // Parse dates explicitly with timezone
+            $timezone = config('app.timezone', 'Asia/Manila');
+            $checkinDate = Carbon::parse($bookingData['checkin_date'], $timezone)
+                ->setTimezone('Asia/Manila')
+                ->startOfDay();
+            $checkoutDate = Carbon::parse($bookingData['checkout_date'], $timezone)
+                ->setTimezone('Asia/Manila')
+                ->startOfDay();
+
+            // Verify dates after parsing
+            if ($checkinDate >= $checkoutDate) {
+                throw new \Exception('Check-out date must be after check-in date');
+            }
+            
+            // Validate guest counts match facility pax limits
+            foreach ($bookingData['facilities'] as $facilityData) {
+                $facilityId = $facilityData['facility_id'];
+                $facility = Facility::findOrFail($facilityId);
+                
+                $totalGuests = 0;
+                if (isset($bookingData['guest_types'][$facilityId])) {
+                    $totalGuests = array_sum($bookingData['guest_types'][$facilityId]);
+                }
+                
+                if ($totalGuests > $facility->pax) {
+                    throw new \Exception("Facility {$facility->name} exceeds maximum guest limit of {$facility->pax}");
+                }
+            }
+
+            // Create or update user
+            $user = User::firstOrCreate(
+                ['email' => $bookingData['email']],
+                [
+                    'firstname' => $bookingData['firstname'],
+                    'lastname' => $bookingData['lastname'],
+                    'phone' => $bookingData['phone'],
+                    'role' => 'customer',
+                ]
+            );
+
+            // Update user details if they already exist
+            if ($user->wasRecentlyCreated === false) {
+                $user->update([
+                    'firstname' => $bookingData['firstname'],
+                    'lastname' => $bookingData['lastname'],
+                    'phone' => $bookingData['phone'],
+                ]);
+            }
+
+            // Create booking log with confirmation token
+            $bookingLog = FacilityBookingLog::create([
+                'user_id' => $user->id,
+                'booking_date' => now(),
+                'confirmation_token' => Str::random(60),
+            ]);
+
+            \Log::info('Booking confirmed via email', [
+                'booking_id' => $bookingLog->id,
+                'user_id' => $user->id,
+                'email' => $bookingData['email']
+            ]);
+            
+            // Get active breakfast price if included
+            $breakfastId = null;
+            $breakfastPricePerFacilityPerDay = 0;
+            
+            if ($bookingData['breakfast_included']) {
+                $breakfast = Breakfast::where('status', 'Active')->first();
+                if ($breakfast) {
+                    $breakfastId = $breakfast->id;
+                    $breakfastPricePerFacilityPerDay = $breakfast->price;
+                }
+            }
+            
+            // Process each facility
+            foreach ($bookingData['facilities'] as $facilityData) {
+                $facility = Facility::findOrFail($facilityData['facility_id']);
+                
+                // Create facility summary
+                $facilitySummary = FacilitySummary::create([
+                    'facility_id' => $facility->id,
+                    'breakfast_id' => $breakfastId,
+                    'facility_booking_log_id' => $bookingLog->id,
+                ]);
+                
+                // Calculate breakfast cost for this facility (per facility per night)
+                $breakfastCost = 0;
+                if ($bookingData['breakfast_included']) {
+                    $breakfastCost = $breakfastPricePerFacilityPerDay * $facilityData['nights'];
+                }
+                
+                // Calculate total price for this facility (room + breakfast)
+                $facilityTotalPrice = $facilityData['total_price'] + $breakfastCost;
+                
+                // Create booking details
+                FacilityBookingDetails::create([
+                    'facility_summary_id' => $facilitySummary->id,
+                    'facility_booking_log_id' => $bookingLog->id,
+                    'checkin_date' => $checkinDate->format('Y-m-d'),
+                    'checkout_date' => $checkoutDate->format('Y-m-d'),
+                    'total_price' => $facilityTotalPrice,
+                    'breakfast_cost' => $breakfastCost,
+                ]);
+                
+                // Process guest types for this facility
+                if (isset($bookingData['guest_types'][$facility->id])) {
+                    foreach ($bookingData['guest_types'][$facility->id] as $guestTypeId => $quantity) {
+                        if ($quantity > 0) {
+                            BookingGuestDetails::create([
+                                'guest_type_id' => $guestTypeId,
+                                'facility_booking_log_id' => $bookingLog->id,
+                                'facility_id' => $facility->id,
+                                'quantity' => $quantity
+                            ]);
+                        }
+                    }
+                }
+            }
+            
+            // Commit transaction
+            DB::commit();
+            
+            $bookingLog->load(['user']);
+            
+            event(new BookingNew($bookingLog)); // Event listener for new booking list
+            
+            // Sending active admin email
+            // if (User::where('role', 'Admin')->where('is_active', true)->exists()) {
+            //     $this->sendEmailAdmin($bookingLog); 
+            // }
+            
+            return $bookingLog;
+        
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Email confirmation booking failed:', [
+                'message' => $e->getMessage(),
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+                'booking_data' => $bookingData
+            ]);
+            
+            throw $e; // Re-throw to handle in the controller
         }
     }
         
