@@ -627,7 +627,7 @@ class BookingController extends Controller
     
     public function bookingDetails($bookingId)
     {   
-        return view('admin.log.booking_details', [
+        return view('admin.Log.booking_details', [
             'bookingId' => $bookingId
         ]);
     }
