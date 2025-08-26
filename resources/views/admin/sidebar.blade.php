@@ -55,7 +55,7 @@
                 </li>
 
                 <!-- Advance Payments -->
-                <li>
+                {{-- <li>
                     @php
                         $isActive = $active === 'payments';
                         $strokeWidth = $isActive ? '2' : '1.5';
@@ -75,7 +75,7 @@
                             0 new
                         </span>
                     </a>
-                </li>
+                </li> --}}
                 
                 <!-- Calendar -->
                 <li>

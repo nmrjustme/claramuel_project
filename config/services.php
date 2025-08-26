@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'philsms' => [
+        'token' => env('PHILSMS_API_TOKEN'),
+        'sender' => env('PHILSMS_SENDER', 'MyApp'),
+    ],
+
 ];

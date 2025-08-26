@@ -19,7 +19,7 @@
     
     <h3 style="font-size: 24px; color: #007bff; margin: 20px 0;">{{ $otp }}</h3>
     
-    <p>Enter this code on the verification page to complete your booking.</p>
+    <p>Enter this code on the verification page to proceed with your payment.</p>
     
     <p><strong>This OTP will expire in 30 minutes.</strong></p>
 

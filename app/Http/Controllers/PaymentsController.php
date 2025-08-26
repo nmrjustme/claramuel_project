@@ -196,7 +196,7 @@ class PaymentsController extends Controller
             ], 500);
         }
     }
-
+    
     private function storeBookingInDatabase($bookingData)
     {
         // Start database transaction
@@ -211,7 +211,7 @@ class PaymentsController extends Controller
             $checkoutDate = Carbon::parse($bookingData['checkout_date'], $timezone)
                 ->setTimezone('Asia/Manila')
                 ->startOfDay();
-
+            
             // Verify dates after parsing
             if ($checkinDate >= $checkoutDate) {
                 throw new \Exception('Check-out date must be after check-in date');
@@ -231,26 +231,15 @@ class PaymentsController extends Controller
                     throw new \Exception("Facility {$facility->name} exceeds maximum guest limit of {$facility->pax}");
                 }
             }
-
-            // Create or update user
-            $user = User::firstOrCreate(
-                ['email' => $bookingData['email']],
-                [
-                    'firstname' => $bookingData['firstname'],
-                    'lastname' => $bookingData['lastname'],
-                    'phone' => $bookingData['phone'],
-                    'role' => 'customer',
-                ]
-            );
-
-            // Update user details if they already exist
-            if ($user->wasRecentlyCreated === false) {
-                $user->update([
-                    'firstname' => $bookingData['firstname'],
-                    'lastname' => $bookingData['lastname'],
-                    'phone' => $bookingData['phone'],
-                ]);
-            }
+            
+            // Create user (always insert new, no update)
+            $user = User::create([
+                'email' => $bookingData['email'],
+                'firstname' => $bookingData['firstname'],
+                'lastname' => $bookingData['lastname'],
+                'phone' => $bookingData['phone'],
+                'role' => 'customer',
+            ]);
 
             // Create booking log with confirmation token
             $bookingLog = FacilityBookingLog::create([

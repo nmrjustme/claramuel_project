@@ -33,6 +33,37 @@ use App\Events\UnreadCountsUpdated;
 
 use Illuminate\Support\Facades\Hash;
 
+Route::get('/try/phone/cleaning/', function(){
+    function formatPhilNumber($rawnumber)
+    {
+        $number = (string) $rawnumber;
+        
+        // Remove non-digit characters
+        $number = preg_replace('/\D/', '', $number);
+        
+        // Prepend 63 for PH format
+        if (substr($number, 0, 1) === '0') {
+            $number = '63' . substr($number, 1);
+        } else {
+            $number = '63' . $number;
+        }
+        return $number;
+    }
+    
+    $booking = FacilityBookingLog::with('user')->findorFail(600);
+    $phone = (string) $booking->user->phone;
+    $formatted = formatPhilNumber($phone);
+    echo $formatted; // 639532713188
+});
+
+Route::get('/try/amount-paid/', function(){
+    $booking = FacilityBookingLog::with(['user', 'payments'])->findorFail(930);
+    $payment = $booking->payments->first();
+    $amount_paid = $payment->amount_paid;
+    
+    return (string) $amount_paid;
+});
+
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
 route::get('/dashboard/cottages', [BookCottageController::class, 'index'])->name('customer_bookings.cottage');
@@ -218,7 +249,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/booking-details/{id}', [BookingController::class, 'bookingDetails'])->name('admin.booking.details');
     // open modal payment details each customer
     Route::get('/payment-details/{id}', [InquirerController::class, 'getPaymentDetails'])->name('admin.inquirerPayment.show');
-    Route::post('/payment-details/{id}/verify', [InquirerController::class, 'verifyPayment'])->name('admin.inquirerPayment.verify');
     
     Route::post('/admin/inquiries/mark-all-as-read', [AdminController::class, 'markAllAsRead'])
         ->name('admin.inquiries.mark-all-as-read');
@@ -321,8 +351,6 @@ Route::get('/booked_date', [BookingsController::class, 'getUnavailableDates']);
 
 Route::post('/confirm-booking/{id}', [InquirerController::class, 'confirmBooking'])->name('booking.confirm');
 Route::post('/reject-booking/{id}', [InquirerController::class, 'rejectBooking'])->name('booking.reject');
-
-Route::get('/booking/verify/{token}', [InquirerController::class, 'verifyBooking'])->name('booking.verify');
 
 // =======================
 // Payments Redirection

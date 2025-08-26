@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Reservation Request is Confirmed - {{ $booking->code }}</title>
     <style>
-                body {
+        body {
             font-family: 'Arial', sans-serif;
             line-height: 1.6;
             color: #333;
@@ -41,13 +41,6 @@
             display: block;
             margin: 0 auto 15px;
         }
-        .footer {
-            text-align: center;
-            padding: 20px 0;
-            border-top: 1px solid #eeeeee;
-            font-size: 14px;
-            color: #777777;
-        }
         .detail-row {
             display: flex;
             margin-bottom: 10px;
@@ -71,31 +64,96 @@
             background: #e6f4ea; /* soft green for verified/success */
             border: 1px solid #b5dfc0;
             border-left: 6px solid #34a853; /* Google green style accent */
-            padding: 15px 20px;
-            border-radius: 6px;
+            padding: 25px;
+            border-radius: 8px;
             margin: 20px 0;
-            font-size: 15px;
             color: #2d572c;
+            position: relative;
+            overflow: hidden;
         }
 
         .custom-message p {
-            margin: 0;
+            margin: 0 0 15px 0;
+            line-height: 1.6;
+        }
+        
+        .custom-message:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b5dfc0' width='100px' height='100px'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E") no-repeat;
+            background-size: contain;
+            opacity: 0.2;
+            transform: translate(30px, -30px);
+        }
+        
+        .confirmation-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+        }
+        
+        .confirmation-title:before {
+            content: "✓";
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #34a853;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #eeeeee;
+            font-size: 14px;
+            color: #777777;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Your reservation is confirmed.</h1>
+            <h1>Your Reservation is Confirmed.</h1>
             <p>Reservation Code: {{ $booking->code }}</p>
         </div>
         
-        @if($customMessage)
-            <div class="custom-message">
+        <div class="custom-message">
+            <div class="confirmation-title">Reservation Confirmed!</div>
+            <p>Dear {{ $booking->user->firstname }},</p>
+            <p>Your reservation request has been <strong>accepted and confirmed</strong>. We're delighted to inform you that everything is set for your upcoming stay.</p>
+            
+            @if($customMessage)
                 <p>{{ $customMessage }}</p>
+            @endif
+            
+            <p>We're looking forward to welcoming you to our resort. Please present your QR code upon arrival for a smooth check-in experience.</p>
+            
+            <div class="resort-info">
+                <p><strong>Resort Location:</strong><br>
+                Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines</p>
             </div>
-        @endif
-        
+            
+            <div class="contact-info">
+                <p><strong>Contact Information:</strong><br>
+                Phone: +63 995 290 1333<br>
+                Email: mtclaramuelresort@gmail.com</p>
+            </div>
+            
+            <p>If you have any questions or special requests, please don't hesitate to contact us.</p>
+        </div>
+        <h1>Booking Receipt</h1>
         <div class="content">
             <div class="receipt">
                 <div class="section">
@@ -108,7 +166,7 @@
                         
                         // Get the latest payment or first payment
                         $payment = $booking->payments->first();
-                        $totalPaid = $booking->payments->sum('amount_paid');
+                        $totalPaid = $payment->amount_paid;
                     @endphp
                     
                     <h2 class="section-title">Guest Information</h2>
@@ -262,18 +320,6 @@
         
         <div class="footer">
             <p>Thank you for choosing our services!</p>
-            <p>We will wait for your arrival.</p>
-            
-            <div class="resort-info">
-                <p>Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines</p>
-            </div>
-            
-            <div class="contact-info">
-                <p>Contact: +63 995 290 1333</p>
-                <p>Email: mtclaramuelresort@gmail.com</p>
-            </div>
-            
-            <p>If you have any questions, please contact our support team.</p>
         </div>
     </div>
 </body>

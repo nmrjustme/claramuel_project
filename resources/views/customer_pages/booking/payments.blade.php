@@ -20,13 +20,13 @@
                         <h2 class="text-2xl font-semibold text-primary">GCash Payment</h2>
                     </div>
 
-                    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-red-100">
                         <p class="text-sm text-gray-600 mb-1">Hi {{ $user_firstname }}, you're paying 50% of the total amount</p>
                         <p class="text-3xl font-bold text-primary">₱{{ number_format($half_of_total_price, 2) }}</p>
                         <p class="text-sm text-gray-600 mt-1">Remaining 50% to be paid upon check-in</p>
                     </div>
     
-                    <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-red-100">
                         <h3 class="font-medium text-gray-800 mb-3">GCash Payment Instructions</h3>
                         <ol class="list-decimal list-inside text-sm space-y-2 text-gray-700">
                             <li>Open your GCash app</li>
@@ -61,14 +61,14 @@
                             <!-- Phone -->
                             <div>
                                 <label for="gcash_number" class="block text-sm font-medium text-gray-700 mb-1">
-                                    GCash Registered Mobile Number <span class="text-blue-500">*</span>
+                                    GCash Registered Mobile Number <span class="text-red-500">*</span>
                                 </label>
                                 <input type="tel" name="gcash_number" id="gcash_number"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     maxlength="11" placeholder="09123456789"
                                     oninput="validatePhoneInput(this)"
                                     onblur="validatePhone(this)" required>
-                                <div id="phone-error" class="hidden text-blue-500 text-xs mt-1">
+                                <div id="phone-error" class="hidden text-red-500 text-xs mt-1">
                                     Please enter a valid 11-digit phone number starting with 09
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">Kindly provide a valid contact number starting with 09 (11 digits)</p>
@@ -77,7 +77,7 @@
                             <!-- Reference -->
                             <div>
                                 <label for="reference" class="block text-sm font-medium text-gray-700 mb-1">
-                                    Transaction Reference Number <span class="text-blue-500">*</span>
+                                    Transaction Reference Number <span class="text-red-500">*</span>
                                 </label>
                                 <input class="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     id="reference" name="reference_no" type="text"
@@ -89,9 +89,9 @@
                         <!-- Upload Proof -->
                         <div>
                             <label for="proof" class="block text-sm font-medium text-gray-700 mb-2">
-                                Upload GCash Payment Proof <b>(Screenshot)</b> <span class="text-blue-500">*</span>
+                                Upload GCash Payment Proof <b>(Screenshot)</b> <span class="text-red-500">*</span>
                             </label>
-                            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 hover:border-primary hover:bg-blue-50 rounded-md cursor-pointer transition duration-150">
+                            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 hover:border-primary hover:bg-red-50 rounded-md cursor-pointer transition duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -107,7 +107,7 @@
                                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <div class="flex justify-between items-center mb-3">
                                         <h4 class="text-base font-medium text-gray-800">Payment Proof Preview</h4>
-                                        <button type="button" id="removeImage" class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+                                        <button type="button" id="removeImage" class="text-sm font-medium text-red-600 hover:text-red-800 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd"
                                                     d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -143,7 +143,7 @@
                         
                         <!-- Submit -->
                         <button type="submit" id="submitBtn"
-                                class="w-full bg-primary hover:bg-secondary text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center">
+                                class="w-full bg-green-600 hover:bg-green-500 text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd"
                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -325,12 +325,12 @@
             
             if (digitsOnly.length > 0 && !phoneRegex.test(digitsOnly)) {
                 document.getElementById('phone-error').classList.remove('hidden');
-                input.classList.add('border-blue-500');
+                input.classList.add('border-red-500');
                 return false;
             }
             
             document.getElementById('phone-error').classList.add('hidden');
-            input.classList.remove('border-blue-500');
+            input.classList.remove('border-red-500');
             return true;
         }
 
@@ -448,8 +448,8 @@
             document.querySelectorAll('.error-message').forEach(el => {
                 if (el.id !== 'phone-error') el.remove();
             });
-            document.querySelectorAll('.border-blue-500').forEach(el => {
-                if (el.id !== 'gcash_number') el.classList.remove('border-blue-500');
+            document.querySelectorAll('.border-red-500').forEach(el => {
+                if (el.id !== 'gcash_number') el.classList.remove('border-red-500');
             });
             
             // Validate Reference Number (required, at least 6 characters)
@@ -469,7 +469,7 @@
             
             if (!isValid) {
                 // Scroll to the first error
-                const firstErrorField = document.querySelector('.border-blue-500');
+                const firstErrorField = document.querySelector('.border-red-500');
                 if (firstErrorField) {
                     firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
@@ -507,15 +507,15 @@
                     if (data.errors) {
                         // Clear all previous errors
                         document.querySelectorAll('.error-message').forEach(el => el.remove());
-                        document.querySelectorAll('.border-blue-500').forEach(el => el.classList.remove('border-blue-500'));
+                        document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
                         
                         // Display new errors
                         for (const [field, messages] of Object.entries(data.errors)) {
                             const input = document.querySelector(`[name="${field}"]`);
                             if (input) {
-                                input.classList.add('border-blue-500');
+                                input.classList.add('border-red-500');
                                 const errorElement = document.createElement('p');
-                                errorElement.className = 'error-message text-blue-500 text-xs mt-1';
+                                errorElement.className = 'error-message text-red-500 text-xs mt-1';
                                 errorElement.textContent = messages[0];
                                 input.parentNode.appendChild(errorElement);
                             }

@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\FacilityBookingLog;
 use Illuminate\Support\Facades\Crypt;
+use Vinkla\Hashids\Facades\Hashids;
 
 class CheckinController extends Controller
 {
@@ -18,14 +19,8 @@ class CheckinController extends Controller
 
     public function verifyQrCode(Request $request)
     {
-        \Log::debug('Incoming request headers', ['headers' => $request->headers->all()]);
-
         try {
-            // Ensure JSON format
             if (!$request->isJson()) {
-                \Log::error('Non-JSON request received', [
-                    'content_type' => $request->header('Content-Type')
-                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Request must be JSON format',
@@ -34,79 +29,74 @@ class CheckinController extends Controller
             }
 
             $data = $request->json()->all();
-            \Log::debug('Parsed request data', ['data' => $data]);
 
             if (empty($data['qr_data'])) {
-                \Log::error('Missing qr_data field', ['received_data' => $data]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Missing qr_data field',
                     'received_data' => $data
                 ], 400);
             }
-            
-            // Decode the JSON string if qr_data is a string
-            $payload = is_string($data['qr_data']) ? json_decode($data['qr_data'], true) : $data['qr_data'];
-            
-            if (!is_array($payload) || json_last_error() !== JSON_ERROR_NONE) {
-                \Log::error('Invalid QR data format', ['qr_data' => $data['qr_data']]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid QR code data format',
-                ], 400);
+
+            // ✅ Extract raw QR payload
+            $qrRaw = $data['qr_data'];
+            if (is_string($qrRaw)) {
+                $qrRaw = trim($qrRaw, '"');
             }
-            
-            if ($this->qrInUsed($payload['id'])) {
-                $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
+
+            // ✅ Split into [hashid, timestamp]
+            $parts = explode('|', $qrRaw);
+            if (count($parts) !== 2) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'QR code is already in use.',
-                    'qr_path' => $qr_path
-                ], 409);    
-            }
-            
-            // Validate payload structure
-            if (empty($payload['id']) || empty($payload['expires_at'])) {
-                \Log::error('QR code missing required fields', ['payload' => $payload]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'QR code missing required fields',
-                    'payload_received' => $payload
+                    'message' => 'Invalid QR format'
                 ], 400);
             }
 
-            // Check for expiry
-            if (Carbon::now()->greaterThan(Carbon::parse($payload['expires_at']))) {
-                \Log::warning('QR code has expired', ['expired_at' => $payload['expires_at']]);
+            [$hashId, $expireTs] = $parts;
+
+            // ✅ Decode booking ID
+            $bookingId = Hashids::decode($hashId)[0] ?? null;
+            $expireDate = Carbon::createFromTimestamp((int)$expireTs);
+
+            if (!$bookingId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'QR code has expired.',
-                    'expired_at' => $payload['expires_at']
+                    'message' => 'Invalid QR code'
+                ], 400);
+            }
+
+            // ✅ Check expiry
+            if (Carbon::now()->greaterThan($expireDate)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'QR code has expired',
+                    'expired_at' => $expireDate->toDateTimeString()
                 ], 403);
             }
 
-            // Find payment by ID
+            // ✅ Find booking/payment
             $payment = Payments::with(['bookingLog', 'bookingLog.user'])
-                ->where('id', $payload['id'])
+                ->where('facility_log_id', $bookingId)
                 ->first();
-                
+
             if (!$payment) {
-                \Log::error('QR code not recognized', ['payment_id' => $payload['id']]);
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code not recognized',
-                    'payment_id' => $payload['id']
+                    'booking_id' => $bookingId
                 ], 404);
             }
 
-            \Log::info('QR code verified successfully', ['payment_id' => $payment->id]);
             return response()->json([
                 'success' => true,
                 'message' => 'QR code verified successfully',
-                'payment_id' => $payment->id,
+                'booking_id' => $bookingId,
+                'payment_id' => $payment->id
             ]);
+
         } catch (\Exception $e) {
-            \Log::error('Server error', ['exception' => $e->getMessage()]);
+            \Log::error('Server error verifying QR: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage(),
@@ -114,7 +104,7 @@ class CheckinController extends Controller
             ], 500);
         }
     }
-
+        
     private function updateCheckedin($payment)
     {
             $payment->bookingLog->update([
@@ -137,13 +127,13 @@ class CheckinController extends Controller
         
         return $payment && $payment->qr_status === 'in_used';
     }
-        
+
     public function processUploadQrUpload(Request $request)
     {
         \Log::debug('QR Upload Verification Request', ['request' => $request->all()]);
 
         try {
-            // Validate JSON request
+            // ✅ Validate JSON request
             if (!$request->isJson()) {
                 \Log::error('Non-JSON request received for QR upload', [
                     'content_type' => $request->header('Content-Type')
@@ -167,64 +157,74 @@ class CheckinController extends Controller
                 ], 400);
             }
 
-            // Decode the JSON string if qr_data is a string
-            $payload = is_string($data['qr_data']) ? json_decode($data['qr_data'], true) : $data['qr_data'];
-            
-            if (!is_array($payload) || json_last_error() !== JSON_ERROR_NONE) {
-                \Log::error('Invalid QR data format', ['qr_data' => $data['qr_data']]);
+            // ✅ Extract raw QR payload (string format: hashid|timestamp)
+            $qrRaw = $data['qr_data'];
+            if (is_string($qrRaw)) {
+                $qrRaw = trim($qrRaw, '"'); // remove quotes if present
+            }
+
+            $parts = explode('|', $qrRaw);
+            if (count($parts) !== 2) {
+                \Log::error('Invalid QR format in upload', ['qr_data' => $qrRaw]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid QR code data format',
+                    'message' => 'Invalid QR code format'
                 ], 400);
             }
             
-            if ($this->qrInUsed($payload['id'])) {
-                $qr_path = Payments::where('id', $payload['id'])->value('qr_code_path');
+            [$hashId, $expireTs] = $parts;
+            
+            // ✅ Decode booking id
+            $bookingId = Hashids::decode($hashId)[0] ?? null;
+            $expireDate = Carbon::createFromTimestamp((int)$expireTs);
+
+            if (!$bookingId) {
+                \Log::error('Invalid booking ID decoded from QR', ['hashId' => $hashId]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid QR code'
+                ], 400);
+            }
+
+            // ✅ Check expiry
+            if (Carbon::now()->greaterThan($expireDate)) {
+                \Log::warning('Expired QR code uploaded', ['expired_at' => $expireDate->toDateTimeString()]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'QR code has expired',
+                    'expired_at' => $expireDate->toDateTimeString()
+                ], 403);
+            }
+
+            // ✅ Check if QR is already used
+            if ($this->qrInUsed($bookingId)) {
+                $qr_path = Payments::where('facility_log_id', $bookingId)->value('qr_code_path');
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code is already in use.',
                     'qr_path' => $qr_path
-                ], 409);    
-            }
-            
-            // Validate payload structure
-            if (empty($payload['id']) || empty($payload['expires_at'])) {
-                \Log::error('Invalid payload structure in uploaded QR', ['payload' => $payload]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'QR code missing required fields',
-                    'payload_received' => $payload
-                ], 400);
-            }
-            
-            // Check for expiry
-            if (Carbon::now()->greaterThan(Carbon::parse($payload['expires_at']))) {
-                \Log::warning('Expired QR code uploaded', ['expired_at' => $payload['expires_at']]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'QR code has expired.',
-                    'expired_at' => $payload['expires_at']
-                ], 403);
+                ], 409);
             }
 
-            // Find payment by ID
+            // ✅ Find related payment
             $payment = Payments::with(['bookingLog', 'bookingLog.user'])
-                ->where('id', $payload['id'])
+                ->where('facility_log_id', $bookingId)
                 ->first();
-            
+
             if (!$payment) {
-                \Log::error('Payment not found for uploaded QR', ['payment_id' => $payload['id']]);
+                \Log::error('Payment not found for uploaded QR', ['booking_id' => $bookingId]);
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code not recognized',
-                    'payment_id' => $payload['id']
+                    'booking_id' => $bookingId
                 ], 404);
             }
-            
+
             \Log::info('QR upload verified successfully', ['payment_id' => $payment->id]);
             return response()->json([
                 'success' => true,
                 'message' => 'QR code verified successfully',
+                'booking_id' => $bookingId,
                 'payment_id' => $payment->id,
             ]);
 

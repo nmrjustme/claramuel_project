@@ -469,21 +469,30 @@ $active = 'dashboard';
           <!-- Recent Enquiries -->
           <div
                class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 rounded-lg shadow-sm border-gray-200 bg-white">
-               <div class="flex justify-between items-center mb-6">
+               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
+                    <!-- Title + Badge -->
                     <div class="flex items-center">
-                         <h2 class="text-xl font-semibold text-gray-800">Recent Inquiries</h2>
+                         <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
                          <span
-                              class="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full new-inquiries-count hidden">
+                              class="ml-2 bg-red-500 text-white 
+                                   text-[10px] sm:text-xs md:text-sm 
+                                   font-bold 
+                                   px-1.5 sm:px-2 md:px-3 
+                                   py-0.5 sm:py-1 md:py-1.5 
+                                   rounded-full 
+                                   new-inquiries-count hidden">
                               0 new
                          </span>
                     </div>
-                    <div>
-                         <button class="text-sm text-red-600 hover:text-red-800 mr-2" onclick="markAllAsRead()">Mark All
-                              as Read</button>
-                         <a href="{{ route('admin.inquiries') }}" type="button"
+                    
+                    <!-- Actions -->
+                    <div class="flex flex-wrap gap-2 sm:gap-3">
+                         <button class="text-sm text-red-600 hover:text-red-800" onclick="markAllAsRead()">Mark All as Read</button>
+                         <a href="{{ route('admin.inquiries') }}"
                               class="text-sm text-red-600 hover:text-red-800">View All</a>
                     </div>
                </div>
+               
 
                <!-- Search Bar -->
                <div class="relative mb-6">

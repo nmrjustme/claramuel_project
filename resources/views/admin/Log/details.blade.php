@@ -4,6 +4,26 @@
 $active = 'inquiries';
 @endphp
 
+@section('content_css')
+<style>
+     #sticky-payment {
+          position: sticky;
+          align-self: flex-start;
+     }
+     
+     #sticky-payment {
+          z-index: 10;
+     }
+
+     @media (max-width: 1024px) {
+          #sticky-payment {
+               position: relative;
+               top: 0;
+          }
+     }
+</style>
+@endsection
+
 @section('content')
 <div class="min-h-screen px-6 py-6">
      
@@ -36,20 +56,6 @@ $active = 'inquiries';
           </div>
      </div>
 </div>
-
-<!-- Payment Information Modal -->
-<div id="paymentModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-     <div class="bg-white rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div class="p-6">
-               <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold text-gray-900">Payment Sent Information</h3>
-                    <span class="text-gray-500 text-3xl cursor-pointer hover:text-gray-700" onclick="closePaymentModal()">&times;</span>
-               </div>
-               <div id="paymentModalContent"></div>
-          </div>
-     </div>
-</div>
-
 <!-- Image Modal -->
 <div id="imageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
      <span class="absolute top-5 right-8 text-white text-6xl cursor-pointer" onclick="closeImageModal()">&times;</span>
@@ -337,16 +343,16 @@ $active = 'inquiries';
                               <span class="text-lg font-bold text-gray-900">${formatPrice(facility.total_price)}</span>
                          </div>
 
-                         <!-- Review Checkbox -->
-                         <div class="flex items-center mt-4 p-3 bg-gray-50 rounded-lg border border-lightgray">
+                         <label for="room-checkbox-${index}" class="flex items-center mt-4 p-3 bg-gray-50 rounded-lg border border-lightgray cursor-pointer">
                               <input type="checkbox" id="room-checkbox-${index}"
                                         class="mr-2 room-checkbox h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                                         data-room="${facility.facility_name || 'Room ' + (index + 1)}"
                                         ${isConfirmed || isRejected ? 'disabled checked' : ''}>
-                              <label for="room-checkbox-${index}" class="text-sm text-gray-700">
-                                        I have reviewed <span class="font-medium">${facility.facility_name || 'this room'}</span> details
-                              </label>
-                         </div>
+                              <span class="text-sm text-gray-700">
+                                   I have reviewed <span class="font-medium">${facility.facility_name || 'this room'}</span> details
+                              </span>
+                         </label>
+                    
                     </div>
                     
                     `;
@@ -385,101 +391,37 @@ $active = 'inquiries';
                     `;
                }
                
-               // Create payment modal content
-               let paymentModalContent = '';
-               if (data.payment && data.payment.amount !== null && data.payment.amount !== undefined) {
-               paymentModalContent = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                         
-                         <!-- Payment Information -->
-                         <div class="space-y-4">
-                              <div class="bg-gray-50 p-4 rounded-lg">
-                                   <p class="text-sm text-gray-600">To be paid:</p>
-                                   <p class="text-xl font-bold text-green-800">${formatPrice(data.payment.amount)}</p>
-                              </div>
-                              
-                              ${data.payment.gcash_number ? `
-                              <div class="bg-gray-50 p-4 rounded-lg">
-                                   <p class="text-sm text-gray-600">GCash Number:</p>
-                                   <p class="text-lg font-semibold text-gray-800">${data.payment.gcash_number}</p>
-                              </div>
-                              ` : ''}
-
-                              ${data.payment.reference_no ? `
-                              <div class="bg-gray-50 p-4 rounded-lg">
-                                   <p class="text-sm text-gray-600">Reference No:</p>
-                                   <p class="text-lg font-semibold text-gray-800">${data.payment.reference_no}</p>
-                              </div>
-                              ` : ''}
-
-                              ${data.payment.payment_date ? `
-                              <div class="bg-gray-50 p-4 rounded-lg">
-                                   <p class="text-sm text-gray-600">Payment Date:</p>
-                                   <p class="text-lg font-semibold text-gray-800">${formatDate(data.payment.payment_date)}</p>
-                              </div>
-                              ` : ''}
-                         </div>
-
-                         <!-- Receipt -->
-                         <div>
-                              <h4 class="text-lg font-semibold mb-2">Receipt</h4>
-                              ${data.payment.receipt_path ? `
-                              <img src="${window.location.origin}/${data.payment.receipt_path}"
-                                   alt="Payment Receipt"
-                                   class="w-full max-h-[600px] object-contain rounded-md cursor-pointer"
-                                   onclick="openImageModal('${window.location.origin}/${data.payment.receipt_path}')">
-                              ` : `
-                              <div class="flex items-center justify-center h-64 bg-gray-100 rounded-md border border-gray-200">
-                                   <p class="text-gray-500 italic">No receipt uploaded</p>
-                              </div>
-                              `}
-                         </div>
-                    </div>
-               `;
-               } else {
-               paymentModalContent = `
-                    <div class="text-center py-8">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                         </svg>
-                         <p class="text-gray-500 text-lg">No payment information available</p>
-                    </div>
-               `;
-               }
-               
-               
-               // Store payment modal content for later use
-               window.paymentModalContent = paymentModalContent;
-               
                let paymentHtml = '';
                if (data.payment && data.payment.amount !== null && data.payment.amount !== undefined) {
                     paymentHtml = `
-                    <div class="bg-green-50 p-6 rounded-2xl mb-6 border border-green-200 shadow-sm sticky top-4">
+                    <div class="bg-green-50 p-6 rounded-2xl mb-6 border border-green-200 shadow-sm sticky top-4" id="sticky-payment">
                          <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">Payment Sent Information</h3>
-                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                         <div class="grid grid-cols-1 lg:grid-cols-1 gap-2">
                               <div class="space-y-3">
-                                   <div class="flex justify-between pb-3 border-b border-gray-200">
-                                   <span class="font-medium text-gray-600">To be paid:</span>
-                                   <span class="font-semibold text-green-800">${formatPrice(data.payment.amount)}</span>
-                                   </div>
                                    ${data.payment.gcash_number ? `
                                    <div class="flex justify-between pb-3 border-b border-gray-200">
-                                   <span class="font-medium text-gray-600">GCash Number:</span>
-                                   <span class="font-semibold text-green-800">${data.payment.gcash_number}</span>
+                                        <span class="font-medium text-gray-600">GCash Number:</span>
+                                        <span class="font-semibold text-green-800">${data.payment.gcash_number}</span>
                                    </div>
                                    ` : ''}
                                    ${data.payment.reference_no ? `
                                    <div class="flex justify-between pb-3 border-b border-gray-200">
-                                   <span class="font-medium text-gray-600">Reference No:</span>
-                                   <span class="font-semibold text-green-800">${data.payment.reference_no}</span>
+                                        <span class="font-medium text-gray-600">Reference No:</span>
+                                        <span class="font-semibold text-green-800">${data.payment.reference_no}</span>
                                    </div>
                                    ` : ''}
                                    ${data.payment.payment_date ? `
                                    <div class="flex justify-between pb-3 border-b border-gray-200">
-                                   <span class="font-medium text-gray-600">Payment Date:</span>
-                                   <span class="font-semibold text-green-800">${formatDate(data.payment.payment_date)}</span>
+                                        <span class="font-medium text-gray-600">Payment Date:</span>
+                                        <span class="font-semibold text-green-800">${formatDate(data.payment.payment_date)}</span>
                                    </div>
                                    ` : ''}
+
+                                   <div class="flex justify-between pb-3 border-b border-gray-200">
+                                        <span class="font-medium text-gray-600">To be paid:</span>
+                                        <span class="font-semibold text-green-800">${formatPrice(data.payment.amount)}</span>
+                                   </div>
+
                                    <div class="flex justify-between pb-3 border-b border-gray-200">
                                         <label class="font-medium text-gray-600" for="amountPaid">Amount Paid:</label>
                                         <input 
@@ -490,8 +432,10 @@ $active = 'inquiries';
                                              placeholder="0.00"
                                              min="0"
                                              step="0.01"
+                                             ${data.payment.amount_paid ? 'disabled' : ''}
                                         >
                                    </div>
+                              
                               
                               </div>
                               ${receiptHtml}
@@ -846,7 +790,7 @@ $active = 'inquiries';
                               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                          },
                          body: JSON.stringify({
-                              send_email: true,
+                              send_notifier: true,
                               custom_message: customMessage,
                               amount_paid: amountPaid
                          })

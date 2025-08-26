@@ -19,304 +19,18 @@ use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
 use App\Mail\BookingVerifiedMail;
+use App\Services\PhilSmsService;
+use Vinkla\Hashids\Facades\Hashids;
 
 class InquirerController extends Controller
 {
-    // ... existing methods ...
+    protected $sms;
     
-    /**
-     * Confirm a booking and optionally send confirmation email
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function confirmBooking(Request $request, $id)
+    public  function __construct(PhilSmsService $sms)
     {
-        try {
-            $validated = $request->validate([
-                'custom_message' => 'nullable|string|max:500'
-            ]);
-    
-            $booking = FacilityBookingLog::with(['user', 'details'])->findOrFail($id);
-            $referenceNumber = '#CLM' . date('Y') . '-' . $booking->id;
-            // Check if booking is already confirmed
-            if ($booking->status === 'confirmed') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Booking is already confirmed.'
-                ], 400);
-            }
-    
-            $updateData = [
-                'status' => 'confirmed',
-                'confirmed_at' => Carbon::now(),
-                'confirmation_token' => Str::random(60),
-                'reference' => $referenceNumber,
-                'code' => $this->reservationCode()
-            ];
-    
-            // Start a database transaction
-            DB::beginTransaction();
-    
-            try {
-                // Update booking status
-                $booking->update($updateData);
-            
-                $total_amount = $booking->details->sum('total_price');
-        
-                // Create payment record
-                Payments::create([
-                    'facility_log_id' => $booking->id,
-                    'status' => 'Pending',
-                    'amount' => (0.5 * $total_amount)
-                ]);
-    
-                // Commit the transaction
-                DB::commit();
-    
-                // Send confirmation email
-                $this->sendConfirmationEmail($booking, $validated['custom_message'] ?? null);
-    
-                Log::info("Booking confirmed, payment created, and email sent", [
-                    'booking_id' => $id, 
-                    'user_id' => auth()->id()
-                ]);
-    
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Booking has been confirmed, payment record created, and confirmation email sent.',
-                    'data' => $booking->fresh()
-                ]);
-    
-            } catch (\Exception $e) {
-                // Rollback the transaction on error
-                DB::rollBack();
-                throw $e;
-            }
-    
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            Log::error("Booking confirmation failed: " . $e->getMessage(), [
-                'booking_id' => $id,
-                'exception' => $e
-            ]);
-    
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to confirm booking: ' . $e->getMessage()
-            ], 500);
-        }
+        $this->sms = $sms;
     }
 
-    public function reservationCode()
-    {
-        $now = Carbon::now();
-        
-        return strtoupper(
-            'CM' // Prefix
-            . $now->format('y')  // Year (e.g. 25 for 2025)
-            . $now->format('m')  // Month (e.g. 08)
-            . $now->format('d')  // Day (e.g. 19)
-            . $now->format('H')  // Hour (24h format)
-            . $now->format('i')  // Minute
-            . 'AA'               // Predefined separator
-            . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT)// Six random digits
-        );
-    }
-    
-    /**
-     * Send booking confirmation email
-     *
-     * @param FacilityBookingLog $booking
-     * @param string|null $customMessage
-     * @throws \Exception
-     */
-    protected function sendConfirmationEmail(FacilityBookingLog $booking, ?string $customMessage = null): void
-    {
-        if (!$booking->user) {
-            throw new \Exception('No user associated with this booking');
-        }
-        
-        if (empty($booking->user->email)) {
-            throw new \Exception('User does not have an email address');
-        }
-        
-        $verificationUrl = route('booking.verify', [
-            'token' => $booking->confirmation_token
-        ]);
-
-        try {
-            Mail::to($booking->user->email)->send(
-                new BookingConfirmationEmail($booking, $verificationUrl, $customMessage)
-            );
-            
-            Log::info("Confirmation email sent", [
-                'booking_id' => $booking->id,
-                'email' => $booking->user->email
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Failed to send confirmation email", [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
-     * Verify booking using confirmation token
-     *
-     * @param Request $request
-     * @param string $token
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function verifyBooking(Request $request, $token)
-    {
-        try {
-            $booking = FacilityBookingLog::where('confirmation_token', $token)
-                ->whereNotNull('confirmation_token')
-                ->firstOrFail();
-            
-            $booking->update([
-                'confirmation_token' => null,
-                'verified_at' => Carbon::now(),
-            ]);
-
-            Log::info("Booking verified via email", ['booking_id' => $booking->id]);
-
-            return redirect()->route('booking.redirect', [
-                'booking' => $booking->id
-            ]);
-
-        } catch (\Exception $e) {
-            Log::warning("Invalid booking verification attempt", ['token' => $token]);
-            
-            return redirect()->route('invalid_link');
-        }
-    }
-    
-    
-    public function rejectBooking(Request $request, $id)
-    {
-        try {
-            $validated = $request->validate([
-                'custom_message' => 'nullable|string|max:500'
-            ]);
-    
-            $booking = FacilityBookingLog::with(['user', 'details'])->findOrFail($id);
-    
-            // Check if booking is already rejected
-            if ($booking->status === 'rejected') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Booking is already rejected.'
-                ], 400);
-            }
-    
-            // Check if booking is already confirmed
-            if ($booking->status === 'confirmed') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot reject a confirmed booking.'
-                ], 400);
-            }
-    
-            $updateData = [
-                'status' => 'rejected',
-                'rejected_at' => Carbon::now(),
-                'rejection_reason' => $validated['custom_message'] ?? null
-            ];
-    
-            // Start a database transaction
-            DB::beginTransaction();
-    
-            try {
-                // Update booking status
-                $booking->update($updateData);
-            
-                // Commit the transaction
-                DB::commit();
-    
-                // Send rejection email
-                $this->sendRejectionEmail($booking, $validated['custom_message'] ?? null);
-    
-                Log::info("Booking rejected and email sent", [
-                    'booking_id' => $id, 
-                    'user_id' => auth()->id()
-                ]);
-    
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Booking has been rejected and notification email sent.',
-                    'data' => $booking->fresh()
-                ]);
-    
-            } catch (\Exception $e) {
-                // Rollback the transaction on error
-                DB::rollBack();
-                throw $e;
-            }
-    
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            Log::error("Booking rejection failed: " . $e->getMessage(), [
-                'booking_id' => $id,
-                'exception' => $e
-            ]);
-    
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to reject booking: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-    
-    /**
-     * Send booking rejection email
-     *
-     * @param FacilityBookingLog $booking
-     * @param string|null $customMessage
-     * @throws \Exception
-     */
-    protected function sendRejectionEmail(FacilityBookingLog $booking, ?string $customMessage = null): void
-    {
-        if (!$booking->user) {
-            throw new \Exception('No user associated with this booking');
-        }
-    
-        if (empty($booking->user->email)) {
-            throw new \Exception('User does not have an email address');
-        }
-    
-        try {
-            Mail::to($booking->user->email)->send(
-                new BookingRejectionEmail($booking, $customMessage)
-            );
-    
-            Log::info("Rejection email sent", [
-                'booking_id' => $booking->id,
-                'email' => $booking->user->email
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Failed to send rejection email", [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-    
     // =======================
     // Trying ajax entry in Inquirer at admin index
     // =======================
@@ -394,7 +108,6 @@ class InquirerController extends Controller
         ]);
     }
     
-    
     public function markAsRead($id)
     {
         $inquiry = FacilityBookingLog::findOrFail($id);
@@ -407,8 +120,7 @@ class InquirerController extends Controller
             'newCount' => $newCount
         ]);
     }
-
-
+    
     public function markAllAsRead()
     {
         FacilityBookingLog::where('is_read', false)->update(['is_read' => true]);
@@ -552,6 +264,302 @@ class InquirerController extends Controller
         }
     }
     
+        
+    /**
+     * Verify payment and send receipt with QR code
+     */
+    public function verifyBookingWithReceipt(Request $request, $bookingId)
+    {
+        try {
+            $validated = $request->validate([
+                'custom_message' => 'nullable|string|max:500',
+                'send_notifier' => 'sometimes|boolean',
+                'amount_paid' => 'required|numeric|min:0.01'
+            ]);
+
+            Payments::where('facility_log_id', $bookingId)
+                ->update(['amount_paid' => $validated['amount_paid']]);
+            
+            $booking = FacilityBookingLog::with([
+                'payments', 
+                'details',
+                'summaries.facility',
+                'summaries.breakfast',
+                'summaries.bookingDetails',
+                'guestDetails.guestType',
+                'user' // Make sure user relationship exists for email
+            ])->findOrFail($bookingId);
+            
+            $checkout_date = $booking->details->first()->checkout_date;
+            $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
+            
+            $hashedId = Hashids::encode($booking->id);
+            $payload = $hashedId . '|' . strtotime($expire_date); // compact string
+            
+            // ✅ Build QR Code with encrypted string
+            $result = Builder::create()
+                ->writer(new PngWriter())
+                ->data(json_encode($payload))
+                ->size(300)
+                ->margin(10)
+                ->build();
+            
+            // ✅ Save QR Code Image
+            $directory = public_path('imgs/qr_code/');
+            $fileName = 'qr_payment_'.$booking->id.'_'.time().'.png';
+            $filePath = $directory . $fileName;
+            
+            if (!File::exists($directory)) {
+                File::makeDirectory($directory, 0755, true);
+            }
+            
+            $result->saveToFile($filePath);
+            
+            // ✅ Update booking record
+            $booking->update([
+                'status' => 'confirmed',
+                'qr_code_path' => 'imgs/qr_code/' . $fileName
+            ]);
+            
+            
+            // ✅ Send Email with QR Code if requested
+            $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
+            $customMessage = $validated['custom_message'] ?? '';
+            
+            if ($request->input('send_notifier', true)) {
+                $this->sendVerificationEmail($booking, $qrCodeUrl, $customMessage);
+                //$this->sendSMS($booking->id);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking confirmed successfully',
+                'booking_id' => $booking->id,
+                'qr_code_url' => $qrCodeUrl
+            ]);
+        
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            \Log::error("Error confirming booking {$bookingId}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+        
+        /**
+     * Send verification email with QR code
+     */
+    private function sendVerificationEmail($booking, $qrCodeUrl, $customMessage): void
+    {
+        try {
+            if (!$booking->user || !$booking->user->email) {
+                throw new \Exception('No user or email associated with this booking');
+            }
+            
+            $customer_email = $booking->user->email;
+            
+            // Validate email format
+            if (!filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
+                throw new \Exception('Invalid email format: ' . $customer_email);
+            }
+            
+            // Send email with error handling
+            Mail::to($customer_email)->send(new BookingVerifiedMail(
+                $booking,
+                $qrCodeUrl,
+                $customMessage
+            ));
+        } catch (\Exception $e) {
+            \Log::error("Failed to send verification email for booking {$booking->id}: " . $e->getMessage());
+            throw $e; // Re-throw to be handled by the main method
+        }
+    }
+    
+    public function sendSMS(FacilityBookingLog $booking)
+    {
+        $booking->load('user');
+        
+        $message = "Hello {$booking->user->firstname}, your reservation code {$booking->code} is confirmed";
+        $cleanPhoneNumber = $this->formatPhilNumber($booking->user->phone);
+        
+        try {
+            // Call PhilSMS service
+            $response = $this->sms->send($cleanPhoneNumber, $message);
+
+            return [
+                'success' => true,
+                'to'      => $cleanPhoneNumber,
+                'message' => $message,
+                'api'     => $response // raw API response from PhilSMS
+            ];
+        } catch (\Exception $e) {
+            \Log::error("SMS failed for booking {$booking->id}: " . $e->getMessage());
+            
+            return [
+                'success' => false,
+                'error'   => $e->getMessage()
+            ];
+        }
+    }
+    
+    // This function convert raw phone number into Philippine format
+    function formatPhilNumber($rawnumber)
+    {
+        $number = (string) $rawnumber;
+
+        // Remove non-digit characters
+        $number = preg_replace('/\D/', '', $number);
+        
+        // Prepend 63 for PH format
+        if (substr($number, 0, 1) === '0') {
+            $number = '63' . substr($number, 1);
+        } else {
+            $number = '63' . $number;
+        }
+        
+        return $number;
+    }
+
+    public function reservationCode()
+    {
+        $now = Carbon::now();
+        
+        return strtoupper(
+            'CM' // Prefix
+            . $now->format('y')  // Year (e.g. 25 for 2025)
+            . $now->format('m')  // Month (e.g. 08)
+            . $now->format('d')  // Day (e.g. 19)
+            . $now->format('H')  // Hour (24h format)
+            . $now->format('i')  // Minute
+            . 'AA'               // Predefined separator
+            . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT)// Six random digits
+        );
+    }
+    
+    public function rejectBooking(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'custom_message' => 'nullable|string|max:500'
+            ]);
+    
+            $booking = FacilityBookingLog::with(['user', 'details'])->findOrFail($id);
+    
+            // Check if booking is already rejected
+            if ($booking->status === 'rejected') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking is already rejected.'
+                ], 400);
+            }
+    
+            // Check if booking is already confirmed
+            if ($booking->status === 'confirmed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot reject a confirmed booking.'
+                ], 400);
+            }
+    
+            $updateData = [
+                'status' => 'rejected',
+                'rejected_at' => Carbon::now(),
+                'rejection_reason' => $validated['custom_message'] ?? null
+            ];
+    
+            // Start a database transaction
+            DB::beginTransaction();
+    
+            try {
+                // Update booking status
+                $booking->update($updateData);
+            
+                // Commit the transaction
+                DB::commit();
+    
+                // Send rejection email
+                $this->sendRejectionEmail($booking, $validated['custom_message'] ?? null);
+    
+                Log::info("Booking rejected and email sent", [
+                    'booking_id' => $id, 
+                    'user_id' => auth()->id()
+                ]);
+    
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Booking has been rejected and notification email sent.',
+                    'data' => $booking->fresh()
+                ]);
+    
+            } catch (\Exception $e) {
+                // Rollback the transaction on error
+                DB::rollBack();
+                throw $e;
+            }
+    
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error("Booking rejection failed: " . $e->getMessage(), [
+                'booking_id' => $id,
+                'exception' => $e
+            ]);
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject booking: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Send booking rejection email
+     *
+     * @param FacilityBookingLog $booking
+     * @param string|null $customMessage
+     * @throws \Exception
+     */
+    protected function sendRejectionEmail(FacilityBookingLog $booking, ?string $customMessage = null): void
+    {
+        if (!$booking->user) {
+            throw new \Exception('No user associated with this booking');
+        }
+    
+        if (empty($booking->user->email)) {
+            throw new \Exception('User does not have an email address');
+        }
+    
+        try {
+            Mail::to($booking->user->email)->send(
+                new BookingRejectionEmail($booking, $customMessage)
+            );
+    
+            Log::info("Rejection email sent", [
+                'booking_id' => $booking->id,
+                'email' => $booking->user->email
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to send rejection email", [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+    
     public function verifyPayment($id)
     {
         try {
@@ -600,136 +608,8 @@ class InquirerController extends Controller
             'payment_method' => $payment->payment_method
         ];
     }
-
-        /**
-     * Verify payment and send receipt with QR code
-     */
-    public function verifyBookingWithReceipt(Request $request, $bookingId)
-    {
-        try {
-            $validated = $request->validate([
-                'custom_message' => 'nullable|string|max:500',
-                'send_email' => 'sometimes|boolean',
-                'amount_paid' => 'required|numeric|min:0.01'
-            ]);
-            
-            $booking = FacilityBookingLog::with([
-                'payments', 
-                'details',
-                'summaries.facility',
-                'summaries.breakfast',
-                'summaries.bookingDetails',
-                'guestDetails.guestType',
-                'user' // Make sure user relationship exists for email
-            ])->findOrFail($bookingId);
-
-            Payments::where('facility_log_id', $bookingId)
-                ->update(['amount_paid' => $validated['amount_paid']]);
-            
-            $checkout_date = $booking->details->first()->checkout_date;
-            $expire_date = Carbon::parse($checkout_date)->endOfDay()->toDateTimeString();
-            
-            // ✅ Generate a unique token
-            do {
-                $verificationToken = Str::random(64);
-            } while (Payments::where('verification_token', $verificationToken)->exists());
-
-            // ✅ Encrypt QR code payload
-            $payload = [
-                'id' => $booking->id,
-                'expires_at' => $expire_date
-            ];
-
-            // ✅ Build QR Code with encrypted string
-            $result = Builder::create()
-                ->writer(new PngWriter())
-                ->data(json_encode($payload))
-                ->size(300)
-                ->margin(10)
-                ->build();
-
-            // ✅ Save QR Code Image
-            $directory = public_path('imgs/qr_code/');
-            $fileName = 'qr_payment_'.$booking->id.'_'.time().'.png';
-            $filePath = $directory . $fileName;
-
-            if (!File::exists($directory)) {
-                File::makeDirectory($directory, 0755, true);
-            }
-
-            $result->saveToFile($filePath);
-
-            // ✅ Update booking record
-            $booking->update([
-                'status' => 'confirmed',
-                'qr_code_path' => 'imgs/qr_code/' . $fileName
-            ]);
-
-
-            // ✅ Send Email with QR Code if requested
-            $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
-            $customMessage = $validated['custom_message'] ?? '';
-
-            if ($request->input('send_email', true)) {
-                $this->sendVerificationEmail($booking, $qrCodeUrl, $customMessage);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Booking confirmed successfully',
-                'booking_id' => $booking->id,
-                'qr_code_url' => $qrCodeUrl
-            ]);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
-            
-        } catch (\Exception $e) {
-            \Log::error("Error confirming booking {$bookingId}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error: ' . $e->getMessage()
-            ], 500);
-        }
-    }
     
-    /**
-     * Send verification email with QR code
-     */
-    private function sendVerificationEmail($booking, $qrCodeUrl, $customMessage): void
-    {
-        try {
-            if (!$booking->user || !$booking->user->email) {
-                throw new \Exception('No user or email associated with this booking');
-            }
-            
-            $customer_email = $booking->user->email;
-            
-            // Validate email format
-            if (!filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
-                throw new \Exception('Invalid email format: ' . $customer_email);
-            }
-            
-            // Send email with error handling
-            Mail::to($customer_email)->send(new BookingVerifiedMail(
-                $booking,
-                $qrCodeUrl,
-                $customMessage
-            ));
-            
-            // Log successful email sending
-            \Log::info("Verification email sent to {$customer_email} for booking {$booking->id}");
-        
-        } catch (\Exception $e) {
-            \Log::error("Failed to send verification email for booking {$booking->id}: " . $e->getMessage());
-            throw $e; // Re-throw to be handled by the main method
-        }
-    }
+
     
     // public function streamUpdates(Request $request)
     // {
