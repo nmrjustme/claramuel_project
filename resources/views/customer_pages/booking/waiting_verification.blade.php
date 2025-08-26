@@ -82,6 +82,21 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Browse More -->
+            <div class="bg-white p-4 sm:p-6 md:p-8 text-center border-t border-gray-200">
+                <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3">
+                    Want to explore more?
+                </h3>
+                {{-- <p class="text-gray-600 text-sm sm:text-base mb-4">
+                    Discover more cottages, event spaces, and offers at Mt.Claramuel Resort.
+                </p> --}}
+                <a href="{{ route('dashboard.bookings') }}" 
+                class="inline-block bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg px-5 py-2 sm:px-6 sm:py-3 text-sm sm:text-base transition">
+                    Browse More
+                </a>
+            </div>
+            
             
             <!-- Footer -->
             <div class="bg-gray-100 px-4 sm:px-8 py-4 md:py-6 text-center">
