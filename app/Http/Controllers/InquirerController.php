@@ -42,10 +42,7 @@ class InquirerController extends Controller
         $perPage = $request->input('per_page', 20);
     
         $query = FacilityBookingLog::with([
-                'user', 
-                'summaries.facility', 
-                'summaries.breakfast',
-                'details',
+                'user',
                 'payments',
             ])
             ->when($search, function($query) use ($search) {
@@ -70,7 +67,8 @@ class InquirerController extends Controller
                     $q->where('status', $paymentStatus);
                 });
             })
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->whereIn('status', [ 'pending_confirmation', 'confirmed', 'rejected' ]);;
     
         $bookings = $query->paginate($perPage);
         $newCount = FacilityBookingLog::where('is_read', false)->count();
@@ -321,6 +319,10 @@ class InquirerController extends Controller
                 'qr_code_path' => 'imgs/qr_code/' . $fileName
             ]);
             
+            $update_payment = Payments::where('facility_log_id', $booking->id);
+            $update_payment->update([
+                'status' => 'verified'
+            ]);
             
             // ✅ Send Email with QR Code if requested
             $qrCodeUrl = asset('imgs/qr_code/' . $fileName);
@@ -328,9 +330,9 @@ class InquirerController extends Controller
             
             if ($request->input('send_notifier', true)) {
                 $this->sendVerificationEmail($booking, $qrCodeUrl, $customMessage);
-                //$this->sendSMS($booking->id);
+                $this->sendSMS($booking->id, $customMessage);
             }
-
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Booking confirmed successfully',
@@ -384,29 +386,39 @@ class InquirerController extends Controller
         }
     }
     
-    public function sendSMS(FacilityBookingLog $booking)
+    // Change the method to accept either object or ID
+    public function sendSMS($booking, $customMessage)
     {
-        $booking->load('user');
-        
-        $message = "Hello {$booking->user->firstname}, your reservation code {$booking->code} is confirmed";
-        $cleanPhoneNumber = $this->formatPhilNumber($booking->user->phone);
-        
         try {
-            // Call PhilSMS service
+            if (is_numeric($booking) || is_string($booking)) {
+                $booking = FacilityBookingLog::with('user')->findOrFail($booking);
+            }
+            
+            if (!$booking->user) {
+                throw new \Exception('No user associated with this booking');
+            }
+        
+            $message = "Hello {$booking->user->firstname}, your reservation code {$booking->code} is confirmed. "
+                . "Please check your email for your QR code. "
+                . "Contact: +63 995 290 1333. "
+                . "From: Mt.ClaRamuel Resort";
+            
+            $cleanPhoneNumber = $this->formatPhilNumber($booking->user->phone);
+            
+            \Log::info("SMS Details - To: {$cleanPhoneNumber}, Message: {$message}");
+            
             $response = $this->sms->send($cleanPhoneNumber, $message);
+            
+            \Log::info("SMS API Response: ", $response);
+            
+            return $response; // Return the full response for debugging
 
-            return [
-                'success' => true,
-                'to'      => $cleanPhoneNumber,
-                'message' => $message,
-                'api'     => $response // raw API response from PhilSMS
-            ];
         } catch (\Exception $e) {
             \Log::error("SMS failed for booking {$booking->id}: " . $e->getMessage());
             
             return [
                 'success' => false,
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage()
             ];
         }
     }
@@ -421,9 +433,9 @@ class InquirerController extends Controller
         
         // Prepend 63 for PH format
         if (substr($number, 0, 1) === '0') {
-            $number = '63' . substr($number, 1);
+            $number = '+63' . substr($number, 1);
         } else {
-            $number = '63' . $number;
+            $number = '+63' . $number;
         }
         
         return $number;

@@ -90,9 +90,7 @@
                 color: #1f2937;
             }
         }
-        .receipt-container {
-            background: linear-gradient(to bottom, #f8fafc, #ffffff);
-        }
+
         .header-gradient {
             background: linear-gradient(135deg, #f63b3b 0%, #d81d1d 100%);
         }
@@ -153,9 +151,76 @@
             pointer-events: none;
             z-index: 0;
         }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-container {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            padding: 1.5rem;
+            transform: translateY(-10px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .modal-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-button-no {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .modal-button-no:hover {
+            background-color: #d1d5db;
+        }
+        .modal-button-yes {
+            background-color: #10B981;
+            color: white;
+        }
+        .modal-button-yes:hover {
+            background-color: #059669;
+        }
     </style>
 </head>
-<body class="bg-gray-200 font-sans">
+<body class="bg-gray-50 font-sans">
     <div class="container mx-auto max-w-6xl p-4">
         <!-- Print Button -->
         <div class="no-print text-center mb-4 flex space-x-4">
@@ -165,7 +230,7 @@
                 </svg>
                 Back to Dashboard
             </a>
-            <button onclick="window.print()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
+            <button id="print-btn" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
                 </svg>
@@ -177,7 +242,7 @@
         <div class="flex flex-col md:flex-row gap-6">
             <!-- Left Side - Receipt -->
             <div class="md:w-2/3">
-                <div class="receipt-container bg-white rounded-xl shadow-lg overflow-hidden relative print-border">
+                <div class="receipt-container rounded-xl border border-gray-200 overflow-hidden relative print-border">
                     <!-- Watermark -->
                     <div class="watermark hidden md:block top-1/4 left-1/4">RECEIPT</div>
                     
@@ -189,7 +254,7 @@
                             </svg>
                         </div>
                         <h1 class="text-2xl font-bold mb-1">CHECK-IN RECEIPT</h1>
-                        <p class="text-primary-100 opacity-90 text-sm">Reservation Code: {{ $payment->bookingLog->code }}</p>
+                        <p class="text-primary-100 opacity-90 text-sm">Reservation Code: {{ $payment->bookingLog->reference }}</p>
                         <p class="text-primary-100 opacity-90 text-sm">
                             Check-in Date:
                             {{ $payment->bookingLog->checked_in_at ? \Carbon\Carbon::parse($payment->bookingLog->checked_in_at)->format('F j, Y \a\t g:i A') : 'N/A' }}
@@ -209,17 +274,17 @@
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:block">
-                                <div class="bg-gray-50 p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
+                                <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Full name:</span>
                                     <span class="font-medium text-gray-800 print-value">{{ $payment->bookingLog->user->firstname }} {{ $payment->bookingLog->user->lastname }}</span>
                                 </div>
                                 
-                                <div class="bg-gray-50 p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
+                                <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Email:</span>
                                     <span class="font-medium text-gray-800 print-value">{{ $payment->bookingLog->user->email }}</span>
                                 </div>
                                 
-                                <div class="bg-gray-50 p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
+                                <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Phone:</span>
                                     <span class="font-medium text-gray-800 print-value">{{ $payment->bookingLog->user->phone ?? 'N/A' }}</span>
                                 </div>
@@ -359,7 +424,7 @@
             
             <!-- Right Side - Payment Status -->
             <div class="md:w-1/3">
-                <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-4 print-border">
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-4 print-border">
                     <div class="header-gradient text-white p-4 text-center">
                         <h2 class="text-xl font-bold">Payment Status</h2>
                     </div>
@@ -484,12 +549,105 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Print Confirmation Modal -->
+    <div id="printConfirmModal" class="modal-overlay">
+        <div class="modal-container">
+            <h2 class="modal-title">Did the receipt print successfully?</h2>
+            <p class="text-gray-600">Please confirm if the receipt was printed correctly.</p>
+            <div class="modal-buttons">
+                <button id="printNoBtn" class="modal-button modal-button-no">No, try again</button>
+                <button id="printYesBtn" class="modal-button modal-button-yes">Yes, successful</button>
+            </div>
+        </div>
+    </div>
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const printBtn = document.getElementById('print-btn');
+            const modal = document.getElementById('printConfirmModal');
+            const yesBtn = document.getElementById('printYesBtn');
+            const noBtn = document.getElementById('printNoBtn');
+            let printRecorded = false;
+            
+            // Print button handler
+            printBtn.addEventListener('click', function () {
+                // Use a more reliable approach for detecting print completion
+                const beforePrint = () => {
+                    // This runs before the print dialog opens
+                };
+                
+                const afterPrint = () => {
+                    // This runs after the print dialog is closed
+                    setTimeout(() => {
+                        modal.classList.add('active');
+                    }, 300);
+                };
+                
+                // Add event listeners for print detection
+                if (window.matchMedia) {
+                    const mediaQueryList = window.matchMedia('print');
+                    mediaQueryList.addListener((mql) => {
+                        if (mql.matches) {
+                            beforePrint();
+                        } else {
+                            afterPrint();
+                        }
+                    });
+                }
+                
+                // Fallback for browsers that don't support matchMedia
+                window.onafterprint = afterPrint;
+                
+                // Trigger the print dialog
+                window.print();
+            });
+            
+            // Handle "Yes" button
+            yesBtn.addEventListener('click', function () {
+                if (!printRecorded) {
+                    updateBookingStatus();
+                    printRecorded = true;
+                }
+                modal.classList.remove('active');
+                showToast('Checked-in booking status recorded!', 'success');
+            });
+            
+            // Handle "No" button
+            noBtn.addEventListener('click', function () {
+                modal.classList.remove('active');
+                showToast('You can try printing again.', 'info');
+            });
+            
+            function updateBookingStatus() {
+                const paymentId = {{ $payment->id }};
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                
+                fetch(`/update/booking/status/${paymentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Print action recorded successfully');
+                    } else {
+                        console.error('Failed to record print action:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error recording print action:', error);
+                });
+            }
+            
+            // Status update functionality
             const statusSelect = document.getElementById('status-select');
             const amountContainer = document.getElementById('amount-container');
             
@@ -500,6 +658,7 @@
                     amountContainer.classList.add('hidden');
                 }
             });
+            
             // Initialize visibility based on current selection
             if (statusSelect.value === 'fully_paid') {
                 amountContainer.classList.remove('hidden');

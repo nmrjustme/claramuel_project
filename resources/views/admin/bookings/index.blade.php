@@ -8,7 +8,6 @@
 
 @section('content_css')
 <style>
-    
     .hover-scale {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -123,13 +122,19 @@
                         Fully Paid
                     </button>
                     <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="verified">
-                        Advance
+                        Verified
                     </button>
-                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="under_verification">
-                        Under Verification
+                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="checked_in">
+                        Checked In
                     </button>
-                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="rejected">
-                        Rejected
+                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="checked_out">
+                        Checked Out
+                    </button>
+                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="cancelled">
+                        Cancelled
+                    </button>
+                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="no_show">
+                        No Show
                     </button>
                 </div>
                 <hr class="border-gray-200 my-4">
@@ -175,12 +180,12 @@
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
                         </button>
-                        <button id="generate-excel" class="bg-green-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-green-800 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg px-4 py-2 ">
+                        {{-- <button id="generate-excel" class="bg-green-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-green-800 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg px-4 py-2 ">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 384 512" fill="currentColor">
                                 <path d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm60.1 106.5L224 336l60.1 93.5c5.1 8-.6 18.5-10.1 18.5h-34.9c-4.4 0-8.5-2.4-10.6-6.3C208.9 405.5 192 373 192 373c-6.4 14.8-10 20-36.6 68.8-2.1 3.9-6.1 6.3-10.5 6.3H110c-9.5 0-15.2-10.5-10.1-18.5l60.3-93.5-60.3-93.5c-5.2-8 .6-18.5 10.1-18.5h34.8c4.4 0 8.5 2.4 10.6 6.3 26.1 48.8 20 35.6 36.6 68.5 0 0 6.1-11.7 36.6-68.5 2.1-3.9 6.2-6.3 10.6-6.3H274c9.5-.1 15.2 10.4 10.1 18.4zM384 121.9v6.1H256V0h6.1c6.4 0 12.5 2.5 17 7l97.9 98c4.5 4.5 7 10.6 7 16.9z"/>
                             </svg>
                             Export Excel
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -211,7 +216,7 @@
                         </div>
                         <div class="flex items-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293 707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                             </svg>
                             <p class="text-gray-600" id="next-checkin-nights">-</p>
                         </div>
@@ -339,94 +344,94 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Generate Excel button click handler
-    document.getElementById('generate-excel').addEventListener('click', function() {
-        generateExcel(currentStatus);
-    });
+    // document.getElementById('generate-excel').addEventListener('click', function() {
+    //     generateExcel(currentStatus);
+    // });
 
-    function generateExcel(status) {
-        const excelBtn = document.getElementById('generate-excel');
-        const originalHtml = excelBtn.innerHTML;
+    // function generateExcel(status) {
+    //     const excelBtn = document.getElementById('generate-excel');
+    //     const originalHtml = excelBtn.innerHTML;
         
-        // Show loading state
-        excelBtn.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Generating...
-        `;
-        excelBtn.disabled = true;
+    //     // Show loading state
+    //     excelBtn.innerHTML = `
+    //         <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    //             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    //             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    //         </svg>
+    //         Generating...
+    //     `;
+    //     excelBtn.disabled = true;
     
-        fetch(`/admin/bookings/export?status=${status}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            credentials: 'same-origin'
-        })
-        .then(async (response) => {
-            if (response.status === 404) {
-                const data = await response.json();
-                throw new Error(data.message || 'No data available for export');
-            }
+    //     fetch(`/admin/bookings/export?status=${status}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`, {
+    //         method: 'GET',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             'Accept': 'application/json',
+    //             'X-Requested-With': 'XMLHttpRequest',
+    //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    //         },
+    //         credentials: 'same-origin'
+    //     })
+    //     .then(async (response) => {
+    //         if (response.status === 404) {
+    //             const data = await response.json();
+    //             throw new Error(data.message || 'No data available for export');
+    //         }
     
-            if (!response.ok) {
-                throw new Error('Failed to generate Excel file');
-            }
+    //         if (!response.ok) {
+    //             throw new Error('Failed to generate Excel file');
+    //         }
     
-            // Handle successful Excel download
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+    //         // Handle successful Excel download
+    //         const blob = await response.blob();
+    //         const url = window.URL.createObjectURL(blob);
+    //         const a = document.createElement('a');
+    //         a.href = url;
             
-            // Get filename from content-disposition header or use default
-            const contentDisposition = response.headers.get('content-disposition');
-            let filename = `bookings_${status}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    //         // Get filename from content-disposition header or use default
+    //         const contentDisposition = response.headers.get('content-disposition');
+    //         let filename = `bookings_${status}_${new Date().toISOString().split('T')[0]}.xlsx`;
             
-            if (contentDisposition) {
-                const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-                if (filenameMatch && filenameMatch[1]) {
-                    filename = filenameMatch[1];
-                }
-            }
+    //         if (contentDisposition) {
+    //             const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+    //             if (filenameMatch && filenameMatch[1]) {
+    //                 filename = filenameMatch[1];
+    //             }
+    //         }
             
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
+    //         a.download = filename;
+    //         document.body.appendChild(a);
+    //         a.click();
+    //         window.URL.revokeObjectURL(url);
+    //         a.remove();
             
-            showToast('success', 'Excel file downloaded successfully');
-        })
-        .catch(error => {
-            console.error('Export Error:', error);
+    //         showToast('success', 'Excel file downloaded successfully');
+    //     })
+    //     .catch(error => {
+    //         console.error('Export Error:', error);
             
-            if (error.message.includes('No data available')) {
-                // Create empty Excel file with just headers
-                const csvContent = "Status,Guest Name,Reservation Code,Check-in Date,Check-out Date,Amount,Payment Collected By,Facilities Booked";
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `bookings_${status}_empty_${new Date().toISOString().split('T')[0]}.csv`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+    //         if (error.message.includes('No data available')) {
+    //             // Create empty Excel file with just headers
+    //             const csvContent = "Status,Guest Name,Reservation Code,Check-in Date,Check-out Date,Amount,Payment Collected By,Facilities Booked";
+    //             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    //             const url = URL.createObjectURL(blob);
+    //             const link = document.createElement('a');
+    //             link.href = url;
+    //             link.download = `bookings_${status}_empty_${new Date().toISOString().split('T')[0]}.csv`;
+    //             document.body.appendChild(link);
+    //             link.click();
+    //             document.body.removeChild(link);
                 
-                showToast('info', 'No bookings found. Downloaded empty template with headers.');
-            } else {
-                showToast('error', error.message || 'Failed to generate Excel file');
-            }
-        })
-        .finally(() => {
-            excelBtn.innerHTML = originalHtml;
-            excelBtn.disabled = false;
-        });
-    }
+    //             showToast('info', 'No bookings found. Downloaded empty template with headers.');
+    //         } else {
+    //             showToast('error', error.message || 'Failed to generate Excel file');
+    //         }
+    //     })
+    //     .finally(() => {
+    //         excelBtn.innerHTML = originalHtml;
+    //         excelBtn.disabled = false;
+    //     });
+    // }
     
     const STATUS_CONFIG = {
         'fully_paid': {
@@ -437,19 +442,31 @@ document.addEventListener('DOMContentLoaded', function() {
             class: 'bg-green-600',
             text: 'VERIFIED'
         },
-        'under_verification': {
-            class: 'bg-yellow-600',
-            text: 'UNDER VERIFICATION'
+        'checked_in': {
+            class: 'bg-purple-600',
+            text: 'CHECKED IN'
+        },
+        'checked_out': {
+            class: 'bg-gray-600',
+            text: 'CHECKED OUT'
+        },
+        'cancelled': {
+            class: 'bg-red-600',
+            text: 'CANCELLED'
+        },
+        'no_show': {
+            class: 'bg-orange-600',
+            text: 'NO SHOW'
         },
         'rejected': {
             class: 'bg-red-600',
             text: 'REJECTED'
         }
     };
-
+    
     // Function to load bookings
     function loadBookings(status, page = 1) {
-        const url = new URL(`/get/admin/bookings`, window.location.origin);
+        const url = new URL(`/get/mybooking`, window.location.origin);
         url.searchParams.append('status', status);
         url.searchParams.append('page', page);
         url.searchParams.append('per_page', perPage);
@@ -496,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <tr>
                         <td colspan="7" class="px-6 py-8 text-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin-round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <p class="mt-2 text-gray-500">No bookings found</p>
                         </td>
@@ -504,13 +521,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             } else {
                 bookings.forEach(booking => {
-                    // Get the payment status from the first payment or use booking status as fallback
-                    let paymentStatus = status === 'fully_paid' ? 'fully_paid' : 
-                        booking.payments?.[0]?.status || booking.status;
+                    // Use the status directly from the API response
+                    // The backend now returns the appropriate status (payment status takes priority)
+                    const displayStatus = booking.status;
+                    const statusInfo = STATUS_CONFIG[displayStatus] || {class: 'bg-yellow-600', text: displayStatus.toUpperCase()};
                     
-                    const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
-                    const verifiedBy = booking.payments?.[0]?.verified_by?.firstname || 'System Admin';
-                
+                    // Get verified by information from payments if available
+                    let verifiedBy = 'System Admin';
+                    if (booking.payments && booking.payments.length > 0) {
+                        const latestPayment = booking.payments.reduce((latest, payment) => {
+                            return (!latest || new Date(payment.created_at) > new Date(latest.created_at)) 
+                                ? payment : latest;
+                        }, null);
+                        
+                        if (latestPayment && latestPayment.verified_by) {
+                            verifiedBy = latestPayment.verified_by.firstname || 'System Admin';
+                        }
+                    }
                     
                     html += `
                         <tr class="booking-row cursor-pointer" data-booking-id="${booking.id}">
@@ -662,24 +689,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             const booking = data.data;
             const detail = booking.details?.[0];
-
+            
             let paymentStatus;
             const payment = booking.payments?.[0];
-
-            if (currentStatus === 'fully_paid') {
-                paymentStatus = 'fully_paid'; // Force fully_paid status for this tab
-            } else if (payment) {
+            
+            // Determine payment status based on payment data
+            if (payment) {
                 if (payment.remaining_balance_status === 'fully_paid') {
                     paymentStatus = 'fully_paid';
+                } else if (payment.status === 'verified') {
+                    paymentStatus = 'verified';
                 } else {
-                    paymentStatus = payment.status || booking.status;
+                    paymentStatus = booking.status;
                 }
             } else {
                 paymentStatus = booking.status;
             }
-
-            const statusInfo = STATUS_CONFIG[paymentStatus] || STATUS_CONFIG.under_verification;
-
+            
+            const statusInfo = STATUS_CONFIG[paymentStatus] || {class: 'bg-yellow-600', text: paymentStatus.toUpperCase()};
+                    
             console.log('Booking data:', booking);
             
             const advancePaid = parseFloat(booking.payments?.[0]?.amount_paid) || 0;
@@ -922,9 +950,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 <!-- Actions -->
                 <div class="px-4 py-4 bg-gray-50 flex justify-end space-x-3">
-                    <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">
-                        Edit
-                    </button>
                     <button class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
                         Cancel Booking
                     </button>
@@ -982,9 +1007,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create toast element
         const toast = document.createElement('div');
         toast.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${
-            type === 'success' ? 'bg-green-600' : 
-            type === 'error' ? 'bg-red-600' : 
-            type === 'info' ? 'bg-blue-600' : 'bg-gray-600'
+        type === 'success' ? 'bg-green-600' : 
+        type === 'error' ? 'bg-red-600' : 
+        type === 'info' ? 'bg-blue-600' : 'bg-gray-600' 
         }`;
         toast.innerHTML = `
             <div class="flex items-center">

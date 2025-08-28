@@ -9,7 +9,7 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Request Monitoring</h1>
-            <p class="text-gray-600">Confirm customer booking request</p>
+            <p class="text-gray-600">To track requests before they become actual bookings</p>
         </div>
         
         <div class="flex items-center space-x-4">
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </tr>
         `;
         
-        let url = `/get/mybooking?page=${currentPage}`;
+        let url = `/get/inquiries/booking?page=${currentPage}`;
         if (currentSearchTerm) {
             url += `&search=${encodeURIComponent(currentSearchTerm)}`;
         }

@@ -105,19 +105,15 @@ class AdminController extends Controller
      {
           $totalBookings = FacilityBookingLog::get()->count();
           $pendingConfirmation = FacilityBookingLog::where('status', 'pending_confirmation')->count();
-          $under_verification_payments = FacilityBookingLog::whereHas('payments', function ($query) {
-               $query->where('status', 'under_verification');
-          })->count();
-
-          $pending_payments = FacilityBookingLog::whereHas('payments', function ($query) {
-               $query->where('status', 'Pending');
-          })->count();
+          
+          $total_checked_in = FacilityBookingLog::where('status', 'checked_in')->count();
+          $total_checked_out = FacilityBookingLog::where('status', 'checked_out')->count();
 
           return response()->json([
                'total_booking' => $totalBookings,
                'pending' => $pendingConfirmation,
-               'under_verification_payments' => $under_verification_payments,
-               'pending_payments' => $pending_payments
+               'checked_in_total' => $total_checked_in,
+               'total_checked_out' => $total_checked_out
           ]);
      }
 
@@ -177,12 +173,10 @@ class AdminController extends Controller
 
           // Sidebar Badge
           $inquiriesCount = FacilityBookingLog::where('is_read', false)->count();
-          $paymentCount = Payments::where('is_read', false)->count();
 
           $counts = [
                'emailBadgeCount' => $unreadMessages->count(),
                'inquiriesCount' => $inquiriesCount,
-               'paymentCount' => $paymentCount // Fixed: Changed comma to =>
           ];
 
           // Broadcast the event

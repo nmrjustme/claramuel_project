@@ -24,6 +24,8 @@ class FacilityBookingLog extends Model
         'is_read',
         'checked_in_at',
         'checked_in_by',
+        'checked_out_at',
+        'checked_out_by',
         'qr_code_path'
     ];
 

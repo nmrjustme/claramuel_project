@@ -30,9 +30,9 @@ function markInquiryAsRead(inquiryId) {
     });
 }
 
-function openInquiriesPageAndSearch(inquiryId) {
+function openInquiriesPageAndSearch(code) {
     // Store the ID to search for in sessionStorage
-    sessionStorage.setItem('searchInquiryId', inquiryId);
+    sessionStorage.setItem('searchInquiryId', code);
     
     // Open the inquiries page
     window.location.href = '/Inquiries';
@@ -115,7 +115,7 @@ function renderInquiries(inquiries) {
                     <p class="text-sm text-gray-500 truncate">${inquirer.user.phone}</p>
                 </div>
                 <button 
-                    onclick="openInquiriesPageAndSearch('${inquirer.id}')" 
+                    onclick="openInquiriesPageAndSearch('${inquirer.code}')" 
                     class="px-3 py-1 text-sm text-gray-700 hover:text-white hover:bg-red-600 border border-gray-300 rounded-md transition-colors"
                 >
                     View
@@ -231,7 +231,7 @@ function addNewInquiry(booking) {
             <p class="text-sm text-gray-500 truncate">${booking.user.phone}</p>
         </div>
         <button 
-            onclick="openInquiriesPageAndSearch('${booking.id}')" 
+            onclick="openInquiriesPageAndSearch('${booking.code}')" 
             class="px-3 py-1 text-sm text-gray-700 hover:text-white hover:bg-red-600 border border-gray-300 rounded-md transition-colors"
         >
             View

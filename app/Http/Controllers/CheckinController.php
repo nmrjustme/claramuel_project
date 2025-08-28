@@ -7,7 +7,6 @@ use App\Models\Payments;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\FacilityBookingLog;
-use Illuminate\Support\Facades\Crypt;
 use Vinkla\Hashids\Facades\Hashids;
 
 class CheckinController extends Controller
@@ -107,9 +106,10 @@ class CheckinController extends Controller
         
     private function updateCheckedin($payment)
     {
-            $payment->bookingLog->update([
-                'checked_in_at' => Carbon::now()
-            ]);
+        $payment->bookingLog->update([
+            'checked_in_at' => Carbon::now(),
+            'checked_in_by' => auth()->id(),
+        ]);
     }
 
     private function updateQrStatus($payment, $status)
@@ -269,11 +269,11 @@ class CheckinController extends Controller
             'bookingLog.summaries.bookingDetails',
             'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
-
+        
         $this->updateCheckedin($payment);
         $this->updateQrStatus($payment, 'in_used');
         
-        return view('admin.printCheckinPage.index', ['payment' => $payment]);
+        return view('admin.print_Receipt.checkin', ['payment' => $payment]);
     }
     
     public function searchGuests(Request $request)
@@ -333,6 +333,15 @@ class CheckinController extends Controller
         });
         
         return response()->json($results);
+    }
+
+    public function updateStatus($id)
+    {
+        $payment = Payments::with('bookingLog')->findorFail($id);
+        
+        $payment->bookingLog->update([
+            'status' => "checked_in"
+        ]);
     }
 
 }

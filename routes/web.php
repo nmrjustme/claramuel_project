@@ -25,44 +25,35 @@ use App\Http\Controllers\BookingLogController;
 use App\Http\Controllers\GuestTypeController;
 use App\Http\Controllers\DayTourController;
 use App\Http\Controllers\BookingReplyController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\DB;
 use App\Models\FacilityBookingLog;
-use App\Models\Payments;
 use Illuminate\Http\Request;
-use App\Events\UnreadCountsUpdated;
+use Illuminate\Support\Facades\Http;
+
 
 use Illuminate\Support\Facades\Hash;
+use GuzzleHttp\Client;
 
-Route::get('/try/phone/cleaning/', function(){
-    function formatPhilNumber($rawnumber)
-    {
-        $number = (string) $rawnumber;
-        
-        // Remove non-digit characters
-        $number = preg_replace('/\D/', '', $number);
-        
-        // Prepend 63 for PH format
-        if (substr($number, 0, 1) === '0') {
-            $number = '63' . substr($number, 1);
-        } else {
-            $number = '63' . $number;
-        }
-        return $number;
-    }
+// // routes/web.php or routes/api.php
+// Route::get('/test-philsms-multiple', function () {
+//     $sendData = [
+//         'sender_id' => "PhilSMS",
+//         'recipient' => "+639169824195", // Add another test number
+//         'type' => "plain",
+//         'message' => "Test multiple numbers",
+//     ];
     
-    $booking = FacilityBookingLog::with('user')->findorFail(600);
-    $phone = (string) $booking->user->phone;
-    $formatted = formatPhilNumber($phone);
-    echo $formatted; // 639532713188
-});
-
-Route::get('/try/amount-paid/', function(){
-    $booking = FacilityBookingLog::with(['user', 'payments'])->findorFail(930);
-    $payment = $booking->payments->first();
-    $amount_paid = $payment->amount_paid;
+//     $token = "2477|yGN3jvV2c1iprhxAtsGLMlw2dyXrGMDtzZBCWhuN";
     
-    return (string) $amount_paid;
-});
+//     $response = Http::withHeaders([
+//         'Authorization' => 'Bearer ' . $token,
+//         'Accept' => 'application/json',
+//         'Content-Type' => 'application/json',
+//     ])->post('https://app.philsms.com/api/v3/sms/send', $sendData);
+    
+//     return response()->json($response->json());
+// });
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
@@ -212,6 +203,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('booking-logs', [BookingLogController::class, 'index'])->name('admin.booking-logs');
     
     // Booking log route
+    Route::get('/get/inquiries/booking', [BookingController::class, 'getMyInquiries'])->name('my_inquiries_bookings');
     Route::get('/get/mybooking', [BookingController::class, 'getMyBookings'])->name('my_bookings');
     
     Route::get('/get/admin/bookings', [BookingController::class, 'index']);
@@ -247,6 +239,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/booking-details/{id}', [InquirerController::class, 'getBookingDetails'])->name('admin.inquirer.show');
     
     Route::get('/admin/booking-details/{id}', [BookingController::class, 'bookingDetails'])->name('admin.booking.details');
+    
     // open modal payment details each customer
     Route::get('/payment-details/{id}', [InquirerController::class, 'getPaymentDetails'])->name('admin.inquirerPayment.show');
     
@@ -301,6 +294,7 @@ Route::middleware(['auth'])->group(function () {
     // calendar
     Route::get('/bookings/calendar', [BookingCalendarController::class, 'getCalendarData'])->name('admin.calendar.getDate');
     Route::get('/bookings/by-date', [BookingCalendarController::class, 'getBookingsByDate'])->name('admin.calendar.byDate');
+    Route::get('/facilities/availability/', [BookingCalendarController::class, 'getUnavailableDatesFacility'])->name('admin.getUnavailableDates');
 
     // =======================
     // Payments
@@ -326,20 +320,38 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/admin/payments/search', [AdminPaymentController::class, 'search'])->name('admin.payments.search');
     
+    // =======================
+    // Check-in Routes
+    // =======================
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
     Route::post('/verify-qr-codes/checkin', [CheckinController::class, 'verifyQrCode']);
     Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
     Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
     Route::get('/qrScanner/customer-details/{paymentId}', [CheckinController::class, 'getCustomerDetails']);
-    
+    Route::get('/check-in/search-guests', [CheckinController::class, 'searchGuests']);
+    Route::post('/update/booking/status/{id}', [CheckinController::class, 'updateStatus']);
     Route::get('/check-in/used', function (Request $request) {
         $qrPath = $request->query('path');
         return view('admin.qr_in_used', ['qrPath' => $qrPath]);
     });
+    // =======================
 
-    Route::get('/check-in/search-guests', [CheckinController::class, 'searchGuests']);
+    // =======================
+    // Check-out Routes
+    // =======================
+    Route::get('/check-out/scanner', [CheckoutController::class, 'scannerPage'])->name('checkout.scanner');
+    Route::post('/verify-qr-codes/checkout', [CheckoutController::class, 'verifyQrCode']);
+    Route::get('/check-out/receipt/{id}', [CheckoutController::class, 'showPrinting']);
+    Route::post('/check-out/process-qr-upload', [CheckoutController::class, 'processUploadQrUpload']);
+    Route::get('/check-out/search-guests', [CheckoutController::class, 'searchGuests']);
+    Route::post('/update/booking/checkout/status/{id}', [CheckoutController::class, 'updateStatus']);
+    
+    // =======================
     
     Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);
+
+
+
 });
 
 // =======================

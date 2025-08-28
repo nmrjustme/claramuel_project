@@ -46,7 +46,7 @@
     
     @yield('content_css')
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-100">
     <!-- Mobile Header -->
     <div class="md:hidden mt-1 fixed top-0 left-0 right-0 bg-white shadow-md z-50 flex items-center justify-between p-4 h-16">
         <button class="text-red-600 text-2xl focus:outline-none" id="toggleSidebarMobile" aria-label="Toggle sidebar">

@@ -180,8 +180,11 @@ $active = 'dashboard';
           background: #2563EB; /* Vibrant blue */
      }
 
-     .status-card.pending-confirmations::before {
-          background: #D97706; /* Vibrant amber */
+     .status-card.checked-out::before {
+          background: #d91406; /* Vibrant amber */
+     }
+     .status-card.status-card.pending-confirmations::before {
+          background: #d98c06; /* Vibrant amber */
      }
 
      .status-card.awaiting-payments::before {
@@ -271,8 +274,12 @@ $active = 'dashboard';
           color: #1E40AF;
      }
 
+     .status-card.checked-out .stat-change {
+          color: #b40909;
+     }
+     
      .status-card.pending-confirmations .stat-change {
-          color: #B45309;
+          color: #b46a09;
      }
 
      .status-card.awaiting-payments .stat-change {
@@ -403,46 +410,46 @@ $active = 'dashboard';
                </div>
           </div>
 
-          <!-- Awaiting Payments -->
           <div class="status-card awaiting-payments shadow-sm">
                <div class="card-content">
                     <div class="text-content">
-                         <p class="stat-label">Under Verification</p>
-                         <h3 class="stat-value" id="under-verification-payments">0</h3>
+                         <p class="stat-label">Checked In</p>
+                         <h3 class="stat-value" id="checked-in-total">0</h3>
                          <p class="stat-change">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5a1 1 0 01-1-1v-5H9v5a1 1 0 01-1 1H3a1 1 0 01-1-1V9.75z" />
                               </svg>
-                              Customer Advance Payment
+                              Customer In-House
                          </p>
                     </div>
                     <div class="icon-wrapper">
-                         <span class="text-violet-600 text-xl font-bold">₱</span>
+                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10h16V10" />
+                         </svg>
                     </div>
+               
                </div>
           </div>
           
-          <!-- Pending Confirmations -->
-          <div class="status-card pending-confirmations shadow-sm">
+          <div class="status-card checked-out shadow-sm">
                <div class="card-content">
                     <div class="text-content">
-                         <p class="stat-label">Pending Advance Payment</p>
-                         <h3 class="stat-value" id="total-pending-payments">8</h3>
+                         <p class="stat-label">Checked Out</p>
+                         <h3 class="stat-value" id="total-checked-out">8</h3>
                          <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                               </svg>
-                              Awaiting Payments
+                              Customer Checked-Out
                          </p>
                     </div>
-                    <div class="icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div class="icon-wrapper bg-gray-50">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                          </svg>
                     </div>
                </div>
           </div>
-
      </div>
      
      <!-- Main Content Grid -->
@@ -622,7 +629,7 @@ $active = 'dashboard';
                <div class="grid grid-cols-2 gap-4">
                
                     <!-- Full-width Day Tour button -->
-                    <a href="#" onclick="openDayTourModal()"
+                    <a href="#"
                          class="p-4 bg-yellow-100 rounded-lg text-center hover:bg-yellow-200 transition-all group col-span-2 hover:-translate-y-0.5">
                          <div class="mx-auto h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -713,8 +720,7 @@ $active = 'dashboard';
                </a>
 
                <!-- Upload QR Code Option - Updated to blue color scheme -->
-               <div
-                    class="border border-blue-100 rounded-lg overflow-hidden hover:border-blue-300 transition-colors duration-200 hover-scale">
+               <div class="border border-blue-100 rounded-lg overflow-hidden hover:border-blue-300 transition-colors duration-200 hover-scale">
                     <div class="p-4 bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
                          <div class="flex items-start">
                               <div class="bg-blue-100 p-3 rounded-lg mr-4 hover:bg-blue-200 transition-colors">
@@ -865,7 +871,7 @@ $active = 'dashboard';
 
           <div class="p-6 space-y-4">
                <!-- QR Code Scan Option -->
-               <a href="" class="block group">
+               <a href="{{ route('checkout.scanner') }}" class="block group">
                     <div class="p-4 bg-green-50 rounded-lg border border-green-100 hover:border-green-300 transition-all duration-200 flex items-start hover-scale">
                          <div class="bg-green-100 p-3 rounded-lg mr-4 group-hover:bg-green-200 transition-colors">
                               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -952,11 +958,11 @@ $active = 'dashboard';
 </div>
 
 <!-- Manual Checkout Search Container -->
-<div id="" class="fixed inset-0 bg-white p-4 hidden z-50 overflow-y-auto">
+<div id="checkoutManualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50 overflow-y-auto">
      <div class="max-w-2xl mx-auto">
           <div class="flex justify-between items-center mb-4">
-               <h3 class="text-lg font-medium">Search Guest</h3>
-               <button onclick="closeManualSearch()" class="text-gray-500 hover:text-gray-700">
+               <h3 class="text-lg font-medium">Search Guest for Checkout</h3>
+               <button onclick="closeCheckoutManualSearch()" class="text-gray-500 hover:text-gray-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -968,10 +974,9 @@ $active = 'dashboard';
           <!-- Quick Search Field -->
           <div class="mb-4">
                <label class="block text-sm font-medium mb-2 text-gray-700">Reservation Code</label>
-               <input type="text" id="reservationCode"
+               <input type="text" id="checkoutReservationCode"
                     class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    {{-- onkeypress="if(event.key==='Enter')performSearch()"> --}}
-               >
+                    onkeypress="if(event.key==='Enter')performCheckoutSearch()">
           </div>
           
           <!-- Advanced Search Fields -->
@@ -981,28 +986,26 @@ $active = 'dashboard';
                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                          <label class="block text-xs font-medium mb-1 text-gray-600">First Name</label>
-                         <input type="text" id="firstNameInput" placeholder="First name" 
+                         <input type="text" id="checkoutFirstNameInput" placeholder="First name" 
                               class="w-full p-2 border rounded text-sm"
-                              {{-- onkeypress="if(event.key==='Enter')performSearch()" --}}
-                              >
+                              onkeypress="if(event.key==='Enter')performCheckoutSearch()">
                     </div>
                     
                     <div>
                          <label class="block text-xs font-medium mb-1 text-gray-600">Last Name</label>
-                         <input type="text" id="lastNameInput" placeholder="Last name" 
+                         <input type="text" id="checkoutLastNameInput" placeholder="Last name" 
                               class="w-full p-2 border rounded text-sm"
-                              {{-- onkeypress="if(event.key==='Enter')performSearch()" --}}
-                         >
+                              onkeypress="if(event.key==='Enter')performCheckoutSearch()">
                     </div>
                </div>
           </div>
           
-          <button onclick=""
+          <button onclick="performCheckoutSearch()"
                class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
                Search Guests
           </button>
           
-          <div id="" class="mt-4 space-y-2">
+          <div id="checkoutSearchResults" class="mt-4 space-y-2">
                <!-- Search results will appear here -->
           </div>
      </div>
@@ -1010,7 +1013,7 @@ $active = 'dashboard';
 
 
 <!-- Day Tour Modal -->
-<div id="dayTourModal" class="modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden">
+<div class="modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden">
      <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
           <!-- Modal Header -->
           <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 p-6 sticky top-0 z-10">
@@ -1696,43 +1699,100 @@ function performSearch() {
 }
 
 function performCheckoutSearch() {
-     const searchTerm = document.getElementById('checkoutSearchInput').value.trim();
-     if (!searchTerm) return;
+     // Get all search field values
+     const firstName = document.getElementById('checkoutFirstNameInput').value.trim();
+     const lastName = document.getElementById('checkoutLastNameInput').value.trim();
+     const reservationCode = document.getElementById('checkoutReservationCode').value.trim();
+     
+     // Check if any search field has value
+     if (!firstName && !lastName && !reservationCode) {
+          alert('Please enter at least one search criteria');
+          return;
+     }
      
      const resultsContainer = document.getElementById('checkoutSearchResults');
-     resultsContainer.innerHTML = '<p class="text-center py-4">Searching...</p>';
+     resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
      
-     fetch(`/check-out/search-guests?q=${encodeURIComponent(searchTerm)}`)
+     // Build query string with all parameters
+     const params = new URLSearchParams();
+     
+     if (reservationCode) params.append('reservationCode', reservationCode);
+     if (firstName) params.append('firstname', firstName);
+     if (lastName) params.append('lastname', lastName);
+     
+     fetch(`/check-out/search-guests?${params.toString()}`)
           .then(response => response.json())
           .then(data => {
                if (data.length > 0) {
-                    let html = '<div class="space-y-2">';
+                    let html = '<div class="space-y-3">';
+                    
+                    // Group by user for better organization
+                    const bookingsByUser = {};
                     data.forEach(guest => {
-                         if (guest.payment_id) {
+                         const userKey = guest.email || guest.name;
+                         if (!bookingsByUser[userKey]) {
+                         bookingsByUser[userKey] = [];
+                         }
+                         bookingsByUser[userKey].push(guest);
+                    });
+                    
+                    // Display all bookings
+                    Object.values(bookingsByUser).forEach(userBookings => {
+                         if (userBookings.length > 0) {
+                         const firstBooking = userBookings[0];
+                         
+                         // User header
                          html += `
-                         <div class="p-3 border rounded-lg hover:bg-green-50 cursor-pointer" 
-                              onclick="selectGuestForCheckout('${guest.payment_id}')">
-                              <h4 class="font-medium">${guest.name}</h4>
-                              <p class="text-sm text-gray-600">Booking Ref: ${guest.reference_no}</p>
-                              <p class="text-sm text-green-600 font-medium">Payment ID: ${guest.payment_id}</p>
-                              <div class="mt-2 flex items-center text-sm text-gray-500">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                   </svg>
-                                   ${guest.checkin_date} to ${guest.checkout_date}
+                              <div class="bg-gray-50 p-3 rounded-lg">
+                                   <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
+                                   <div class="text-sm text-gray-600 mt-1">
+                                        ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
+                                        ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
+                                   </div>
                               </div>
-                         </div>
                          `;
+                         
+                         // Individual bookings
+                         userBookings.forEach(guest => {
+                              if (guest.payment_id) {
+                                   html += `
+                                        <div class="p-4 border rounded-lg hover:bg-green-50 cursor-pointer ml-4 transition-colors shadow-sm" 
+                                             onclick="selectGuestForCheckout('${guest.payment_id}')">
+                                             <div class="flex justify-between items-start">
+                                             <div>
+                                                  <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
+                                                  ${guest.checkin_date ? `
+                                                       <p class="text-sm text-gray-600">
+                                                            Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
+                                                       </p>
+                                                  ` : ''}
+                                                  <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
+                                             </div>
+                                             <div class="text-right">
+                                                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                       ${guest.status === 'checked_in' ? 'bg-green-100 text-green-800' : 
+                                                       guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                                       'bg-gray-100 text-gray-800'}">
+                                                       ${guest.status}
+                                                  </span>
+                                                  <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
+                                             </div>
+                                             </div>
+                                        </div>
+                                   `;
+                              }
+                         });
                          }
                     });
+                    
                     html += '</div>';
                     resultsContainer.innerHTML = html;
                } else {
-                    resultsContainer.innerHTML = '<p class="text-center py-4">No guests found for checkout</p>';
+                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No checked-in guests found matching your criteria</p></div>';
                }
           })
           .catch(error => {
-               resultsContainer.innerHTML = '<p class="text-center py-4 text-red-500">Error searching</p>';
+               resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
                console.error('Checkout search error:', error);
           });
 }
@@ -1743,7 +1803,7 @@ function selectGuest(paymentId) {
 }
 
 function selectGuestForCheckout(paymentId) {
-     window.location.href = `/check-out/process/${paymentId}`;
+     window.location.href = `/check-out/receipt/${paymentId}`;
 }
 
 // Calculation Functions
@@ -1974,8 +2034,8 @@ document.addEventListener('DOMContentLoaded', function() {
      .then(data => {
           document.getElementById('total-bookings').textContent = data.total_booking;
           document.getElementById('total-pending').textContent = data.pending;
-          document.getElementById('under-verification-payments').textContent = data.under_verification_payments;
-          document.getElementById('total-pending-payments').textContent = data.pending_payments;
+          document.getElementById('checked-in-total').textContent = data.checked_in_total;
+          document.getElementById('total-checked-out').textContent = data.total_checked_out;
      })
      .catch(error => {
           console.error(`Fetching error:`, error); 
@@ -2167,7 +2227,7 @@ document.addEventListener('DOMContentLoaded', function() {
                }
                
                if (data.success) {
-                    window.location.href = `/check-out/process/${data.payment_id}`;
+                    window.location.href = `/check-out/receipt/${data.payment_id}`;
                } else {
                     throw new Error(data.message || 'QR verification failed');
                }
