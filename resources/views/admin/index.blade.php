@@ -887,7 +887,7 @@ $active = 'dashboard';
                          </svg>
                     </div>
                </a>
-
+               
                <!-- Upload QR Code Option -->
                <div class="border border-green-100 rounded-lg overflow-hidden hover:border-green-300 transition-colors duration-200 hover-scale">
                     <div class="p-4 bg-green-50 hover:bg-green-100 transition-colors duration-200">

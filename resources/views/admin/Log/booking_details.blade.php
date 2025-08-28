@@ -1088,7 +1088,7 @@ $active = 'inquiries';
                     <div class="space-y-3">
                     ${detailsHtml}
                     </div>
-
+                    
                     <!-- Custom Message -->
                     <div class="mt-8">
                          <p class="text-sm text-gray-600">

@@ -350,8 +350,6 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);
 
-
-
 });
 
 // =======================

@@ -8,7 +8,7 @@
     
     <p>Hello {{ $booking['firstname'] }},</p>
 
-    <p>Your booking details:</p>
+    <p>Your booking period:</p>
     
     <ul>
         <li>Check-in: {{ $booking['checkin_date'] }}</li>
