@@ -791,4 +791,13 @@ class BookingController extends Controller
         ]);
     }
 
+    public function guestDetailsList()
+    {
+        $bookings = FacilityBookingLog::with('user', 'details')->get();
+
+        return response()->json([
+            'data' => $bookings
+        ]);
+    }
+
 }

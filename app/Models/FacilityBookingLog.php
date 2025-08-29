@@ -28,7 +28,7 @@ class FacilityBookingLog extends Model
         'checked_out_by',
         'qr_code_path'
     ];
-
+    
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

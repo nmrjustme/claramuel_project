@@ -27,33 +27,8 @@ use App\Http\Controllers\DayTourController;
 use App\Http\Controllers\BookingReplyController;
 use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\DB;
-use App\Models\FacilityBookingLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-
-
 use Illuminate\Support\Facades\Hash;
-use GuzzleHttp\Client;
-
-// // routes/web.php or routes/api.php
-// Route::get('/test-philsms-multiple', function () {
-//     $sendData = [
-//         'sender_id' => "PhilSMS",
-//         'recipient' => "+639169824195", // Add another test number
-//         'type' => "plain",
-//         'message' => "Test multiple numbers",
-//     ];
-    
-//     $token = "2477|yGN3jvV2c1iprhxAtsGLMlw2dyXrGMDtzZBCWhuN";
-    
-//     $response = Http::withHeaders([
-//         'Authorization' => 'Bearer ' . $token,
-//         'Accept' => 'application/json',
-//         'Content-Type' => 'application/json',
-//     ])->post('https://app.philsms.com/api/v3/sms/send', $sendData);
-    
-//     return response()->json($response->json());
-// });
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
@@ -204,9 +179,14 @@ Route::middleware(['auth'])->group(function () {
     
     // Booking log route
     Route::get('/get/inquiries/booking', [BookingController::class, 'getMyInquiries'])->name('my_inquiries_bookings');
-    Route::get('/get/mybooking', [BookingController::class, 'getMyBookings'])->name('my_bookings');
     
+    //========================
+    // Bookings Page
+    //========================
+    Route::get('/get/mybooking', [BookingController::class, 'getMyBookings'])->name('my_bookings');
     Route::get('/get/admin/bookings', [BookingController::class, 'index']);
+    Route::get('/get/admin/bookings/guest/details/', [BookingController::class, 'guestDetailsList'])->name('guest.details.list');
+    //========================
     
     //========================
     // Dashboard Routes
@@ -345,7 +325,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/check-out/process-qr-upload', [CheckoutController::class, 'processUploadQrUpload']);
     Route::get('/check-out/search-guests', [CheckoutController::class, 'searchGuests']);
     Route::post('/update/booking/checkout/status/{id}', [CheckoutController::class, 'updateStatus']);
-    
     // =======================
     
     Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);

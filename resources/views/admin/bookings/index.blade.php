@@ -105,42 +105,67 @@
                         <p class="text-gray-600 mt-1">Manage all guest reservations and payments</p>
                     </div>
                     
-                    <!-- Search Bar -->
-                    <div class="relative w-full md:w-64">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                            </svg>
+                    <!-- Search Bar and Guest Details Button -->
+                    <div class="flex items-center gap-3">
+                        <!-- Search Bar -->
+                        <div class="relative w-full md:w-64">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <input id="search-input" type="text" class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-lg leading-5 bg-white/50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Search bookings...">
                         </div>
-                        <input id="search-input" type="text" class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-lg leading-5 bg-white/50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Search bookings...">
                     </div>
                 </div>
                 
                 <!-- Status Tabs -->
-                <div class="flex flex-wrap gap-2 mb-6">
-                    <button class="px-4 py-2 rounded-lg font-medium tab-active" data-status="fully_paid">
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <button 
+                        class="px-5 py-2 rounded-full font-medium text-white bg-blue-600 shadow-md tab-active hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200" 
+                        data-status="fully_paid">
                         Fully Paid
                     </button>
-                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="verified">
+                    <button 
+                        class="px-5 py-2 rounded-full font-medium text-gray-700 bg-gray-100 tab-inactive hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200" 
+                        data-status="verified">
                         Verified
                     </button>
-                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="checked_in">
+                    <button 
+                        class="px-5 py-2 rounded-full font-medium text-gray-700 bg-gray-100 tab-inactive hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200" 
+                        data-status="checked_in">
                         Checked In
                     </button>
-                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="checked_out">
+                    <button 
+                        class="px-5 py-2 rounded-full font-medium text-gray-700 bg-gray-100 tab-inactive hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200" 
+                        data-status="checked_out">
                         Checked Out
                     </button>
-                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="cancelled">
+                    <button 
+                        class="px-5 py-2 rounded-full font-medium text-gray-700 bg-gray-100 tab-inactive hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200" 
+                        data-status="cancelled">
                         Cancelled
                     </button>
-                    <button class="px-4 py-2 rounded-lg font-medium tab-inactive" data-status="no_show">
+                    <button 
+                        class="px-5 py-2 rounded-full font-medium text-gray-700 bg-gray-100 tab-inactive hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200" 
+                        data-status="no_show">
                         No Show
                     </button>
                 </div>
-                <hr class="border-gray-200 my-4">
+                <hr class="border-gray-300 my-4">
                 
                 <!-- Booking Table -->
                 <div class="overflow-x-auto custom-scroll">
+                    <div class="flex justify-start mb-4">
+                        <!-- Guest Details Button -->
+                        <button id="guest-details-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                            Guest Details
+                        </button>
+                    </div>
+
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -165,6 +190,7 @@
                         </tbody>
                     </table>
                 </div>
+                
 
                 <!-- Pagination and Excel Button -->
                 <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
