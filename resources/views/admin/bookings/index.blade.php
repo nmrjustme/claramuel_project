@@ -156,16 +156,6 @@
                 
                 <!-- Booking Table -->
                 <div class="overflow-x-auto custom-scroll">
-                    <div class="flex justify-start mb-4">
-                        <!-- Guest Details Button -->
-                        <button id="guest-details-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                            </svg>
-                            Guest Details
-                        </button>
-                    </div>
-
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
