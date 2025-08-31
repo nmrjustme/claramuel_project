@@ -160,28 +160,6 @@ $active = 'inquiries';
           border-radius: 3px;
           margin-right: 5px;
      }
-
-     .view-calendar-btn {
-          background: none;
-          border: none;
-          color: #3b82f6;
-          cursor: pointer;
-          text-decoration: underline;
-          font-size: 13px;
-          margin-top: 8px;
-          display: inline-flex;
-          align-items: center;
-     }
-
-     .view-calendar-btn:hover {
-          color: #2563eb;
-     }
-
-     .view-calendar-btn svg {
-          margin-right: 4px;
-          width: 14px;
-          height: 14px;
-     }
 </style>
 @endsection
 
@@ -345,47 +323,7 @@ $active = 'inquiries';
                }
           });
      }
-     
-     // Open calendar modal for a specific room
-     function openCalendarModal(roomId, roomName, checkin, checkout) {
-     // Create or get modal for this room
-     let modal = document.getElementById(`calendarModal-${roomId}`);
-     
-     if (!modal) {
-          // Clone the template
-          const template = document.getElementById('calendarModalTemplate');
-          modal = template.cloneNode(true);
-          modal.id = `calendarModal-${roomId}`;
-          document.body.appendChild(modal);
-     }
-     
-     // Set the checkin/checkout dates as data attributes on the modal
-     modal.dataset.checkIn = checkin;
-     modal.dataset.checkOut = checkout;
-     
-     // Find the title inside THIS modal
-     const title = modal.querySelector('.calendarModalTitle');
-     if (title) {
-          title.textContent = `${roomName} Availability`;
-     }
-     
-     const checkinmodal = modal.querySelector('.checkinPlaceholder');
-     const checkoutmodal = modal.querySelector('.checkoutPlaceholder');
-     if (checkinmodal && checkoutmodal) {
-          checkinmodal.textContent = formatDate(checkin);
-          checkoutmodal.textContent = formatDate(checkout);
-     }
-     
-     // Generate calendar
-     generateCalendar(roomId, modal);
-     
-     // Show modal
-     modal.style.display = 'block';
-     document.body.style.overflow = 'hidden';
-     }
-     
-     
-     
+
      // Close calendar modal
      function closeCalendarModal(modal) {
           if (modal) {
@@ -678,18 +616,6 @@ $active = 'inquiries';
      }
      
      function populatePageWithData(data) {
-
-          document.addEventListener('click', function(e) {
-               if (e.target.closest('.view-calendar-btn')) {
-                    const button = e.target.closest('.view-calendar-btn');
-                    const roomId = button.dataset.roomId;
-                    const roomName = button.dataset.roomName;
-                    const checkin = button.dataset.checkin;
-                    const checkout = button.dataset.checkout;
-                    openCalendarModal(roomId, roomName, checkin, checkout);
-               }
-          });
-
           
           const contentDiv = document.getElementById('booking-details-content');
           
@@ -778,19 +704,6 @@ $active = 'inquiries';
                          <span class="ml-2 text-gray-800">${facilityNights}</span>
                          </p>
                          </div>
-                         
-                         <!-- View Calendar Button -->
-                         <button class="view-calendar-btn" 
-                                   data-room-id="${facility.facility_id}" 
-                                   data-room-name="${facility.facility_name}"
-                                   data-checkin="${checkInDate}"
-                                   data-checkout="${checkOutDate}"
-                                   >
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              View Availability Calendar
-                         </button>
                     </div>
 
                     <!-- Price per night -->
@@ -1092,10 +1005,12 @@ $active = 'inquiries';
                     <!-- Custom Message -->
                     <div class="mt-8">
                          <p class="text-sm text-gray-600">
-                                   By confirming or rejecting this booking, an email will be sent to 
-                                   <span class="font-semibold text-gray-900">${data.user?.email || 'the guest'} </span> and
-                                   <span class="font-semibold text-gray-900">${data.user?.phone || 'No Phone Number'} </span>
+                              By confirming or rejecting this booking, an email and SMS will be sent to 
+                              <span class="font-semibold text-gray-900">${data.user?.email || 'the guest'}</span> 
+                              and 
+                              <span class="font-semibold text-gray-900">${data.user?.phone || 'no phone number'}</span>.
                          </p>
+                         
                          <div class="mt-4">
                               <label for="customMessage" class="block text-sm font-medium text-gray-700 mb-2">
                               Custom Message (optional)

@@ -68,7 +68,7 @@ class InquirerController extends Controller
                 });
             })
             ->orderBy('created_at', 'desc')
-            ->whereIn('status', [ 'pending_confirmation', 'confirmed', 'rejected' ]);;
+            ->where('status', 'pending_confirmation');
     
         $bookings = $query->paginate($perPage);
         $newCount = FacilityBookingLog::where('is_read', false)->count();
@@ -316,6 +316,7 @@ class InquirerController extends Controller
             // ✅ Update booking record
             $booking->update([
                 'status' => 'confirmed',
+                'confirmed_at' => now(),
                 'qr_code_path' => 'imgs/qr_code/' . $fileName
             ]);
             

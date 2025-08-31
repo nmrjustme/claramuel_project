@@ -22,7 +22,7 @@ class FacilityBookingDetails extends Model
         'checkout_date',
         'total_price',
     ];
-
+    
     public function bookingLog()
     {
         return $this->belongsTo(FacilityBookingLog::class, 'facility_booking_log_id');

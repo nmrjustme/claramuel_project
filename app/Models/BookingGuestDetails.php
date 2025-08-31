@@ -13,6 +13,7 @@ class BookingGuestDetails extends Model
         'facility_booking_log_id',
         'facility_id',
         'quantity',
+        'facility_quantity',
     ];
     
     public function guestType()

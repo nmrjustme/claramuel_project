@@ -11,6 +11,66 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class CheckinController extends Controller
 {
+    public function index()
+    {
+        return view('admin.checkins.index');
+    }
+
+    public function dataList()
+    {
+        $today = now()->startOfDay();
+        $yesterday = now()->subDay()->startOfDay();
+        $tomorrow = now()->addDay()->startOfDay();
+
+        // Yesterday (no shows only)
+        $yesterdayNoShow = FacilityBookingLog::with(['user', 'details'])
+            ->whereHas('details', function ($query) use ($yesterday) {
+                $query->whereDate('checkin_date', $yesterday);
+            })
+            ->orderBy('confirmed_at', 'asc')
+            ->where('status', 'confirmed')
+            ->get();
+
+        // Today
+        $todayCheckins = FacilityBookingLog::with(['user', 'details'])
+            ->whereHas('details', function ($query) use ($today, $tomorrow) {
+                $query->whereBetween('checkin_date', [$today, $tomorrow->subSecond()]);
+            })
+            ->orderBy('confirmed_at', 'asc')
+            ->where('status', 'confirmed')
+            ->get();
+
+        // Future (tomorrow onwards)
+        $futureCheckins = FacilityBookingLog::with(['user', 'details'])
+            ->whereHas('details', function ($query) use ($tomorrow) {
+                $query->whereDate('checkin_date', '>=', $tomorrow);
+            })
+            ->orderBy('confirmed_at', 'asc')
+            ->where('status', 'confirmed')
+            ->get();
+
+        // Helper for formatting
+        $mapFn = function ($log) {
+            $detail = $log->details->first();
+
+            return [
+                'reservation_code' => $log->code,
+                'checkin_date'     => $detail ? $detail->checkin_date->toISOString() : null,
+                'full_name'        => $log->user ? $log->user->firstname . ' ' . $log->user->lastname : '',
+                'email'            => $log->user ? $log->user->email : '',
+                'phone'            => $log->user ? $log->user->phone : '',
+                'attendance_status' => $log->attendance_status,
+            ];
+        };
+
+        return response()->json([
+            'yesterdayNoShow' => $yesterdayNoShow->map($mapFn),
+            'today'           => $todayCheckins->map($mapFn),
+            'future'          => $futureCheckins->map($mapFn),
+        ]);
+    }
+
+
     public function showScanner()
     {
         return view('admin.qr_scanner.checkin');
@@ -93,7 +153,6 @@ class CheckinController extends Controller
                 'booking_id' => $bookingId,
                 'payment_id' => $payment->id
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Server error verifying QR: ' . $e->getMessage());
             return response()->json([
@@ -103,7 +162,7 @@ class CheckinController extends Controller
             ], 500);
         }
     }
-        
+
     private function updateCheckedin($payment)
     {
         $payment->bookingLog->update([
@@ -124,7 +183,7 @@ class CheckinController extends Controller
         $payment = Payments::where('id', $id)
             ->select('qr_status')
             ->first();
-        
+
         return $payment && $payment->qr_status === 'in_used';
     }
 
@@ -144,7 +203,7 @@ class CheckinController extends Controller
                     'received_content_type' => $request->header('Content-Type')
                 ], 415);
             }
-            
+
             $data = $request->json()->all();
             \Log::debug('Parsed QR upload data', ['data' => $data]);
 
@@ -171,9 +230,9 @@ class CheckinController extends Controller
                     'message' => 'Invalid QR code format'
                 ], 400);
             }
-            
+
             [$hashId, $expireTs] = $parts;
-            
+
             // ✅ Decode booking id
             $bookingId = Hashids::decode($hashId)[0] ?? null;
             $expireDate = Carbon::createFromTimestamp((int)$expireTs);
@@ -227,7 +286,6 @@ class CheckinController extends Controller
                 'booking_id' => $bookingId,
                 'payment_id' => $payment->id,
             ]);
-
         } catch (\Exception $e) {
             \Log::error('QR upload processing error', ['exception' => $e->getMessage()]);
             return response()->json([
@@ -237,14 +295,14 @@ class CheckinController extends Controller
             ], 500);
         }
     }
-    
+
     public function getCustomerDetails($paymentId)
     {
         try {
             $payment = Payments::with(
                 'bookingLog.user',
             )->findOrFail($paymentId);
-            
+
             return response()->json([
                 'success' => true,
                 'customer' => [
@@ -269,36 +327,36 @@ class CheckinController extends Controller
             'bookingLog.summaries.bookingDetails',
             'bookingLog.guestDetails.guestType'
         )->findOrFail($id);
-        
+
         $this->updateCheckedin($payment);
         $this->updateQrStatus($payment, 'in_used');
-        
+
         return view('admin.print_Receipt.checkin', ['payment' => $payment]);
     }
-    
+
     public function searchGuests(Request $request)
     {
         // Get search parameters
         $firstName = $request->query('firstname', '');
         $lastName = $request->query('lastname', '');
         $reservationCode = $request->query('reservationCode', '');
-        
+
         // Return empty if no criteria provided
         if (empty($firstName) && empty($lastName) && empty($reservationCode)) {
             return response()->json([]);
         }
-        
+
         $bookings = FacilityBookingLog::with(['user', 'payments'])
-            ->where(function($query) use ($firstName, $lastName, $reservationCode) {
+            ->where(function ($query) use ($firstName, $lastName, $reservationCode) {
                 // Search by reservation code
                 if (!empty($reservationCode)) {
                     $query->where('code', 'like', "%{$reservationCode}%")
                         ->orWhere('reference', 'like', "%{$reservationCode}%");
                 }
-                
+
                 // Search by user details
                 if (!empty($firstName) || !empty($lastName)) {
-                    $query->orWhereHas('user', function($q) use ($firstName, $lastName) {
+                    $query->orWhereHas('user', function ($q) use ($firstName, $lastName) {
                         if (!empty($firstName)) {
                             $q->where('firstname', 'like', "%{$firstName}%");
                         }
@@ -311,11 +369,11 @@ class CheckinController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(50)
             ->get();
-        
+
         // Format results
-        $results = $bookings->map(function($booking) {
+        $results = $bookings->map(function ($booking) {
             $paymentId = $booking->payments->first()?->id ?? null;
-            
+
             return [
                 'id' => $booking->id,
                 'name' => $booking->user ? "{$booking->user->firstname} {$booking->user->lastname}" : 'Unknown',
@@ -331,17 +389,16 @@ class CheckinController extends Controller
                 'checkout_date' => $booking->checkout_date ?? null,
             ];
         });
-        
+
         return response()->json($results);
     }
 
     public function updateStatus($id)
     {
         $payment = Payments::with('bookingLog')->findorFail($id);
-        
+
         $payment->bookingLog->update([
             'status' => "checked_in"
         ]);
     }
-
 }

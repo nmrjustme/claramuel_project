@@ -4,14 +4,14 @@
 <style>
     /* Base Styles */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
+
     /* Form Elements - Enhanced */
     .input-group {
         margin-bottom: 1.5rem;
         position: relative;
         transition: all 0.3s ease;
     }
-    
+
     label {
         display: block;
         margin-bottom: 0.5rem;
@@ -20,7 +20,7 @@
         font-size: 0.9375rem;
         transition: all 0.2s ease;
     }
-    
+
     .form-input {
         width: 100%;
         padding: 0.75rem 1rem;
@@ -39,7 +39,7 @@
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         background-color: #fffafa;
     }
-    
+
     .input-error {
         border-color: #DC2626 !important;
         background-color: #FEF2F2;
@@ -147,7 +147,7 @@
         align-items: center;
         gap: 0.5rem;
     }
-    
+
 
     .booking-summary-title {
         font-size: 1.25rem;
@@ -266,7 +266,7 @@
     .guest-type-container:hover {
         background-color: #f3f4f6;
     }
-    
+
     .guest-type-header {
         display: flex;
         justify-content: space-between;
@@ -288,9 +288,14 @@
 
     .guest-type-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(150px, auto));
         gap: 1rem;
+        justify-content: center;
+        /* centers the whole grid */
+        justify-items: center;
+        /* centers each item inside its column */
     }
+
 
     .guest-type-group {
         margin-bottom: 0.5rem;
@@ -413,14 +418,29 @@
 
     /* Animations */
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
     }
 
     /* Responsive Adjustments */
@@ -428,12 +448,12 @@
         .form-card {
             padding: 1.5rem;
         }
-        
+
         .guest-type-grid {
             grid-template-columns: 1fr;
         }
-        
-        .section-title::after, 
+
+        .section-title::after,
         .booking-summary-title::after {
             width: 30px;
         }
@@ -517,13 +537,13 @@
         display: flex;
         align-items: center;
     }
-    
+
     /* Floating Labels */
     .floating-label-group {
         position: relative;
         margin-bottom: 1.5rem;
     }
-    
+
     .floating-label {
         position: absolute;
         left: 1rem;
@@ -537,14 +557,15 @@
         border-radius: 0.25rem;
     }
 
-    .floating-input:focus + .floating-label,
-    .floating-input:not(:placeholder-shown) + .floating-label {
+    .floating-input:focus+.floating-label,
+    .floating-input:not(:placeholder-shown)+.floating-label {
         top: -0.5rem;
         left: 0.75rem;
         font-size: 0.75rem;
         color: #DC2626;
         background-color: white;
     }
+
     .page-title {
         font-size: 1.75rem;
         font-weight: 700;
@@ -565,60 +586,59 @@
         background: linear-gradient(90deg, #DC2626 0%, rgba(220, 38, 38, 0.2) 100%);
         border-radius: 4px;
     }
-    
 </style>
 
 <x-header />
 
-<div class="container mx-auto px-4 sm:px-6 py-8 max-w-6xl">
+<div class="container mx-auto px-6 py-8 max-w-12xl">
     <!-- Progress Steps - Enhanced with Tooltips -->
-    <x-progress-step 
-        :currentStep="2"
-        :steps="[
+    <x-progress-step :currentStep="2" :steps="[
             ['label' => 'Select Rooms'],
             ['label' => 'Your Details'],
             ['label' => 'Payment'],
             ['label' => 'Processing']
-        ]"
-    />
-    
-    
+        ]" />
+
+
     <div class="flex flex-col lg:flex-row gap-8">
-        
-        
+
+
         <!-- Left Column - Customer Information -->
         <div class="lg:w-2/3">
             <h3 class="page-title font-semibold text-dark mb-2">Request To Book</h3>
-            
+
             <div class="rounded-lg p-8 mb-6 border border-lightgray">
                 <h2 class="section-title">
                     <i class="fas fa-user-circle"></i>
-                    Guest Information
+                    Personal Information
                 </h2>
-                
+
                 <form id="customer-info-form">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- First Name with Floating Label -->
                         <div class="floating-label-group">
-                            <input type="text" id="firstname" name="firstname" class="form-input border border-darkgray uppercase-input floating-input"
-                                required placeholder=" " oninput="this.value = this.value.toUpperCase()">
+                            <input type="text" id="firstname" name="firstname"
+                                class="form-input border border-darkgray uppercase-input floating-input" required
+                                placeholder=" " oninput="this.value = this.value.toUpperCase()">
                             <label class="floating-label">First Name <span class="text-red-500">*</span></label>
                             <div id="firstname-error" class="error-message">Please enter your first name</div>
                         </div>
 
                         <!-- Last Name with Floating Label -->
                         <div class="floating-label-group">
-                            <input type="text" id="lastname" name="lastname" class="form-input border border-darkgray uppercase-input floating-input"
-                                required placeholder=" " oninput="this.value = this.value.toUpperCase()">
+                            <input type="text" id="lastname" name="lastname"
+                                class="form-input border border-darkgray uppercase-input floating-input" required
+                                placeholder=" " oninput="this.value = this.value.toUpperCase()">
                             <label class="floating-label">Last Name <span class="text-red-500">*</span></label>
                             <div id="lastname-error" class="error-message">Please enter your last name</div>
                         </div>
-                        
+
                         <!-- Email with Icon -->
                         <div class="input-group">
                             <label for="email">Email Address <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="email" id="email" name="email" class="form-input border border-darkgray input-with-icon" required
+                                <input type="email" id="email" name="email"
+                                    class="form-input border border-darkgray input-with-icon" required
                                     placeholder="john.doe@example.com">
                                 <i class="fas fa-envelope input-icon"></i>
                             </div>
@@ -630,12 +650,13 @@
                         <div class="input-group">
                             <label for="phone">Phone Number <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="tel" id="phone" name="phone" class="form-input border border-darkgray input-with-icon" maxlength="12"
-                                    placeholder="9123 456 789" oninput="formatPhone(this)"
-                                    onblur="validatePhone(this)">
+                                <input type="tel" id="phone" name="phone"
+                                    class="form-input border border-darkgray input-with-icon" maxlength="12"
+                                    placeholder="9123 456 789" oninput="formatPhone(this)" onblur="validatePhone(this)">
                                 <i class="fas fa-phone input-icon"></i>
                             </div>
-                            <div id="phone-error" class="error-message">Please enter a valid 10-digit phone number starting with 9</div>
+                            <div id="phone-error" class="error-message">Please enter a valid 10-digit phone number
+                                starting with 9</div>
                             <p class="input-hint">We'll contact you if needed regarding your booking</p>
                         </div>
                     </div>
@@ -647,11 +668,11 @@
                             Guest Details
                         </h3>
                         <p class="input-hint mb-4">Please specify the number of guests for each room type</p>
-                        
+
                         <div id="guest-selection-container">
                             <!-- This will be populated with guest selection fields for each room -->
                         </div>
-                    
+
                     </div>
                 </form>
             </div>
@@ -663,48 +684,54 @@
                 <span class="booking-item-value">You will pay 50% of the total price.</span>
             </div>
 
-            <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp" style="animation-delay: 0.6s;">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d789.1338574963425!2d121.9251491!3d17.142796!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33856b144a6449f5%3A0xea1ad60f5e068495!2sMt.%20Claramuel%20Resort%20and%20Events%20Place!5e0!3m2!1sen!2sph!4v1711431557" 
-                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp"
+                style="animation-delay: 0.6s;">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d789.1338574963425!2d121.9251491!3d17.142796!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33856b144a6449f5%3A0xea1ad60f5e068495!2sMt.%20Claramuel%20Resort%20and%20Events%20Place!5e0!3m2!1sen!2sph!4v1711431557"
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
-        
+
         <!-- Right Column - Booking Summary -->
         <div class="lg:w-2/5 space-y-4">
             <div class="sticky top-6 space-y-6">
                 <!-- Date Summary Card -->
                 <div class="border border-lightgray rounded-lg p-6">
-                    <h3 class="booking-summary-title">
+                    <h3 class="booking-summary-title mb-4">
                         Booking Summary
                     </h3>
-                    
-                    <div class="booking-item">
+
+                    <div class="booking-item flex justify-between mb-2">
                         <span class="booking-item-label">Check-in</span>
                         <span class="booking-item-value" id="summary-checkin">-</span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1 ml-1">
-                        Reminder: Check-in time starts at <span class="font-medium">12:00 PM</span>
-                    </p>
-                    
-                    <div class="booking-item">
+
+                    <div class="booking-item flex justify-between mb-2">
                         <span class="booking-item-label">Check-out</span>
                         <span class="booking-item-value" id="summary-checkout">-</span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1 ml-1">
-                        Reminder: Check-out time is until <span class="font-medium">10:00 AM</span>
-                    </p>
-                    
-                    <div class="booking-item">
+
+                    <div class="booking-item flex justify-between mb-4">
                         <span class="booking-item-label">Duration</span>
                         <span class="booking-item-value" id="summary-nights">-</span>
                     </div>
+
+                    <!-- Important Reminder Box -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm mt-4">
+                        <p class="text-sm font-semibold text-gray-800">Important Reminder</p>
+                        <p class="text-sm text-gray-600 mt-1 leading-relaxed">
+                            Check-in time is <span class="font-medium text-gray-900">12:00 PM</span>
+                            and Check-out time is <span class="font-medium text-gray-900">10:00 AM</span> only.
+                        </p>
+                    </div>
                 </div>
+
                 <!-- Rooms Summary Card - Enhanced -->
                 <div class="rounded-lg p-8 mb-6 border border-lightgray">
                     <h3 class="booking-summary-title">
                         Your Rooms
                     </h3>
-                    
+
                     <div id="rooms-list">
                         <!-- Rooms will be populated here -->
                         <div class="text-gray-400 text-center py-4">
@@ -719,7 +746,7 @@
                             <span class="booking-item-value" id="breakfast-price">-</span>
                         </div>
                     </div>
-                    
+
                     <!-- Total Section with Animation -->
                     <div class="total-section">
                         <div class="total-row">
@@ -727,7 +754,7 @@
                             <span class="total-amount" id="summary-total">₱0.00</span>
                         </div>
                     </div>
-                </div>     
+                </div>
 
                 <!-- Payment CTA Card - Enhanced -->
                 <div class="rounded-lg p-6 border border-lightgray">
@@ -742,23 +769,22 @@
                     <div id="terms-error" class="error-message hidden text-sm text-red-500 mb-4">
                         Please accept the terms and conditions to proceed
                     </div>
-                    
-                    <button id="confirm-booking-btn"
-                        class="btn-primary disabled:opacity-70 disabled:cursor-not-allowed"
+
+                    <button id="confirm-booking-btn" class="btn-primary disabled:opacity-70 disabled:cursor-not-allowed"
                         disabled>
                         <span id="button-text">I'll Reserve</span>
                         <div id="button-spinner" class="loading-spinner hidden"></div>
                     </button>
-                    
+
                     <!-- Secure Payment Info -->
                     <div class="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
                         <i class="fas fa-lock"></i>
                         <span>Secure Payment Processing</span>
                     </div>
                 </div>
-                
+
                 <!-- Customer Support -->
-                <div class="rounded-lg shadow-sm p-4 border border-lightgray text-center">
+                <div class="rounded-lg p-4 border border-lightgray text-center">
                     <h4 class="font-medium text-gray-700 mb-2">Need Help?</h4>
                     <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
                         <i class="fas fa-phone-alt text-red-500"></i>
@@ -872,10 +898,6 @@
                         <div class="guest-type-group">
                             <label for="guest-type-${index}-${type.id}" class="guest-type-label">
                                 ${type.type}
-                                ${type.description ? `<span class="tooltip ml-1">
-                                    <i class="fas fa-info-circle text-gray-400"></i>
-                                    <span class="tooltip-text">${type.description}</span>
-                                </span>` : ''}
                             </label>
                             <div class="counter-container">
                                 <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">

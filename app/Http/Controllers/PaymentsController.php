@@ -112,6 +112,12 @@ class PaymentsController extends Controller
             'gcash_number' => 'required|string|regex:/^09\d{9}$/',
             'reference_no' => 'required|string|max:50|unique:payments,reference_no',
             'receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'amount_paid' => 'required|numeric|min:1',
+            ], [
+                'amount_paid.required' => 'Please enter the amount you paid.',
+                'amount_paid.numeric'  => 'The amount must be a valid number.',
+                'amount_paid.min'      => 'The amount must be at least ₱1.',
+            
         ]);
         
         if ($validator->fails()) {
@@ -161,7 +167,7 @@ class PaymentsController extends Controller
                 'reference_no' => $request->reference_no,
                 'receipt_path' => $receiptPath,
                 'payment_date' => now(),
-                'paid_at' => now(),
+                'amount_paid' => $request->amount_paid,
             ]);
 
             // Remove from cache after successful database storage

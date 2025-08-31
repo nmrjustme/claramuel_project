@@ -11,7 +11,7 @@
 @endphp
 
 <div class="w-full px-4 sm:px-6 pt-6 pb-6">
-    <div class="relative flex justify-between items-center mb-10 mx-auto max-w-5xl">
+    <div class="relative flex justify-between items-center mb-10 mx-auto max-w-12xl">
 
         <!-- Background line -->
         <div class="absolute top-1/2 left-0 right-0 h-0.5 sm:h-1 bg-gray-200 -z-10"></div>

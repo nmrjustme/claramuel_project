@@ -12,7 +12,7 @@ $active = 'dashboard';
           margin: 0 auto;
           position: relative;
      }
-     
+
      .main-modal {
           position: fixed;
           top: 0;
@@ -21,7 +21,7 @@ $active = 'dashboard';
           bottom: 0;
           overflow-y: auto;
      }
-     
+
      #qr-reader__dashboard_section_csr {
           margin-top: 15px;
           text-align: center;
@@ -30,7 +30,7 @@ $active = 'dashboard';
      #qr-reader__scan_region {
           background: white;
      }
-     
+
      #qr-reader__dashboard_section {
           padding: 10px;
      }
@@ -41,7 +41,7 @@ $active = 'dashboard';
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.128);
      }
-     
+
      .animated-gradient {
           animation: gradientBG 15s ease infinite;
           background-size: 400% 400%;
@@ -51,11 +51,11 @@ $active = 'dashboard';
           0% {
                background-position: 0% 50%;
           }
-          
+
           50% {
                background-position: 100% 50%;
           }
-          
+
           100% {
                background-position: 0% 50%;
           }
@@ -149,13 +149,14 @@ $active = 'dashboard';
           width: 2px;
           background-color: #E5E7EB;
      }
+
      body.modal-open {
           overflow: hidden;
           position: fixed;
           width: 100%;
           height: 100%
      }
-     
+
      /* Status Cards - High Contrast Version */
      .status-card {
           background: white;
@@ -177,22 +178,28 @@ $active = 'dashboard';
      }
 
      .status-card.total-bookings::before {
-          background: #2563EB; /* Vibrant blue */
+          background: #2563EB;
+          /* Vibrant blue */
      }
 
      .status-card.checked-out::before {
-          background: #d91406; /* Vibrant amber */
+          background: #d91406;
+          /* Vibrant amber */
      }
+
      .status-card.status-card.pending-confirmations::before {
-          background: #d98c06; /* Vibrant amber */
+          background: #d98c06;
+          /* Vibrant amber */
      }
 
      .status-card.awaiting-payments::before {
-          background: #7C3AED; /* Vibrant violet */
+          background: #7C3AED;
+          /* Vibrant violet */
      }
 
      .status-card.verified-bookings::before {
-          background: #059669; /* Vibrant emerald */
+          background: #059669;
+          /* Vibrant emerald */
      }
 
      .status-card .card-content {
@@ -202,7 +209,7 @@ $active = 'dashboard';
      }
 
      .status-card .text-content {
-     flex: 1;
+          flex: 1;
      }
 
      .status-card .icon-wrapper {
@@ -277,7 +284,7 @@ $active = 'dashboard';
      .status-card.checked-out .stat-change {
           color: #b40909;
      }
-     
+
      .status-card.pending-confirmations .stat-change {
           color: #b46a09;
      }
@@ -310,40 +317,42 @@ $active = 'dashboard';
                               <h1 class="text-3xl font-bold">Dashboard Overview</h1>
                               @auth
                               <p class="opacity-90 mt-2">
-                              Welcome back, {{ auth()->user()->firstname }}! Here's what's happening today.
+                                   Welcome back, {{ auth()->user()->firstname }}! Here's what's happening today.
                               </p>
                               @endauth
                          </div>
                          <div class="flex items-center space-x-4">
                               <!-- Active Host Toggle with Indicator -->
                               <div class="flex flex-col items-end">
-                              <div class="flex items-center mb-1">
-                                   <label for="activeHost" class="mr-2 text-sm font-medium">Active Admin</label>
-                                   <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="activeHost" class="sr-only peer" 
-                                             onchange="toggleActiveHost(this)" {{ auth()->user()->is_active ? 'checked' : '' }}>
-                                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer 
+                                   <div class="flex items-center mb-1">
+                                        <label for="activeHost" class="mr-2 text-sm font-medium">Active Admin</label>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                             <input type="checkbox" id="activeHost" class="sr-only peer"
+                                                  onchange="toggleActiveHost(this)" {{ auth()->user()->is_active ?
+                                             'checked' : '' }}>
+                                             <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer 
                                                   peer-checked:bg-green-500 after:content-[''] after:absolute 
                                                   after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 
                                                   after:border after:rounded-full after:h-5 after:w-5 
                                                   after:transition-all peer-checked:after:translate-x-full"></div>
-                                   </label>
-                              </div>
-                              <div id="hostStatusIndicator" class="text-xs font-medium px-2 py-1 rounded-full 
+                                        </label>
+                                   </div>
+                                   <div id="hostStatusIndicator"
+                                        class="text-xs font-medium px-2 py-1 rounded-full 
                                    {{ auth()->user()->is_active ? 'bg-green-100/20 text-green-100' : 'bg-gray-100/20 text-gray-200' }}">
-                                   {{ auth()->user()->is_active ? 
-                                        '✓ Booking email notifications are enabled.' : 
+                                        {{ auth()->user()->is_active ?
+                                        '✓ Booking email notifications are enabled.' :
                                         '✗ Booking email notifications are turned off.' }}
+                                   </div>
                               </div>
-                              </div>
-                              
+
                               <!-- User Icon -->
                               <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                                   stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                   </svg>
                               </div>
                          </div>
                     </div>
@@ -355,9 +364,9 @@ $active = 'dashboard';
                          </span>
                          <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium flex items-center">
                               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                              viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                   viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               @php echo \Carbon\Carbon::now('Asia/Manila')->format('g:i A'); @endphp
                          </span>
@@ -365,25 +374,29 @@ $active = 'dashboard';
                </div>
           </div>
      </div>
-     
+
      <!-- Status Cards -->
      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-     <!-- Total Bookings -->
+          <!-- Total Bookings -->
           <div class="status-card total-bookings shadow-sm">
                <div class="card-content">
                     <div class="text-content">
                          <p class="stat-label">Total Bookings</p>
                          <h3 class="stat-value" id="total-bookings">0</h3>
                          <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                   stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                               </svg>
                               +5 This Week
                          </p>
                     </div>
                     <div class="icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none"
+                              viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                          </svg>
                     </div>
                </div>
@@ -396,15 +409,19 @@ $active = 'dashboard';
                          <p class="stat-label">Pending Confirmations</p>
                          <h3 class="stat-value" id="total-pending">8</h3>
                          <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                   stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               Awaiting response
                          </p>
                     </div>
                     <div class="icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none"
+                              viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                          </svg>
                     </div>
                </div>
@@ -416,51 +433,61 @@ $active = 'dashboard';
                          <p class="stat-label">Checked In</p>
                          <h3 class="stat-value" id="checked-in-total">0</h3>
                          <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5a1 1 0 01-1-1v-5H9v5a1 1 0 01-1 1H3a1 1 0 01-1-1V9.75z" />
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                   stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5a1 1 0 01-1-1v-5H9v5a1 1 0 01-1 1H3a1 1 0 01-1-1V9.75z" />
                               </svg>
                               Customer In-House
                          </p>
                     </div>
                     <div class="icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10h16V10" />
+                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-violet-600" fill="none"
+                              viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M3 12l9-9 9 9M4 10v10h16V10" />
                          </svg>
                     </div>
-               
+
                </div>
           </div>
-          
+
           <div class="status-card checked-out shadow-sm">
                <div class="card-content">
                     <div class="text-content">
                          <p class="stat-label">Checked Out</p>
                          <h3 class="stat-value" id="total-checked-out">8</h3>
                          <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none"
+                                   viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                               </svg>
                               Customer Checked-Out
                          </p>
                     </div>
                     <div class="icon-wrapper bg-gray-50">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none"
+                              viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                          </svg>
                     </div>
                </div>
           </div>
      </div>
-     
+
      <!-- Main Content Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6"> 
-          <!-- Admins -->       
+     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+          <!-- Admins -->
           <div class="p-6 rounded-lg shadow-sm bg-white" id="active-admins-container">
                <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
                     <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                              stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                          </svg>
                     </button>
                </div>
@@ -472,16 +499,14 @@ $active = 'dashboard';
                     </div>
                </div>
           </div>
-          
+
           <!-- Recent Enquiries -->
-          <div
-               class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 rounded-lg shadow-sm border-gray-200 bg-white">
+          <div class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 rounded-lg shadow-sm border-gray-200 bg-white">
                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
                     <!-- Title + Badge -->
                     <div class="flex items-center">
                          <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
-                         <span
-                              class="ml-2 bg-red-500 text-white 
+                         <span class="ml-2 bg-red-500 text-white 
                                    text-[10px] sm:text-xs md:text-sm 
                                    font-bold 
                                    px-1.5 sm:px-2 md:px-3 
@@ -491,15 +516,14 @@ $active = 'dashboard';
                               0 new
                          </span>
                     </div>
-                    
+
                     <!-- Actions -->
                     <div class="flex flex-wrap gap-2 sm:gap-3">
-                         <button class="text-sm text-red-600 hover:text-red-800" onclick="markAllAsRead()">Mark All as Read</button>
-                         <a href="{{ route('admin.inquiries') }}"
-                              class="text-sm text-red-600 hover:text-red-800">View All</a>
+                         <a href="{{ route('admin.inquiries') }}" class="text-sm text-red-600 hover:text-red-800">View
+                              All</a>
                     </div>
                </div>
-               
+
 
                <!-- Search Bar -->
                <div class="relative mb-6">
@@ -513,7 +537,7 @@ $active = 'dashboard';
                          class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
                          placeholder="Search by id, reference, or name..." onkeyup="filterInquiries()">
                </div>
-               
+
                <div class="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scroll" id="inquiries-container">
                     <!-- Inquiries will be loaded here via AJAX -->
                     <div class="text-center py-8">
@@ -523,9 +547,9 @@ $active = 'dashboard';
                     </div>
                </div>
           </div>
-          
+
           @include('admin.inquirers.recent_inquirers')
-          
+
           <!-- Facilities Occupied Today -->
           <div class="lg:col-span-2 shadow-sm bg-white p-6 rounded-lg">
                <div class="flex justify-between items-center mb-6">
@@ -550,7 +574,7 @@ $active = 'dashboard';
                          </button>
                     </div>
                </div>
-               
+
                <div class="relative">
                     <!-- Horizontal scroll container -->
                     <div class="flex space-x-4 pb-4 overflow-x-auto scrollbar-hide" id="occupied-facilities-container">
@@ -560,7 +584,7 @@ $active = 'dashboard';
                               <p class="mt-2 text-gray-500">Loading occupied facilities...</p>
                          </div>
                     </div>
-                    
+
                     <!-- Scroll indicators -->
                     <div
                          class="absolute top-0 left-0 h-full w-8 bg-gradient-to-r from-white to-transparent pointer-events-none">
@@ -571,7 +595,7 @@ $active = 'dashboard';
                </div>
           </div>
      </div>
-     
+
      <!-- Bottom Grid -->
      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <!-- Left Column (Next Check-in) -->
@@ -580,42 +604,60 @@ $active = 'dashboard';
                <div class="glass-card">
                     <div class="flex items-center justify-between mb-4">
                          <h3 class="text-lg font-semibold text-gray-800">Next Check-in</h3>
-                         <div class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                              </svg>
-                              Upcoming
-                         </div>
+                         <a href="{{ route('incoming.list') }}">
+                              <div
+                                   class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center cursor-pointer">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                             d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                   </svg>
+                                   Upcoming
+                              </div>
+                         </a>
                     </div>
                     <p class="text-gray-600 mb-4" id="next-checkin-time">Loading...</p>
                     <div class="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-100">
                          <div class="flex items-center mb-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                                   viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd"
+                                        d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                        clip-rule="evenodd" />
                               </svg>
                               <p class="font-medium text-gray-800" id="next-checkin-date">-</p>
                          </div>
                          <div class="flex items-center mb-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                                   viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                        clip-rule="evenodd" />
                               </svg>
                               <p class="text-gray-600" id="next-checkin-nights">-</p>
                          </div>
                          <div class="flex items-center mb-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                                   viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                        clip-rule="evenodd" />
                               </svg>
                               <p class="font-medium text-gray-800" id="next-checkin-guest">-</p>
                          </div>
                          <div class="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                                   viewBox="0 0 20 20" fill="currentColor">
+                                   <path
+                                        d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                               </svg>
                               <p class="text-gray-600" id="next-checkin-phone">-</p>
                          </div>
                          <div class="flex items-center mt-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                   <path fill-rule="evenodd" d="M9 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" clip-rule="evenodd" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                                   viewBox="0 0 20 20" fill="currentColor">
+                                   <path fill-rule="evenodd"
+                                        d="M9 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                        clip-rule="evenodd" />
                               </svg>
                               <p class="font-medium text-gray-800" id="next-checkin-booking-code">-</p>
                          </div>
@@ -627,55 +669,57 @@ $active = 'dashboard';
           <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
                <div class="grid grid-cols-2 gap-4">
-               
+
                     <!-- Full-width Day Tour button -->
                     <a href="#"
-                         class="p-4 bg-yellow-100 rounded-lg text-center hover:bg-yellow-200 transition-all group col-span-2 hover:-translate-y-0.5">
-                         <div class="mx-auto h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                         </svg>
+                         class="p-4 bg-yellow-100 rounded-lg text-center hover:bg-yellow-200 transition-all group hover:-translate-y-0.5">
+                         <div
+                              class="mx-auto h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none"
+                                   viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
                          </div>
                          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Day Tour</span>
                     </a>
-                    
-                    <!-- Action Buttons -->
-                    <a href="#" id="openBookingModal"
-                         class="p-4 bg-red-100 rounded-lg text-center hover:bg-red-200 transition-all group hover:-translate-y-0.5">
-                         <div class="mx-auto h-10 w-10 bg-red-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                         </svg>
-                         </div>
-                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">New Booking</span>
-                    </a>
-                    
+
+
                     <a href="#" onclick="openCheckInModal()"
                          class="p-4 bg-blue-100 rounded-lg text-center hover:bg-blue-200 transition-all group hover:-translate-y-0.5">
-                         <div class="mx-auto h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                         </svg>
+                         <div
+                              class="mx-auto h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none"
+                                   viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
                          </div>
                          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Check-in</span>
                     </a>
-                    
+
                     <a href="#" onclick="openCheckOutModal()"
                          class="p-4 bg-green-100 rounded-lg text-center hover:bg-green-200 transition-all group hover:-translate-y-0.5">
-                         <div class="mx-auto h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                         </svg>
+                         <div
+                              class="mx-auto h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none"
+                                   viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                              </svg>
                          </div>
                          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Check-out</span>
                     </a>
-                    
+
                     <a href="#"
                          class="p-4 bg-purple-100 rounded-lg text-center hover:bg-purple-200 transition-all group hover:-translate-y-0.5">
-                         <div class="mx-auto h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                         </svg>
+                         <div
+                              class="mx-auto h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none"
+                                   viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                              </svg>
                          </div>
                          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Payments</span>
                     </a>
@@ -687,8 +731,7 @@ $active = 'dashboard';
 <!-- Modal for check-in options -->
 <div id="checkInModal"
      class="main-modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden z-50">
-     <div
-          class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
+     <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
           <!-- Modal Header - Updated to blue color scheme -->
           <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
                <h3 class="text-xl font-semibold text-white">Check-in Method</h3>
@@ -720,7 +763,8 @@ $active = 'dashboard';
                </a>
 
                <!-- Upload QR Code Option - Updated to blue color scheme -->
-               <div class="border border-blue-100 rounded-lg overflow-hidden hover:border-blue-300 transition-colors duration-200 hover-scale">
+               <div
+                    class="border border-blue-100 rounded-lg overflow-hidden hover:border-blue-300 transition-colors duration-200 hover-scale">
                     <div class="p-4 bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
                          <div class="flex items-start">
                               <div class="bg-blue-100 p-3 rounded-lg mr-4 hover:bg-blue-200 transition-colors">
@@ -818,7 +862,7 @@ $active = 'dashboard';
                     </svg>
                </button>
           </div>
-          
+
           <!-- Quick Search Field -->
           <div class="mb-4">
                <label class="block text-sm font-medium mb-2 text-gray-700">Reservation Code</label>
@@ -826,33 +870,33 @@ $active = 'dashboard';
                     class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     onkeypress="if(event.key==='Enter')performSearch()">
           </div>
-          
+
           <!-- Advanced Search Fields -->
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
                <h4 class="text-sm font-medium mb-3 text-gray-700">Advanced Search</h4>
-               
+
                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                          <label class="block text-xs font-medium mb-1 text-gray-600">First Name</label>
-                         <input type="text" id="firstNameInput" placeholder="First name" 
+                         <input type="text" id="firstNameInput" placeholder="First name"
                               class="w-full p-2 border rounded text-sm"
                               onkeypress="if(event.key==='Enter')performSearch()">
                     </div>
-                    
+
                     <div>
                          <label class="block text-xs font-medium mb-1 text-gray-600">Last Name</label>
-                         <input type="text" id="lastNameInput" placeholder="Last name" 
+                         <input type="text" id="lastNameInput" placeholder="Last name"
                               class="w-full p-2 border rounded text-sm"
                               onkeypress="if(event.key==='Enter')performSearch()">
                     </div>
                </div>
           </div>
-          
+
           <button onclick="performSearch()"
                class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
                Search Guests
           </button>
-          
+
           <div id="searchResults" class="mt-4 space-y-2">
                <!-- Search results will appear here -->
           </div>
@@ -861,7 +905,8 @@ $active = 'dashboard';
 
 
 <!-- Add this modal near your checkInModal in the HTML section -->
-<div id="checkOutModal" class="main-modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden z-50">
+<div id="checkOutModal"
+     class="main-modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden z-50">
      <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
           <!-- Modal Header -->
           <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
@@ -872,29 +917,36 @@ $active = 'dashboard';
           <div class="p-6 space-y-4">
                <!-- QR Code Scan Option -->
                <a href="{{ route('checkout.scanner') }}" class="block group">
-                    <div class="p-4 bg-green-50 rounded-lg border border-green-100 hover:border-green-300 transition-all duration-200 flex items-start hover-scale">
+                    <div
+                         class="p-4 bg-green-50 rounded-lg border border-green-100 hover:border-green-300 transition-all duration-200 flex items-start hover-scale">
                          <div class="bg-green-100 p-3 rounded-lg mr-4 group-hover:bg-green-200 transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none"
+                                   viewBox="0 0 24 24" stroke="currentColor">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                               </svg>
                          </div>
                          <div>
                               <h4 class="font-medium text-gray-900">Scan QR Code</h4>
                               <p class="text-sm text-gray-600 mt-1">Use your device camera to scan guest's QR code</p>
                          </div>
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none"
+                              viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                          </svg>
                     </div>
                </a>
-               
+
                <!-- Upload QR Code Option -->
-               <div class="border border-green-100 rounded-lg overflow-hidden hover:border-green-300 transition-colors duration-200 hover-scale">
+               <div
+                    class="border border-green-100 rounded-lg overflow-hidden hover:border-green-300 transition-colors duration-200 hover-scale">
                     <div class="p-4 bg-green-50 hover:bg-green-100 transition-colors duration-200">
                          <div class="flex items-start">
                               <div class="bg-green-100 p-3 rounded-lg mr-4 hover:bg-green-200 transition-colors">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                    </svg>
                               </div>
                               <div class="flex-1">
@@ -902,10 +954,14 @@ $active = 'dashboard';
                                    <p class="text-sm text-gray-600 mt-1">Upload an image containing the QR code</p>
 
                                    <div class="mt-4">
-                                        <input type="file" id="checkout-qr-upload-input" accept="image/*" class="hidden" />
-                                        <label for="checkout-qr-upload-input" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer text-sm font-medium">
-                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        <input type="file" id="checkout-qr-upload-input" accept="image/*"
+                                             class="hidden" />
+                                        <label for="checkout-qr-upload-input"
+                                             class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer text-sm font-medium">
+                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
+                                                  viewBox="0 0 24 24" stroke="currentColor">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                              </svg>
                                              Choose File
                                         </label>
@@ -915,15 +971,20 @@ $active = 'dashboard';
                          </div>
 
                          <div id="checkout-qr-upload-preview" class="mt-4 hidden">
-                              <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center">
-                                   <img id="checkout-qr-image-preview" src="#" alt="QR Code Preview" class="mx-auto max-h-40 mb-3 hidden">
+                              <div
+                                   class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center">
+                                   <img id="checkout-qr-image-preview" src="#" alt="QR Code Preview"
+                                        class="mx-auto max-h-40 mb-3 hidden">
                                    <div id="checkout-upload-instructions" class="text-center text-sm text-gray-500">
                                         <p>QR code will appear here after selection</p>
                                    </div>
                               </div>
-                              <button id="checkout-process-qr-btn" class="w-full mt-3 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                              <button id="checkout-process-qr-btn"
+                                   class="w-full mt-3 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                                    </svg>
                                    Process QR Code
                               </button>
@@ -932,17 +993,21 @@ $active = 'dashboard';
                </div>
 
                <!-- Manual Search Option -->
-               <button onclick="showCheckoutManualSearch()" class="w-full p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-start hover-scale">
+               <button onclick="showCheckoutManualSearch()"
+                    class="w-full p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-start hover-scale">
                     <div class="bg-gray-200 p-3 rounded-lg mr-4 hover:bg-gray-300 transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none"
+                              viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                          </svg>
                     </div>
                     <div class="text-left">
                          <h4 class="font-medium text-gray-900">Manual Search</h4>
                          <p class="text-sm text-gray-600 mt-1">Search for guest by name or reference number</p>
                     </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                </button>
@@ -950,7 +1015,8 @@ $active = 'dashboard';
 
           <!-- Modal Footer -->
           <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-               <button onclick="closeCheckOutModal()" class="w-full py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">
+               <button onclick="closeCheckOutModal()"
+                    class="w-full py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">
                     Cancel
                </button>
           </div>
@@ -970,7 +1036,7 @@ $active = 'dashboard';
                     </svg>
                </button>
           </div>
-          
+
           <!-- Quick Search Field -->
           <div class="mb-4">
                <label class="block text-sm font-medium mb-2 text-gray-700">Reservation Code</label>
@@ -978,33 +1044,33 @@ $active = 'dashboard';
                     class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     onkeypress="if(event.key==='Enter')performCheckoutSearch()">
           </div>
-          
+
           <!-- Advanced Search Fields -->
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
                <h4 class="text-sm font-medium mb-3 text-gray-700">Advanced Search</h4>
-               
+
                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                          <label class="block text-xs font-medium mb-1 text-gray-600">First Name</label>
-                         <input type="text" id="checkoutFirstNameInput" placeholder="First name" 
+                         <input type="text" id="checkoutFirstNameInput" placeholder="First name"
                               class="w-full p-2 border rounded text-sm"
                               onkeypress="if(event.key==='Enter')performCheckoutSearch()">
                     </div>
-                    
+
                     <div>
                          <label class="block text-xs font-medium mb-1 text-gray-600">Last Name</label>
-                         <input type="text" id="checkoutLastNameInput" placeholder="Last name" 
+                         <input type="text" id="checkoutLastNameInput" placeholder="Last name"
                               class="w-full p-2 border rounded text-sm"
                               onkeypress="if(event.key==='Enter')performCheckoutSearch()">
                     </div>
                </div>
           </div>
-          
+
           <button onclick="performCheckoutSearch()"
                class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
                Search Guests
           </button>
-          
+
           <div id="checkoutSearchResults" class="mt-4 space-y-2">
                <!-- Search results will appear here -->
           </div>
@@ -1028,35 +1094,47 @@ $active = 'dashboard';
                          <div>
                               <!-- Customer Information -->
                               <div class="mb-6">
-                                   <button type="button" class="flex items-center justify-between w-full" onclick="toggleSection('customerInfoSection')">
+                                   <button type="button" class="flex items-center justify-between w-full"
+                                        onclick="toggleSection('customerInfoSection')">
                                         <h4 class="text-lg font-medium text-gray-900">Customer Information</h4>
-                                        <svg id="customerInfoChevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        <svg id="customerInfoChevron" xmlns="http://www.w3.org/2000/svg"
+                                             class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24"
+                                             stroke="currentColor">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 9l-7 7-7-7" />
                                         </svg>
                                    </button>
-                                   
+
                                    <div id="customerInfoSection" class="mt-4 space-y-4">
                                         <div class="grid grid-cols-2 gap-4">
                                              <div>
-                                                  <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                                  <label for="firstName"
+                                                       class="block text-sm font-medium text-gray-700 mb-1">First Name
+                                                       *</label>
                                                   <input type="text" id="firstName" name="firstName" required
                                                        class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                                              </div>
                                              <div>
-                                                  <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                                                  <label for="lastName"
+                                                       class="block text-sm font-medium text-gray-700 mb-1">Last Name
+                                                       *</label>
                                                   <input type="text" id="lastName" name="lastName" required
                                                        class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                                              </div>
                                         </div>
 
                                         <div>
-                                             <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                                             <label for="phoneNumber"
+                                                  class="block text-sm font-medium text-gray-700 mb-1">Phone Number
+                                                  *</label>
                                              <input type="tel" id="phoneNumber" name="phoneNumber" required
                                                   class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                                         </div>
 
                                         <div>
-                                             <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email (Optional)</label>
+                                             <label for="email"
+                                                  class="block text-sm font-medium text-gray-700 mb-1">Email
+                                                  (Optional)</label>
                                              <input type="email" id="email" name="email"
                                                   class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                                         </div>
@@ -1065,37 +1143,46 @@ $active = 'dashboard';
 
                               <!-- Tour Options -->
                               <div class="mb-6">
-                                   <h4 class="text-lg font-semibold text-gray-800 mb-4">Tour Options <span class="text-red-500">*</span></h4>
+                                   <h4 class="text-lg font-semibold text-gray-800 mb-4">Tour Options <span
+                                             class="text-red-500">*</span></h4>
                                    <div class="grid grid-cols-3 gap-4">
-                                        
+
                                         <!-- Pool Only -->
                                         <div>
-                                             <input id="poolOption" name="tourOption" type="radio" value="pool" class="hidden peer" checked>
-                                             <label for="poolOption" class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
+                                             <input id="poolOption" name="tourOption" type="radio" value="pool"
+                                                  class="hidden peer" checked>
+                                             <label for="poolOption"
+                                                  class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
                                                   transition-all duration-200 ease-in-out 
                                                   hover:border-yellow-400 hover:shadow-lg
                                                   peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
-                                                  <span class="block text-base font-medium text-gray-700">Pool Only</span>
+                                                  <span class="block text-base font-medium text-gray-700">Pool
+                                                       Only</span>
                                                   <span class="block text-xs text-gray-500 mt-1">₱150/₱100</span>
                                              </label>
                                         </div>
 
                                         <!-- Park Only -->
                                         <div>
-                                             <input id="parkOption" name="tourOption" type="radio" value="park" class="hidden peer">
-                                             <label for="parkOption" class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
+                                             <input id="parkOption" name="tourOption" type="radio" value="park"
+                                                  class="hidden peer">
+                                             <label for="parkOption"
+                                                  class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
                                                   transition-all duration-200 ease-in-out 
                                                   hover:border-yellow-400 hover:shadow-lg
                                                   peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
-                                                  <span class="block text-base font-medium text-gray-700">Park Only</span>
+                                                  <span class="block text-base font-medium text-gray-700">Park
+                                                       Only</span>
                                                   <span class="block text-xs text-gray-500 mt-1">₱80/₱50</span>
                                              </label>
                                         </div>
-                                        
+
                                         <!-- Both -->
                                         <div>
-                                             <input id="bothOption" name="tourOption" type="radio" value="both" class="hidden peer">
-                                             <label for="bothOption" class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
+                                             <input id="bothOption" name="tourOption" type="radio" value="both"
+                                                  class="hidden peer">
+                                             <label for="bothOption"
+                                                  class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
                                                   transition-all duration-200 ease-in-out 
                                                   hover:border-yellow-400 hover:shadow-lg
                                                   peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
@@ -1103,110 +1190,135 @@ $active = 'dashboard';
                                                   <span class="block text-xs text-gray-500 mt-1">Pool + Park</span>
                                              </label>
                                         </div>
-                                   
+
                                    </div>
                               </div>
-                         
+
                          </div>
 
                          <!-- Right Column - Pricing -->
                          <div>
                               <!-- Entrance Fees -->
                               <div class="mb-6">
-                                   <button type="button" class="flex items-center justify-between w-full" onclick="toggleSection('entranceFeesSection')">
+                                   <button type="button" class="flex items-center justify-between w-full"
+                                        onclick="toggleSection('entranceFeesSection')">
                                         <h4 class="text-lg font-medium text-gray-900">Entrance Fees</h4>
-                                        <svg id="entranceFeesChevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        <svg id="entranceFeesChevron" xmlns="http://www.w3.org/2000/svg"
+                                             class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24"
+                                             stroke="currentColor">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 9l-7 7-7-7" />
                                         </svg>
                                    </button>
-                                   
+
                                    <div id="entranceFeesSection" class="mt-4 space-y-4">
                                         <!-- Pool Fees (shown when Pool or Both selected) -->
                                         <div id="poolFees" class="space-y-3">
                                              <h5 class="text-sm font-medium text-gray-700">Pool Entrance</h5>
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Adults (₱150)</label>
-                                                  <input type="number" id="poolAdultCount" name="poolAdultCount" min="0" value="0"
+                                                  <input type="number" id="poolAdultCount" name="poolAdultCount" min="0"
+                                                       value="0"
                                                        class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
                                                        onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span id="poolAdultTotal">0</span></div>
+                                                  <div class="text-sm font-medium text-right">₱<span
+                                                            id="poolAdultTotal">0</span></div>
                                              </div>
-                                             
+
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Kids (₱100)</label>
-                                                  <input type="number" id="poolKidCount" name="poolKidCount" min="0" value="0"
+                                                  <input type="number" id="poolKidCount" name="poolKidCount" min="0"
+                                                       value="0"
                                                        class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
                                                        onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span id="poolKidTotal">0</span></div>
+                                                  <div class="text-sm font-medium text-right">₱<span
+                                                            id="poolKidTotal">0</span></div>
                                              </div>
-                                             
+
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Seniors (₱100)</label>
-                                                  <input type="number" id="poolSeniorCount" name="poolSeniorCount" min="0" value="0"
+                                                  <input type="number" id="poolSeniorCount" name="poolSeniorCount"
+                                                       min="0" value="0"
                                                        class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
                                                        onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span id="poolSeniorTotal">0</span></div>
+                                                  <div class="text-sm font-medium text-right">₱<span
+                                                            id="poolSeniorTotal">0</span></div>
                                              </div>
                                         </div>
-                                        
+
                                         <!-- Park Fees (shown when Park or Both selected) -->
                                         <div id="parkFees" class="space-y-3 mt-4 hidden">
                                              <h5 class="text-sm font-medium text-gray-700">Park Entrance</h5>
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Adults (₱80)</label>
-                                                  <input type="number" id="parkAdultCount" name="parkAdultCount" min="0" value="0"
+                                                  <input type="number" id="parkAdultCount" name="parkAdultCount" min="0"
+                                                       value="0"
                                                        class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
                                                        onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span id="parkAdultTotal">0</span></div>
+                                                  <div class="text-sm font-medium text-right">₱<span
+                                                            id="parkAdultTotal">0</span></div>
                                              </div>
-                                             
+
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Kids (₱50)</label>
-                                                  <input type="number" id="parkKidCount" name="parkKidCount" min="0" value="0"
+                                                  <input type="number" id="parkKidCount" name="parkKidCount" min="0"
+                                                       value="0"
                                                        class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
                                                        onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span id="parkKidTotal">0</span></div>
+                                                  <div class="text-sm font-medium text-right">₱<span
+                                                            id="parkKidTotal">0</span></div>
                                              </div>
-                                             
+
                                              <div class="grid grid-cols-3 gap-2 items-center">
                                                   <label class="block text-xs text-gray-600">Seniors (₱50)</label>
-                                                  <input type="number" id="parkSeniorCount" name="parkSeniorCount" min="0" value="0"
+                                                  <input type="number" id="parkSeniorCount" name="parkSeniorCount"
+                                                       min="0" value="0"
                                                        class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
                                                        onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span id="parkSeniorTotal">0</span></div>
+                                                  <div class="text-sm font-medium text-right">₱<span
+                                                            id="parkSeniorTotal">0</span></div>
                                              </div>
                                         </div>
-                                        
-                                        <div class="grid grid-cols-3 gap-2 items-center pt-2 border-t border-gray-200 mt-4">
+
+                                        <div
+                                             class="grid grid-cols-3 gap-2 items-center pt-2 border-t border-gray-200 mt-4">
                                              <label class="block text-sm font-medium text-gray-700">Subtotal</label>
                                              <div></div>
-                                             <div class="text-sm font-bold text-right">₱<span id="grandTotal">0</span></div>
+                                             <div class="text-sm font-bold text-right">₱<span id="grandTotal">0</span>
+                                             </div>
                                         </div>
                                    </div>
                               </div>
 
                               <!-- Cottages Section -->
                               <div class="mb-6">
-                                   <button type="button" class="flex items-center justify-between w-full" onclick="toggleSection('cottagesSection')">
+                                   <button type="button" class="flex items-center justify-between w-full"
+                                        onclick="toggleSection('cottagesSection')">
                                         <h4 class="text-lg font-medium text-gray-900">Optional Cottages</h4>
-                                        <svg id="cottagesChevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        <svg id="cottagesChevron" xmlns="http://www.w3.org/2000/svg"
+                                             class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24"
+                                             stroke="currentColor">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 9l-7 7-7-7" />
                                         </svg>
                                    </button>
-                                   
+
                                    <div id="cottagesSection" class="mt-4">
                                         <div id="cottageOptions" class="space-y-3">
                                              <p class="text-sm text-gray-500">Loading cottage options...</p>
                                         </div>
-                                        
-                                        <div class="grid grid-cols-3 gap-2 items-center pt-2 border-t border-gray-200 mt-4">
-                                             <label class="block text-sm font-medium text-gray-700">Cottage Total</label>
+
+                                        <div
+                                             class="grid grid-cols-3 gap-2 items-center pt-2 border-t border-gray-200 mt-4">
+                                             <label class="block text-sm font-medium text-gray-700">Cottage
+                                                  Total</label>
                                              <div></div>
-                                             <div class="text-sm font-medium text-right">₱<span id="cottageTotal">0</span></div>
+                                             <div class="text-sm font-medium text-right">₱<span
+                                                       id="cottageTotal">0</span></div>
                                         </div>
                                    </div>
                               </div>
-                         
+
                          </div>
                     </div>
 
@@ -1241,8 +1353,7 @@ $active = 'dashboard';
 <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-
-function toggleActiveHost(checkbox) {
+     function toggleActiveHost(checkbox) {
      const isActive = checkbox.checked;
      const indicator = document.getElementById('hostStatusIndicator');
      
@@ -2058,13 +2169,6 @@ document.addEventListener('DOMContentLoaded', function() {
                openModal_accept_inquirer(this);
           });
      });
-     
-     // Set up event listener for New Booking button
-     document.getElementById('openBookingModal').addEventListener('click', function(e) {
-          e.preventDefault();
-          openBookingModal();
-     });
-     
      // QR Upload and Processing for Check-in
      const qrUploadInput = document.getElementById('qr-upload-input');
      const qrUploadPreview = document.getElementById('qr-upload-preview');

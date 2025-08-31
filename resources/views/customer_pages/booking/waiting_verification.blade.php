@@ -39,7 +39,7 @@
                                 Processing Your Request
                             </h2>
                             <p class="text-gray-700 mt-1 text-sm sm:text-base">
-                                Your booking has been received. We will send your booking confirmation to your registered contact details right away.
+                                Your booking has been received. We will send your booking confirmation to your registered email and phone number via SMS within 5 to 10 minutes.
                             </p>
                         </div>
                     </div>

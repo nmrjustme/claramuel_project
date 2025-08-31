@@ -178,7 +178,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('booking-logs', [BookingLogController::class, 'index'])->name('admin.booking-logs');
     
     // Booking log route
-    Route::get('/get/inquiries/booking', [BookingController::class, 'getMyInquiries'])->name('my_inquiries_bookings');
+    // Route::get('/get/inquiries/booking', [BookingController::class, 'getMyInquiries'])->name('my_inquiries_bookings');
+
+    Route::get('/get/inquiries/confirmed', [BookingController::class, 'getConfirmedInquiries']);
+    Route::get('/get/inquiries/pending', [BookingController::class, 'getPendingInquiries']);
     
     //========================
     // Bookings Page
@@ -303,6 +306,9 @@ Route::middleware(['auth'])->group(function () {
     // =======================
     // Check-in Routes
     // =======================
+    Route::get('/next/check-in/list', [CheckinController::class, 'index'])->name('incoming.list');
+    Route::get('/next/check-in/list/data', [CheckinController::class, 'dataList'])->name('checkins.data');
+
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
     Route::post('/verify-qr-codes/checkin', [CheckinController::class, 'verifyQrCode']);
     Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
