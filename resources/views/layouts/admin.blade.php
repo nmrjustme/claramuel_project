@@ -116,7 +116,7 @@
         <div class="flex-1 flex flex-col md:ml-64">
             <!-- Desktop Header -->
             <header
-                class="hidden md:block bg-gradient-to-r from-red-600 to-red-800 text-white shadow-md sticky top-0 z-50">
+                class="hidden md:block bg-white text-gray-800 shadow-md sticky top-0 z-50">
                 <div class="px-6 py-6 flex justify-between items-center">
                     <div class="flex items-center space-x-3">
                         <span class="text-2xl font-bold">
@@ -127,7 +127,7 @@
                     <div class="flex items-center space-x-6">
                         <!-- Email Icon with Badge -->
                         <a href="{{ route('admin.email') }}"
-                            class="relative text-white hover:text-gray-200 transition-colors" title="Email Inbox">
+                            class="relative text-gray-800 hover:text-gray-600 transition-colors" title="Email Inbox">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -145,8 +145,8 @@
                             <button class="flex items-center gap-2 focus:outline-none">
                                 <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}"
                                     class="h-8 w-8 rounded-full object-cover" alt="Profile">
-                                <span class="text-sm font-medium text-white">{{ Auth::user()->firstname }}</span>
-                                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2"
+                                <span class="text-sm font-medium text-gray-800">{{ Auth::user()->firstname }}</span>
+                                <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                                 </svg>

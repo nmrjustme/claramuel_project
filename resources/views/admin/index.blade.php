@@ -309,7 +309,7 @@ $active = 'dashboard';
 <div class="min-h-screen px-6 py-6">
      <!-- Header with animated gradient -->
      <div class="rounded-lg mb-4 overflow-hidden">
-          <div class="bg-gradient-to-r from-red-600 to-red-700 p-8 text-white rounded-lg relative overflow-hidden">
+          <div class="bg-gradient-to-r from-red-800 to-red-700 p-8 text-white rounded-lg relative overflow-hidden">
                <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-white/0"></div>
                <div class="relative z-10">
                     <div class="flex items-center justify-between">

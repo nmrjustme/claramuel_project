@@ -601,10 +601,8 @@
 
 
     <div class="flex flex-col lg:flex-row gap-8">
-
-
         <!-- Left Column - Customer Information -->
-        <div class="lg:w-2/3">
+        <div class="lg:w-2/3 space-y-6">
             <h3 class="page-title font-semibold text-dark mb-2">Request To Book</h3>
 
             <div class="rounded-lg p-8 mb-6 border border-lightgray">
@@ -681,7 +679,7 @@
                 <h3 class="booking-summary-title">
                     Your Payment Schedule
                 </h3>
-                <span class="booking-item-value">You will pay 50% of the total price.</span>
+                <span class="booking-item-value">An initial payment of 50% of the total price is required, with the remaining balance due upon check-in.</span>
             </div>
 
             <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp"
@@ -691,10 +689,10 @@
                     width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
-
+        
         <!-- Right Column - Booking Summary -->
-        <div class="lg:w-2/5 space-y-4">
-            <div class="sticky top-6 space-y-6">
+        <div class="lg:w-1/3 space-y-6">
+            <div class="sticky top-4 space-y-6">
                 <!-- Date Summary Card -->
                 <div class="border border-lightgray rounded-lg p-6">
                     <h3 class="booking-summary-title mb-4">

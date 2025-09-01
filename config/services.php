@@ -40,4 +40,10 @@ return [
         'sender' => env('PHILSMS_SENDER', 'MyApp'),
     ],
 
+    'maya' => [
+        'secret_key' => env('MAYA_SECRET_KEY'),
+        'public_key' => env('MAYA_PUBLIC_KEY'),
+        'base_url' => env('MAYA_BASE_URL'),
+    ]
+
 ];

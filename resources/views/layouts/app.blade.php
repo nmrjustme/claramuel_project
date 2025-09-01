@@ -9,7 +9,7 @@
         
         <!-- Fonts -->
         <link rel="icon" href="{{ asset('/favicon.ico?v=2') }}">
-
+        
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
