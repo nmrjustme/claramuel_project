@@ -20,52 +20,51 @@ use App\Models\Payments;
 
 class MayaWebhookSetupController extends Controller
 {
-    
+
     public function handle(Request $request)
     {
-        // Log full payload for debugging
         Log::info('Maya Webhook Received:', $request->all());
 
-        // Get event type
-        $event = $request->status;
+        $event = $request->input('status');
 
         switch ($event) {
             case 'PAYMENT_SUCCESS':
-                $this->updateOrder('paid', $request);
-                break;
+                return $this->updateOrder('paid', $request);
             case 'PAYMENT_FAILED':
-                $this->updateOrder('failed', $request);
-                break;
+                return $this->updateOrder('failed', $request);
             case 'PAYMENT_EXPIRED':
-                $this->updateOrder('expired', $request);
-                break;
+                return $this->updateOrder('expired', $request);
             case 'PAYMENT_CANCELLED':
-                $this->updateOrder('cancelled', $request);
-                break;
+                return $this->updateOrder('cancelled', $request);
             default:
                 Log::info("Maya Webhook: Event {$event} ignored");
                 return response()->json(['message' => "Event {$event} ignored"], 200);
         }
     }
-    
+
     public function updateOrder($status, $request)
     {
         $orderId = $request->input('requestReferenceNumber');
-        
-        // Find order by reference number and mark as paid
         $order = Order::where('reference_number', $orderId)->first();
-        $token = Order::where('reference_number', $orderId)->value('token');
-        
+
+        if (!$order) {
+            Log::error("Order not found for reference: {$orderId}");
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        $token = $order->token;
+
         $order->status = $status;
         $order->save();
 
         if ($status === 'paid') {
             $this->storeBookingInDatabase($token, $orderId);
         }
-        
+
         Log::info("Order {$orderId} marked as " . strtoupper($status));
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);
     }
+
 
     private function storeBookingInDatabase($token, $orderId)
     {
@@ -168,7 +167,7 @@ class MayaWebhookSetupController extends Controller
                     'total_price' => $facilityTotalPrice,
                     'breakfast_cost' => $breakfastCost,
                 ]);
-                
+
                 $total_price = $bookingData['total_price'] ?? 0;
                 $half_of_total_price = ($total_price * 0.5);
                 // Create payment record
@@ -180,7 +179,7 @@ class MayaWebhookSetupController extends Controller
                     'payment_date' => now(),
                     'amount_paid' => $half_of_total_price,
                 ]);
-                
+
                 // Process guest types for this facility
                 if (isset($bookingData['guest_types'][$facility->id])) {
                     foreach ($bookingData['guest_types'][$facility->id] as $guestTypeId => $quantity) {
@@ -195,14 +194,14 @@ class MayaWebhookSetupController extends Controller
                     }
                 }
             }
-            
+
             // Commit transaction
             DB::commit();
 
             $bookingLog->load(['user']);
 
             event(new BookingNew($bookingLog)); // Event listener for new booking list
-            
+
             // Sending active admin email
             // if (User::where('role', 'Admin')->where('is_active', true)->exists()) {
             //     $this->sendEmailAdmin($bookingLog); 
@@ -211,7 +210,6 @@ class MayaWebhookSetupController extends Controller
             Log::info('booking recorded successfully');
 
             Cache::forget('booking_confirmation_' . $token);
-        
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Email confirmation booking failed:', [
