@@ -10,7 +10,7 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use App\Models\Breakfast;
-use App\Models\facility;
+use App\Models\Facility;
 
 
 class MayaCheckoutController extends Controller
