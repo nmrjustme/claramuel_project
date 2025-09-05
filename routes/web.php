@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\MayaCheckoutController;
 use App\Http\Controllers\MayaWebhookController;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\MayaWebhookSetupController;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
@@ -48,12 +50,15 @@ Route::get('/dashboard/checkin_page/{id}', [CustomerBookingPageController::class
 // Checkout page
 Route::get('/maya-checkout', [MayaCheckoutController::class, 'index'])->name('maya.checkout');
 Route::post('/maya/create-session', [MayaCheckoutController::class, 'createCheckoutSession'])->name('maya.create.session');
-Route::get('/maya/success', [MayaCheckoutController::class, 'handleSuccess'])->name('maya.checkout.success');
+// Route::get('/maya/success/', [MayaCheckoutController::class, 'handleSuccess'])->name('maya.checkout.success');
+Route::get('/maya/payment-processing/{token}', [MayaCheckoutController::class, 'handleProcessing'])->name('maya.checkout.processing');
+Route::get('/maya/check-order/{token}', [MayaCheckoutController::class, 'checkOrder'])->name('maya.checkOrder');
 Route::get('/maya/failure', [MayaCheckoutController::class, 'handleFailure'])->name('maya.checkout.failure');
 Route::get('/maya/cancel', [MayaCheckoutController::class, 'handleCancel'])->name('maya.checkout.cancel');
 Route::post('/maya/webhook', [MayaCheckoutController::class, 'handleWebhook'])->name('maya.webhook');
 Route::get('/maya/status/{referenceNumber}', [MayaCheckoutController::class, 'checkPaymentStatus'])->name('maya.check.status');
 // =======================
+Route::post('/maya/payment/webhook', [MayaWebhookSetupController::class, 'handle'])->name('maya.webhook.succes');
 
 Route::get('/test-maya-connection', function () {
     $baseUrl   = config('services.maya.base_url');
@@ -95,27 +100,27 @@ Route::get('/test-maya-connection', function () {
     }
 });
 
-// routes/web.php (development only)
-// routes/web.php (for testing only)
-Route::get('/test-webhook', function () {
-    // Simulate webhook for testing
-    $testData = [
-        'eventType' => 'PAYMENT_SUCCESS',
-        'id' => 'test-payment-123',
-        'requestReferenceNumber' => 'ORDER-SPTOH2R4',
-        'amount' => 100.00
-    ];
 
-    // Dispatch to your webhook handler
-    return (new MayaCheckoutController)->handleWebhook(
-        new Request([], $testData)
-    );
+Route::get('try/webhook/again', function () {
+    $response = Http::withHeaders([
+            'accept' => 'application/json',
+            'authorization' => 'Basic c2stWDhxb2xZank2MmtJekVicjBRUksxaDRiNEtEVkhhTmN3TVlrMzlqSW5TbDo=',
+            'content-type' => 'application/json',
+        ])
+        ->post("https://pg-sandbox.paymaya.com/payments/v1/webhooks", [
+            'name' => 'PAYMENT_SUCCESS',
+            'callbackUrl' => 'https://5e708220a669.ngrok-free.app/try/maya/webhook',
+        ]);
+    
+    Log::info('Webhook registration response: ', $response->json());
 });
 
 // =======================
 // Awaiting verification page 
 // =======================
-Route::get('/booking-awaiting', [BookingsController::class, 'pendingVerification']);
+Route::get('/booking-awaiting', [BookingsController::class, 'pendingVerification'])->name('booking-awaiting');
+Route::get('/room/monitorign/data', [BookingsController::class, 'monitorData'])->name('monitor.room.data');
+Route::get('/room/monitorign', [BookingsController::class, 'monitorRoom']);
 
 Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
     ->name('booking.WaitConfirmation');
@@ -423,10 +428,13 @@ Route::post('/reject-booking/{id}', [InquirerController::class, 'rejectBooking']
 // =======================
 // Payments Redirection
 // =======================
-Route::get('/payment/create/{token}', [PaymentsController::class, 'payments'])->name('customer.booking.payments');
+// Route::get('/payment/create/{token}', [PaymentsController::class, 'payments'])->name('customer.booking.payments');
+Route::get('/payment/create/{token}', [MayaCheckoutController::class, 'createCheckoutSession'])->name('customer.booking.payments');
 // =======================
 
 Route::get('/NotVerified', [PaymentsController::class, 'notVerified'])->name('not.verified');
+Route::get('/payment/order/status/{token}', [PaymentsController::class, 'checkOrderStatus'])
+    ->name('payment.status');
 
 
 Route::get('/link-expired', function () {

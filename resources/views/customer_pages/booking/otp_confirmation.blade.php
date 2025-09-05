@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Route URL:', '{{ route("verify.otp") }}');
         console.log('CSRF Token:', '{{ csrf_token() }}');
         submitButton.disabled = true;
-
+        
         // Make AJAX request
         fetch('{{ route("verify.otp") }}', {
             method: 'POST',
@@ -207,7 +207,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 successAlert.classList.remove('hidden');
                 // Redirect to payment page after 2 seconds
                 setTimeout(() => {
-                    window.location.href = data.redirect_url;
+                    window.open(data.redirect_url, '_blank');
+                    window.location.href = `/maya/payment-processing/${data.token}`;
                 }, 2000);
             } else {
                 errorText.textContent = data.message;

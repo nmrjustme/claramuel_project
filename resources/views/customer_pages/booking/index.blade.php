@@ -842,7 +842,7 @@
           ['label' => 'Select Rooms'],
           ['label' => 'Your Details'],
           ['label' => 'Payment'],
-          ['label' => 'Processing']
+          ['label' => 'Completed']
      ]" />
 
      <!-- Main Content -->
@@ -1189,7 +1189,7 @@
                                    <div>
                                         <p class="text-sm font-semibold text-gray-800">Important Reminder</p>
                                         <p class="text-sm text-gray-600 mt-1">
-                                             Check-in time is <span class="font-medium text-gray-900">12:00 PM</span>
+                                             Check-in time is <span class="font-medium text-gray-900">12:00 NN</span>
                                              and Check-out time is <span class="font-medium text-gray-900">10:00
                                                   AM</span> only.
                                         </p>

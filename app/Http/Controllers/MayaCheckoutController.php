@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Models\Order;
+use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
+use App\Models\Breakfast;
+use App\Models\facility;
+
 
 class MayaCheckoutController extends Controller
 {
@@ -15,98 +20,252 @@ class MayaCheckoutController extends Controller
         return view('customer_pages.maya.index');
     }
 
-    public function createCheckoutSession(Request $request)
+    public function createCheckoutSession($token)
     {
-        // Validate the request
-        $validated = $request->validate([
-            'totalAmount' => 'required|numeric|min:1'
+        Log::info('Maya Checkout - Token: ' . $token);
+
+        $bookingData = Cache::get('booking_confirmation_' . $token);
+
+        if (!$bookingData) {
+            Log::error('Maya Checkout - No booking data found for token: ' . $token);
+            return redirect()->route('bookings.customer-info')->with('error', 'Invalid or expired booking session.');
+        }
+
+        // Extract data from cached booking
+        $user_firstname = $bookingData['firstname'] ?? 'Guest';
+        $user_lastname = $bookingData['lastname'] ?? 'Guest';
+        $user_phone = $bookingData['phone'] ?? '+639000000000';
+        $user_email = $bookingData['email'] ?? 'guest@example.com';
+        $total_price = $bookingData['total_price'] ?? 0;
+        $amount_to_pay = $bookingData['amount_to_pay'] ?? $total_price; // Use the correct amount to pay
+        $reservation_code = $bookingData['reservation_code'] ?? 'NO-CODE';
+
+        $checkin = Carbon::parse($bookingData['checkin_date']);
+        $checkout = Carbon::parse($bookingData['checkout_date']);
+        $nights = $checkin->diffInDays($checkout);
+
+        Log::debug('Booking Data:', [
+            'breakfast_included' => $bookingData['breakfast_included'] ?? 'not set',
+            'total_price' => $total_price,
+            'amount_to_pay' => $amount_to_pay,
+            'nights' => $nights,
+            'facilities_count' => count($bookingData['facilities'] ?? [])
         ]);
 
-        // Get configuration from services.php
+        // Get breakfast price if included
+        $breakfastPrice = 0;
+        $isBreakfastIncluded = false;
+
+        if (isset($bookingData['breakfast_included']) && $bookingData['breakfast_included']) {
+            $isBreakfastIncluded = true;
+            $breakfast = Breakfast::where('status', 'Active')->first();
+
+            if ($breakfast) {
+                $breakfastPrice = $breakfast->price;
+                Log::debug('Breakfast found:', [
+                    'price' => $breakfastPrice,
+                    'breakfast_id' => $breakfast->id
+                ]);
+            } else {
+                Log::warning('No active breakfast found in database');
+            }
+        }
+
+        Log::debug('Breakfast status:', [
+            'included' => $isBreakfastIncluded,
+            'price_per_night' => $breakfastPrice,
+            'total_breakfast_cost' => $breakfastPrice * $nights
+        ]);
+
+        // Calculate the ratio for prorating the amount to pay
+        $paymentRatio = $amount_to_pay / $total_price;
+
+        // Prepare items array for Maya
+        $items = [];
+        $calculatedTotal = 0;
+
+        foreach ($bookingData['facilities'] as $facilityData) {
+            $facility = Facility::find($facilityData['facility_id']);
+            $facilityName = $facility->name ?? 'Unknown Facility';
+            $facilityPrice = $facilityData['price'] ?? 0;
+
+            // Calculate subtotal (price per night * nights)
+            $facilitySubtotal = $facilityPrice * $nights;
+
+            // Add breakfast if included
+            $breakfastCost = 0;
+            if ($isBreakfastIncluded) {
+                $breakfastCost = $breakfastPrice * $nights;
+                $facilitySubtotal += $breakfastCost;
+            }
+
+            // Calculate the prorated amount for this facility
+            $facilityPaymentAmount = $facilitySubtotal * $paymentRatio;
+
+            $calculatedTotal += $facilityPaymentAmount;
+
+            $description = "Check-in: " . $checkin->format('M j, Y') .
+                " | Check-out: " . $checkout->format('M j, Y') .
+                " | Nights: " . $nights;
+
+            if ($isBreakfastIncluded) {
+                $description .= " | Breakfast: ₱" . number_format($breakfastCost, 2) . " (" . $nights . " mornings)";
+            }
+
+            // Add payment type info to description
+            if ($amount_to_pay < $total_price) {
+                $description .= " | 50% Deposit Payment";
+            }
+
+            $items[] = [
+                'name' => $facilityName,
+                'code' => 'FAC-' . ($facility->id ?? '000'),
+                'description' => $description,
+                'amount' => [
+                    'value' => $facilityPaymentAmount,
+                    'currency' => 'PHP',
+                    'details' => [
+                        "discount" => 0,
+                        "serviceCharge" => 0,
+                        "shippingFee" => 0,
+                        "tax" => 0,
+                        "subtotal" => $facilityPaymentAmount
+                    ]
+                ],
+                'totalAmount' => [
+                    'value' => $facilityPaymentAmount,
+                    'currency' => 'PHP',
+                    'details' => [
+                        "discount" => 0,
+                        "serviceCharge" => 0,
+                        "shippingFee" => 0,
+                        "tax" => 0,
+                        "subtotal" => $facilityPaymentAmount
+                    ]
+                ]
+            ];
+
+            Log::debug('Facility item created:', [
+                'name' => $facilityName,
+                'facility_price' => $facilityPrice,
+                'nights' => $nights,
+                'breakfast_included' => $isBreakfastIncluded,
+                'breakfast_cost' => $breakfastCost,
+                'facility_subtotal' => $facilitySubtotal,
+                'facility_payment_amount' => $facilityPaymentAmount,
+                'payment_ratio' => $paymentRatio,
+            ]);
+        }
+
+        Log::debug('Price verification:', [
+            'total_price' => $total_price,
+            'amount_to_pay' => $amount_to_pay,
+            'calculated_payment_total' => $calculatedTotal,
+            'difference' => abs($amount_to_pay - $calculatedTotal)
+        ]);
+
+        // ✅ Get configuration
         $baseUrl = config('services.maya.base_url');
         $publicKey = config('services.maya.public_key');
+        $secretKey = config('services.maya.secret_key');
 
-        // Debug: Check if keys are loaded correctly
-        Log::debug('Maya Config - Base URL: ' . $baseUrl);
-        Log::debug('Maya Config - Public Key: ' . (empty($publicKey) ? 'EMPTY' : 'SET'));
+        if (!$baseUrl || !$publicKey || !$secretKey) {
+            Log::error('Maya configuration missing');
+            return back()->with('error', 'Payment gateway configuration error. Please try again later.');
+        }
 
-        // Generate a unique reference number
         $rn = 'ORDER-' . Str::upper(Str::random(8));
 
-        // Build the request payload for Maya
         $requestBody = [
             'totalAmount' => [
-                'value' => $validated['totalAmount'],
+                'value' => $amount_to_pay, // Use the actual amount to pay
                 'currency' => 'PHP',
-            ],
-            'buyer' => [
-                'firstName' => 'Test',
-                'lastName' => 'User',
-                'contact' => [
-                    'phone' => '+639171234567',
-                    'email' => 'test@example.com'
+                'details' => [
+                    "discount" => 0,
+                    "serviceCharge" => 0,
+                    "shippingFee" => 0,
+                    "tax" => 0,
+                    "subtotal" => $amount_to_pay
                 ]
             ],
+            'buyer' => [
+                'firstName' => $user_firstname,
+                'lastName' => $user_lastname,
+                'contact' => [
+                    'phone' => $user_phone,
+                    'email' => $user_email
+                ],
+                'billingAddress' => [
+                    'line1' => 'Not specified',
+                    'city' => 'Not specified',
+                    'state' => 'Not specified',
+                    'zipCode' => '0000',
+                    'countryCode' => 'PH'
+                ]
+            ],
+            'items' => $items,
             'redirectUrl' => [
-                'success' => route('maya.checkout.success'),
+                'success' => route('booking-awaiting'),
                 'failure' => route('maya.checkout.failure'),
                 'cancel' => route('maya.checkout.cancel'),
             ],
             'requestReferenceNumber' => $rn,
-            'webhookUrl' => route('maya.webhook'), // Add webhook URL to payload
         ];
 
-        Log::debug('Maya Request Body: ', $requestBody);
+        Log::debug('Maya Request Body:', $requestBody);
 
-        // Make the API call to Maya
         try {
-            $response = Http::withBasicAuth($publicKey, '')
+            $response = Http::withBasicAuth($publicKey, $secretKey)
+                ->timeout(30)
                 ->withHeaders([
-                    'Content-Type' => 'application/json',
+                    'accept' => 'application/json',
+                    'content-type' => 'application/json',
                 ])
                 ->post("{$baseUrl}/checkout/v1/checkouts", $requestBody);
 
-            // Log the full response for debugging
-            Log::debug('Maya API Response: ', [
+            Log::debug('Maya API Response:', [
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
 
-            // Check if the API call was successful
             if ($response->successful()) {
                 $responseData = $response->json();
 
-                // Create order with pending status
                 Order::create([
                     'reference_number' => $rn,
-                    'amount' => $validated['totalAmount'],
+                    'amount' => $amount_to_pay, // Store the actual amount being paid
+                    'total_amount' => $total_price, // Store the full amount for reference
                     'status' => 'pending',
-                    'payment_gateway' => 'maya'
+                    'token' => $token,
+                    'payment_type' => $amount_to_pay < $total_price ? 'deposit' : 'full',
                 ]);
 
-                // Store the reference number in session for redirect pages
-                session(['maya_rrn' => $rn]);
+                Log::info('Maya checkout created successfully', [
+                    'reference_number' => $rn,
+                    'checkout_id' => $responseData['checkoutId'] ?? null,
+                    'redirect_url' => $responseData['redirectUrl'] ?? null,
+                    'amount_paid' => $amount_to_pay,
+                    'payment_type' => $amount_to_pay < $total_price ? 'deposit' : 'full'
+                ]);
 
-                // Redirect the user to Maya's payment page
                 return redirect()->away($responseData['redirectUrl']);
             } else {
-                // Handle API error with more details
-                $error = $response->json();
                 $statusCode = $response->status();
+                $error = $response->json();
 
-                Log::error('Maya API Error: ', [
+                Log::error('Maya API Error:', [
                     'status' => $statusCode,
                     'error' => $error,
                     'request_body' => $requestBody
                 ]);
 
                 $errorMessage = 'Failed to initialize checkout. ';
-
-                // Add specific error messages based on status code
                 if ($statusCode === 401) {
                     $errorMessage .= 'Authentication failed. Please check your API keys.';
                 } elseif ($statusCode === 404) {
                     $errorMessage .= 'API endpoint not found.';
+                } elseif ($statusCode === 422) {
+                    $errorMessage .= 'Invalid request data. Please check your input.';
                 } else {
                     $errorMessage .= 'Please try again.';
                 }
@@ -114,7 +273,6 @@ class MayaCheckoutController extends Controller
                 return back()->with('error', $errorMessage);
             }
         } catch (\Exception $e) {
-            // Handle network errors
             Log::error('Maya Checkout Exception: ' . $e->getMessage());
             Log::error('Exception Trace: ' . $e->getTraceAsString());
 
@@ -122,16 +280,32 @@ class MayaCheckoutController extends Controller
         }
     }
 
-    public function handleSuccess(Request $request)
+    public function handleSuccessPaid()
     {
-        // Display success message but don't update order status here
-        // The actual payment confirmation will come from webhook
-        $referenceNumber = session('maya_rrn');
+        return view('customer_pages.maya.return_orig_page');
+    }
+    
+    public function handleProcessing($token)
+    {
+        $order = Order::where('token', $token)->latest()->first();
+        
+        return view('customer_pages.maya.processing_payment', ['order' => $order, 'token' => $token]);
+    }
+    
+    public function checkOrder($token)
+    {
+        $order = Order::where('token', $token)->latest()->first();
 
-        return view('customer_pages.maya.checkout_success', [
-            'referenceNumber' => $referenceNumber,
-            'message' => 'Payment processing completed. Please wait for confirmation.'
-        ]);
+        if ($order) {
+            return response()->json([
+                'exists' => true,
+                'status' => $order->status,
+                'amount' => $order->amount,
+                'reference' => $order->reference_number,
+            ]);
+        }
+
+        return response()->json(['exists' => false]);
     }
 
     public function handleFailure(Request $request)
@@ -151,101 +325,6 @@ class MayaCheckoutController extends Controller
         return view('customer_pages.maya.checkout_cancel')->with([
             'message' => 'Payment was cancelled.',
             'referenceNumber' => $referenceNumber
-        ]);
-    }
-
-    public function handleWebhook(Request $request)
-    {
-        Log::debug('Your Now in webHook');
-        // Start webhook debugging
-        $webhookId = 'WEBHOOK-' . Str::random(8);
-        $startTime = microtime(true);
-
-        Log::info("[$webhookId] Maya Webhook Received", [
-            'headers' => $request->headers->all(),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'raw_content' => $request->getContent(),
-            'json_data' => $request->all()
-        ]);
-
-        // Verify webhook signature
-        $signatureResult = $this->verifyWebhookSignature($request);
-        if (!$signatureResult['valid']) {
-            Log::error("[$webhookId] Webhook Signature Verification Failed", [
-                'reason' => $signatureResult['reason'],
-                'received_signature' => $request->header('x-payment-signature'),
-                'expected_signature' => $signatureResult['expected'] ?? null,
-                'payload_length' => strlen($request->getContent())
-            ]);
-            return response()->json(['error' => 'Invalid signature', 'webhook_id' => $webhookId], 401);
-        }
-
-        Log::debug("[$webhookId] Webhook signature verified successfully");
-
-        $webhookData = $request->json()->all();
-        $referenceNumber = $webhookData['requestReferenceNumber'] ?? null;
-
-        if (!$referenceNumber) {
-            Log::error("[$webhookId] No reference number in webhook data", [
-                'webhook_data' => $webhookData,
-                'available_keys' => array_keys($webhookData)
-            ]);
-            return response()->json([
-                'error' => 'Invalid webhook data',
-                'webhook_id' => $webhookId
-            ], 400);
-        }
-
-        Log::info("[$webhookId] Processing webhook for reference: $referenceNumber", [
-            'event_type' => $webhookData['eventType'] ?? 'unknown',
-            'payment_id' => $webhookData['id'] ?? null
-        ]);
-
-        // Handle different webhook events
-        $eventType = $webhookData['eventType'] ?? 'UNKNOWN_EVENT';
-        $handlingResult = null;
-
-        switch ($eventType) {
-            case 'PAYMENT_SUCCESS':
-                $handlingResult = $this->handlePaymentSuccess($webhookData, $webhookId);
-                break;
-
-            case 'PAYMENT_FAILED':
-                $handlingResult = $this->handlePaymentFailed($webhookData, $webhookId);
-                break;
-
-            case 'PAYMENT_EXPIRED':
-                $handlingResult = $this->handlePaymentExpired($webhookData, $webhookId);
-                break;
-
-            case 'PAYMENT_CANCELLED':
-                $handlingResult = $this->handlePaymentCancelled($webhookData, $webhookId);
-                break;
-
-            default:
-                Log::warning("[$webhookId] Unhandled webhook event type", [
-                    'event_type' => $eventType,
-                    'full_data' => $webhookData
-                ]);
-                $handlingResult = ['status' => 'unhandled', 'message' => 'Event type not handled'];
-                break;
-        }
-
-        // Log webhook processing completion
-        $processingTime = round((microtime(true) - $startTime) * 1000, 2);
-        Log::info("[$webhookId] Webhook processing completed", [
-            'processing_time_ms' => $processingTime,
-            'reference_number' => $referenceNumber,
-            'event_type' => $eventType,
-            'result' => $handlingResult
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'webhook_id' => $webhookId,
-            'processing_time_ms' => $processingTime,
-            'handled_event' => $eventType
         ]);
     }
 

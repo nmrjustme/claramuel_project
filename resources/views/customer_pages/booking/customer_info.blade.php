@@ -586,6 +586,52 @@
         background: linear-gradient(90deg, #DC2626 0%, rgba(220, 38, 38, 0.2) 100%);
         border-radius: 4px;
     }
+
+    /* Payment Preference Styles */
+    .payment-option {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f9fafb;
+    }
+
+    .payment-option:hover {
+        background-color: #f3f4f6;
+        border-color: #d1d5db;
+    }
+
+    .payment-option.selected {
+        border-color: #DC2626;
+        background-color: #FEF2F2;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .payment-option input[type="radio"] {
+        margin-right: 0.75rem;
+        accent-color: #DC2626;
+    }
+
+    .payment-option-label {
+        font-weight: 500;
+        color: #374151;
+        flex: 1;
+    }
+
+    .payment-amount {
+        font-weight: 600;
+        color: #DC2626;
+    }
+
+    .payment-description {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
 </style>
 
 <x-header />
@@ -596,7 +642,7 @@
             ['label' => 'Select Rooms'],
             ['label' => 'Your Details'],
             ['label' => 'Payment'],
-            ['label' => 'Processing']
+            ['label' => 'Completed']
         ]" />
 
 
@@ -676,10 +722,39 @@
             </div>
 
             <div class="rounded-lg mb-6 p-6 border border-lightgray text-center">
-                <h3 class="booking-summary-title">
-                    Your Payment Schedule
+                <h3 class="booking-summary-title mb-6 text-lg font-semibold">
+                    Accepted Payment Methods
                 </h3>
-                <span class="booking-item-value">An initial payment of 50% of the total price is required, with the remaining balance due upon check-in.</span>
+
+                <!-- E-Wallets -->
+                <div class="mb-8">
+                    <h4 class="text-base font-medium mb-2">E-Wallets</h4>
+                    <p class="text-sm text-gray-500 mb-4">Maya, GCash, QR Ph, or any supported e-wallet</p>
+                    <div class="flex flex-wrap justify-center gap-6">
+                        <img src="{{ asset('imgs/banks/Maya_logo.svg') }}" alt="Maya" class="h-7">
+                        <img src="{{ asset('imgs/banks/QR_Ph_Logo.svg.png') }}" alt="QR Ph" class="h-7">
+                        <img src="{{ asset('imgs/banks/GCash_Logo.svg') }}" alt="GCash" class="h-7">
+                    </div>
+                </div>
+
+                <!-- Debit / Credit Cards -->
+                <div class="mb-8">
+                    <h4 class="text-base font-medium mb-2">Debit / Credit Cards</h4>
+                    <div class="flex flex-wrap justify-center gap-6">
+                        <img src="{{ asset('imgs/banks/960px-Visa_Inc._logo.svg.png') }}" alt="Visa" class="h-7">
+                        <img src="{{ asset('imgs/banks/Mastercard_2019_logo.svg') }}" alt="Mastercard" class="h-7">
+                        <img src="{{ asset('imgs/banks/JCB_logo.svg') }}" alt="JCB" class="h-7">
+                    </div>
+                </div>
+
+                <!-- Cash -->
+                <div>
+                    <h4 class="text-base font-medium mb-2">Cash</h4>
+                    <span
+                        class="inline-block px-4 py-1 bg-green-600 text-white text-sm font-semibold rounded-lg shadow-sm">
+                        Cash Payment
+                    </span>
+                </div>
             </div>
 
             <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp"
@@ -689,7 +764,7 @@
                     width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
-        
+
         <!-- Right Column - Booking Summary -->
         <div class="lg:w-1/3 space-y-6">
             <div class="sticky top-4 space-y-6">
@@ -718,7 +793,7 @@
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm mt-4">
                         <p class="text-sm font-semibold text-gray-800">Important Reminder</p>
                         <p class="text-sm text-gray-600 mt-1 leading-relaxed">
-                            Check-in time is <span class="font-medium text-gray-900">12:00 PM</span>
+                            Check-in time is <span class="font-medium text-gray-900">12:00 NN</span>
                             and Check-out time is <span class="font-medium text-gray-900">10:00 AM</span> only.
                         </p>
                     </div>
@@ -752,7 +827,36 @@
                             <span class="total-amount" id="summary-total">₱0.00</span>
                         </div>
                     </div>
+
+
                 </div>
+
+                <div class="rounded-lg p-8 mb-6 border border-lightgray">
+                    <h3 class="booking-summary-title mb-4">
+                        Payment Preference
+                    </h3>
+
+                    <div class="space-y-3" id="payment-options">
+                        <div class="payment-option" data-value="full">
+                            <input type="radio" name="payment_option" value="full" class="h-4 w-4 text-blue-600">
+                            <div>
+                                <div class="payment-option-label">Pay Total Amount</div>
+                                <div class="payment-amount" id="full-amount">₱0.00</div>
+                                <div class="payment-description">Pay the full amount now</div>
+                            </div>
+                        </div>
+
+                        <div class="payment-option" data-value="half">
+                            <input type="radio" name="payment_option" value="half" class="h-4 w-4 text-blue-600">
+                            <div>
+                                <div class="payment-option-label">Pay 50% Deposit</div>
+                                <div class="payment-amount" id="half-amount">₱0.00</div>
+                                <div class="payment-description">Pay half now, the rest upon check-in</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!-- Payment CTA Card - Enhanced -->
                 <div class="rounded-lg p-6 border border-lightgray">
@@ -828,22 +932,46 @@
         // Setup guest selection fields
         setupGuestSelection(bookingData);
 
+        // Setup payment preference functionality
+        setupPaymentPreference(bookingData);
+
         // Add real-time validation for form fields
         document.getElementById('firstname').addEventListener('input', validateForm);
         document.getElementById('lastname').addEventListener('input', validateForm);
         document.getElementById('email').addEventListener('input', validateForm);
         document.getElementById('phone').addEventListener('input', validateForm);
-
-        // Add animation to total amount
-        const totalAmount = document.getElementById('summary-total');
-        if (totalAmount) {
-            totalAmount.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                totalAmount.style.transform = 'scale(1)';
-                totalAmount.style.transition = 'transform 0.3s ease';
-            }, 300);
-        }
     });
+    
+    function setupPaymentPreference(bookingData) {
+        const totalAmount = bookingData.total_price;
+        const halfAmount = totalAmount * 0.5;
+        
+        // Update payment amounts
+        document.getElementById('full-amount').textContent = `₱${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('half-amount').textContent = `₱${halfAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        // Set default selection to full payment
+        document.querySelector('input[name="payment_option"][value="full"]').checked = true;
+        document.querySelector('.payment-option[data-value="full"]').classList.add('selected');
+        
+        // Add click handlers for payment options
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                
+                // Update radio button
+                document.querySelector(`input[name="payment_option"][value="${value}"]`).checked = true;
+                
+                // Update UI
+                document.querySelectorAll('.payment-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+            });
+        });
+    }
+    
     
     function setupGuestSelection(bookingData) {
         const container = document.getElementById('guest-selection-container');
@@ -1163,6 +1291,11 @@
         buttonText.textContent = 'Processing...';
         spinner.classList.remove('hidden');
 
+        // Get selected payment option
+        const paymentOption = document.querySelector('input[name="payment_option"]:checked').value;
+        const totalAmount = bookingData.total_price;
+        const amountToPay = paymentOption === 'half' ? totalAmount * 0.5 : totalAmount;
+        
         const formData = {
             firstname: document.getElementById('firstname').value.trim(),
             lastname: document.getElementById('lastname').value.trim(),
@@ -1182,6 +1315,7 @@
                 ? bookingData.breakfast_price * bookingData.facilities.length * bookingData.facilities[0].nights
                 : 0,
             total_price: bookingData.total_price,
+            amount_to_pay: amountToPay,
             guest_types: {}
         };
 

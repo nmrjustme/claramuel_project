@@ -70,7 +70,7 @@
                                                       <form id="paymentForm" action="{{ route('maya.create.session') }}"
                                                             method="POST">
                                                             @csrf
-
+                                                            
                                                             <input type="hidden" name="totalAmount"
                                                                   value="{{ $totalAmount }}">
 

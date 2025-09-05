@@ -9,7 +9,7 @@ use function PHPSTORM_META\map;
 class Order extends Model
 {
     protected $table = 'orders';
-
+    
     protected $fillable = [
         'reference_number',
         'amount',
@@ -17,6 +17,7 @@ class Order extends Model
         'payment_id',
         'failure_reason',
         'paid_at',
-        'payment_data'
+        'payment_data',
+        'token',
     ];
 }
