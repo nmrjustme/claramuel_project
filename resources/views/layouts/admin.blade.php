@@ -197,7 +197,6 @@
                     sound.pause();
                     sound.currentTime = 0;
                     audioUnlocked = true;
-                    console.log("Audio unlocked successfully");
                 }).catch(err => {
                     console.log("Audio unlock attempt failed:", err);
                 });
