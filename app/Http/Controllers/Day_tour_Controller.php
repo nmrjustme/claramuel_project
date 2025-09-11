@@ -11,7 +11,7 @@ use App\Models\User;
 use App\Models\FacilityBookingDetails;
 use App\Models\FacilityBookingLog;
 use App\Models\FacilitySummary;
-use Illuminate\Support\Facades\Log; // Added for logging is for me onlu man
+use Illuminate\Support\Facades\Log; // Added for logging 
 
 class Day_tour_Controller extends Controller
 {
