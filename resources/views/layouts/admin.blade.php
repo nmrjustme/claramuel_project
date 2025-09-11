@@ -180,10 +180,13 @@
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 
     <script type="module">
+        // Global variables
+        let audioUnlocked = false;
+        let notificationCooldown = false;
+        let lastBookingId = null;
+
         document.addEventListener('DOMContentLoaded', function() {
             const sound = document.getElementById('notificationSound');
-            let audioUnlocked = false;
-            let notificationCooldown = false;
 
             // Unlock audio after first user interaction
             function unlockAudio() {
@@ -269,7 +272,8 @@
             }
         });
 
-        function playNotificationSound(sound) {
+        function playNotificationSound() {
+            const sound = document.getElementById('notificationSound');
             if (!sound || !audioUnlocked) return;
             
             try {
@@ -285,8 +289,8 @@
             }
         }
 
-        // Function to show notification with cooldown
-        function showNotification(title, message, sound) {
+        // Function to show notification with cooldown (for bookings only)
+        function showBookingNotification(title, message) {
             // Prevent notification spam
             if (notificationCooldown) {
                 console.log("Notification cooldown active, skipping");
@@ -299,8 +303,8 @@
                 notificationCooldown = false;
             }, 3000); // 3 second cooldown
             
-            // Play sound
-            playNotificationSound(sound);
+            // Play sound - only for booking notifications
+            playNotificationSound();
                                 
             // Show desktop notification
             if ("Notification" in window && Notification.permission === 'granted') {
@@ -347,8 +351,6 @@
             });
 
         // Booking notifications with duplicate prevention
-        let lastBookingId = null;
-        
         window.Echo.channel('bookings')
             .listen('.booking.created', (e) => {
                 console.log('New booking received:', e);
@@ -360,11 +362,10 @@
                 }
                 lastBookingId = e.booking.id;
                 
-                const sound = document.getElementById('notificationSound');
-                showNotification(
+                // Show notification with sound - only for new bookings
+                showBookingNotification(
                     'New Booking', 
-                    `New booking from ${e.booking.user.firstname} ${e.booking.user.lastname} (ID: ${e.booking.id})`,
-                    sound
+                    `New booking from ${e.booking.user.firstname} ${e.booking.user.lastname} (ID: ${e.booking.id})`
                 );
             });
 
