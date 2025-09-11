@@ -106,7 +106,6 @@ $active = 'dashboard';
      .chart-container {
           height: 400px;
           position: relative;
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
           border-radius: 16px;
           padding: 20px;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -405,8 +404,9 @@ $active = 'dashboard';
                               @endauth
                          </div>
                          <div class="flex items-center space-x-4">
+
                               <!-- Active Host Toggle with Indicator -->
-                              <div class="flex flex-col items-end">
+                              {{-- <div class="flex flex-col items-end">
                                    <div class="flex items-center mb-1">
                                         <label for="activeHost" class="mr-2 text-sm font-medium">Active Admin</label>
                                         <label class="relative inline-flex items-center cursor-pointer">
@@ -427,7 +427,7 @@ $active = 'dashboard';
                                         '✓ Booking email notifications are enabled.' :
                                         '✗ Booking email notifications are turned off.' }}
                                    </div>
-                              </div>
+                              </div> --}}
 
                               <!-- User Icon -->
                               <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
@@ -540,7 +540,7 @@ $active = 'dashboard';
                <div class="card-content">
                     <div class="text-content">
                          <p class="stat-label">Checked Out</p>
-                         <h3 class="stat-value" id="total-checked-out">8</h3>
+                         <h3 class="stat-value text-red-700" id="total-checked-out">8</h3>
                          <p class="stat-change">
                               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none"
                                    viewBox="0 0 24 24" stroke="currentColor">
@@ -571,8 +571,8 @@ $active = 'dashboard';
                     <p>Please check your connection and try again</p>
                     <button onclick="loadData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">Retry</button>
                </div>
-               
-               <div class="chart-container">
+
+               <div class="chart-container bg-blue-50">
                     <div class="loading" id="loading">
                          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
                          <p>Loading income data...</p>
@@ -603,18 +603,43 @@ $active = 'dashboard';
                </div>
 
                <!-- Room monitoring grid -->
-               <div id="room-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+               <div id="room-grid"
+                    class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 p-2 sm:p-4">
                     <!-- JS will render here -->
                     <div class="col-span-full text-center py-8">
-                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                         <p class="mt-2 text-gray-500">Loading...</p>
+                         <div
+                              class="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-red-600 mx-auto">
+                         </div>
+                         <p class="mt-2 text-gray-500 text-sm sm:text-base">Loading...</p>
                     </div>
                </div>
+          
           </div>
      </div>
 
      <!-- Bottom Grid -->
      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+     
+          <!-- Admins -->
+          <div class="p-6 bg-white rounded-lg border border-gray-200" id="active-admins-container">
+               <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
+                    <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                              stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                         </svg>
+                    </button>
+               </div>
+               <div id="active-admins-list" class="overflow-y-auto max-h-64 space-y-4 pr-2">
+                    <!-- Loading state -->
+                    <div class="text-center py-8">
+                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                         <p class="mt-2 text-gray-500">Loading active admins...</p>
+                    </div>
+               </div>
+          </div>
           <!-- Left Column (Next Check-in) -->
           <div class="p-6 bg-white rounded-lg border border-gray-200">
                <!-- Next Check-in Section -->
@@ -683,28 +708,6 @@ $active = 'dashboard';
                </div>
           </div>
 
-          <!-- Admins -->
-          <div class="p-6 bg-white rounded-lg border border-gray-200" id="active-admins-container">
-               <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
-                    <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                              stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                         </svg>
-                    </button>
-               </div>
-               <div id="active-admins-list" class="overflow-y-auto max-h-64 space-y-4 pr-2">
-                    <!-- Loading state -->
-                    <div class="text-center py-8">
-                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                         <p class="mt-2 text-gray-500">Loading active admins...</p>
-                    </div>
-               </div>
-          </div>
-
-
           <!-- Recent Enquiries -->
           <div class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 bg-white rounded-lg border border-gray-200">
 
@@ -771,44 +774,44 @@ $active = 'dashboard';
      <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
      <script>
-     function toggleActiveHost(checkbox) {
-          const isActive = checkbox.checked;
-          const indicator = document.getElementById('hostStatusIndicator');
+          // function toggleActiveHost(checkbox) {
+     //      const isActive = checkbox.checked;
+     //      const indicator = document.getElementById('hostStatusIndicator');
           
-          // Send AJAX request to update host status
-          fetch('/host/status', {
-               method: 'POST',
-               headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-               },
-               body: JSON.stringify({ is_active: isActive })
-          })
-          .then(response => {
-               if (!response.ok) {
-                    throw new Error('Network response was not ok');
-               }
-               return response.json();
-          })
-          .then(data => {
-               // Update indicator
-               if(data.is_active) {
-                    indicator.textContent = '✓ Receiving booking notifications';
-                    indicator.classList.remove('bg-gray-100/20', 'text-gray-200');
-                    indicator.classList.add('bg-green-100/20', 'text-green-100');
-               } else {
-                    indicator.textContent = '✗ Not accepting bookings notification';
-                    indicator.classList.remove('bg-green-100/20', 'text-green-100');
-                    indicator.classList.add('bg-gray-100/20', 'text-gray-200');
-               }
-          })
-          .catch(error => {
-               console.error('Error:', error);
-               // Revert checkbox if update failed
-               checkbox.checked = !isActive;
-          });
-     }
+     //      // Send AJAX request to update host status
+     //      fetch('/host/status', {
+     //           method: 'POST',
+     //           headers: {
+     //                'Content-Type': 'application/json',
+     //                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+     //                'Accept': 'application/json'
+     //           },
+     //           body: JSON.stringify({ is_active: isActive })
+     //      })
+     //      .then(response => {
+     //           if (!response.ok) {
+     //                throw new Error('Network response was not ok');
+     //           }
+     //           return response.json();
+     //      })
+     //      .then(data => {
+     //           // Update indicator
+     //           if(data.is_active) {
+     //                indicator.textContent = '✓ Receiving booking notifications';
+     //                indicator.classList.remove('bg-gray-100/20', 'text-gray-200');
+     //                indicator.classList.add('bg-green-100/20', 'text-green-100');
+     //           } else {
+     //                indicator.textContent = '✗ Not accepting bookings notification';
+     //                indicator.classList.remove('bg-green-100/20', 'text-green-100');
+     //                indicator.classList.add('bg-gray-100/20', 'text-gray-200');
+     //           }
+     //      })
+     //      .catch(error => {
+     //           console.error('Error:', error);
+     //           // Revert checkbox if update failed
+     //           checkbox.checked = !isActive;
+     //      });
+     // }
      
      // Data Loading Functions
      function loadNextCheckin() {
@@ -855,7 +858,7 @@ $active = 'dashboard';
                     document.getElementById('next-checkin-guest').textContent = 
                          `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
                     document.getElementById('next-checkin-phone').textContent = booking.user?.phone || 'N/A';
-                    document.getElementById('next-checkin-booking-code').textContent = booking.reference || 'N/A';
+                    document.getElementById('next-checkin-booking-code').textContent = booking.code || 'N/A';
                } else {
                     container.textContent = 'No upcoming check-ins';
                     ['next-checkin-date', 'next-checkin-nights', 'next-checkin-guest', 'next-checkin-phone'].forEach(id => {
@@ -911,9 +914,7 @@ $active = 'dashboard';
                                    <img src="{{ url('imgs/profiles') }}/${admin.profile_img}" 
                                         alt="${admin.fullname}" 
                                         class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
-                                   ${admin.is_active ? `
-                                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
-                                   `: ''}
+                                   
                               </div>
                               <div class="ml-3 overflow-hidden">
                                    <h3 class="font-medium text-gray-800 truncate">${admin.fullname}</h3>
@@ -987,7 +988,7 @@ $active = 'dashboard';
                `;
           }
      }
-
+     
      function renderRooms(data) {
           const grid = document.getElementById("room-grid");
           grid.innerHTML = ""; // clear old content
@@ -1009,21 +1010,23 @@ $active = 'dashboard';
           data.facilities.forEach(facility => {
                const unavailable = data.unavailableDates[facility.id] || [];
                const today = data.today;
-
+               
                const isOccupied = unavailable.some(date =>
                     today >= date.checkin_date && today < date.checkout_date
                );
-
+               
                const div = document.createElement("div");
                div.className = `
-                    p-3 rounded-lg shadow text-center text-sm
+                    p-4 sm:p-5 rounded-xl shadow-md
+                    text-center text-sm sm:text-base
                     ${isOccupied ? 'bg-red-500 text-white' : 'bg-blue-50 text-gray-700'}
                `;
+               
                div.innerHTML = `
-                    <h3 class="font-semibold ${isOccupied ? 'text-white' : 'text-gray-700'}">
+                    <h3 class="font-semibold truncate ${isOccupied ? 'text-white' : 'text-gray-800'}">
                          ${facility.name}
                     </h3>
-                    <p class="text-xs italic ${isOccupied ? 'text-gray-100' : 'text-gray-500'}">
+                    <p class="text-xs sm:text-sm italic ${isOccupied ? 'text-gray-100' : 'text-gray-500'}">
                          ${facility.category ?? 'No Category'}
                     </p>
                     <p class="mt-1 font-medium ${isOccupied ? 'text-white' : 'text-gray-600'}">
@@ -1038,6 +1041,7 @@ $active = 'dashboard';
                
                grid.appendChild(div);
           });
+     
      }
      
 

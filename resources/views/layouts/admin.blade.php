@@ -181,33 +181,10 @@
 
     <script type="module">
         // Global variables
-        let audioUnlocked = false;
         let notificationCooldown = false;
         let lastBookingId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            const sound = document.getElementById('notificationSound');
-
-            // Unlock audio after first user interaction
-            function unlockAudio() {
-                if (audioUnlocked) return;
-                
-                // Try to play and immediately pause to unlock audio
-                sound.play().then(() => {
-                    sound.pause();
-                    sound.currentTime = 0;
-                    audioUnlocked = true;
-                }).catch(err => {
-                    console.log("Audio unlock attempt failed:", err);
-                });
-
-                document.removeEventListener('click', unlockAudio);
-                document.removeEventListener('keydown', unlockAudio);
-            }
-
-            document.addEventListener('click', unlockAudio);
-            document.addEventListener('keydown', unlockAudio);
-
             // Sidebar toggle functionality
             const sidebar = document.getElementById('sidebar');
             const toggleSidebarMobile = document.getElementById('toggleSidebarMobile');
@@ -273,15 +250,12 @@
 
         function playNotificationSound() {
             const sound = document.getElementById('notificationSound');
-            if (!sound || !audioUnlocked) return;
+            if (!sound) return;
             
             try {
                 sound.currentTime = 0;
                 sound.play().catch(err => {
                     console.log("Sound play blocked:", err);
-                    // Try to unlock audio again if play fails
-                    audioUnlocked = false;
-                    unlockAudio();
                 });
             } catch (error) {
                 console.error("Error playing sound:", error);

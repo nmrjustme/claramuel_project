@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check-out Receipt - {{ $payment->bookingLog->reference }}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         @page {
@@ -187,7 +186,7 @@
         .modal-button-yes:hover {
             background-color: #059669;
         }
-        
+
         /* Loading spinner */
         .spinner {
             border: 3px solid #f3f3f3;
@@ -200,12 +199,17 @@
             margin-right: 8px;
             vertical-align: middle;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .hidden {
             display: none;
         }
@@ -217,22 +221,20 @@
         <!-- Print Button -->
         <div class="no-print text-center mb-4 flex space-x-4 justify-center">
             <a href="{{ route('admin.bookings') }}"
-               class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                     fill="currentColor">
+                class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
-                          d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
-                          clip-rule="evenodd" />
+                        d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd" />
                 </svg>
                 Back
             </a>
             <button onclick="handlePrint()" id="print-btn"
-                    class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                     fill="CurrentColor">
+                class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="CurrentColor">
                     <path fill-rule="evenodd"
-                          d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                          clip-rule="evenodd" />
+                        d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                        clip-rule="evenodd" />
                 </svg>
                 Print Receipt
             </button>
@@ -249,15 +251,15 @@
                     <!-- Header -->
                     <div class="header-gradient text-white p-6 text-center relative">
                         <div class="absolute top-4 left-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 opacity-20"
-                                 viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 opacity-20" viewBox="0 0 20 20"
+                                fill="currentColor">
                                 <path
-                                      d="M10 2a6 极 0 00-6 6v3.586l-.707.707A1 1 极 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                                    d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
                             </svg>
                         </div>
                         <h1 class="text-2xl font-bold mb-1">CHECK-OUT RECEIPT</h1>
                         <p class="text-red-100 opacity-90 text-sm">Reservation Code: {{
-                              $payment->bookingLog->reference }}</p>
+                            $payment->bookingLog->code }}</p>
                         <p class="text-red-100 opacity-90 text-sm">
                             Check-out At:
                             {{ $payment->bookingLog->checked_out_at ?
@@ -271,42 +273,38 @@
                         <div class="mb-8">
                             <div class="flex items-center mb-4">
                                 <div class="bg-red-200 p-2 rounded-full mr-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         class="h-5 w-5 text-red-600" viewBox="0 0 20 20"
-                                         fill="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600"
+                                        viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd"
-                                              d="M10 极a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                              clip-rule="evenodd" />
+                                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                 </div>
                                 <h2 class="text-xl font-semibold text-gray-800">Guest Information</h2>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:block">
-                                <div
-                                    class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
+                                <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span
                                         class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Full
                                         name:</span>
                                     <span class="font-medium text-gray-800 print-value">{{
-                                          $payment->bookingLog->user->firstname }} {{
-                                          $payment->bookingLog->user->lastname }}</span>
+                                        $payment->bookingLog->user->firstname }} {{
+                                        $payment->bookingLog->user->lastname }}</span>
                                 </div>
 
-                                <div
-                                    class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
+                                <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span
                                         class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Email:</span>
                                     <span class="font-medium text-gray-800 print-value">{{
-                                          $payment->bookingLog->user->email }}</span>
+                                        $payment->bookingLog->user->email }}</span>
                                 </div>
 
-                                <div
-                                    class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
+                                <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span
                                         class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Phone:</span>
                                     <span class="font-medium text-gray-800 print-value">{{
-                                          $payment->bookingLog->user->phone ?? 'N/A' }}</span>
+                                        $payment->bookingLog->user->phone ?? 'N/A' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -315,12 +313,11 @@
                         <div class="mb-8">
                             <div class="flex items-center mb-4">
                                 <div class="bg-red-200 p-2 rounded-full mr-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         class="h-5 w-5 text-red-600" viewBox="0 0 20 20"
-                                         fill="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600"
+                                        viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd"
-                                              d="M4 4a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 2a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2极3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2极7zm3 0a1 1 0 100 2极3a1 1 0 100-2h-3z"
-                                              clip-rule="evenodd" />
+                                            d="M4 4a2 2 0 012-2h8a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 2a1 1 0 000 2h4a1 1 0 100-2H7zm0 4a1 1 0 000 2h4a1 1 0 100-2H7z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                 </div>
                                 <h2 class="text-xl font-semibold text-gray-800">Booking Summary</h2>
@@ -365,15 +362,15 @@
                                             class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room
                                             Type:</span>
                                         <span class="font-medium text-gray-800 print-value">{{
-                                              $facility->name }} (₱{{
-                                              number_format($facility->price, 2) }}/night)</span>
+                                            $facility->name }} (₱{{
+                                            number_format($facility->price, 2) }}/night)</span>
                                     </div>
                                     <div class="print-row">
                                         <span
                                             class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room
                                             Number:</span>
                                         <span class="font-medium text-gray-800 print-value">{{
-                                              $facility->room_number ?? 'Not assigned' }}</span>
+                                            $facility->room_number ?? 'Not assigned' }}</span>
                                     </div>
 
                                     <div class="print-row">
@@ -407,17 +404,16 @@
                                         <span
                                             class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Breakfast:</span>
                                         <span class="font-medium text-gray-800 print-value">₱{{
-                                              number_format($summary->breakfast_price * $nights)
-                                              }}/morning(s)</span>
+                                            number_format($summary->breakfast_price * $nights)
+                                            }}/morning(s)</span>
                                     </div>
                                     @endif
 
 
                                     <div class="md:col-span-2 pt-2 print:block print-row">
-                                        <span
-                                            class="text-sm font-medium text-gray-500 print-label">Subtotal:</span>
+                                        <span class="text-sm font-medium text-gray-500 print-label">Subtotal:</span>
                                         <span class="font-medium text-red-600 print-value">₱{{
-                                              number_format($subtotal, 2) }}</span>
+                                            number_format($subtotal, 2) }}</span>
                                         <div class="divider my-2 print:hidden"></div>
                                     </div>
                                 </div>
@@ -426,16 +422,15 @@
                                     @foreach($guestsForFacility as $guest)
                                     <tr>
                                         <td class="p-2 border-b border-gray-200 guest-type">{{
-                                              $guest['type'] }}</td>
-                                        <td
-                                            class="p-2 border-b border-gray-200 text-right guest-quantity">
+                                            $guest['type'] }}</td>
+                                        <td class="p-2 border-b border-gray-200 text-right guest-quantity">
                                             {{ $guest['quantity'] }} guest(s)</td>
                                     </tr>
                                     @endforeach
                                     <tr class="guest-total">
                                         <td class="p-2 font-semibold">Total Guests</td>
                                         <td class="p-2 text-right font-semibold">{{
-                                              $guestsForFacility->sum('quantity') }}</td>
+                                            $guestsForFacility->sum('quantity') }}</td>
                                     </tr>
                                 </table>
                                 @else
@@ -450,7 +445,7 @@
                                 <span class="text-lg font-bold text-gray-700 print-label">Total
                                     Amount:</span>
                                 <span class="text-xl font-bold text-red-600 print-value">₱{{
-                                      number_format($totalAmount, 2) }}</span>
+                                    number_format($totalAmount, 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -475,16 +470,16 @@
                         <!-- Payment Summary -->
                         <div class="mb-6">
                             <div class="flex items-center mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="h-5 w-5 text-red-600 mr-2" viewBox="极 0 20 20"
-                                     fill="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 mr-2"
+                                    viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                                     <path fill-rule="evenodd"
-                                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.极v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
-                                          clip-rule="evenodd" />
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
+                                        clip-rule="evenodd" />
                                 </svg>
-                                <h3 class="text-lg font-semibold text-gray-800">Payment Summary</极>
+
+                                <h3 class="text-lg font-semibold text-gray-800">Payment Summary</h3>
                             </div>
 
                             <div class="space-y-3">
@@ -505,31 +500,29 @@
                                 <div class="payment-row">
                                     <span class="payment-label">Advance Paid:</span>
                                     <span class="payment-value text-green-600">₱{{
-                                          number_format($advancePaid, 2) }}</span>
+                                        number_format($advancePaid, 2) }}</span>
                                 </div>
 
                                 @if($checkinPaid > 0)
                                 <div class="payment-row">
                                     <span class="payment-label">Paid at Check-in:</span>
                                     <span class="payment-value text-green-600">₱{{
-                                          number_format($checkinPaid, 2) }}</span>
+                                        number_format($checkinPaid, 2) }}</span>
                                 </div>
                                 @endif
 
                                 <div class="payment-row" style="font-weight: bold;">
                                     <span class="payment-label">Total Paid:</span>
                                     <span class="payment-value text-green-600">₱{{
-                                          number_format($totalPaid, 2) }}</span>
+                                        number_format($totalPaid, 2) }}</span>
                                 </div>
 
                                 <div
                                     class="payment-row pt-4 mt-4 border-t-2 border-gray-300 flex items-center justify-between bg-gray-50 rounded-xl p-4 shadow-sm">
-                                    <span
-                                        class="payment-label text-lg font-semib极 text-gray-700 flex items-center">
+                                    <span class="payment-label text-lg font-semibold text-gray-700 flex items-center">
                                         Balance Status
                                     </span>
-                                    <span
-                                        class="payment-value text-2xl font-extrabold text-green-600">
+                                    <span class="payment-value text-2xl font-extrabold text-green-600">
                                         FULLY PAID
                                     </span>
                                 </div>
@@ -540,24 +533,16 @@
                         <!-- Status Display -->
                         <div class="mb-6">
                             <div class="flex items-center mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="h-5 w-5 text-red-600 mr-2" viewBox="0 0 20 20"
-                                     fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287极1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                                          clip-rule="evenodd" />
-                                </svg>
                                 <h3 class="text-lg font-semibold text-gray-800">Payment Status</h3>
                             </div>
 
                             <div class="bg-green-50 p-4 rounded-lg border border-green-200">
                                 <div class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         class="h-5 w-5 text-green-600 mr-2" viewBox="0 0 20 20"
-                                         fill="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 mr-2"
+                                        viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd"
-                                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                              clip-rule="evenodd" />
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <p class="text-green-800 font-medium">All payments have been
                                         settled. No balance remaining.</p>
@@ -568,12 +553,11 @@
                         <!-- Payment Details -->
                         <div>
                             <div class="flex items-center mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="h-5 w-5 text-red-600 mr-2" viewBox="0 0 20 20"
-                                     fill="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 mr-2"
+                                    viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd"
-                                          d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
-                                          clip-rule="evenodd" />
+                                        d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                                        clip-rule="evenodd" />
                                 </svg>
                                 <h3 class="text-lg font-semibold text-gray-800">Advance Payment Details
                                 </h3>
@@ -585,20 +569,19 @@
                                     <span class="payment-value">{{ ucfirst($payment->method) }}</span>
                                 </div>
                                 <div class="payment-row">
-                                    <span class="payment-label">GCASH NUMBER:</span>
-                                    <span class="payment-value">{{ ucfirst($payment->gcash_number)
-                                        }}</span>
+                                    <span class="payment-label">Amount:</span>
+                                    <span class="payment-value">₱{{ ucfirst(number_format($payment->amount)) }}</span>
                                 </div>
                                 <div class="payment-row">
                                     <span class="payment-label">Payment Date:</span>
                                     <span class="payment-value">{{
-                                          \Carbon\Carbon::parse($payment->payment_date)->format('F j,
-                                          Y \a\t g:i A') }}</span>
+                                        \Carbon\Carbon::parse($payment->payment_date)->format('F j,
+                                        Y \a\t g:i A') }}</span>
                                 </div>
 
                                 @if($payment->reference_no)
                                 <div class="payment-row">
-                                    <span class="payment-label">Reference No:</span>
+                                    <span class="payment-label">Reference:</span>
                                     <span class="payment-value">{{ $payment->reference_no }}</span>
                                 </div>
                                 @endif

@@ -55,6 +55,7 @@ class CheckinController extends Controller
 
             return [
                 'reservation_code' => $log->code,
+                'id' => $log->id,
                 'checkin_date'     => $detail ? $detail->checkin_date->toISOString() : null,
                 'full_name'        => $log->user ? $log->user->firstname . ' ' . $log->user->lastname : '',
                 'email'            => $log->user ? $log->user->email : '',

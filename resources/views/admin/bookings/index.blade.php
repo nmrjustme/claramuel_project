@@ -1535,7 +1535,8 @@ $active = 'bookings';
                 const totalPayment = advancePaid + checkinPaid;
                 
                 const paymentScheme = booking.payments?.[0]?.method || 'Unknown';
-                
+
+                const reference = booking.payments?.[0]?.reference_no || 'Unknown';
                 // Calculate remaining balance (positive = owed, negative = overpaid)
                 const balance = totalAmount - totalPayment;
                 
@@ -1803,10 +1804,17 @@ $active = 'bookings';
                         </div>
                         
                         <div class="px-4 py-3 space-y-3">
-                            <div class="flex justify-between items-center py-1.5">
+                            <div class="flex justify-between items-center">
                                 <span class="text-sm text-gray-600">Payment Scheme:</span>
                                 <span class="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
                                     ${paymentScheme}
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">Reference:</span>
+                                <span class="text-sm font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                                    ${reference}
                                 </span>
                             </div>
                             
@@ -2208,10 +2216,14 @@ $active = 'bookings';
             // Create the new booking row
             const statusInfo = STATUS_CONFIG[booking.status] || {class: 'bg-yellow-600', text: booking.status.toUpperCase()};
             
+            const displayStatus = booking.status;
+            const isPending = displayStatus === 'pending_confirmation';                         
+            
             const newRow = document.createElement('tr');
             newRow.className = 'booking-row fade-in';
             newRow.dataset.bookingId = booking.id;
             newRow.innerHTML = `
+            <div class="booking-row ${isPending ? 'pending' : ''}">
                 <td class="px-3 py-2">
                     <div class="text-xs text-gray-900 font-medium">${booking.id}</div>
                 </td>
@@ -2235,6 +2247,7 @@ $active = 'bookings';
                         </button>
                     </div>
                 </td>
+            </div>
             `;
             
             // Add to the top of the table
