@@ -2129,39 +2129,6 @@ $active = 'bookings';
         async function checkoutBooking(bookingId, button) {
             
             window.location.href = `/check-out/receipt/${bookingId}`;
-            try {
-                // Show loading state on button
-                button.disabled = true;
-                button.innerHTML = '<div class="btn-preloader"></div> Processing...';
-                
-                // Implement your checkout booking logic here
-                // Example API call:
-                // const response = await fetch(`/bookings/${bookingId}/checkout`, {
-                //     method: 'POST',
-                //     headers: headers
-                // });
-                // const result = await response.json();
-                
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Reset button state
-                button.disabled = false;
-                button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" /></svg> Check-out Guest';
-                
-                showToast('success', `Booking ${bookingId} checked out successfully!`);
-                
-                // Reload the booking summary to update the status
-                loadBookingSummary(bookingId);
-                loadBookings(currentStatus, currentPage);
-            } catch (error) {
-                console.error('Check-out error:', error);
-                // Reset button state
-                button.disabled = false;
-                button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" /></svg> Check-out Guest';
-                
-                showToast('error', error.message || 'Failed to check out booking');
-            }
         }
         
         // Helper functions
