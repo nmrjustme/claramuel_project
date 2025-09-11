@@ -24,7 +24,7 @@
         @endif
     </div>
 
-    <form method="POST" action="{{ route('daytour.store') }}" class="space-y-8" id="dayTourForm">
+    <form method="POST" action="{{ route('admin.daytour.store') }}" class="space-y-8" id="dayTourForm">
         @csrf
         
         <!-- Guest Information Section -->

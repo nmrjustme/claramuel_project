@@ -157,7 +157,6 @@ public function show($id)
         'user',
         'bookingGuestDetails.guestType',
         'bookingGuestDetails.facility',
-        'facilitySummaries'
     ])->findOrFail($id);
 
     $serviceType = $this->getServiceType($log);
@@ -446,7 +445,6 @@ public function update(Request $request, $id)
             'user',
             'bookingGuestDetails.guestType',
             'bookingGuestDetails.facility',
-            'facilitySummaries'
         ])->findOrFail($id);
 
         $serviceType = $this->getServiceType($log);

@@ -38,7 +38,7 @@
                    class="px-4 py-2 bg-red-50 text-red-700 rounded-lg border border-red-200 hover:bg-red-100 transition-all duration-200 flex items-center shadow-sm hover:shadow-md">
                     <i class="fas fa-edit mr-2 text-red-500"></i>Edit
                 </a>
-                <a href="{{ route('admin.daytour.day_tour_logs') }}" 
+                <a href="{{ route('admin.daytour.logs') }}" 
                    class="px-4 py-2 bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-200 flex items-center shadow-sm hover:shadow-md">
                     <i class="fas fa-arrow-left mr-2 text-gray-500"></i>Back
                 </a>

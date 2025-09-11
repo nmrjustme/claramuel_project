@@ -57,7 +57,7 @@
             <p class="text-gray-600 mt-1">Real-time status and availability tracking</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="{{ route('admin.daytour.day_tour_logs') }}" 
+            <a href="{{ route('admin.daytour.logs') }}" 
                class="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
                 <i class="fas fa-list mr-2"></i>View Logs
             </a>

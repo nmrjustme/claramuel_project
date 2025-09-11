@@ -191,7 +191,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments');
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
-    Route::get('/DayTour logs', [Day_tour_Controller::class, 'index'])->name('admin.daytour.index');
 
     
     // Get badge counts Unread or New

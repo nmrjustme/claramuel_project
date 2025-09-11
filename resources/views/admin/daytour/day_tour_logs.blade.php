@@ -25,7 +25,7 @@
 
     <!-- User-Friendly Search and Filters -->
 <div class="bg-gray-50 p-4 rounded-lg mb-6">
-    <form method="GET" action="{{ route('admin.daytour.day_tour_logs') }}">
+    <form method="GET" action="{{ route('admin.daytour.logs') }}">
         <!-- Basic Search Row -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div class="md:col-span-2">
@@ -120,7 +120,7 @@
 
         <!-- Action Buttons -->
         <div class="flex items-center justify-end space-x-3 pt-4">
-            <a href="{{ route('admin.daytour.day_tour_logs') }}" 
+            <a href="{{ route('admin.daytour.logs') }}" 
                 class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
                 <i class="fas fa-times mr-2"></i>Clear All
             </a>
@@ -149,7 +149,7 @@
                 @endif
             @endif
         @endforeach
-        <a href="{{ route('admin.daytour.day_tour_logs') }}" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full hover:bg-red-200">
+        <a href="{{ route('admin.daytour.logs') }}" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full hover:bg-red-200">
             Clear All ×
         </a>
     </div>
