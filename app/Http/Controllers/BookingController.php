@@ -408,10 +408,13 @@ class BookingController extends Controller
             $perPage = $request->input('per_page', 15);
             $page = $request->input('page', 1);
             $search = $request->input('search', '');
-            $status = $request->input('status', '');
-            $readStatus = $request->input('read_status', '');
-
-            $query = FacilityBookingLog::with(['user', 'payments'])
+            
+            $query = FacilityBookingLog::with([
+                'user:id,firstname,lastname,email,phone',
+                'payments:id,facility_log_id,amount_paid,checkin_paid,remaining_balance_status,status',
+                'details:id,facility_booking_log_id,checkin_date,checkout_date',
+                'summaries.facility:id,name,price'
+            ])
                 ->orderBy('created_at', 'desc');
 
             // 🔍 Search functionality
@@ -421,73 +424,11 @@ class BookingController extends Controller
                         ->orWhere('code', 'like', "%$search%")
                         ->orWhereHas('user', function ($userQuery) use ($search) {
                             $userQuery->where('firstname', 'like', "%$search%")
-                                ->orWhere('lastname', 'like', "%$search%");
+                                ->orWhere('lastname', 'like', "%$search%")
+                                ->orWhere('email', 'like', "%$search%")
+                                ->orWhere('phone', 'like', "%$search%");
                         });
                 });
-            }
-
-            // 🎯 Status filtering (aligned with display status)
-            if ($status) {
-                switch ($status) {
-                    case 'fully_paid':
-                        $query->where(function ($q) {
-                            $q->whereIn('status', ['pending_confirmation', 'confirmed'])
-                                ->whereHas('payments', function ($paymentQuery) {
-                                    $paymentQuery->where('remaining_balance_status', 'fully_paid');
-                                });
-                        });
-                        break;
-
-                    case 'verified':
-                        $query->where(function ($q) {
-                            $q->whereIn('status', ['pending_confirmation', 'confirmed'])
-                                ->whereHas('payments', function ($paymentQuery) {
-                                    $paymentQuery->where('status', 'verified')
-                                        ->where('remaining_balance_status', '!=', 'fully_paid');
-                                });
-                        });
-                        break;
-
-                    case 'checked_in':
-                        $query->where('status', 'checked_in');
-                        break;
-
-                    case 'checked_out':
-                        $query->where('status', 'checked_out');
-                        break;
-
-                    case 'cancelled':
-                        $query->where('status', 'cancelled');
-                        break;
-
-                    case 'no_show':
-                        $query->where('status', 'no_show');
-                        break;
-
-                    case 'pending_confirmation':
-                        $query->where('status', 'pending_confirmation');
-                        break;
-
-                    case 'confirmed':
-                        $query->where('status', 'confirmed');
-                        break;
-
-                    case 'rejected':
-                        $query->where('status', 'rejected');
-                        break;
-                }
-            }
-
-            // 👀 Read status filtering
-            if ($readStatus) {
-                switch ($readStatus) {
-                    case 'read':
-                        $query->where('is_read', true);
-                        break;
-                    case 'unread':
-                        $query->where('is_read', false);
-                        break;
-                }
             }
 
             $bookings = $query->paginate($perPage, ['*'], 'page', $page);
@@ -516,23 +457,25 @@ class BookingController extends Controller
                             'firstname' => $booking->user->firstname,
                             'lastname' => $booking->user->lastname,
                             'email' => $booking->user->email,
+                            'phone' => $booking->user->phone,
                         ],
-                        'created_at' => $booking->created_at->toDateTimeString(),
                         'status' => $displayStatus,
-                        'is_read' => (bool) $booking->is_read,
                         'code' => $booking->code,
-                        'payments' => $booking->payments,
                         'details' => $booking->details,
                         'summaries' => $booking->summaries,
+                        'payments' => $booking->payments,
                     ];
                 }),
                 'current_page' => $bookings->currentPage(),
                 'per_page' => $bookings->perPage(),
                 'last_page' => $bookings->lastPage(),
-                'total' => $bookings->total()
+                'total' => $bookings->total(),
+                'from' => $bookings->firstItem(),
+                'to' => $bookings->lastItem()
             ]);
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'error' => 'Server Error',
                 'message' => $e->getMessage()
             ], 500);

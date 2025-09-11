@@ -11,7 +11,7 @@
             ['label' => 'Payment'],
             ['label' => 'Completed']
       ]" />`
-
+      
       <!-- Fancy Loading Section -->
       <div class="flex items-center justify-center mt-10 sm:mt-16 px-2">
             <div
@@ -86,7 +86,8 @@
                                                 data.order.status === 'cancelled' || 
                                                 data.order.status === 'expired') {
                                           // Payment failed - redirect to error page
-                                          window.location.href = `/booking/payment-failed?reason=${data.order.status}&order=${data.order.reference_number}`;
+                                          window.location.href = `/booking/payment-failed/${data.order.status}/${data.order.reference_number}`;
+                                    
                                     } else {
                                           // Payment still processing, continue checking
                                           statusMessage.textContent = 'Waiting for your payment...';

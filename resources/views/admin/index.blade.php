@@ -480,7 +480,7 @@ $active = 'dashboard';
      <!-- Main Content Grid -->
      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
           <!-- Admins -->
-          <div class="p-6 rounded-lg shadow-sm bg-white" id="active-admins-container">
+          <div class="p-6 bg-white rounded-lg border border-gray-200" id="active-admins-container">
                <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
                     <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
@@ -501,7 +501,7 @@ $active = 'dashboard';
           </div>
 
           <!-- Recent Enquiries -->
-          <div class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 rounded-lg shadow-sm border-gray-200 bg-white">
+          <div class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 bg-white rounded-lg border border-gray-200">
                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
                     <!-- Title + Badge -->
                     <div class="flex items-center">
@@ -550,22 +550,18 @@ $active = 'dashboard';
 
           @include('admin.inquirers.recent_inquirers')
 
-          <!-- Facilities Occupied Today -->
-          <div class="lg:col-span-2 shadow-sm bg-white p-6 rounded-lg">
+          <!--Facilities Occupied Today section  -->
+          <div class="lg:col-span-2 p-6 bg-white rounded-lg border border-gray-200">
                <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">Facilities Occupied Today</h2>
                     <div class="flex items-center">
                          <span class="text-sm text-gray-500 mr-3">
                               @php
-                              $today = \Carbon\Carbon::now(
-                              'Asia/Manila',
-                              )->toDateString();
-                              echo \Carbon\Carbon::now('Asia/Manila')->format(
-                              'F j, Y',
-                              );
+                              $today = \Carbon\Carbon::now('Asia/Manila')->toDateString();
+                              echo \Carbon\Carbon::now('Asia/Manila')->format('F j, Y');
                               @endphp
                          </span>
-                         <button onclick="loadOccupiedFacilities()" class="text-gray-500 hover:text-red-600">
+                         <button onclick="loadRoomMonitoring()" class="text-gray-500 hover:text-red-600">
                               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                    stroke="currentColor">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -575,22 +571,12 @@ $active = 'dashboard';
                     </div>
                </div>
 
-               <div class="relative">
-                    <!-- Horizontal scroll container -->
-                    <div class="flex space-x-4 pb-4 overflow-x-auto scrollbar-hide" id="occupied-facilities-container">
-                         <!-- Loading state -->
-                         <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
-                              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                              <p class="mt-2 text-gray-500">Loading occupied facilities...</p>
-                         </div>
-                    </div>
-
-                    <!-- Scroll indicators -->
-                    <div
-                         class="absolute top-0 left-0 h-full w-8 bg-gradient-to-r from-white to-transparent pointer-events-none">
-                    </div>
-                    <div
-                         class="absolute top-0 right-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none">
+               <!-- Room monitoring grid -->
+               <div id="room-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <!-- JS will render here -->
+                    <div class="col-span-full text-center py-8">
+                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                         <p class="mt-2 text-gray-500">Loading...</p>
                     </div>
                </div>
           </div>
@@ -599,7 +585,7 @@ $active = 'dashboard';
      <!-- Bottom Grid -->
      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <!-- Left Column (Next Check-in) -->
-          <div class="bg-white p-6 rounded-lg shadow-sm">
+          <div class="p-6 bg-white rounded-lg border border-gray-200">
                <!-- Next Check-in Section -->
                <div class="glass-card">
                     <div class="flex items-center justify-between mb-4">
@@ -666,7 +652,7 @@ $active = 'dashboard';
           </div>
 
           <!-- Quick Actions -->
-          <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+          <div class="p-6 lg:col-span-2 bg-white rounded-lg border border-gray-200">
                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
                <div class="grid grid-cols-2 gap-4">
 
@@ -1352,1126 +1338,1215 @@ $active = 'dashboard';
 @section('content_js')
 <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
 <script>
      function toggleActiveHost(checkbox) {
-     const isActive = checkbox.checked;
-     const indicator = document.getElementById('hostStatusIndicator');
-     
-     // Send AJAX request to update host status
-     fetch('/host/status', {
-          method: 'POST',
-          headers: {
-               'Content-Type': 'application/json',
-               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-               'Accept': 'application/json'
-          },
-          body: JSON.stringify({ is_active: isActive })
-     })
-     .then(response => {
-          if (!response.ok) {
-               throw new Error('Network response was not ok');
-          }
-          return response.json();
-     })
-     .then(data => {
-          // Update indicator
-          if(data.is_active) {
-               indicator.textContent = '✓ Receiving booking notifications';
-               indicator.classList.remove('bg-gray-100/20', 'text-gray-200');
-               indicator.classList.add('bg-green-100/20', 'text-green-100');
-          } else {
-               indicator.textContent = '✗ Not accepting bookings';
-               indicator.classList.remove('bg-green-100/20', 'text-green-100');
-               indicator.classList.add('bg-gray-100/20', 'text-gray-200');
-          }
-     })
-     .catch(error => {
-          console.error('Error:', error);
-          // Revert checkbox if update failed
-          checkbox.checked = !isActive;
-     });
-}
-// Global functions for modal operations
-function openCheckInModal() {
-     document.body.classList.add('modal-open');
-     document.getElementById('checkInModal').classList.remove('hidden');
-}
-
-function closeCheckInModal() {
-     document.body.classList.remove('modal-open');
-     document.getElementById('checkInModal').classList.add('hidden');
-}
-
-function openCheckOutModal() {
-     document.body.classList.add('modal-open');
-     document.getElementById('checkOutModal').classList.remove('hidden');
-}
-
-function closeCheckOutModal() {
-     document.body.classList.remove('modal-open');
-     document.getElementById('checkOutModal').classList.add('hidden');
-}
-
-function showManualSearch() {
-     document.body.classList.add('modal-open');
-     closeCheckInModal();
-     document.getElementById('manualSearchContainer').classList.remove('hidden');
-}
-
-function closeManualSearch() {
-     document.body.classList.remove('modal-open');
-     document.getElementById('manualSearchContainer').classList.add('hidden');
-}
-
-function showCheckoutManualSearch() {
-     document.body.classList.add('modal-open');
-     closeCheckOutModal();
-     document.getElementById('checkoutManualSearchContainer').classList.remove('hidden');
-}
-
-function closeCheckoutManualSearch() {
-     document.body.classList.remove('modal-open');
-     document.getElementById('checkoutManualSearchContainer').classList.add('hidden');
-}
-
-// Day Tour Modal Functions
-function openDayTourModal() {
-     document.body.classList.add('modal-open');
-     document.getElementById('dayTourModal').classList.remove('hidden');
-     loadCottageOptions();
-     calculateTotals(); // Initialize totals
-}
-
-function closeDayTourModal() {
-     document.body.classList.remove('modal-open');
-     document.getElementById('dayTourModal').classList.add('hidden');
-     // Reset form when closing
-     document.getElementById('dayTourForm').reset();
-     document.getElementById('grandTotal').textContent = '0';
-     document.getElementById('finalTotal').textContent = '0';
-     document.getElementById('cottageTotal').textContent = '0';
-}
-
-function toggleSection(sectionId) {
-     const section = document.getElementById(sectionId);
-     const chevron = document.getElementById(`${sectionId}Chevron`);
-     section.classList.toggle('hidden');
-     chevron.classList.toggle('rotate-180');
-}
-
-// Data Loading Functions
-function loadNextCheckin() {
-     fetch('/get/bookings/next-checkin', {
-          method: 'GET',
-          headers: {
-               'Accept': 'application/json',
-               'X-Requested-With': 'XMLHttpRequest',
-               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          }
-     })
-     .then(response => {
-          if (!response.ok) {
-               throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-     })
-     .then(data => {
-          if (!data.success) {
-               throw new Error(data.message || 'Failed to load next check-in');
-          }
+          const isActive = checkbox.checked;
+          const indicator = document.getElementById('hostStatusIndicator');
           
-          const container = document.getElementById('next-checkin-time');
-          
-          if (data.data) {
-               const booking = data.data;
-               const detail = booking.details[0];
-               
-               // Format the time display
-               const daysUntil = data.days_until;
-               let displayText;
-               
-               if (daysUntil < 1) {
-                    const hours = Math.round(daysUntil * 24);
-                    displayText = `${hours} hour${hours !== 1 ? 's' : ''} from now`;
-               } else {
-                    displayText = `${daysUntil.toFixed(1)} day${daysUntil !== 1 ? 's' : ''} from now`;
+          // Send AJAX request to update host status
+          fetch('/host/status', {
+               method: 'POST',
+               headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+               },
+               body: JSON.stringify({ is_active: isActive })
+          })
+          .then(response => {
+               if (!response.ok) {
+                    throw new Error('Network response was not ok');
                }
-               
-               container.textContent = displayText;
-               document.getElementById('next-checkin-date').textContent = formatDate(detail.checkin_date);
-               document.getElementById('next-checkin-nights').textContent = 
-                    `${getNights(detail.checkin_date, detail.checkout_date)} night${getNights(detail.checkin_date, detail.checkout_date) !== 1 ? 's' : ''}`;
-               document.getElementById('next-checkin-guest').textContent = 
-                    `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
-               document.getElementById('next-checkin-phone').textContent = booking.user?.phone || 'N/A';
-               document.getElementById('next-checkin-booking-code').textContent = booking.reference || 'N/A';
-          } else {
-               container.textContent = 'No upcoming check-ins';
-               ['next-checkin-date', 'next-checkin-nights', 'next-checkin-guest', 'next-checkin-phone'].forEach(id => {
-                    document.getElementById(id).textContent = '-';
-               });
-          }
-     })
-     .catch(error => {
-          console.error('Error loading check-in data:', error);
-          document.getElementById('next-checkin-time').textContent = 'Error loading check-in data';
-          document.getElementById('next-checkin-time').classList.add('text-red-500');
-     });
-}
-
-function loadOccupiedFacilities() {
-     fetch('/admin/dashboard/occupied-facilities', {
-          method: 'GET',
-          headers: {
-               'Content-Type': 'application/json',
-               'Accept': 'application/json',
-               'X-Requested-With': 'XMLHttpRequest',
-               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          }
-     })
-     .then(response => response.json())
-     .then(data => {
-          const container = document.getElementById('occupied-facilities-container');
-          
-          if (data.length === 0) {
-               container.innerHTML = `
-                    <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                         </svg>
-                         <p class="mt-2 text-gray-600">No facilities occupied today</p>
-                    </div>Active Admins
-               `;
-               return;
-          }
-          
-          let html = '';
-          data.forEach(facility => {
-               const hasBreakfast = facility.has_breakfast ? `
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                         </svg>
-                         Breakfast
-                    </span>
-               ` : '';
-               
-               const imageUrl = facility.image_url ? facility.image_url : '/images/default-facility.jpg';
-               
-               html += `
-                    <div class="flex-shrink-0 w-64 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-                         <div class="h-40 bg-gray-100 overflow-hidden">
-                         <img src="${imageUrl}" alt="${facility.name}" class="w-full h-full object-cover">
-                         </div>
-                         <div class="p-4">
-                         <div class="flex justify-between items-start">
-                         <h3 class="font-medium text-gray-900 truncate">${facility.name}</h3>
-                         ${hasBreakfast}
-                         </div>
-                         <div class="mt-2">
-                         <p class="text-sm text-gray-600 truncate">
-                              <span class="font-medium">Guest:</span> ${facility.user_name}
-                         </p>
-                         </div>
-                         <div class="mt-3 flex justify-between items-center text-xs text-gray-500">
-                         <span class="inline-flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              Today
-                         </span>
-                         </div>
-                         </div>
-                    </div>
-               `;
-          });
-          
-          container.innerHTML = html;
-     })
-     .catch(error => {
-          console.error('Error loading occupied facilities:', error);
-          const container = document.getElementById('occupied-facilities-container');
-          container.innerHTML = `
-               <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p class="mt-2 text-gray-600">Failed to load facilities</p>
-                    <button onclick="loadOccupiedFacilities()" class="mt-2 text-sm text-red-600 hover:text-red-800">Retry</button>
-               </div>
-          `;
-     });
-}
-
-function loadCottageOptions() {
-     fetch('/get/admin/cottages')
-          .then(response => response.json())
+               return response.json();
+          })
           .then(data => {
-               const container = document.getElementById('cottageOptions');
-               if (data.length > 0) {
-                    let html = '';
-                    data.forEach(cottage => {
-                         html += `
-                         <div class="border-b border-gray-100 pb-3">
-                         <div class="flex items-start justify-between">
-                              <div class="flex-1">
-                                   <label class="block text-sm text-gray-700">${cottage.name} (₱${cottage.price})</label>
-                                   <p class="text-xs text-gray-500">${cottage.description || ''}</p>
-                                   <p class="text-xs text-gray-500">Max: ${cottage.quantity || 1} per booking</p>
-                              </div>
-                              <div class="text-sm font-medium text-right">
-                                   ₱<span id="cottage_subtotal_${cottage.id}">0</span>
-                              </div>
-                         </div>
-                         <div class="flex items-center space-x-2 mt-2">
-                              <button type="button" onclick="decrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
-                                   class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
-                                   -
-                              </button>
-                              <input type="number" id="cottage_qty_${cottage.id}" 
-                                   name="cottages[${cottage.id}][quantity]" 
-                                   value="0" min="0" max="${cottage.quantity || 1}"
-                                   data-price="${cottage.price}"
-                                   class="w-12 px-2 py-1 text-sm border border-darkgray rounded-md text-center focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                   onchange="updateCottageSubtotal('${cottage.id}', ${cottage.price})">
-                              <button type="button" onclick="incrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
-                                   class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
-                                   +
-                              </button>
-                         </div>
-                         </div>
-                         `;
-                    });
-                    container.innerHTML = html;
+               // Update indicator
+               if(data.is_active) {
+                    indicator.textContent = '✓ Receiving booking notifications';
+                    indicator.classList.remove('bg-gray-100/20', 'text-gray-200');
+                    indicator.classList.add('bg-green-100/20', 'text-green-100');
                } else {
-                    container.innerHTML = '<p class="text-sm text-gray-500">No cottages available</p>';
+                    indicator.textContent = '✗ Not accepting bookings notification';
+                    indicator.classList.remove('bg-green-100/20', 'text-green-100');
+                    indicator.classList.add('bg-gray-100/20', 'text-gray-200');
                }
           })
           .catch(error => {
-               console.error('Error loading cottages:', error);
-               document.getElementById('cottageOptions').innerHTML = '<p class="text-sm text-red-500">Error loading cottages</p>';
+               console.error('Error:', error);
+               // Revert checkbox if update failed
+               checkbox.checked = !isActive;
           });
-}
-
-function incrementCottageQuantity(cottageId, price, maxQuantity) {
-     const input = document.getElementById(`cottage_qty_${cottageId}`);
-     let value = parseInt(input.value) || 0;
-     if (value < maxQuantity) {
-          input.value = value + 1;
-          updateCottageSubtotal(cottageId, price);
      }
-}
-
-function decrementCottageQuantity(cottageId, price) {
-     const input = document.getElementById(`cottage_qty_${cottageId}`);
-     let value = parseInt(input.value) || 0;
-     if (value > 0) {
-          input.value = value - 1;
-          updateCottageSubtotal(cottageId, price);
-     }
-}
-
-function updateCottageSubtotal(cottageId, price) {
-     const input = document.getElementById(`cottage_qty_${cottageId}`);
-     const quantity = parseInt(input.value) || 0;
-     const subtotal = quantity * price;
-     
-     document.getElementById(`cottage_subtotal_${cottageId}`).textContent = subtotal.toFixed(2);
-     calculateCottageTotal();
-}
-
-function calculateCottageTotal() {
-     let total = 0;
-     const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
-     
-     quantityInputs.forEach(input => {
-          const quantity = parseInt(input.value) || 0;
-          const price = parseFloat(input.dataset.price) || 0;
-          total += quantity * price;
-     });
-     
-     document.getElementById('cottageTotal').textContent = total.toFixed(2);
-     calculateFinalTotal();
-}
-
-// Utility Functions
-function formatDate(dateString) {
-     if (!dateString) return '-';
-     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-     return new Date(dateString).toLocaleDateString(undefined, options);
+     // Global functions for modal operations
+     function openCheckInModal() {
+          document.body.classList.add('modal-open');
+          document.getElementById('checkInModal').classList.remove('hidden');
      }
 
-
-     function getNights(checkin, checkout) {
-     if (!checkin || !checkout) return 0;
-     const diff = new Date(checkout) - new Date(checkin);
-     return Math.floor(diff / (1000 * 60 * 60 * 24));
-}
-
-// Search Functions
-function performSearch() {
-     // Get all search field values
-     const firstName = document.getElementById('firstNameInput').value.trim();
-     const lastName = document.getElementById('lastNameInput').value.trim();
-     const reservationCode = document.getElementById('reservationCode').value.trim();
-     
-     // Check if any search field has value
-     if (!firstName && !lastName && !reservationCode) {
-          alert('Please enter at least one search criteria');
-          return;
+     function closeCheckInModal() {
+          document.body.classList.remove('modal-open');
+          document.getElementById('checkInModal').classList.add('hidden');
      }
-     
-     const resultsContainer = document.getElementById('searchResults');
-     resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
-     
-     // Build query string with all parameters
-     const params = new URLSearchParams();
-     
-     if (reservationCode) params.append('reservationCode', reservationCode);
-     if (firstName) params.append('firstname', firstName);
-     if (lastName) params.append('lastname', lastName);
-     
-     fetch(`/check-in/search-guests?${params.toString()}`)
-          .then(response => response.json())
-          .then(data => {
-               if (data.length > 0) {
-                    let html = '<div class="space-y-3">';
-                    
-                    // Group by user for better organization (optional)
-                    const bookingsByUser = {};
-                    data.forEach(guest => {
-                         const userKey = guest.email || guest.name;
-                         if (!bookingsByUser[userKey]) {
-                         bookingsByUser[userKey] = [];
-                         }
-                         bookingsByUser[userKey].push(guest);
-                    });
-                    
-                    // Display all bookings
-                    Object.values(bookingsByUser).forEach(userBookings => {
-                         if (userBookings.length > 0) {
-                         const firstBooking = userBookings[0];
-                         
-                         // User header
-                         html += `
-                              <div class="bg-gray-50 p-3 rounded-lg">
-                                   <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
-                                   <div class="text-sm text-gray-600 mt-1">
-                                        ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
-                                        ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
-                                   </div>
-                              </div>
-                         `;
-                         
-                         // Individual bookings
-                         userBookings.forEach(guest => {
-                              if (guest.payment_id) {
-                                   html += `
-                                        <div class="p-4 border rounded-lg hover:bg-gray-100 cursor-pointer ml-4 transition-colors shadow-sm" 
-                                             onclick="selectGuest('${guest.payment_id}')">
-                                             <div class="flex justify-between items-start">
-                                             <div>
-                                                  <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
-                                                  ${guest.checkin_date ? `
-                                                       <p class="text-sm text-gray-600">
-                                                            Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
-                                                       </p>
-                                                  ` : ''}
-                                                  <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
-                                             </div>
-                                             <div class="text-right">
-                                                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                       ${guest.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
-                                                       guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                       guest.status === 'checked_in' ? 'bg-blue-100 text-blue-800' : 
-                                                       'bg-gray-100 text-gray-800'}">
-                                                       ${guest.status}
-                                                  </span>
-                                                  <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
-                                             </div>
-                                             </div>
-                                        </div>
-                                   `;
-                              }
-                         });
-                         }
-                    });
-                    
-                    html += '</div>';
-                    resultsContainer.innerHTML = html;
-               } else {
-                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No bookings found matching your criteria</p></div>';
+
+     function openCheckOutModal() {
+          document.body.classList.add('modal-open');
+          document.getElementById('checkOutModal').classList.remove('hidden');
+     }
+
+     function closeCheckOutModal() {
+          document.body.classList.remove('modal-open');
+          document.getElementById('checkOutModal').classList.add('hidden');
+     }
+
+     function showManualSearch() {
+          document.body.classList.add('modal-open');
+          closeCheckInModal();
+          document.getElementById('manualSearchContainer').classList.remove('hidden');
+     }
+
+     function closeManualSearch() {
+          document.body.classList.remove('modal-open');
+          document.getElementById('manualSearchContainer').classList.add('hidden');
+     }
+
+     function showCheckoutManualSearch() {
+          document.body.classList.add('modal-open');
+          closeCheckOutModal();
+          document.getElementById('checkoutManualSearchContainer').classList.remove('hidden');
+     }
+
+     function closeCheckoutManualSearch() {
+          document.body.classList.remove('modal-open');
+          document.getElementById('checkoutManualSearchContainer').classList.add('hidden');
+     }
+
+     // Day Tour Modal Functions
+     function openDayTourModal() {
+          document.body.classList.add('modal-open');
+          document.getElementById('dayTourModal').classList.remove('hidden');
+          loadCottageOptions();
+          calculateTotals(); // Initialize totals
+     }
+
+     function closeDayTourModal() {
+          document.body.classList.remove('modal-open');
+          document.getElementById('dayTourModal').classList.add('hidden');
+          // Reset form when closing
+          document.getElementById('dayTourForm').reset();
+          document.getElementById('grandTotal').textContent = '0';
+          document.getElementById('finalTotal').textContent = '0';
+          document.getElementById('cottageTotal').textContent = '0';
+     }
+
+     function toggleSection(sectionId) {
+          const section = document.getElementById(sectionId);
+          const chevron = document.getElementById(`${sectionId}Chevron`);
+          section.classList.toggle('hidden');
+          chevron.classList.toggle('rotate-180');
+     }
+
+     // Data Loading Functions
+     function loadNextCheckin() {
+          fetch('/get/bookings/next-checkin', {
+               method: 'GET',
+               headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                }
           })
-          .catch(error => {
-               resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
-               console.error('Search error:', error);
-          });
-}
-
-function performCheckoutSearch() {
-     // Get all search field values
-     const firstName = document.getElementById('checkoutFirstNameInput').value.trim();
-     const lastName = document.getElementById('checkoutLastNameInput').value.trim();
-     const reservationCode = document.getElementById('checkoutReservationCode').value.trim();
-     
-     // Check if any search field has value
-     if (!firstName && !lastName && !reservationCode) {
-          alert('Please enter at least one search criteria');
-          return;
-     }
-     
-     const resultsContainer = document.getElementById('checkoutSearchResults');
-     resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
-     
-     // Build query string with all parameters
-     const params = new URLSearchParams();
-     
-     if (reservationCode) params.append('reservationCode', reservationCode);
-     if (firstName) params.append('firstname', firstName);
-     if (lastName) params.append('lastname', lastName);
-     
-     fetch(`/check-out/search-guests?${params.toString()}`)
-          .then(response => response.json())
-          .then(data => {
-               if (data.length > 0) {
-                    let html = '<div class="space-y-3">';
-                    
-                    // Group by user for better organization
-                    const bookingsByUser = {};
-                    data.forEach(guest => {
-                         const userKey = guest.email || guest.name;
-                         if (!bookingsByUser[userKey]) {
-                         bookingsByUser[userKey] = [];
-                         }
-                         bookingsByUser[userKey].push(guest);
-                    });
-                    
-                    // Display all bookings
-                    Object.values(bookingsByUser).forEach(userBookings => {
-                         if (userBookings.length > 0) {
-                         const firstBooking = userBookings[0];
-                         
-                         // User header
-                         html += `
-                              <div class="bg-gray-50 p-3 rounded-lg">
-                                   <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
-                                   <div class="text-sm text-gray-600 mt-1">
-                                        ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
-                                        ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
-                                   </div>
-                              </div>
-                         `;
-                         
-                         // Individual bookings
-                         userBookings.forEach(guest => {
-                              if (guest.payment_id) {
-                                   html += `
-                                        <div class="p-4 border rounded-lg hover:bg-green-50 cursor-pointer ml-4 transition-colors shadow-sm" 
-                                             onclick="selectGuestForCheckout('${guest.payment_id}')">
-                                             <div class="flex justify-between items-start">
-                                             <div>
-                                                  <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
-                                                  ${guest.checkin_date ? `
-                                                       <p class="text-sm text-gray-600">
-                                                            Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
-                                                       </p>
-                                                  ` : ''}
-                                                  <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
-                                             </div>
-                                             <div class="text-right">
-                                                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                       ${guest.status === 'checked_in' ? 'bg-green-100 text-green-800' : 
-                                                       guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                       'bg-gray-100 text-gray-800'}">
-                                                       ${guest.status}
-                                                  </span>
-                                                  <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
-                                             </div>
-                                             </div>
-                                        </div>
-                                   `;
-                              }
-                         });
-                         }
-                    });
-                    
-                    html += '</div>';
-                    resultsContainer.innerHTML = html;
-               } else {
-                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No checked-in guests found matching your criteria</p></div>';
+          .then(response => {
+               if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                }
+               return response.json();
           })
-          .catch(error => {
-               resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
-               console.error('Checkout search error:', error);
-          });
-}
-
-// Selection Functions
-function selectGuest(paymentId) {
-     window.location.href = `/check-in/success/${paymentId}`;
-}
-
-function selectGuestForCheckout(paymentId) {
-     window.location.href = `/check-out/receipt/${paymentId}`;
-}
-
-// Calculation Functions
-function calculateTotals() {
-     const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
-     
-     // Show/hide sections based on selection
-     document.getElementById('poolFees').classList.toggle('hidden', tourOption === 'park');
-     document.getElementById('parkFees').classList.toggle('hidden', tourOption === 'pool');
-
-     if (tourOption === 'park') {
-          cottageSection.classList.add('hidden');
-          // Reset cottage selections
-          document.querySelectorAll('input[id^="cottage_qty_"]').forEach(input => {
-               input.value = 0;
-               updateCottageSubtotal(input.id.replace('cottage_qty_', ''), parseFloat(input.dataset.price));
-          });
-     } else {
-          cottageSection.classList.remove('hidden');
-     }
-     
-     // Calculate pool fees if selected
-     if (tourOption === 'pool' || tourOption === 'both') {
-          const poolAdultCount = parseInt(document.getElementById('poolAdultCount').value) || 0;
-          const poolKidCount = parseInt(document.getElementById('poolKidCount').value) || 0;
-          const poolSeniorCount = parseInt(document.getElementById('poolSeniorCount').value) || 0;
-          
-          const poolAdultTotal = poolAdultCount * 150;
-          const poolKidTotal = poolKidCount * 100;
-          const poolSeniorTotal = poolSeniorCount * 100;
-          
-          document.getElementById('poolAdultTotal').textContent = poolAdultTotal;
-          document.getElementById('poolKidTotal').textContent = poolKidTotal;
-          document.getElementById('poolSeniorTotal').textContent = poolSeniorTotal;
-     } else {
-          // Reset pool values if not selected
-          document.getElementById('poolAdultCount').value = 0;
-          document.getElementById('poolKidCount').value = 0;
-          document.getElementById('poolSeniorCount').value = 0;
-          document.getElementById('poolAdultTotal').textContent = '0';
-          document.getElementById('poolKidTotal').textContent = '0';
-          document.getElementById('poolSeniorTotal').textContent = '0';
-     }
-     
-     // Calculate park fees if selected
-     if (tourOption === 'park' || tourOption === 'both') {
-          const parkAdultCount = parseInt(document.getElementById('parkAdultCount').value) || 0;
-          const parkKidCount = parseInt(document.getElementById('parkKidCount').value) || 0;
-          const parkSeniorCount = parseInt(document.getElementById('parkSeniorCount').value) || 0;
-          
-          const parkAdultTotal = parkAdultCount * 80;
-          const parkKidTotal = parkKidCount * 50;
-          const parkSeniorTotal = parkSeniorCount * 50;
-          
-          document.getElementById('parkAdultTotal').textContent = parkAdultTotal;
-          document.getElementById('parkKidTotal').textContent = parkKidTotal;
-          document.getElementById('parkSeniorTotal').textContent = parkSeniorTotal;
-     } else {
-          // Reset park values if not selected
-          document.getElementById('parkAdultCount').value = 0;
-          document.getElementById('parkKidCount').value = 0;
-          document.getElementById('parkSeniorCount').value = 0;
-          document.getElementById('parkAdultTotal').textContent = '0';
-          document.getElementById('parkKidTotal').textContent = '0';
-          document.getElementById('parkSeniorTotal').textContent = '0';
-     }
-     calculateCottageTotal();
-}
-
-function calculateCottageTotal() {
-     let total = 0;
-     const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
-     
-     quantityInputs.forEach(input => {
-          const quantity = parseInt(input.value) || 0;
-          const price = parseFloat(input.dataset.price) || 0;
-          total += quantity * price;
-     });
-     
-     document.getElementById('cottageTotal').textContent = total.toFixed(2);
-     calculateFinalTotal(); // Update the final total
-}
-
-function calculateFinalTotal() {
-     const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
-     let entranceTotal = 0;
-
-     if (tourOption === 'pool' || tourOption === 'both') {
-          entranceTotal += parseInt(document.getElementById('poolAdultTotal').textContent) || 0;
-          entranceTotal += parseInt(document.getElementById('poolKidTotal').textContent) || 0;
-          entranceTotal += parseInt(document.getElementById('poolSeniorTotal').textContent) || 0;
-     }
-     
-     if (tourOption === 'park' || tourOption === 'both') {
-          entranceTotal += parseInt(document.getElementById('parkAdultTotal').textContent) || 0;
-          entranceTotal += parseInt(document.getElementById('parkKidTotal').textContent) || 0;
-          entranceTotal += parseInt(document.getElementById('parkSeniorTotal').textContent) || 0;
-     }
-     
-     const cottageTotal = parseFloat(document.getElementById('cottageTotal').textContent) || 0;
-     const finalTotal = entranceTotal + cottageTotal;
-     
-     document.getElementById('grandTotal').textContent = entranceTotal.toFixed(2);
-     document.getElementById('finalTotal').textContent = finalTotal.toFixed(2);
-}
-
-// QR Code Processing Functions
-async function readQRCodeFromImage(file) {
-     return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-               const img = new Image();
-               img.onload = function() {
-                    try {
-                         const canvas = document.createElement('canvas');
-                         const ctx = canvas.getContext('2d');
-                         canvas.width = img.width;
-                         canvas.height = img.height;
-                         ctx.drawImage(img, 0, 0);
-                         
-                         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                         const code = jsQR(imageData.data, imageData.width, imageData.height);
-                         
-                         if (code) {
-                         resolve(code.data);
-                         } else {
-                         reject(new Error("Could not read QR code from the image. Please ensure the image is clear and contains a valid QR code."));
-                         }
-                    } catch (error) {
-                         reject(error);
-                    }
-               };
-               img.onerror = () => reject(new Error("Failed to load image"));
-               img.src = e.target.result;
-          };
-          reader.onerror = () => reject(new Error("Failed to read file"));
-          reader.readAsDataURL(file);
-     });
-}
-
-function fetchActiveAdmins() {
-     // Show loading state
-     document.getElementById('active-admins-list').innerHTML = `
-          <div class="text-center py-4">
-               <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-               <p class="mt-2 text-gray-500">Loading active admins...</p>
-          </div>
-     `;
-     
-     // Make AJAX request
-     fetch(`/admin/active-admins`, {
-          headers: {
-               'X-Requested-With': 'XMLHttpRequest',
-               'X-CSRF-TOKEN': '{{ csrf_token() }}'
-          }
-     })
-     .then(response => response.json())
-     .then(data => {
-          if(data.length > 0) {
-               let html = '';
-               data.forEach(admin => {
-                    html += `
-                    <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                         <div class="relative flex-shrink-0">
-                              <img src="{{ url('imgs/profiles') }}/${admin.profile_img}" 
-                                   alt="${admin.fullname}" 
-                                   class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
-                              ${admin.is_active ? `
-                                   <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
-                              `: ''}
-                         </div>
-                         <div class="ml-3 overflow-hidden">
-                              <h3 class="font-medium text-gray-800 truncate">${admin.fullname}</h3>
-                              <p class="text-sm text-gray-600 flex items-center mt-1">
-                                   ${admin.phone ? `
-                                        <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                        </svg>
-                                        <span class="truncate">${admin.phone}</span>
-                                   ` : `
-                                        <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <span class="truncate">${admin.email}</span>
-                                   `}
-                              </p>
-                         </div>
-                    </div>
-                    `;
-               });
-               document.getElementById('active-admins-list').innerHTML = html;
-          } else {
-               document.getElementById('active-admins-list').innerHTML = `
-                    <div class="text-center py-4 text-gray-500">
-                         <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                         </svg>
-                         No active admins at the moment
-                    </div>
-               `;
-          }
-     })
-     .catch(error => {
-          console.error('Error fetching active admins:', error);
-          document.getElementById('active-admins-list').innerHTML = `
-               <div class="text-center py-4 text-red-500">
-                    <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                    Failed to load active admins
-               </div>
-          `;
-     });
-}
-
-// Document Ready Function
-document.addEventListener('DOMContentLoaded', function() {
-     // Initialize dashboard stats
-     fetch(`/admin/dashboard/stats`, {
-          method: 'GET',
-          headers: {
-               'Accept': 'application/json',
-               'X-Requested-With': 'XMLHttpRequest',
-               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          }
-     })
-     .then(response => response.json()) 
-     .then(data => {
-          document.getElementById('total-bookings').textContent = data.total_booking;
-          document.getElementById('total-pending').textContent = data.pending;
-          document.getElementById('checked-in-total').textContent = data.checked_in_total;
-          document.getElementById('total-checked-out').textContent = data.total_checked_out;
-     })
-     .catch(error => {
-          console.error(`Fetching error:`, error); 
-     });
-     
-     // Load initial data
-     loadNextCheckin();
-     loadOccupiedFacilities();
-     fetchActiveAdmins();
-
-     // Set up periodic refreshes
-     setInterval(loadNextCheckin, 300000);
-     setInterval(loadOccupiedFacilities, 300000);
-     setInterval(fetchActiveAdmins, 300000);
-     
-     // Set up event listeners for all View buttons
-     document.querySelectorAll('[data-id]').forEach(button => {
-          button.addEventListener('click', function() {
-               const inquirerId = this.getAttribute('data-id');
-               openModal_accept_inquirer(this);
-          });
-     });
-     // QR Upload and Processing for Check-in
-     const qrUploadInput = document.getElementById('qr-upload-input');
-     const qrUploadPreview = document.getElementById('qr-upload-preview');
-     const qrImagePreview = document.getElementById('qr-image-preview');
-     const fileNameSpan = document.getElementById('file-name');
-     const processQrBtn = document.getElementById('process-qr-btn');
-     
-     qrUploadInput.addEventListener('change', function(e) {
-          const file = e.target.files[0];
-          if (!file) return;
-          
-          fileNameSpan.textContent = file.name;
-          qrUploadPreview.classList.remove('hidden');
-          document.getElementById('upload-instructions').classList.add('hidden');
-          
-          if (file.type.startsWith('image/')) {
-               const reader = new FileReader();
-               reader.onload = function(e) {
-                    qrImagePreview.src = e.target.result;
-                    qrImagePreview.classList.remove('hidden');
-               };
-               reader.readAsDataURL(file);
-          }
-     });
-
-     processQrBtn.addEventListener('click', async function() {
-          const file = qrUploadInput.files[0];
-          if (!file) {
-               alert('Please select a QR code image first');
-               return;
-          }
-          
-          processQrBtn.disabled = true;
-          processQrBtn.innerHTML = `
-               <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-               </svg>
-               Processing...
-          `;
-
-          try {
-               const qrData = await readQRCodeFromImage(file);
+          .then(data => {
+               if (!data.success) {
+                    throw new Error(data.message || 'Failed to load next check-in');
+               }
                
-               const response = await fetch('/check-in/process-qr-upload', {
-                    method: 'POST',
-                    headers: {
-                         'Content-Type': 'application/json',
-                         'Accept': 'application/json',
-                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ qr_data: qrData })
-               });
-
-               const data = await response.json();
+               const container = document.getElementById('next-checkin-time');
                
-               if (response.status === 409) {
-                    const shouldRedirect = confirm(
-                         data.message || "This QR code has already been used. Do you want to view details?"
-                    );
+               if (data.data) {
+                    const booking = data.data;
+                    const detail = booking.details[0];
                     
-                    if (shouldRedirect && data.qr_path) {
-                         window.location.href = `/check-in/used?path=${encodeURIComponent(data.qr_path)}`;
+                    // Format the time display
+                    const daysUntil = data.days_until;
+                    let displayText;
+                    
+                    if (daysUntil < 1) {
+                         const hours = Math.round(daysUntil * 24);
+                         displayText = `${hours} hour${hours !== 1 ? 's' : ''} from now`;
                     } else {
-                         resetQRUploadForm();
+                         displayText = `${daysUntil.toFixed(1)} day${daysUntil !== 1 ? 's' : ''} from now`;
                     }
+                    
+                    container.textContent = displayText;
+                    document.getElementById('next-checkin-date').textContent = formatDate(detail.checkin_date);
+                    document.getElementById('next-checkin-nights').textContent = 
+                         `${getNights(detail.checkin_date, detail.checkout_date)} night${getNights(detail.checkin_date, detail.checkout_date) !== 1 ? 's' : ''}`;
+                    document.getElementById('next-checkin-guest').textContent = 
+                         `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
+                    document.getElementById('next-checkin-phone').textContent = booking.user?.phone || 'N/A';
+                    document.getElementById('next-checkin-booking-code').textContent = booking.reference || 'N/A';
+               } else {
+                    container.textContent = 'No upcoming check-ins';
+                    ['next-checkin-date', 'next-checkin-nights', 'next-checkin-guest', 'next-checkin-phone'].forEach(id => {
+                         document.getElementById(id).textContent = '-';
+                    });
+               }
+          })
+          .catch(error => {
+               console.error('Error loading check-in data:', error);
+               document.getElementById('next-checkin-time').textContent = 'Error loading check-in data';
+               document.getElementById('next-checkin-time').classList.add('text-red-500');
+          });
+     }
+
+     function loadOccupiedFacilities() {
+          fetch('/admin/dashboard/occupied-facilities', {
+               method: 'GET',
+               headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+               }
+          })
+          .then(response => response.json())
+          .then(data => {
+               const container = document.getElementById('occupied-facilities-container');
+               
+               if (data.length === 0) {
+                    container.innerHTML = `
+                         <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <p class="mt-2 text-gray-600">No facilities occupied today</p>
+                         </div>Active Admins
+                    `;
                     return;
                }
                
-               if (!response.ok) {
-                    throw new Error(data.message || 'Server verification failed');
-               }
+               let html = '';
+               data.forEach(facility => {
+                    const hasBreakfast = facility.has_breakfast ? `
+                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Breakfast
+                         </span>
+                    ` : '';
+                    
+                    const imageUrl = facility.image_url ? facility.image_url : '/images/default-facility.jpg';
+                    
+                    html += `
+                         <div class="flex-shrink-0 w-64 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                              <div class="h-40 bg-gray-100 overflow-hidden">
+                              <img src="${imageUrl}" alt="${facility.name}" class="w-full h-full object-cover">
+                              </div>
+                              <div class="p-4">
+                              <div class="flex justify-between items-start">
+                              <h3 class="font-medium text-gray-900 truncate">${facility.name}</h3>
+                              ${hasBreakfast}
+                              </div>
+                              <div class="mt-2">
+                              <p class="text-sm text-gray-600 truncate">
+                                   <span class="font-medium">Guest:</span> ${facility.user_name}
+                              </p>
+                              </div>
+                              <div class="mt-3 flex justify-between items-center text-xs text-gray-500">
+                              <span class="inline-flex items-center">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                   </svg>
+                                   Today
+                              </span>
+                              </div>
+                              </div>
+                         </div>
+                    `;
+               });
                
-               if (data.success) {
-                    window.location.href = `/check-in/success/${data.payment_id}`;
-               } else {
-                    throw new Error(data.message || 'QR verification failed');
-               }
-          } catch (error) {
-               console.error('Error:', error);
-               alert(error.message || 'An error occurred while processing the QR code');
-          } finally {
-               resetQRUploadForm();
-          }
-     });
-
-     function resetQRUploadForm() {
-          processQrBtn.disabled = false;
-          processQrBtn.innerHTML = `
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-               </svg>
-               Process QR Code
-          `;
-          qrUploadInput.value = '';
-          fileNameSpan.textContent = '';
-          qrImagePreview.src = '';
-          qrImagePreview.classList.add('hidden');
-          document.getElementById('upload-instructions').classList.remove('hidden');
+               container.innerHTML = html;
+          })
+          .catch(error => {
+               console.error('Error loading occupied facilities:', error);
+               const container = document.getElementById('occupied-facilities-container');
+               container.innerHTML = `
+                    <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                         </svg>
+                         <p class="mt-2 text-gray-600">Failed to load facilities</p>
+                         <button onclick="loadOccupiedFacilities()" class="mt-2 text-sm text-red-600 hover:text-red-800">Retry</button>
+                    </div>
+               `;
+          });
      }
 
-     // Checkout QR Upload and Processing
-     const checkoutQrUploadInput = document.getElementById('checkout-qr-upload-input');
-     const checkoutQrUploadPreview = document.getElementById('checkout-qr-upload-preview');
-     const checkoutQrImagePreview = document.getElementById('checkout-qr-image-preview');
-     const checkoutFileNameSpan = document.getElementById('checkout-file-name');
-     const checkoutProcessQrBtn = document.getElementById('checkout-process-qr-btn');
-     
-     checkoutQrUploadInput.addEventListener('change', function(e) {
-          const file = e.target.files[0];
-          if (!file) return;
-          
-          checkoutFileNameSpan.textContent = file.name;
-          checkoutQrUploadPreview.classList.remove('hidden');
-          document.getElementById('checkout-upload-instructions').classList.add('hidden');
-          
-          if (file.type.startsWith('image/')) {
-               const reader = new FileReader();
-               reader.onload = function(e) {
-                    checkoutQrImagePreview.src = e.target.result;
-                    checkoutQrImagePreview.classList.remove('hidden');
-               };
-               reader.readAsDataURL(file);
-          }
-     });
+     function loadCottageOptions() {
+          fetch('/get/admin/cottages')
+               .then(response => response.json())
+               .then(data => {
+                    const container = document.getElementById('cottageOptions');
+                    if (data.length > 0) {
+                         let html = '';
+                         data.forEach(cottage => {
+                              html += `
+                              <div class="border-b border-gray-100 pb-3">
+                              <div class="flex items-start justify-between">
+                                   <div class="flex-1">
+                                        <label class="block text-sm text-gray-700">${cottage.name} (₱${cottage.price})</label>
+                                        <p class="text-xs text-gray-500">${cottage.description || ''}</p>
+                                        <p class="text-xs text-gray-500">Max: ${cottage.quantity || 1} per booking</p>
+                                   </div>
+                                   <div class="text-sm font-medium text-right">
+                                        ₱<span id="cottage_subtotal_${cottage.id}">0</span>
+                                   </div>
+                              </div>
+                              <div class="flex items-center space-x-2 mt-2">
+                                   <button type="button" onclick="decrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
+                                        class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
+                                        -
+                                   </button>
+                                   <input type="number" id="cottage_qty_${cottage.id}" 
+                                        name="cottages[${cottage.id}][quantity]" 
+                                        value="0" min="0" max="${cottage.quantity || 1}"
+                                        data-price="${cottage.price}"
+                                        class="w-12 px-2 py-1 text-sm border border-darkgray rounded-md text-center focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                                        onchange="updateCottageSubtotal('${cottage.id}', ${cottage.price})">
+                                   <button type="button" onclick="incrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
+                                        class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
+                                        +
+                                   </button>
+                              </div>
+                              </div>
+                              `;
+                         });
+                         container.innerHTML = html;
+                    } else {
+                         container.innerHTML = '<p class="text-sm text-gray-500">No cottages available</p>';
+                    }
+               })
+               .catch(error => {
+                    console.error('Error loading cottages:', error);
+                    document.getElementById('cottageOptions').innerHTML = '<p class="text-sm text-red-500">Error loading cottages</p>';
+               });
+     }
 
-     checkoutProcessQrBtn.addEventListener('click', async function() {
-          const file = checkoutQrUploadInput.files[0];
-          if (!file) {
-               alert('Please select a QR code image first');
+     function incrementCottageQuantity(cottageId, price, maxQuantity) {
+          const input = document.getElementById(`cottage_qty_${cottageId}`);
+          let value = parseInt(input.value) || 0;
+          if (value < maxQuantity) {
+               input.value = value + 1;
+               updateCottageSubtotal(cottageId, price);
+          }
+     }
+
+     function decrementCottageQuantity(cottageId, price) {
+          const input = document.getElementById(`cottage_qty_${cottageId}`);
+          let value = parseInt(input.value) || 0;
+          if (value > 0) {
+               input.value = value - 1;
+               updateCottageSubtotal(cottageId, price);
+          }
+     }
+
+     function updateCottageSubtotal(cottageId, price) {
+          const input = document.getElementById(`cottage_qty_${cottageId}`);
+          const quantity = parseInt(input.value) || 0;
+          const subtotal = quantity * price;
+          
+          document.getElementById(`cottage_subtotal_${cottageId}`).textContent = subtotal.toFixed(2);
+          calculateCottageTotal();
+     }
+
+     function calculateCottageTotal() {
+          let total = 0;
+          const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
+          
+          quantityInputs.forEach(input => {
+               const quantity = parseInt(input.value) || 0;
+               const price = parseFloat(input.dataset.price) || 0;
+               total += quantity * price;
+          });
+          
+          document.getElementById('cottageTotal').textContent = total.toFixed(2);
+          calculateFinalTotal();
+     }
+
+     // Utility Functions
+     function formatDate(dateString) {
+          if (!dateString) return '-';
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          return new Date(dateString).toLocaleDateString(undefined, options);
+          }
+
+
+          function getNights(checkin, checkout) {
+          if (!checkin || !checkout) return 0;
+          const diff = new Date(checkout) - new Date(checkin);
+          return Math.floor(diff / (1000 * 60 * 60 * 24));
+     }
+
+     // Search Functions
+     function performSearch() {
+          // Get all search field values
+          const firstName = document.getElementById('firstNameInput').value.trim();
+          const lastName = document.getElementById('lastNameInput').value.trim();
+          const reservationCode = document.getElementById('reservationCode').value.trim();
+          
+          // Check if any search field has value
+          if (!firstName && !lastName && !reservationCode) {
+               alert('Please enter at least one search criteria');
                return;
           }
           
-          checkoutProcessQrBtn.disabled = true;
-          checkoutProcessQrBtn.innerHTML = `
-               <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-               </svg>
-               Processing...
-          `;
-
-          try {
-               const qrData = await readQRCodeFromImage(file);
-               
-               const response = await fetch('/check-out/process-qr-upload', {
-                    method: 'POST',
-                    headers: {
-                         'Content-Type': 'application/json',
-                         'Accept': 'application/json',
-                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ qr_data: qrData })
+          const resultsContainer = document.getElementById('searchResults');
+          resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
+          
+          // Build query string with all parameters
+          const params = new URLSearchParams();
+          
+          if (reservationCode) params.append('reservationCode', reservationCode);
+          if (firstName) params.append('firstname', firstName);
+          if (lastName) params.append('lastname', lastName);
+          
+          fetch(`/check-in/search-guests?${params.toString()}`)
+               .then(response => response.json())
+               .then(data => {
+                    if (data.length > 0) {
+                         let html = '<div class="space-y-3">';
+                         
+                         // Group by user for better organization (optional)
+                         const bookingsByUser = {};
+                         data.forEach(guest => {
+                              const userKey = guest.email || guest.name;
+                              if (!bookingsByUser[userKey]) {
+                              bookingsByUser[userKey] = [];
+                              }
+                              bookingsByUser[userKey].push(guest);
+                         });
+                         
+                         // Display all bookings
+                         Object.values(bookingsByUser).forEach(userBookings => {
+                              if (userBookings.length > 0) {
+                              const firstBooking = userBookings[0];
+                              
+                              // User header
+                              html += `
+                                   <div class="bg-gray-50 p-3 rounded-lg">
+                                        <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                             ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
+                                             ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
+                                        </div>
+                                   </div>
+                              `;
+                              
+                              // Individual bookings
+                              userBookings.forEach(guest => {
+                                   if (guest.payment_id) {
+                                        html += `
+                                             <div class="p-4 border rounded-lg hover:bg-gray-100 cursor-pointer ml-4 transition-colors shadow-sm" 
+                                                  onclick="selectGuest('${guest.payment_id}')">
+                                                  <div class="flex justify-between items-start">
+                                                  <div>
+                                                       <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
+                                                       ${guest.checkin_date ? `
+                                                            <p class="text-sm text-gray-600">
+                                                                 Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
+                                                            </p>
+                                                       ` : ''}
+                                                       <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
+                                                  </div>
+                                                  <div class="text-right">
+                                                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                            ${guest.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                                                            guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                                            guest.status === 'checked_in' ? 'bg-blue-100 text-blue-800' : 
+                                                            'bg-gray-100 text-gray-800'}">
+                                                            ${guest.status}
+                                                       </span>
+                                                       <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
+                                                  </div>
+                                                  </div>
+                                             </div>
+                                        `;
+                                   }
+                              });
+                              }
+                         });
+                         
+                         html += '</div>';
+                         resultsContainer.innerHTML = html;
+                    } else {
+                         resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No bookings found matching your criteria</p></div>';
+                    }
+               })
+               .catch(error => {
+                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
+                    console.error('Search error:', error);
                });
-               
-               const data = await response.json();
-               
-               if (!response.ok) {
-                    throw new Error(data.message || 'Server verification failed');
-               }
-               
-               if (data.success) {
-                    window.location.href = `/check-out/receipt/${data.payment_id}`;
-               } else {
-                    throw new Error(data.message || 'QR verification failed');
-               }
-          } catch (error) {
-               console.error('Error:', error);
-               alert(error.message || 'An error occurred while processing the QR code');
-          } finally {
-               resetCheckoutQRUploadForm();
-          }
-     });
-     
-     function resetCheckoutQRUploadForm() {
-          checkoutProcessQrBtn.disabled = false;
-          checkoutProcessQrBtn.innerHTML = `
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-               </svg>
-               Process QR Code
-          `;
-          checkoutQrUploadInput.value = '';
-          checkoutFileNameSpan.textContent = '';
-          checkoutQrImagePreview.src = '';
-          checkoutQrImagePreview.classList.add('hidden');
-          document.getElementById('checkout-upload-instructions').classList.remove('hidden');
      }
 
-     // Day Tour Form Submission
-     const dayTourForm = document.getElementById('dayTourForm');
-     
-     if (dayTourForm) {
-          dayTourForm.addEventListener('submit', async function(e) {
-               e.preventDefault();
-               
-               const submitButton = e.target.querySelector('button[type="submit"]');
-               const originalButtonText = submitButton.innerHTML;
-               
-               try {
-                    // Disable button and show loading state
-                    submitButton.disabled = true;
-                    submitButton.innerHTML = `
-                         <div class="flex items-center">
-                         <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24">
-                              <circle class="opacity-25" cx="12" cy="12" r="10"
-                                   stroke="currentColor" stroke-width="4"></circle>
-                              <path class="opacity-75" fill="currentColor"
-                                   d="M4 12a8 8 0 018-8V0C5.373 0 
-                                   0 5.373 0 12h4zm2 5.291A7.962 7.962 
-                                   0 014 12H0c0 3.042 1.135 5.824 3 
-                                   7.938l3-2.647z"></path>
-                         </svg>
-                         Processing...
-                         </div>
-                    
-                    `;
-
-                    const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
-                    
-                    // Collect cottage data
-                    const cottages = [];
-                    document.querySelectorAll('input[id^="cottage_qty_"]').forEach(input => {
-                         const cottageId = input.id.replace('cottage_qty_', '');
-                         const quantity = parseInt(input.value) || 0;
-                         if (quantity > 0) {
-                              cottages.push({
-                                   id: cottageId,
-                                   quantity: quantity
+     function performCheckoutSearch() {
+          // Get all search field values
+          const firstName = document.getElementById('checkoutFirstNameInput').value.trim();
+          const lastName = document.getElementById('checkoutLastNameInput').value.trim();
+          const reservationCode = document.getElementById('checkoutReservationCode').value.trim();
+          
+          // Check if any search field has value
+          if (!firstName && !lastName && !reservationCode) {
+               alert('Please enter at least one search criteria');
+               return;
+          }
+          
+          const resultsContainer = document.getElementById('checkoutSearchResults');
+          resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
+          
+          // Build query string with all parameters
+          const params = new URLSearchParams();
+          
+          if (reservationCode) params.append('reservationCode', reservationCode);
+          if (firstName) params.append('firstname', firstName);
+          if (lastName) params.append('lastname', lastName);
+          
+          fetch(`/check-out/search-guests?${params.toString()}`)
+               .then(response => response.json())
+               .then(data => {
+                    if (data.length > 0) {
+                         let html = '<div class="space-y-3">';
+                         
+                         // Group by user for better organization
+                         const bookingsByUser = {};
+                         data.forEach(guest => {
+                              const userKey = guest.email || guest.name;
+                              if (!bookingsByUser[userKey]) {
+                              bookingsByUser[userKey] = [];
+                              }
+                              bookingsByUser[userKey].push(guest);
+                         });
+                         
+                         // Display all bookings
+                         Object.values(bookingsByUser).forEach(userBookings => {
+                              if (userBookings.length > 0) {
+                              const firstBooking = userBookings[0];
+                              
+                              // User header
+                              html += `
+                                   <div class="bg-gray-50 p-3 rounded-lg">
+                                        <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                             ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
+                                             ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
+                                        </div>
+                                   </div>
+                              `;
+                              
+                              // Individual bookings
+                              userBookings.forEach(guest => {
+                                   if (guest.payment_id) {
+                                        html += `
+                                             <div class="p-4 border rounded-lg hover:bg-green-50 cursor-pointer ml-4 transition-colors shadow-sm" 
+                                                  onclick="selectGuestForCheckout('${guest.payment_id}')">
+                                                  <div class="flex justify-between items-start">
+                                                  <div>
+                                                       <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
+                                                       ${guest.checkin_date ? `
+                                                            <p class="text-sm text-gray-600">
+                                                                 Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
+                                                            </p>
+                                                       ` : ''}
+                                                       <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
+                                                  </div>
+                                                  <div class="text-right">
+                                                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                            ${guest.status === 'checked_in' ? 'bg-green-100 text-green-800' : 
+                                                            guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                                            'bg-gray-100 text-gray-800'}">
+                                                            ${guest.status}
+                                                       </span>
+                                                       <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
+                                                  </div>
+                                                  </div>
+                                             </div>
+                                        `;
+                                   }
                               });
+                              }
+                         });
+                         
+                         html += '</div>';
+                         resultsContainer.innerHTML = html;
+                    } else {
+                         resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No checked-in guests found matching your criteria</p></div>';
+                    }
+               })
+               .catch(error => {
+                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
+                    console.error('Checkout search error:', error);
+               });
+     }
+
+     // Selection Functions
+     function selectGuest(paymentId) {
+          window.location.href = `/check-in/success/${paymentId}`;
+     }
+
+     function selectGuestForCheckout(paymentId) {
+          window.location.href = `/check-out/receipt/${paymentId}`;
+     }
+
+     // Calculation Functions
+     function calculateTotals() {
+          const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
+          
+          // Show/hide sections based on selection
+          document.getElementById('poolFees').classList.toggle('hidden', tourOption === 'park');
+          document.getElementById('parkFees').classList.toggle('hidden', tourOption === 'pool');
+
+          if (tourOption === 'park') {
+               cottageSection.classList.add('hidden');
+               // Reset cottage selections
+               document.querySelectorAll('input[id^="cottage_qty_"]').forEach(input => {
+                    input.value = 0;
+                    updateCottageSubtotal(input.id.replace('cottage_qty_', ''), parseFloat(input.dataset.price));
+               });
+          } else {
+               cottageSection.classList.remove('hidden');
+          }
+          
+          // Calculate pool fees if selected
+          if (tourOption === 'pool' || tourOption === 'both') {
+               const poolAdultCount = parseInt(document.getElementById('poolAdultCount').value) || 0;
+               const poolKidCount = parseInt(document.getElementById('poolKidCount').value) || 0;
+               const poolSeniorCount = parseInt(document.getElementById('poolSeniorCount').value) || 0;
+               
+               const poolAdultTotal = poolAdultCount * 150;
+               const poolKidTotal = poolKidCount * 100;
+               const poolSeniorTotal = poolSeniorCount * 100;
+               
+               document.getElementById('poolAdultTotal').textContent = poolAdultTotal;
+               document.getElementById('poolKidTotal').textContent = poolKidTotal;
+               document.getElementById('poolSeniorTotal').textContent = poolSeniorTotal;
+          } else {
+               // Reset pool values if not selected
+               document.getElementById('poolAdultCount').value = 0;
+               document.getElementById('poolKidCount').value = 0;
+               document.getElementById('poolSeniorCount').value = 0;
+               document.getElementById('poolAdultTotal').textContent = '0';
+               document.getElementById('poolKidTotal').textContent = '0';
+               document.getElementById('poolSeniorTotal').textContent = '0';
+          }
+          
+          // Calculate park fees if selected
+          if (tourOption === 'park' || tourOption === 'both') {
+               const parkAdultCount = parseInt(document.getElementById('parkAdultCount').value) || 0;
+               const parkKidCount = parseInt(document.getElementById('parkKidCount').value) || 0;
+               const parkSeniorCount = parseInt(document.getElementById('parkSeniorCount').value) || 0;
+               
+               const parkAdultTotal = parkAdultCount * 80;
+               const parkKidTotal = parkKidCount * 50;
+               const parkSeniorTotal = parkSeniorCount * 50;
+               
+               document.getElementById('parkAdultTotal').textContent = parkAdultTotal;
+               document.getElementById('parkKidTotal').textContent = parkKidTotal;
+               document.getElementById('parkSeniorTotal').textContent = parkSeniorTotal;
+          } else {
+               // Reset park values if not selected
+               document.getElementById('parkAdultCount').value = 0;
+               document.getElementById('parkKidCount').value = 0;
+               document.getElementById('parkSeniorCount').value = 0;
+               document.getElementById('parkAdultTotal').textContent = '0';
+               document.getElementById('parkKidTotal').textContent = '0';
+               document.getElementById('parkSeniorTotal').textContent = '0';
+          }
+          calculateCottageTotal();
+     }
+
+     function calculateCottageTotal() {
+          let total = 0;
+          const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
+          
+          quantityInputs.forEach(input => {
+               const quantity = parseInt(input.value) || 0;
+               const price = parseFloat(input.dataset.price) || 0;
+               total += quantity * price;
+          });
+          
+          document.getElementById('cottageTotal').textContent = total.toFixed(2);
+          calculateFinalTotal(); // Update the final total
+     }
+
+     function calculateFinalTotal() {
+          const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
+          let entranceTotal = 0;
+
+          if (tourOption === 'pool' || tourOption === 'both') {
+               entranceTotal += parseInt(document.getElementById('poolAdultTotal').textContent) || 0;
+               entranceTotal += parseInt(document.getElementById('poolKidTotal').textContent) || 0;
+               entranceTotal += parseInt(document.getElementById('poolSeniorTotal').textContent) || 0;
+          }
+          
+          if (tourOption === 'park' || tourOption === 'both') {
+               entranceTotal += parseInt(document.getElementById('parkAdultTotal').textContent) || 0;
+               entranceTotal += parseInt(document.getElementById('parkKidTotal').textContent) || 0;
+               entranceTotal += parseInt(document.getElementById('parkSeniorTotal').textContent) || 0;
+          }
+          
+          const cottageTotal = parseFloat(document.getElementById('cottageTotal').textContent) || 0;
+          const finalTotal = entranceTotal + cottageTotal;
+          
+          document.getElementById('grandTotal').textContent = entranceTotal.toFixed(2);
+          document.getElementById('finalTotal').textContent = finalTotal.toFixed(2);
+     }
+
+     // QR Code Processing Functions
+     async function readQRCodeFromImage(file) {
+          return new Promise((resolve, reject) => {
+               const reader = new FileReader();
+               reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                         try {
+                              const canvas = document.createElement('canvas');
+                              const ctx = canvas.getContext('2d');
+                              canvas.width = img.width;
+                              canvas.height = img.height;
+                              ctx.drawImage(img, 0, 0);
+                              
+                              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                              const code = jsQR(imageData.data, imageData.width, imageData.height);
+                              
+                              if (code) {
+                              resolve(code.data);
+                              } else {
+                              reject(new Error("Could not read QR code from the image. Please ensure the image is clear and contains a valid QR code."));
+                              }
+                         } catch (error) {
+                              reject(error);
                          }
-                    });
-
-                    const formData = {
-                         first_name: document.getElementById('firstName').value,
-                         last_name: document.getElementById('lastName').value,
-                         phone: document.getElementById('phoneNumber').value,
-                         email: document.getElementById('email').value || null,
-                         tour_type: tourOption,
-                         pool_adults: tourOption !== 'park' ? document.getElementById('poolAdultCount').value : 0,
-                         pool_kids: tourOption !== 'park' ? document.getElementById('poolKidCount').value : 0,
-                         pool_seniors: tourOption !== 'park' ? document.getElementById('poolSeniorCount').value : 0,
-                         park_adults: tourOption !== 'pool' ? document.getElementById('parkAdultCount').value : 0,
-                         park_kids: tourOption !== 'pool' ? document.getElementById('parkKidCount').value : 0,
-                         park_seniors: tourOption !== 'pool' ? document.getElementById('parkSeniorCount').value : 0,
-                         cottages: cottages,
-                         total_amount: document.getElementById('finalTotal').textContent
                     };
+                    img.onerror = () => reject(new Error("Failed to load image"));
+                    img.src = e.target.result;
+               };
+               reader.onerror = () => reject(new Error("Failed to read file"));
+               reader.readAsDataURL(file);
+          });
+     }
 
-                    // Send data to server
-                    const response = await fetch('/day-tour/register', {
+     function fetchActiveAdmins() {
+          // Show loading state
+          document.getElementById('active-admins-list').innerHTML = `
+               <div class="text-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                    <p class="mt-2 text-gray-500">Loading active admins...</p>
+               </div>
+          `;
+          
+          // Make AJAX request
+          fetch(`/admin/active-admins`, {
+               headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+               }
+          })
+          .then(response => response.json())
+          .then(data => {
+               if(data.length > 0) {
+                    let html = '';
+                    data.forEach(admin => {
+                         html += `
+                         <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                              <div class="relative flex-shrink-0">
+                                   <img src="{{ url('imgs/profiles') }}/${admin.profile_img}" 
+                                        alt="${admin.fullname}" 
+                                        class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
+                                   ${admin.is_active ? `
+                                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                                   `: ''}
+                              </div>
+                              <div class="ml-3 overflow-hidden">
+                                   <h3 class="font-medium text-gray-800 truncate">${admin.fullname}</h3>
+                                   <p class="text-sm text-gray-600 flex items-center mt-1">
+                                        ${admin.phone ? `
+                                             <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                             </svg>
+                                             <span class="truncate">${admin.phone}</span>
+                                        ` : `
+                                             <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                             </svg>
+                                             <span class="truncate">${admin.email}</span>
+                                        `}
+                                   </p>
+                              </div>
+                         </div>
+                         `;
+                    });
+                    document.getElementById('active-admins-list').innerHTML = html;
+               } else {
+                    document.getElementById('active-admins-list').innerHTML = `
+                         <div class="text-center py-4 text-gray-500">
+                              <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                              </svg>
+                              No active admins at the moment
+                         </div>
+                    `;
+               }
+          })
+          .catch(error => {
+               console.error('Error fetching active admins:', error);
+               document.getElementById('active-admins-list').innerHTML = `
+                    <div class="text-center py-4 text-red-500">
+                         <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                         </svg>
+                         Failed to load active admins
+                    </div>
+               `;
+          });
+     }
+
+     async function fetchRooms() {
+    try {
+        const response = await fetch("{{ route('monitor.room.data') }}", {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            }
+        });
+
+        if (!response.ok) throw new Error("Network error");
+
+        const data = await response.json();
+        renderRooms(data);
+    } catch (err) {
+        console.error("Fetch error:", err);
+        document.getElementById('room-grid').innerHTML = `
+            <div class="col-span-full text-center py-4 text-red-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p>Failed to load room status</p>
+                <button onclick="fetchRooms()" class="mt-2 text-sm text-red-600 hover:text-red-800">Retry</button>
+            </div>
+        `;
+    }
+}
+
+     function renderRooms(data) {
+          const grid = document.getElementById("room-grid");
+          grid.innerHTML = ""; // clear old content
+          
+          if (!data.facilities || data.facilities.length === 0) {
+               grid.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                         </svg>
+                         <p class="mt-2 text-gray-600">No facilities found</p>
+                    </div>
+               `;
+               return;
+          }
+          
+          data.facilities.forEach(facility => {
+               const unavailable = data.unavailableDates[facility.id] || [];
+               const today = data.today;
+
+               const isOccupied = unavailable.some(date =>
+                    today >= date.checkin_date && today < date.checkout_date
+               );
+
+               const div = document.createElement("div");
+               div.className = `
+                    p-3 rounded-lg shadow text-center text-white text-sm cursor-pointer
+                    ${isOccupied ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}
+                    transition-colors duration-200
+               `;
+               div.innerHTML = `
+                    <h3 class="font-semibold">${facility.name}</h3>
+                    <p class="text-xs italic text-gray-100">${facility.category ?? 'No Category'}</p>
+                    <p class="mt-1 font-medium">${isOccupied ? 'Occupied' : 'Available'}</p>
+               `;
+               
+               // Add click event to show details if needed
+               div.addEventListener('click', () => {
+                    // You can implement a modal or details view here
+                    console.log('Facility clicked:', facility);
+               });
+               
+               grid.appendChild(div);
+          });
+     }
+
+     function loadRoomMonitoring() {
+          // Show loading state
+          document.getElementById('room-grid').innerHTML = `
+               <div class="col-span-full text-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                    <p class="mt-2 text-gray-500">Refreshing room status...</p>
+               </div>
+          `;
+          fetchRooms();
+     }
+     
+
+     // Document Ready Function
+     document.addEventListener('DOMContentLoaded', function() {
+          fetchRooms();
+          // Initialize dashboard stats
+          fetch(`/admin/dashboard/stats`, {
+               method: 'GET',
+               headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+               }
+          })
+          .then(response => response.json()) 
+          .then(data => {
+               document.getElementById('total-bookings').textContent = data.total_booking;
+               document.getElementById('total-pending').textContent = data.pending;
+               document.getElementById('checked-in-total').textContent = data.checked_in_total;
+               document.getElementById('total-checked-out').textContent = data.total_checked_out;
+          })
+          .catch(error => {
+               console.error(`Fetching error:`, error); 
+          });
+          
+          // Load initial data
+          loadNextCheckin();
+          loadOccupiedFacilities();
+          fetchActiveAdmins();
+
+          // Set up periodic refreshes
+          setInterval(loadNextCheckin, 300000);
+          setInterval(loadOccupiedFacilities, 300000);
+          setInterval(fetchActiveAdmins, 300000);
+          
+          // Set up event listeners for all View buttons
+          document.querySelectorAll('[data-id]').forEach(button => {
+               button.addEventListener('click', function() {
+                    const inquirerId = this.getAttribute('data-id');
+                    openModal_accept_inquirer(this);
+               });
+          });
+          // QR Upload and Processing for Check-in
+          const qrUploadInput = document.getElementById('qr-upload-input');
+          const qrUploadPreview = document.getElementById('qr-upload-preview');
+          const qrImagePreview = document.getElementById('qr-image-preview');
+          const fileNameSpan = document.getElementById('file-name');
+          const processQrBtn = document.getElementById('process-qr-btn');
+          
+          qrUploadInput.addEventListener('change', function(e) {
+               const file = e.target.files[0];
+               if (!file) return;
+               
+               fileNameSpan.textContent = file.name;
+               qrUploadPreview.classList.remove('hidden');
+               document.getElementById('upload-instructions').classList.add('hidden');
+               
+               if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                         qrImagePreview.src = e.target.result;
+                         qrImagePreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+               }
+          });
+
+          processQrBtn.addEventListener('click', async function() {
+               const file = qrUploadInput.files[0];
+               if (!file) {
+                    alert('Please select a QR code image first');
+                    return;
+               }
+               
+               processQrBtn.disabled = true;
+               processQrBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+               `;
+
+               try {
+                    const qrData = await readQRCodeFromImage(file);
+                    
+                    const response = await fetch('/check-in/process-qr-upload', {
                          method: 'POST',
                          headers: {
                               'Content-Type': 'application/json',
                               'Accept': 'application/json',
                               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                          },
-                         body: JSON.stringify(formData)
+                         body: JSON.stringify({ qr_data: qrData })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.status === 409) {
+                         const shouldRedirect = confirm(
+                              data.message || "This QR code has already been used. Do you want to view details?"
+                         );
+                         
+                         if (shouldRedirect && data.qr_path) {
+                              window.location.href = `/check-in/used?path=${encodeURIComponent(data.qr_path)}`;
+                         } else {
+                              resetQRUploadForm();
+                         }
+                         return;
+                    }
+                    
+                    if (!response.ok) {
+                         throw new Error(data.message || 'Server verification failed');
+                    }
+                    
+                    if (data.success) {
+                         window.location.href = `/check-in/success/${data.payment_id}`;
+                    } else {
+                         throw new Error(data.message || 'QR verification failed');
+                    }
+               } catch (error) {
+                    console.error('Error:', error);
+                    alert(error.message || 'An error occurred while processing the QR code');
+               } finally {
+                    resetQRUploadForm();
+               }
+          });
+
+          function resetQRUploadForm() {
+               processQrBtn.disabled = false;
+               processQrBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    Process QR Code
+               `;
+               qrUploadInput.value = '';
+               fileNameSpan.textContent = '';
+               qrImagePreview.src = '';
+               qrImagePreview.classList.add('hidden');
+               document.getElementById('upload-instructions').classList.remove('hidden');
+          }
+
+          // Checkout QR Upload and Processing
+          const checkoutQrUploadInput = document.getElementById('checkout-qr-upload-input');
+          const checkoutQrUploadPreview = document.getElementById('checkout-qr-upload-preview');
+          const checkoutQrImagePreview = document.getElementById('checkout-qr-image-preview');
+          const checkoutFileNameSpan = document.getElementById('checkout-file-name');
+          const checkoutProcessQrBtn = document.getElementById('checkout-process-qr-btn');
+          
+          checkoutQrUploadInput.addEventListener('change', function(e) {
+               const file = e.target.files[0];
+               if (!file) return;
+               
+               checkoutFileNameSpan.textContent = file.name;
+               checkoutQrUploadPreview.classList.remove('hidden');
+               document.getElementById('checkout-upload-instructions').classList.add('hidden');
+               
+               if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                         checkoutQrImagePreview.src = e.target.result;
+                         checkoutQrImagePreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+               }
+          });
+
+          checkoutProcessQrBtn.addEventListener('click', async function() {
+               const file = checkoutQrUploadInput.files[0];
+               if (!file) {
+                    alert('Please select a QR code image first');
+                    return;
+               }
+               
+               checkoutProcessQrBtn.disabled = true;
+               checkoutProcessQrBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+               `;
+
+               try {
+                    const qrData = await readQRCodeFromImage(file);
+                    
+                    const response = await fetch('/check-out/process-qr-upload', {
+                         method: 'POST',
+                         headers: {
+                              'Content-Type': 'application/json',
+                              'Accept': 'application/json',
+                              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                         },
+                         body: JSON.stringify({ qr_data: qrData })
                     });
                     
                     const data = await response.json();
                     
                     if (!response.ok) {
-                         throw new Error(data.message || 'Registration failed');
+                         throw new Error(data.message || 'Server verification failed');
                     }
-
-                    // Show success message
-                    alert('Day tour registration successful!');
                     
-                    // Close modal and reset form
-                    closeDayTourModal();
-                    
-                    // Optionally redirect to receipt
-                    if (data.booking_id) {
-                         window.location.href = `/day-tour/receipt/${data.booking_id}`;
+                    if (data.success) {
+                         window.location.href = `/check-out/receipt/${data.payment_id}`;
+                    } else {
+                         throw new Error(data.message || 'QR verification failed');
                     }
-
                } catch (error) {
-                    console.error('Registration error:', error);
-                    alert(error.message || 'An error occurred during registration');
+                    console.error('Error:', error);
+                    alert(error.message || 'An error occurred while processing the QR code');
                } finally {
-                    // Reset button state
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = originalButtonText;
+                    resetCheckoutQRUploadForm();
                }
           });
-     }
+          
+          function resetCheckoutQRUploadForm() {
+               checkoutProcessQrBtn.disabled = false;
+               checkoutProcessQrBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    Process QR Code
+               `;
+               checkoutQrUploadInput.value = '';
+               checkoutFileNameSpan.textContent = '';
+               checkoutQrImagePreview.src = '';
+               checkoutQrImagePreview.classList.add('hidden');
+               document.getElementById('checkout-upload-instructions').classList.remove('hidden');
+          }
 
-     // Set up event listeners for tour option changes
-     document.querySelectorAll('input[name="tourOption"]').forEach(radio => {
-          radio.addEventListener('change', calculateTotals);
+          // Day Tour Form Submission
+          const dayTourForm = document.getElementById('dayTourForm');
+          
+          if (dayTourForm) {
+               dayTourForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const submitButton = e.target.querySelector('button[type="submit"]');
+                    const originalButtonText = submitButton.innerHTML;
+                    
+                    try {
+                         // Disable button and show loading state
+                         submitButton.disabled = true;
+                         submitButton.innerHTML = `
+                              <div class="flex items-center">
+                              <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                                   xmlns="http://www.w3.org/2000/svg"
+                                   fill="none"
+                                   viewBox="0 0 24 24">
+                                   <circle class="opacity-25" cx="12" cy="12" r="10"
+                                        stroke="currentColor" stroke-width="4"></circle>
+                                   <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 
+                                        0 5.373 0 12h4zm2 5.291A7.962 7.962 
+                                        0 014 12H0c0 3.042 1.135 5.824 3 
+                                        7.938l3-2.647z"></path>
+                              </svg>
+                              Processing...
+                              </div>
+                         
+                         `;
+
+                         const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
+                         
+                         // Collect cottage data
+                         const cottages = [];
+                         document.querySelectorAll('input[id^="cottage_qty_"]').forEach(input => {
+                              const cottageId = input.id.replace('cottage_qty_', '');
+                              const quantity = parseInt(input.value) || 0;
+                              if (quantity > 0) {
+                                   cottages.push({
+                                        id: cottageId,
+                                        quantity: quantity
+                                   });
+                              }
+                         });
+
+                         const formData = {
+                              first_name: document.getElementById('firstName').value,
+                              last_name: document.getElementById('lastName').value,
+                              phone: document.getElementById('phoneNumber').value,
+                              email: document.getElementById('email').value || null,
+                              tour_type: tourOption,
+                              pool_adults: tourOption !== 'park' ? document.getElementById('poolAdultCount').value : 0,
+                              pool_kids: tourOption !== 'park' ? document.getElementById('poolKidCount').value : 0,
+                              pool_seniors: tourOption !== 'park' ? document.getElementById('poolSeniorCount').value : 0,
+                              park_adults: tourOption !== 'pool' ? document.getElementById('parkAdultCount').value : 0,
+                              park_kids: tourOption !== 'pool' ? document.getElementById('parkKidCount').value : 0,
+                              park_seniors: tourOption !== 'pool' ? document.getElementById('parkSeniorCount').value : 0,
+                              cottages: cottages,
+                              total_amount: document.getElementById('finalTotal').textContent
+                         };
+
+                         // Send data to server
+                         const response = await fetch('/day-tour/register', {
+                              method: 'POST',
+                              headers: {
+                                   'Content-Type': 'application/json',
+                                   'Accept': 'application/json',
+                                   'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                              },
+                              body: JSON.stringify(formData)
+                         });
+                         
+                         const data = await response.json();
+                         
+                         if (!response.ok) {
+                              throw new Error(data.message || 'Registration failed');
+                         }
+
+                         // Show success message
+                         alert('Day tour registration successful!');
+                         
+                         // Close modal and reset form
+                         closeDayTourModal();
+                         
+                         // Optionally redirect to receipt
+                         if (data.booking_id) {
+                              window.location.href = `/day-tour/receipt/${data.booking_id}`;
+                         }
+
+                    } catch (error) {
+                         console.error('Registration error:', error);
+                         alert(error.message || 'An error occurred during registration');
+                    } finally {
+                         // Reset button state
+                         submitButton.disabled = false;
+                         submitButton.innerHTML = originalButtonText;
+                    }
+               });
+          }
+
+          // Set up event listeners for tour option changes
+          document.querySelectorAll('input[name="tourOption"]').forEach(radio => {
+               radio.addEventListener('change', calculateTotals);
+          });
+          
+          // Set up event listeners for input changes in day tour form
+          document.getElementById('poolAdultCount').addEventListener('change', calculateTotals);
+          document.getElementById('poolKidCount').addEventListener('change', calculateTotals);
+          document.getElementById('poolSeniorCount').addEventListener('change', calculateTotals);
+          document.getElementById('parkAdultCount').addEventListener('change', calculateTotals);
+          document.getElementById('parkKidCount').addEventListener('change', calculateTotals);
+          document.getElementById('parkSeniorCount').addEventListener('change', calculateTotals);
      });
-     
-     // Set up event listeners for input changes in day tour form
-     document.getElementById('poolAdultCount').addEventListener('change', calculateTotals);
-     document.getElementById('poolKidCount').addEventListener('change', calculateTotals);
-     document.getElementById('poolSeniorCount').addEventListener('change', calculateTotals);
-     document.getElementById('parkAdultCount').addEventListener('change', calculateTotals);
-     document.getElementById('parkKidCount').addEventListener('change', calculateTotals);
-     document.getElementById('parkSeniorCount').addEventListener('change', calculateTotals);
-});
 </script>
 @endsection

@@ -33,39 +33,23 @@ $active = 'arrivals';
         </div>
     </div>
 
-    <!-- Today -->
-    <div class="mb-10">
-        <div class="flex items-center mb-4">
-            <div class="w-1 h-6 mr-2 bg-green-500 rounded-full"></div>
-            <h2 class="text-xl font-semibold text-gray-800 md:text-2xl">Today</h2>
-            <span id="todayCount"
-                class="flex items-center justify-center w-6 h-6 ml-2 text-xs font-medium text-white bg-green-500 rounded-full">0</span>
-        </div>
-        <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3" id="todayCheckins">
-            <div class="flex justify-center items-center h-64 col-span-full">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                    <p class="mt-2 text-gray-500">Loading today's check-ins...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Two-column layout for Last Day and Tomorrow -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
-        <!-- Last Day (No Show) -->
+        <!-- Today -->
         <div>
             <div class="flex items-center mb-4">
-                <div class="w-1 h-6 mr-2 bg-gray-500 rounded-full"></div>
-                <h2 class="text-xl font-semibold text-gray-800 md:text-2xl">Last Day (No-show on the check-in date)</h2>
-                <span id="yesterdayCount"
-                    class="flex items-center justify-center w-6 h-6 ml-2 text-xs font-medium text-gray-700 bg-gray-300 rounded-full">0</span>
+                <div class="w-1 h-6 mr-2 bg-green-500 rounded-full"></div>
+                <h2 class="text-xl font-semibold text-gray-800 md:text-2xl">Today</h2>
+                <span id="todayCount"
+                    class="flex items-center justify-center w-6 h-6 ml-2 text-xs font-medium text-white bg-green-500 rounded-full">0</span>
             </div>
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-1" id="yesterdayNoShow">
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3" id="todayCheckins">
                 <div class="flex justify-center items-center h-64 col-span-full">
                     <div class="text-center">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto"></div>
-                        <p class="mt-2 text-gray-500">Loading yesterday's no shows...</p>
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                        <p class="mt-2 text-gray-500">Loading today's check-ins...</p>
                     </div>
                 </div>
             </div>
@@ -89,6 +73,7 @@ $active = 'arrivals';
             </div>
         </div>
     </div>
+
 </div>
 @endsection
 
@@ -96,17 +81,13 @@ $active = 'arrivals';
 @section('content_js')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const yesterdayContainer = document.getElementById('yesterdayNoShow');
         const todayContainer = document.getElementById('todayCheckins');
         const futureContainer = document.getElementById('futureCheckins');
         const refreshBtn = document.getElementById('refreshBtn');
-        
-        const yesterdayCount = document.getElementById('yesterdayCount');
         const todayCount = document.getElementById('todayCount');
         const futureCount = document.getElementById('futureCount');
         
         function fetchCheckins() {
-            yesterdayContainer.innerHTML = loader("Loading yesterday's no shows...");
             todayContainer.innerHTML = loader("Today's check-ins...");
             futureContainer.innerHTML = loader("Upcoming check-ins...");
             
@@ -116,12 +97,11 @@ $active = 'arrivals';
                     renderCheckins(data);
                 })
                 .catch(() => {
-                    yesterdayContainer.innerHTML = errorMsg("Error loading yesterday's no shows");
                     todayContainer.innerHTML = errorMsg("Error loading today's check-ins");
                     futureContainer.innerHTML = errorMsg("Error loading future check-ins");
                 });
         }
-
+        
         function loader(msg) {
             return `
             <div class="flex justify-center items-center h-64 col-span-full">
@@ -143,30 +123,9 @@ $active = 'arrivals';
 
         function renderCheckins(data) {
             // Update counts
-            yesterdayCount.textContent = data.yesterdayNoShow.length;
             todayCount.textContent = data.today.length;
             futureCount.textContent = data.future.length;
             
-            // Yesterday (No Shows)
-            let yesterdayHtml = "";
-            if (data.yesterdayNoShow.length > 0) {
-                data.yesterdayNoShow.forEach(checkin => {
-                    yesterdayHtml += buildCard(checkin, true);
-                });
-            } else {
-                yesterdayHtml = `
-                <div class="col-span-full">
-                    <div class="p-6 text-center bg-gray-50 rounded-lg border border-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 class="mt-3 text-lg font-medium text-gray-900">No no-shows</h3>
-                        <p class="mt-1 text-gray-500">All guests from yesterday checked in successfully.</p>
-                    </div>
-                </div>`;
-            }
-            yesterdayContainer.innerHTML = yesterdayHtml;
-
             // Today
             let todayHtml = "";
             if (data.today.length > 0) {

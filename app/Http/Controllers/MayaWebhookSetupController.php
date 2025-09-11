@@ -24,8 +24,8 @@ class MayaWebhookSetupController extends Controller
     public function handle(Request $request)
     {
         Log::info('Maya Webhook Received:', $request->all());
-
-        $event = $request->input('status');
+        
+        $event = $request->input('name');
 
         switch ($event) {
             case 'PAYMENT_SUCCESS':
@@ -41,31 +41,30 @@ class MayaWebhookSetupController extends Controller
                 return response()->json(['message' => "Event {$event} ignored"], 200);
         }
     }
-
+    
     public function updateOrder($status, $request)
     {
         $orderId = $request->input('requestReferenceNumber');
         $order = Order::where('reference_number', $orderId)->first();
-
+        
         if (!$order) {
             Log::error("Order not found for reference: {$orderId}");
             return response()->json(['error' => 'Order not found'], 404);
         }
-
+        
         $token = $order->token;
-
+        
         $order->status = $status;
         $order->save();
-
+        
         if ($status === 'paid') {
             $this->storeBookingInDatabase($token, $orderId);
         }
-
+        
         Log::info("Order {$orderId} marked as " . strtoupper($status));
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);
     }
-
-
+    
     private function storeBookingInDatabase($token, $orderId)
     {
         $bookingData = Cache::get('booking_confirmation_' . $token);
@@ -222,4 +221,5 @@ class MayaWebhookSetupController extends Controller
             throw $e; // Re-throw to handle in the controller
         }
     }
+
 }

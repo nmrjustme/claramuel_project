@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Facility;
 use Illuminate\Support\Facades\DB;
 use App\Models\Breakfast;
-use App\Models\FacilityBookingLog;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 
 class BookingsController extends Controller
 {
@@ -33,14 +31,14 @@ class BookingsController extends Controller
             },
             'discounts' // Using a relationship for better performance
         ])
-            ->whereNotIn('category', ['pool', 'park', 'cottage'])
-            ->orderBy('id', 'desc')
-            ->get()
-            ->each(function ($facility) {
-                $this->processFacility($facility);
-            });
+        ->where('type', 'room')
+        ->orderBy('id', 'desc')
+        ->get()
+        ->each(function ($facility) {
+            $this->processFacility($facility);
+        });
     }
-
+    
     protected function processFacility($facility)
     {
         // Set main image with fallback
@@ -124,24 +122,7 @@ class BookingsController extends Controller
         $lowerName = strtolower($amenityName);
         return $iconMap[$lowerName] ?? 'fas fa-check-circle';
     }
-
-    public function monitorRoom()
-    {
-        return view('admin.monitoring.index');
-    }
     
-    public function monitorData()
-    {
-        $facilities = Facility::get();
-        $unavailableDates = $this->getUnavailableDates();
-        
-        return response()->json([
-            'facilities' => $facilities,
-            'unavailableDates' => $unavailableDates,
-            'today' => now()->format('Y-m-d')
-        ]);
-    }
-
     protected function getUnavailableDates()
     {
         $now = now()->format('Y-m-d'); // Get current date in app timezone

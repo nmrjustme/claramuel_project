@@ -34,6 +34,8 @@ use App\Http\Controllers\MayaWebhookController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\MayaWebhookSetupController;
+use App\Http\Controllers\RoomMonitoringController;
+use App\Http\Controllers\AdminBookingsController;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
@@ -53,7 +55,9 @@ Route::post('/maya/create-session', [MayaCheckoutController::class, 'createCheck
 // Route::get('/maya/success/', [MayaCheckoutController::class, 'handleSuccess'])->name('maya.checkout.success');
 Route::get('/maya/payment-processing/{token}', [MayaCheckoutController::class, 'handleProcessing'])->name('maya.checkout.processing');
 Route::get('/maya/check-order/{token}', [MayaCheckoutController::class, 'checkOrder'])->name('maya.checkOrder');
-Route::get('/maya/failure', [MayaCheckoutController::class, 'handleFailure'])->name('maya.checkout.failure');
+// Handle Failure, cancel, or expired
+Route::get('/maya/failure/{reason}/{order}/{token}', [MayaCheckoutController::class, 'handleFailure'])->name('maya.checkout.failure');
+
 Route::get('/maya/cancel', [MayaCheckoutController::class, 'handleCancel'])->name('maya.checkout.cancel');
 Route::post('/maya/webhook', [MayaCheckoutController::class, 'handleWebhook'])->name('maya.webhook');
 Route::get('/maya/status/{referenceNumber}', [MayaCheckoutController::class, 'checkPaymentStatus'])->name('maya.check.status');
@@ -119,8 +123,7 @@ Route::get('try/webhook/again', function () {
 // Awaiting verification page 
 // =======================
 Route::get('/booking-awaiting', [BookingsController::class, 'pendingVerification'])->name('booking-awaiting');
-Route::get('/room/monitorign/data', [BookingsController::class, 'monitorData'])->name('monitor.room.data');
-Route::get('/room/monitorign', [BookingsController::class, 'monitorRoom']);
+
 
 Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
     ->name('booking.WaitConfirmation');
@@ -285,9 +288,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/host/status', [AdminController::class, 'updateActiveHost']);
     // Get Active Admins
     Route::get('/admin/active-admins', [AdminController::class, 'getActiveAdmins']);
+
+    //Get Rooms avaibilities monitoring
+    Route::get('/room/monitoring', [RoomMonitoringController::class, 'index']);
+    Route::get('/room/monitoring/data', [RoomMonitoringController::class, 'data'])->name('monitor.room.data');
+
+    Route::get('admin/bookings/management', [AdminBookingsController::class, 'index']);
+
+
+    Route::get('/rooms/get', function() {
+        return view('admin.monitoring.index');
+    });
     //========================
-
-
+    
+    
     Route::get('/get/show/bookings/{booking}', [BookingController::class, 'show']);
 
     Route::get('/admin/bookings/export/', [BookingController::class, 'export'])->name('admin.bookings.export');

@@ -39,7 +39,7 @@ class MayaCheckoutController extends Controller
         $total_price = $bookingData['total_price'] ?? 0;
         $amount_to_pay = $bookingData['amount_to_pay'] ?? $total_price; // Use the correct amount to pay
         $reservation_code = $bookingData['reservation_code'] ?? 'NO-CODE';
-
+        
         $checkin = Carbon::parse($bookingData['checkin_date']);
         $checkout = Carbon::parse($bookingData['checkout_date']);
         $nights = $checkin->diffInDays($checkout);
@@ -206,12 +206,12 @@ class MayaCheckoutController extends Controller
             'items' => $items,
             'redirectUrl' => [
                 'success' => route('booking-awaiting'),
-                'failure' => route('maya.checkout.failure'),
-                'cancel' => route('maya.checkout.cancel'),
+                'failure' => route('maya.checkout.failure', ['reason' => 'Failed', 'order' => $rn, 'token' => $token]),
+                'cancel' => route('maya.checkout.failure', ['reason' => 'Cancelled', 'order' => $rn, 'token' => $token]),
             ],
             'requestReferenceNumber' => $rn,
         ];
-
+        
         Log::debug('Maya Request Body:', $requestBody);
 
         try {
@@ -308,13 +308,12 @@ class MayaCheckoutController extends Controller
         return response()->json(['exists' => false]);
     }
 
-    public function handleFailure(Request $request)
+    public function handleFailure($reason, $order, $token)
     {
-        $referenceNumber = session('maya_rrn');
-
-        return view('customer_pages.maya.checkout_failure')->with([
-            'error' => 'Payment failed. Please try again.',
-            'referenceNumber' => $referenceNumber
+        return view('customer_pages.maya.checkout_failure', [
+            'reason' => $reason,
+            'order' => $order,
+            'token' => $token
         ]);
     }
 
