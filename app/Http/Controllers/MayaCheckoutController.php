@@ -173,8 +173,8 @@ class MayaCheckoutController extends Controller
             Log::error('Maya configuration missing');
             return back()->with('error', 'Payment gateway configuration error. Please try again later.');
         }
-
-        $rn = 'ORDER-' . Str::upper(Str::random(8));
+        
+        $rn = 'CLM-' . Str::upper(Str::random(8));
 
         $requestBody = [
             'totalAmount' => [
@@ -188,21 +188,21 @@ class MayaCheckoutController extends Controller
                     "subtotal" => $amount_to_pay
                 ]
             ],
-            'buyer' => [
-                'firstName' => $user_firstname,
-                'lastName' => $user_lastname,
-                'contact' => [
-                    'phone' => $user_phone,
-                    'email' => $user_email
-                ],
-                'billingAddress' => [
-                    'line1' => 'Not specified',
-                    'city' => 'Not specified',
-                    'state' => 'Not specified',
-                    'zipCode' => '0000',
-                    'countryCode' => 'PH'
-                ]
-            ],
+            // 'buyer' => [
+            //     'firstName' => $user_firstname,
+            //     'lastName' => $user_lastname,
+            //     'contact' => [
+            //         'phone' => $user_phone,
+            //         'email' => $user_email
+            //     ],
+            //     'billingAddress' => [
+            //         'line1' => 'Not specified',
+            //         'city' => 'Not specified',
+            //         'state' => 'Not specified',
+            //         'zipCode' => '0000',
+            //         'countryCode' => 'PH'
+            //     ]
+            // ],
             'items' => $items,
             'redirectUrl' => [
                 'success' => route('booking-awaiting'),
@@ -278,11 +278,6 @@ class MayaCheckoutController extends Controller
 
             return back()->with('error', 'A network error occurred: ' . $e->getMessage());
         }
-    }
-
-    public function handleSuccessPaid()
-    {
-        return view('customer_pages.maya.return_orig_page');
     }
     
     public function handleProcessing($token)

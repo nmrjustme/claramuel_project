@@ -70,7 +70,6 @@ class CheckinController extends Controller
         ]);
     }
 
-
     public function showScanner()
     {
         return view('admin.qr_scanner.checkin');
@@ -400,5 +399,89 @@ class CheckinController extends Controller
         $payment->bookingLog->update([
             'status' => "checked_in"
         ]);
+    }
+
+    public function decodeQrBooking(Request $request)
+    {
+        try {
+            if (!$request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Request must be JSON format',
+                ], 415);
+            }
+
+            $data = $request->json()->all();
+
+            if (empty($data['qr_data'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Missing qr_data field',
+                ], 400);
+            }
+
+            // Extract raw QR payload
+            $qrRaw = $data['qr_data'];
+            if (is_string($qrRaw)) {
+                $qrRaw = trim($qrRaw, '"');
+            }
+
+            // Try to parse as JSON first (if it's a JSON string)
+            $jsonData = json_decode($qrRaw, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($jsonData['booking_id'])) {
+                // It's a JSON object with booking_id
+                $bookingId = $jsonData['booking_id'];
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'QR code decoded successfully',
+                    'booking_id' => $bookingId
+                ]);
+            }
+
+            // Try to parse as the encoded format (hashid|timestamp)
+            $parts = explode('|', $qrRaw);
+            if (count($parts) === 2) {
+                [$hashId, $expireTs] = $parts;
+
+                if (now()->greaterThan(Carbon::createFromTimestamp($expireTs))) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'QR code expired'
+                    ]);
+                }
+
+                // Decode booking ID from hashid
+                $decoded = Hashids::decode($hashId);
+                if (!empty($decoded)) {
+                    $bookingId = $decoded[0];
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'QR code decoded successfully',
+                        'booking_id' => $bookingId
+                    ]);
+                }
+            }
+
+            // If it's just a plain booking ID
+            if (is_numeric($qrRaw)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'QR code decoded successfully',
+                    'booking_id' => (int)$qrRaw
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid QR code format'
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

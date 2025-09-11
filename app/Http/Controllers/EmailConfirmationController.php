@@ -264,7 +264,7 @@ class EmailConfirmationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'OTP verified successfully!',
-            'redirect_url' => route('booking.redirect', ['token' => $token]),
+            'redirect_url' => route('customer.booking.payments', ['token' => $token]),
             'reservation_code' => $reservationCode,
             'token' => $token,
         ]);

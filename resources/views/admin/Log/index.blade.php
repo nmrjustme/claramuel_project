@@ -34,7 +34,7 @@ $active = 'inquiries';
             <h1 class="text-3xl font-bold text-gray-800">Request Monitoring</h1>
             <p class="text-gray-600">To track requests before they become actual bookings</p>
         </div>
-
+        
         <div class="flex items-center space-x-4">
             <button id="refreshBtn" class="flex items-center text-blue-600 hover:text-blue-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -235,7 +235,7 @@ $active = 'inquiries';
     let pendingSearchTerm = '';
     let confirmedReadFilter = 'all'; // 'all', 'read', 'unread'
     let pendingReadFilter = 'all';   // 'all', 'read', 'unread'
-
+    
     const searchInquiryId = sessionStorage.getItem('searchInquiryId');
     if (searchInquiryId) {
         confirmedSearchInput.value = searchInquiryId;

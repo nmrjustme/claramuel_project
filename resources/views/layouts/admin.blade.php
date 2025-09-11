@@ -105,6 +105,7 @@
     </div>
 
     <div class="md:hidden h-16"></div>
+
     @include('admin.sidebar')
 
     <!-- Mobile sidebar overlay -->
@@ -125,7 +126,7 @@
                     </div>
 
                     <div class="flex items-center space-x-6">
-                        <!-- Email Icon with Badge -->
+                        {{-- <!-- Email Icon with Badge -->
                         <a href="{{ route('admin.email') }}"
                             class="relative text-gray-800 hover:text-gray-600 transition-colors" title="Email Inbox">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -137,7 +138,7 @@
                                 class="absolute -top-2 -right-2 bg-yellow-400 text-xs text-gray-900 font-bold rounded-full h-5 w-5 flex items-center justify-center">
                                 <span class="badge-loading"></span>
                             </span>
-                        </a>
+                        </a> --}}
 
                         <!-- User Profile Dropdown -->
                         <div class="relative group">
@@ -187,7 +188,6 @@
                 sound.play().then(() => {
                     sound.pause();
                     sound.currentTime = 0;
-                    console.log("🔊 Notification sound unlocked");
                 }).catch(err => console.log("Unlock failed:", err));
 
                 document.removeEventListener('click', unlockAudio);
@@ -198,7 +198,7 @@
             document.addEventListener('keydown', unlockAudio);
 
             // Initial load of all counts
-            getAllUnreadCounts();
+            // getAllUnreadCounts();
             
             // Sidebar toggle functionality
             const sidebar = document.getElementById('sidebar');
@@ -258,51 +258,50 @@
             sound.play().catch(err => console.log("Play blocked:", err));
         }
         // Function to fetch all unread counts
-        function getAllUnreadCounts() {
-            showLoadingIndicators();
+        // function getAllUnreadCounts() {
+        //     showLoadingIndicators();
             
-            fetch(`/unread-counts/all`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                updateAllBadges(data);
-            })
-            .catch(error => {
-                console.error('Error fetching unread counts:', error);
-                hideLoadingIndicators();
-                // Optionally show error to user
-                toastr.error('Failed to load notification counts', 'Error');
-            });
-        }
+        //     fetch(`/unread-counts/all`, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        //         }
+        //     })
+        //     .then(response => {
+        //         if (!response.ok) {
+        //             throw new Error('Network response was not ok');
+        //         }
+        //         return response.json();
+        //     })
+        //     .then(data => {
+        //         updateAllBadges(data);
+        //     })
+        //     .catch(error => {
+        //         console.error('Error fetching unread counts:', error);
+        //         hideLoadingIndicators();
+        //         // Optionally show error to user
+        //         toastr.error('Failed to load notification counts', 'Error');
+        //     });
+        // }
 
         // Function to update all badges
         function updateAllBadges(counts) {
             console.log('Updating badges with:', counts);
             
             // Update email badge
-            const emailBadge = document.getElementById('emailBadge');
-            if (emailBadge) {
-                if (counts.emailBadgeCount > 0) {
-                    emailBadge.innerHTML = counts.emailBadgeCount;
-                    emailBadge.classList.remove('hidden');
-                } else {
-                    emailBadge.classList.add('hidden');
-                }
-            }
+            // const emailBadge = document.getElementById('emailBadge');
+            // if (emailBadge) {
+            //     if (counts.emailBadgeCount > 0) {
+            //         emailBadge.innerHTML = counts.emailBadgeCount;
+            //         emailBadge.classList.remove('hidden');
+            //     } else {
+            //         emailBadge.classList.add('hidden');
+            //     }
+            // }
             
             // Update sidebar badges
             const inquiriesBadge = document.getElementById('inquiries-badge');
-            const paymentBadge = document.getElementById('payment-badge');
             
             if (inquiriesBadge) {
                 if (counts.inquiriesCount > 0) {
@@ -310,15 +309,6 @@
                     inquiriesBadge.classList.remove('hidden');
                 } else {
                     inquiriesBadge.classList.add('hidden');
-                }
-            }
-            
-            if (paymentBadge) {
-                if (counts.paymentCount > 0) {
-                    paymentBadge.innerHTML = `${counts.paymentCount} new`;
-                    paymentBadge.classList.remove('hidden');
-                } else {
-                    paymentBadge.classList.add('hidden');
                 }
             }
             
@@ -372,7 +362,7 @@
                 });
                 
                 // Refresh counts
-                getAllUnreadCounts();
+                // getAllUnreadCounts();
             });
     </script>
 

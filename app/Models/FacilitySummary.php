@@ -30,7 +30,7 @@ class FacilitySummary extends Model
     {
         return $this->belongsTo(Facility::class, 'facility_id');
     }
-
+    
     public function bookingDetails()
     {
         return $this->hasMany(FacilityBookingDetails::class, 'facility_summary_id');

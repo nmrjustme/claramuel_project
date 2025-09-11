@@ -52,7 +52,7 @@ class BookingCalendarController extends Controller
                 ->whereHas('details', function($query) use ($startOfMonth, $endOfMonth) {
                     $query->where(function($q) use ($startOfMonth, $endOfMonth) {
                         $q->whereBetween('checkin_date', [$startOfMonth, $endOfMonth])
-                          ->orWhereBetween('checkout_date', [$startOfMonth, $endOfMonth]);
+                            ->orWhereBetween('checkout_date', [$startOfMonth, $endOfMonth]);
                     });
                 })
                 ->get();
@@ -146,8 +146,9 @@ class BookingCalendarController extends Controller
                         'status' => $log->status,
                         'payment_status' => $log->payment_status,
                         'total_price' => $detail->total_price ?? 0,
-                        'amount_paid' => $log->payments->sum('amount') ?? 0,
-                        'breakfast' => $detail->breakfast_id !== null
+                        'amount_paid' => ($log->payments->sum('amount') + ($log->payments->sum('amount_paid') ?? 0)) ?? 0,
+                        'breakfast' => $detail->facilitySummary->breakfast_id !== null,
+                        
                     ];
                 }
             }

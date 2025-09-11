@@ -1112,7 +1112,7 @@ $active = 'inquiries';
                }
           }
      }
-
+     
      
      // Show confirmation modal
      function showConfirmationModal(title, message) {

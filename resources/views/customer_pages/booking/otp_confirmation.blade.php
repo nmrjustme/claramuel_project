@@ -72,6 +72,24 @@
     </div>
 </div>
 
+<!-- Modal for leaving confirmation -->
+<div id="leave-confirmation-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Site?</h3>
+        <p class="text-gray-600 mb-6">
+            You're about to leave Mt.Claramuel website to pay. Are you sure you want to proceed?
+        </p>
+        <div class="flex justify-end space-x-4">
+            <button id="cancel-leave" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition duration-200">
+                Cancel
+            </button>
+            <button id="proceed-leave" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200">
+                Proceed
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const otpForm = document.getElementById('otp-form');
@@ -85,6 +103,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorText = document.getElementById('error-text');
     const token = document.querySelector('input[name="token"]').value;
     const userEmail = '{{ $email }}';
+    
+    // Modal elements
+    const modal = document.getElementById('leave-confirmation-modal');
+    const cancelButton = document.getElementById('cancel-leave');
+    const proceedButton = document.getElementById('proceed-leave');
+    
+    // Store redirect data for later use
+    let redirectData = null;
 
     // OTP input navigation logic
     otpInputs.forEach((input, index) => {
@@ -165,6 +191,31 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
+    // Show the leave confirmation modal
+    function showLeaveConfirmation(data) {
+        redirectData = data;
+        modal.classList.remove('hidden');
+    }
+
+    // Hide the leave confirmation modal
+    function hideLeaveConfirmation() {
+        modal.classList.add('hidden');
+        redirectData = null;
+    }
+
+    // Proceed with the redirection
+    function proceedWithRedirection() {
+        if (redirectData) {
+            window.open(redirectData.redirect_url, '_blank');
+            window.location.href = '/bookings/customer-info';
+        }
+        hideLeaveConfirmation();
+    }
+
+    // Modal event listeners
+    cancelButton.addEventListener('click', hideLeaveConfirmation);
+    proceedButton.addEventListener('click', proceedWithRedirection);
+
     // OTP form submission
     otpForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -205,11 +256,12 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 successAlert.classList.remove('hidden');
-                // Redirect to payment page after 2 seconds
+                // Show confirmation modal instead of automatically redirecting
                 setTimeout(() => {
-                    window.open(data.redirect_url, '_blank');
-                    window.location.href = `/maya/payment-processing/${data.token}`;
-                }, 2000);
+                    showLeaveConfirmation(data);
+                    submitButton.textContent = originalText;
+                    submitButton.disabled = false;
+                }, 1000);
             } else {
                 errorText.textContent = data.message;
                 errorAlert.classList.remove('hidden');
@@ -309,6 +361,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .otp-input:invalid {
     border-color: #ef4444;
+}
+
+#leave-confirmation-modal {
+    transition: opacity 0.3s ease;
 }
 </style>
 @endsection

@@ -36,6 +36,8 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\MayaWebhookSetupController;
 use App\Http\Controllers\RoomMonitoringController;
 use App\Http\Controllers\AdminBookingsController;
+use App\Http\Controllers\AccountingController;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
@@ -61,8 +63,11 @@ Route::get('/maya/failure/{reason}/{order}/{token}', [MayaCheckoutController::cl
 Route::get('/maya/cancel', [MayaCheckoutController::class, 'handleCancel'])->name('maya.checkout.cancel');
 Route::post('/maya/webhook', [MayaCheckoutController::class, 'handleWebhook'])->name('maya.webhook');
 Route::get('/maya/status/{referenceNumber}', [MayaCheckoutController::class, 'checkPaymentStatus'])->name('maya.check.status');
+// Route::get('/maya/success/paid', [MayaCheckoutController::class, 'handleSuccessPaid'])->name('maya.success.checkout');
 // =======================
 Route::post('/maya/payment/webhook', [MayaWebhookSetupController::class, 'handle'])->name('maya.webhook.succes');
+
+
 
 Route::get('/test-maya-connection', function () {
     $baseUrl   = config('services.maya.base_url');
@@ -107,15 +112,15 @@ Route::get('/test-maya-connection', function () {
 
 Route::get('try/webhook/again', function () {
     $response = Http::withHeaders([
-            'accept' => 'application/json',
-            'authorization' => 'Basic c2stWDhxb2xZank2MmtJekVicjBRUksxaDRiNEtEVkhhTmN3TVlrMzlqSW5TbDo=',
-            'content-type' => 'application/json',
-        ])
+        'accept' => 'application/json',
+        'authorization' => 'Basic c2stWDhxb2xZank2MmtJekVicjBRUksxaDRiNEtEVkhhTmN3TVlrMzlqSW5TbDo=',
+        'content-type' => 'application/json',
+    ])
         ->post("https://pg-sandbox.paymaya.com/payments/v1/webhooks", [
             'name' => 'PAYMENT_SUCCESS',
             'callbackUrl' => 'https://5e708220a669.ngrok-free.app/try/maya/webhook',
         ]);
-    
+
     Log::info('Webhook registration response: ', $response->json());
 });
 
@@ -240,7 +245,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
 
     // Get badge counts Unread or New
-    Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
+    // Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
 
     //========================
     //========================
@@ -271,6 +276,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get/mybooking', [BookingController::class, 'getMyBookings'])->name('my_bookings');
     Route::get('/get/admin/bookings', [BookingController::class, 'index']);
     Route::get('/get/admin/bookings/guest/details/', [BookingController::class, 'guestDetailsList'])->name('guest.details.list');
+
+
+    Route::get('/get/show/bookings/checkin/{id}', [BookingController::class, 'paymentDetails']);
+    Route::post('/bookings/{id}/process-payment', [BookingController::class, 'processMyPayment']);
+    Route::post('/bookings/{id}/checkin', [BookingController::class, 'checkin']);
     //========================
 
     //========================
@@ -296,9 +306,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin/bookings/management', [AdminBookingsController::class, 'index']);
 
 
-    Route::get('/rooms/get', function() {
+    Route::get('/rooms/get', function () {
         return view('admin.monitoring.index');
     });
+    
+    // Revenue monitoring
+    Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
+    Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
+    Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');
     //========================
     
     
@@ -405,7 +420,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
     Route::post('/verify-qr-codes/checkin', [CheckinController::class, 'verifyQrCode']);
     Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
-    Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
+    Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting'])->name('show.print-checkout');
     Route::get('/qrScanner/customer-details/{paymentId}', [CheckinController::class, 'getCustomerDetails']);
     Route::get('/check-in/search-guests', [CheckinController::class, 'searchGuests']);
     Route::post('/update/booking/status/{id}', [CheckinController::class, 'updateStatus']);
@@ -413,6 +428,8 @@ Route::middleware(['auth'])->group(function () {
         $qrPath = $request->query('path');
         return view('admin.qr_in_used', ['qrPath' => $qrPath]);
     });
+
+    Route::post('/decode-qr-booking', [CheckinController::class, 'decodeQrBooking']);
     // =======================
 
     // =======================
@@ -420,7 +437,7 @@ Route::middleware(['auth'])->group(function () {
     // =======================
     Route::get('/check-out/scanner', [CheckoutController::class, 'scannerPage'])->name('checkout.scanner');
     Route::post('/verify-qr-codes/checkout', [CheckoutController::class, 'verifyQrCode']);
-    Route::get('/check-out/receipt/{id}', [CheckoutController::class, 'showPrinting']);
+    Route::get('/check-out/receipt/{id}', [CheckoutController::class, 'showPrinting'])->name('checkout.receipt');
     Route::post('/check-out/process-qr-upload', [CheckoutController::class, 'processUploadQrUpload']);
     Route::get('/check-out/search-guests', [CheckoutController::class, 'searchGuests']);
     Route::post('/update/booking/checkout/status/{id}', [CheckoutController::class, 'updateStatus']);

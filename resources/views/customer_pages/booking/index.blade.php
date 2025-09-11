@@ -52,7 +52,6 @@
      /* Netflix-style room cards */
      .room-card {
           transition: all 0.3s ease;
-          border: 1px solid #D3D3D3;
           min-width: 340px;
           width: 340px;
           /* Keeps consistent card size in scroll */
@@ -927,11 +926,11 @@
                                              $bookedDates = array_values(array_unique($bookedDates));
                                              @endphp
 
-                                             <div class="room-card border-lightgray flex flex-col h-full"
+                                             <div class="room-card border border-lightgray flex flex-col h-full"
                                                   data-price="{{ $facility->price }}" data-room-id="{{ $facilityId }}"
                                                   data-images='@json($allImages)'
                                                   data-booked-dates='{{ json_encode($bookedDates) }}'>
-
+                                                  
                                                   @if ($facility->included != null)
                                                   <div class="included-ribbon">
                                                        {{ $facility->included }}

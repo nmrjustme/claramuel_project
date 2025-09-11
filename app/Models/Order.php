@@ -14,6 +14,7 @@ class Order extends Model
         'reference_number',
         'amount',
         'status',
+        'payment_scheme',
         'payment_id',
         'failure_reason',
         'paid_at',

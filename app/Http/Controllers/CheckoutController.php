@@ -272,23 +272,24 @@ class CheckoutController extends Controller
         
         return response()->json($results);
     }
-
+    
     public function showPrinting($id)
     {
+        $booking = FacilityBookingLog::findorFail($id);
+        
         $payment = Payments::with([
             'bookingLog.details',
             'bookingLog.summaries.facility',
             'bookingLog.summaries.breakfast',
             'bookingLog.summaries.bookingDetails',
             'bookingLog.guestDetails.guestType'
-        ])->findOrFail($id);
+        ])->where('facility_log_id', $booking->id)->firstOrFail();
         
         $payment->bookingLog->update([
             'checked_out_at' => Carbon::now(),
             'checked_out_by' => auth()->id(),
         ]);
-        //$this->updateQrStatus($payment, 'in_used');
-
+        
         return view('admin.print_Receipt.checkout', ['payment' => $payment]);
     }
 

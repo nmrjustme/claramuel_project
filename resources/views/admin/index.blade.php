@@ -104,9 +104,16 @@ $active = 'dashboard';
      }
 
      .chart-container {
-          height: 300px;
+          height: 400px;
           position: relative;
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          border-radius: 16px;
+          padding: 20px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+          overflow: hidden;
      }
+
+
 
      .floating-action-btn {
           position: fixed;
@@ -164,7 +171,6 @@ $active = 'dashboard';
           padding: 1.5rem;
           position: relative;
           overflow: hidden;
-          border: 1px solid rgba(0, 0, 0, 0.08);
           transition: all 0.2s ease;
      }
 
@@ -302,6 +308,83 @@ $active = 'dashboard';
           height: 0.875rem;
           margin-right: 0.25rem;
      }
+
+     .stats-container {
+          display: flex;
+          justify-content: space-around;
+          flex-wrap: wrap;
+          padding: 20px;
+          background: #f8f9fa;
+          border-bottom: 1px solid #eaeaea;
+     }
+
+     .stat-box {
+          background: white;
+          border-radius: 12px;
+          padding: 20px;
+          margin: 10px;
+          min-width: 200px;
+          text-align: center;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+          flex: 1;
+     }
+
+     .stat-box h3 {
+          font-size: 16px;
+          color: #6c757d;
+          margin-bottom: 10px;
+     }
+
+     .stat-value {
+          font-size: 24px;
+          font-weight: 700;
+          color: #4b6cb7;
+     }
+
+     .stat-box.best-month {
+          background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+          color: white;
+     }
+
+     .stat-box.best-month h3,
+     .stat-box.best-month .stat-value {
+          color: white;
+     }
+
+     .loading {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 300px;
+          flex-direction: column;
+     }
+
+     .spinner {
+          width: 50px;
+          height: 50px;
+          border: 5px solid rgba(75, 108, 183, 0.2);
+          border-radius: 50%;
+          border-top-color: #4b6cb7;
+          animation: spin 1s linear infinite;
+          margin-bottom: 20px;
+     }
+
+     @keyframes spin {
+          0% {
+               transform: rotate(0deg);
+          }
+
+          100% {
+               transform: rotate(360deg);
+          }
+     }
+
+     .error-message {
+          text-align: center;
+          padding: 30px;
+          color: #e74c3c;
+          display: none;
+     }
 </style>
 @endsection
 
@@ -377,6 +460,7 @@ $active = 'dashboard';
 
      <!-- Status Cards -->
      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+
           <!-- Total Bookings -->
           <div class="status-card total-bookings shadow-sm">
                <div class="card-content">
@@ -478,77 +562,24 @@ $active = 'dashboard';
      </div>
 
      <!-- Main Content Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-          <!-- Admins -->
-          <div class="p-6 bg-white rounded-lg border border-gray-200" id="active-admins-container">
-               <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
-                    <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                              stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                         </svg>
-                    </button>
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+          <!-- Middle Column (Revenue & Chart) -->
+          <div class="p-6 bg-white rounded-lg border border-gray-200">
+               <div class="error-message" id="error-message" style="display:none;">
+                    <h3>Unable to load data</h3>
+                    <p>Please check your connection and try again</p>
+                    <button onclick="loadData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">Retry</button>
                </div>
-               <div id="active-admins-list" class="overflow-y-auto max-h-64 space-y-4 pr-2">
-                    <!-- Loading state -->
-                    <div class="text-center py-8">
+               
+               <div class="chart-container">
+                    <div class="loading" id="loading">
                          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                         <p class="mt-2 text-gray-500">Loading active admins...</p>
+                         <p>Loading income data...</p>
                     </div>
+                    <canvas id="incomeChart"></canvas>
                </div>
           </div>
-
-          <!-- Recent Enquiries -->
-          <div class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 bg-white rounded-lg border border-gray-200">
-               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
-                    <!-- Title + Badge -->
-                    <div class="flex items-center">
-                         <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
-                         <span class="ml-2 bg-red-500 text-white 
-                                   text-[10px] sm:text-xs md:text-sm 
-                                   font-bold 
-                                   px-1.5 sm:px-2 md:px-3 
-                                   py-0.5 sm:py-1 md:py-1.5 
-                                   rounded-full 
-                                   new-inquiries-count hidden">
-                              0 new
-                         </span>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap gap-2 sm:gap-3">
-                         <a href="{{ route('admin.inquiries') }}" class="text-sm text-red-600 hover:text-red-800">View
-                              All</a>
-                    </div>
-               </div>
-
-
-               <!-- Search Bar -->
-               <div class="relative mb-6">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                         <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                         </svg>
-                    </div>
-                    <input type="text" id="inquiry-search"
-                         class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                         placeholder="Search by id, reference, or name..." onkeyup="filterInquiries()">
-               </div>
-
-               <div class="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scroll" id="inquiries-container">
-                    <!-- Inquiries will be loaded here via AJAX -->
-                    <div class="text-center py-8">
-                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto">
-                         </div>
-                         <p class="mt-2 text-gray-500">Loading inquiries...</p>
-                    </div>
-               </div>
-          </div>
-
-          @include('admin.inquirers.recent_inquirers')
 
           <!--Facilities Occupied Today section  -->
           <div class="lg:col-span-2 p-6 bg-white rounded-lg border border-gray-200">
@@ -603,6 +634,7 @@ $active = 'dashboard';
                          </a>
                     </div>
                     <p class="text-gray-600 mb-4" id="next-checkin-time">Loading...</p>
+
                     <div class="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-100">
                          <div class="flex items-center mb-2">
                               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
@@ -651,695 +683,94 @@ $active = 'dashboard';
                </div>
           </div>
 
-          <!-- Quick Actions -->
-          <div class="p-6 lg:col-span-2 bg-white rounded-lg border border-gray-200">
-               <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
-               <div class="grid grid-cols-2 gap-4">
-
-                    <!-- Full-width Day Tour button -->
-                    <a href="#"
-                         class="p-4 bg-yellow-100 rounded-lg text-center hover:bg-yellow-200 transition-all group hover:-translate-y-0.5">
-                         <div
-                              class="mx-auto h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                         </div>
-                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Day Tour</span>
-                    </a>
-
-
-                    <a href="#" onclick="openCheckInModal()"
-                         class="p-4 bg-blue-100 rounded-lg text-center hover:bg-blue-200 transition-all group hover:-translate-y-0.5">
-                         <div
-                              class="mx-auto h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                              </svg>
-                         </div>
-                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Check-in</span>
-                    </a>
-
-                    <a href="#" onclick="openCheckOutModal()"
-                         class="p-4 bg-green-100 rounded-lg text-center hover:bg-green-200 transition-all group hover:-translate-y-0.5">
-                         <div
-                              class="mx-auto h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
-                         </div>
-                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Check-out</span>
-                    </a>
-
-                    <a href="#"
-                         class="p-4 bg-purple-100 rounded-lg text-center hover:bg-purple-200 transition-all group hover:-translate-y-0.5">
-                         <div
-                              class="mx-auto h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                              </svg>
-                         </div>
-                         <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Payments</span>
-                    </a>
-               </div>
-          </div>
-     </div>
-</div>
-
-<!-- Modal for check-in options -->
-<div id="checkInModal"
-     class="main-modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden z-50">
-     <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
-          <!-- Modal Header - Updated to blue color scheme -->
-          <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
-               <h3 class="text-xl font-semibold text-white">Check-in Method</h3>
-               <p class="text-blue-100 text-sm mt-1">Choose how you'd like to check in guests</p>
-          </div>
-
-          <div class="p-6 space-y-4">
-               <!-- QR Code Scan Option - Updated to blue color scheme -->
-               <a href="{{ route('checkin.scanner') }}" class="block group">
-                    <div
-                         class="p-4 bg-blue-50 rounded-lg border border-blue-100 hover:border-blue-300 transition-all duration-200 flex items-start hover-scale">
-                         <div class="bg-blue-100 p-3 rounded-lg mr-4 group-hover:bg-blue-200 transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                              </svg>
-                         </div>
-                         <div>
-                              <h4 class="font-medium text-gray-900">Scan QR Code</h4>
-                              <p class="text-sm text-gray-600 mt-1">Use your device camera to scan
-                                   guest's QR code</p>
-                         </div>
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none"
-                              viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <!-- Admins -->
+          <div class="p-6 bg-white rounded-lg border border-gray-200" id="active-admins-container">
+               <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
+                    <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                              stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                          </svg>
+                    </button>
+               </div>
+               <div id="active-admins-list" class="overflow-y-auto max-h-64 space-y-4 pr-2">
+                    <!-- Loading state -->
+                    <div class="text-center py-8">
+                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                         <p class="mt-2 text-gray-500">Loading active admins...</p>
                     </div>
-               </a>
+               </div>
+          </div>
 
-               <!-- Upload QR Code Option - Updated to blue color scheme -->
-               <div
-                    class="border border-blue-100 rounded-lg overflow-hidden hover:border-blue-300 transition-colors duration-200 hover-scale">
-                    <div class="p-4 bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
-                         <div class="flex items-start">
-                              <div class="bg-blue-100 p-3 rounded-lg mr-4 hover:bg-blue-200 transition-colors">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                   </svg>
-                              </div>
-                              <div class="flex-1">
-                                   <h4 class="font-medium text-gray-900">Upload QR Code</h4>
-                                   <p class="text-sm text-gray-600 mt-1">Upload an image
-                                        containing the QR code</p>
 
-                                   <div class="mt-4">
-                                        <input type="file" id="qr-upload-input" accept="image/*" class="hidden" />
-                                        <label for="qr-upload-input"
-                                             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer text-sm font-medium">
-                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                                                  viewBox="0 0 24 24" stroke="currentColor">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                             </svg>
-                                             Choose File
-                                        </label>
-                                        <span id="file-name" class="ml-3 text-sm text-gray-600"></span>
-                                   </div>
-                              </div>
-                         </div>
+          <!-- Recent Enquiries -->
+          <div class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 bg-white rounded-lg border border-gray-200">
 
-                         <div id="qr-upload-preview" class="mt-4 hidden">
-                              <div
-                                   class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center">
-                                   <img id="qr-image-preview" src="#" alt="QR Code Preview"
-                                        class="mx-auto max-h-40 mb-3 hidden">
-                                   <div id="upload-instructions" class="text-center text-sm text-gray-500">
-                                        <p>QR code will appear here after selection</p>
-                                   </div>
-                              </div>
-                              <button id="process-qr-btn"
-                                   class="w-full mt-3 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                                   </svg>
-                                   Process QR Code
-                              </button>
-                         </div>
+               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
+                    <!-- Title + Badge -->
+                    <div class="flex items-center">
+                         <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
+                         <span class="ml-2 bg-red-500 text-white 
+                                   text-[10px] sm:text-xs md:text-sm 
+                                   font-bold 
+                                   px-1.5 sm:px-2 md:px-3 
+                                   py-0.5 sm:py-1 md:py-1.5 
+                                   rounded-full 
+                                   new-inquiries-count hidden">
+                              0 new
+                         </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-wrap gap-2 sm:gap-3">
+                         <a href="{{ route('admin.inquiries') }}" class="text-sm text-red-600 hover:text-red-800">View
+                              All</a>
                     </div>
                </div>
 
-               <!-- Manual Search Option -->
-               <button onclick="showManualSearch()"
-                    class="w-full p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-start hover-scale">
-                    <div class="bg-gray-200 p-3 rounded-lg mr-4 hover:bg-gray-300 transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none"
-                              viewBox="0 0 24 24" stroke="currentColor">
+
+               <!-- Search Bar -->
+               <div class="relative mb-6">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                         <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                          </svg>
                     </div>
-                    <div class="text-left">
-                         <h4 class="font-medium text-gray-900">Manual Search</h4>
-                         <p class="text-sm text-gray-600 mt-1">Search for guest by name or reference
-                              number</p>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-               </button>
-          </div>
+                    <input type="text" id="inquiry-search"
+                         class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                         placeholder="Search by id, reference, or name..." onkeyup="filterInquiries()">
+               </div>
 
-          <!-- Modal Footer -->
-          <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-               <button onclick="closeCheckInModal()"
-                    class="w-full py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">
-                    Cancel
-               </button>
-          </div>
-     </div>
-</div>
-
-<!-- Manual Search Container (hidden by default) -->
-<div id="manualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50 overflow-y-auto">
-     <div class="max-w-2xl mx-auto">
-          <div class="flex justify-between items-center mb-4">
-               <h3 class="text-lg font-medium">Search Guest</h3>
-               <button onclick="closeManualSearch()" class="text-gray-500 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-               </button>
-          </div>
-
-          <!-- Quick Search Field -->
-          <div class="mb-4">
-               <label class="block text-sm font-medium mb-2 text-gray-700">Reservation Code</label>
-               <input type="text" id="reservationCode"
-                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    onkeypress="if(event.key==='Enter')performSearch()">
-          </div>
-
-          <!-- Advanced Search Fields -->
-          <div class="bg-gray-50 p-4 rounded-lg mb-4">
-               <h4 class="text-sm font-medium mb-3 text-gray-700">Advanced Search</h4>
-
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                         <label class="block text-xs font-medium mb-1 text-gray-600">First Name</label>
-                         <input type="text" id="firstNameInput" placeholder="First name"
-                              class="w-full p-2 border rounded text-sm"
-                              onkeypress="if(event.key==='Enter')performSearch()">
-                    </div>
-
-                    <div>
-                         <label class="block text-xs font-medium mb-1 text-gray-600">Last Name</label>
-                         <input type="text" id="lastNameInput" placeholder="Last name"
-                              class="w-full p-2 border rounded text-sm"
-                              onkeypress="if(event.key==='Enter')performSearch()">
+               <div class="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scroll" id="inquiries-container">
+                    <!-- Inquiries will be loaded here via AJAX -->
+                    <div class="text-center py-8">
+                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto">
+                         </div>
+                         <p class="mt-2 text-gray-500">Loading inquiries...</p>
                     </div>
                </div>
           </div>
 
-          <button onclick="performSearch()"
-               class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
-               Search Guests
-          </button>
+          @include('admin.inquirers.recent_inquirers')
 
-          <div id="searchResults" class="mt-4 space-y-2">
-               <!-- Search results will appear here -->
-          </div>
      </div>
-</div>
 
 
-<!-- Add this modal near your checkInModal in the HTML section -->
-<div id="checkOutModal"
-     class="main-modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden z-50">
-     <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4">
-          <!-- Modal Header -->
-          <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
-               <h3 class="text-xl font-semibold text-white">Check-out Method</h3>
-               <p class="text-green-100 text-sm mt-1">Choose how you'd like to check out guests</p>
-          </div>
-
-          <div class="p-6 space-y-4">
-               <!-- QR Code Scan Option -->
-               <a href="{{ route('checkout.scanner') }}" class="block group">
-                    <div
-                         class="p-4 bg-green-50 rounded-lg border border-green-100 hover:border-green-300 transition-all duration-200 flex items-start hover-scale">
-                         <div class="bg-green-100 p-3 rounded-lg mr-4 group-hover:bg-green-200 transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                              </svg>
-                         </div>
-                         <div>
-                              <h4 class="font-medium text-gray-900">Scan QR Code</h4>
-                              <p class="text-sm text-gray-600 mt-1">Use your device camera to scan guest's QR code</p>
-                         </div>
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none"
-                              viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                         </svg>
-                    </div>
-               </a>
-
-               <!-- Upload QR Code Option -->
-               <div
-                    class="border border-green-100 rounded-lg overflow-hidden hover:border-green-300 transition-colors duration-200 hover-scale">
-                    <div class="p-4 bg-green-50 hover:bg-green-100 transition-colors duration-200">
-                         <div class="flex items-start">
-                              <div class="bg-green-100 p-3 rounded-lg mr-4 hover:bg-green-200 transition-colors">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-700" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                   </svg>
-                              </div>
-                              <div class="flex-1">
-                                   <h4 class="font-medium text-gray-900">Upload QR Code</h4>
-                                   <p class="text-sm text-gray-600 mt-1">Upload an image containing the QR code</p>
-
-                                   <div class="mt-4">
-                                        <input type="file" id="checkout-qr-upload-input" accept="image/*"
-                                             class="hidden" />
-                                        <label for="checkout-qr-upload-input"
-                                             class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer text-sm font-medium">
-                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                                                  viewBox="0 0 24 24" stroke="currentColor">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                             </svg>
-                                             Choose File
-                                        </label>
-                                        <span id="checkout-file-name" class="ml-3 text-sm text-gray-600"></span>
-                                   </div>
-                              </div>
-                         </div>
-
-                         <div id="checkout-qr-upload-preview" class="mt-4 hidden">
-                              <div
-                                   class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center">
-                                   <img id="checkout-qr-image-preview" src="#" alt="QR Code Preview"
-                                        class="mx-auto max-h-40 mb-3 hidden">
-                                   <div id="checkout-upload-instructions" class="text-center text-sm text-gray-500">
-                                        <p>QR code will appear here after selection</p>
-                                   </div>
-                              </div>
-                              <button id="checkout-process-qr-btn"
-                                   class="w-full mt-3 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                                   </svg>
-                                   Process QR Code
-                              </button>
-                         </div>
-                    </div>
-               </div>
-
-               <!-- Manual Search Option -->
-               <button onclick="showCheckoutManualSearch()"
-                    class="w-full p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-start hover-scale">
-                    <div class="bg-gray-200 p-3 rounded-lg mr-4 hover:bg-gray-300 transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none"
-                              viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                         </svg>
-                    </div>
-                    <div class="text-left">
-                         <h4 class="font-medium text-gray-900">Manual Search</h4>
-                         <p class="text-sm text-gray-600 mt-1">Search for guest by name or reference number</p>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 ml-auto mt-1" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-               </button>
-          </div>
-
-          <!-- Modal Footer -->
-          <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-               <button onclick="closeCheckOutModal()"
-                    class="w-full py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">
-                    Cancel
-               </button>
-          </div>
-     </div>
-</div>
-
-<!-- Manual Checkout Search Container -->
-<div id="checkoutManualSearchContainer" class="fixed inset-0 bg-white p-4 hidden z-50 overflow-y-auto">
-     <div class="max-w-2xl mx-auto">
-          <div class="flex justify-between items-center mb-4">
-               <h3 class="text-lg font-medium">Search Guest for Checkout</h3>
-               <button onclick="closeCheckoutManualSearch()" class="text-gray-500 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-               </button>
-          </div>
-
-          <!-- Quick Search Field -->
-          <div class="mb-4">
-               <label class="block text-sm font-medium mb-2 text-gray-700">Reservation Code</label>
-               <input type="text" id="checkoutReservationCode"
-                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    onkeypress="if(event.key==='Enter')performCheckoutSearch()">
-          </div>
-
-          <!-- Advanced Search Fields -->
-          <div class="bg-gray-50 p-4 rounded-lg mb-4">
-               <h4 class="text-sm font-medium mb-3 text-gray-700">Advanced Search</h4>
-
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                         <label class="block text-xs font-medium mb-1 text-gray-600">First Name</label>
-                         <input type="text" id="checkoutFirstNameInput" placeholder="First name"
-                              class="w-full p-2 border rounded text-sm"
-                              onkeypress="if(event.key==='Enter')performCheckoutSearch()">
-                    </div>
-
-                    <div>
-                         <label class="block text-xs font-medium mb-1 text-gray-600">Last Name</label>
-                         <input type="text" id="checkoutLastNameInput" placeholder="Last name"
-                              class="w-full p-2 border rounded text-sm"
-                              onkeypress="if(event.key==='Enter')performCheckoutSearch()">
-                    </div>
-               </div>
-          </div>
-
-          <button onclick="performCheckoutSearch()"
-               class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
-               Search Guests
-          </button>
-
-          <div id="checkoutSearchResults" class="mt-4 space-y-2">
-               <!-- Search results will appear here -->
-          </div>
-     </div>
-</div>
 
 
-<!-- Day Tour Modal -->
-<div class="modal fixed inset-0 bg-black/50 z-[999] backdrop-blur-sm flex items-center justify-center hidden">
-     <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-          <!-- Modal Header -->
-          <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 p-6 sticky top-0 z-10">
-               <h3 class="text-xl font-semibold text-white">Day Tour Registration</h3>
-               <p class="text-yellow-100 text-sm mt-1">Register a new day tour guest</p>
-          </div>
+     <meta name="csrf-token" content="{{ csrf_token() }}">
+     @endsection
 
-          <div class="p-6">
-               <form id="dayTourForm">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <!-- Left Column - Customer Info -->
-                         <div>
-                              <!-- Customer Information -->
-                              <div class="mb-6">
-                                   <button type="button" class="flex items-center justify-between w-full"
-                                        onclick="toggleSection('customerInfoSection')">
-                                        <h4 class="text-lg font-medium text-gray-900">Customer Information</h4>
-                                        <svg id="customerInfoChevron" xmlns="http://www.w3.org/2000/svg"
-                                             class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24"
-                                             stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                   </button>
+     @section('content_js')
+     <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-                                   <div id="customerInfoSection" class="mt-4 space-y-4">
-                                        <div class="grid grid-cols-2 gap-4">
-                                             <div>
-                                                  <label for="firstName"
-                                                       class="block text-sm font-medium text-gray-700 mb-1">First Name
-                                                       *</label>
-                                                  <input type="text" id="firstName" name="firstName" required
-                                                       class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                                             </div>
-                                             <div>
-                                                  <label for="lastName"
-                                                       class="block text-sm font-medium text-gray-700 mb-1">Last Name
-                                                       *</label>
-                                                  <input type="text" id="lastName" name="lastName" required
-                                                       class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                                             </div>
-                                        </div>
-
-                                        <div>
-                                             <label for="phoneNumber"
-                                                  class="block text-sm font-medium text-gray-700 mb-1">Phone Number
-                                                  *</label>
-                                             <input type="tel" id="phoneNumber" name="phoneNumber" required
-                                                  class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                                        </div>
-
-                                        <div>
-                                             <label for="email"
-                                                  class="block text-sm font-medium text-gray-700 mb-1">Email
-                                                  (Optional)</label>
-                                             <input type="email" id="email" name="email"
-                                                  class="w-full px-3 py-2 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                                        </div>
-                                   </div>
-                              </div>
-
-                              <!-- Tour Options -->
-                              <div class="mb-6">
-                                   <h4 class="text-lg font-semibold text-gray-800 mb-4">Tour Options <span
-                                             class="text-red-500">*</span></h4>
-                                   <div class="grid grid-cols-3 gap-4">
-
-                                        <!-- Pool Only -->
-                                        <div>
-                                             <input id="poolOption" name="tourOption" type="radio" value="pool"
-                                                  class="hidden peer" checked>
-                                             <label for="poolOption"
-                                                  class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
-                                                  transition-all duration-200 ease-in-out 
-                                                  hover:border-yellow-400 hover:shadow-lg
-                                                  peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
-                                                  <span class="block text-base font-medium text-gray-700">Pool
-                                                       Only</span>
-                                                  <span class="block text-xs text-gray-500 mt-1">₱150/₱100</span>
-                                             </label>
-                                        </div>
-
-                                        <!-- Park Only -->
-                                        <div>
-                                             <input id="parkOption" name="tourOption" type="radio" value="park"
-                                                  class="hidden peer">
-                                             <label for="parkOption"
-                                                  class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
-                                                  transition-all duration-200 ease-in-out 
-                                                  hover:border-yellow-400 hover:shadow-lg
-                                                  peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
-                                                  <span class="block text-base font-medium text-gray-700">Park
-                                                       Only</span>
-                                                  <span class="block text-xs text-gray-500 mt-1">₱80/₱50</span>
-                                             </label>
-                                        </div>
-
-                                        <!-- Both -->
-                                        <div>
-                                             <input id="bothOption" name="tourOption" type="radio" value="both"
-                                                  class="hidden peer">
-                                             <label for="bothOption"
-                                                  class="block p-4 border border-gray-300 rounded-xl text-center cursor-pointer 
-                                                  transition-all duration-200 ease-in-out 
-                                                  hover:border-yellow-400 hover:shadow-lg
-                                                  peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:shadow-md">
-                                                  <span class="block text-base font-medium text-gray-700">Both</span>
-                                                  <span class="block text-xs text-gray-500 mt-1">Pool + Park</span>
-                                             </label>
-                                        </div>
-
-                                   </div>
-                              </div>
-
-                         </div>
-
-                         <!-- Right Column - Pricing -->
-                         <div>
-                              <!-- Entrance Fees -->
-                              <div class="mb-6">
-                                   <button type="button" class="flex items-center justify-between w-full"
-                                        onclick="toggleSection('entranceFeesSection')">
-                                        <h4 class="text-lg font-medium text-gray-900">Entrance Fees</h4>
-                                        <svg id="entranceFeesChevron" xmlns="http://www.w3.org/2000/svg"
-                                             class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24"
-                                             stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                   </button>
-
-                                   <div id="entranceFeesSection" class="mt-4 space-y-4">
-                                        <!-- Pool Fees (shown when Pool or Both selected) -->
-                                        <div id="poolFees" class="space-y-3">
-                                             <h5 class="text-sm font-medium text-gray-700">Pool Entrance</h5>
-                                             <div class="grid grid-cols-3 gap-2 items-center">
-                                                  <label class="block text-xs text-gray-600">Adults (₱150)</label>
-                                                  <input type="number" id="poolAdultCount" name="poolAdultCount" min="0"
-                                                       value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                                       onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span
-                                                            id="poolAdultTotal">0</span></div>
-                                             </div>
-
-                                             <div class="grid grid-cols-3 gap-2 items-center">
-                                                  <label class="block text-xs text-gray-600">Kids (₱100)</label>
-                                                  <input type="number" id="poolKidCount" name="poolKidCount" min="0"
-                                                       value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                                       onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span
-                                                            id="poolKidTotal">0</span></div>
-                                             </div>
-
-                                             <div class="grid grid-cols-3 gap-2 items-center">
-                                                  <label class="block text-xs text-gray-600">Seniors (₱100)</label>
-                                                  <input type="number" id="poolSeniorCount" name="poolSeniorCount"
-                                                       min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                                       onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span
-                                                            id="poolSeniorTotal">0</span></div>
-                                             </div>
-                                        </div>
-
-                                        <!-- Park Fees (shown when Park or Both selected) -->
-                                        <div id="parkFees" class="space-y-3 mt-4 hidden">
-                                             <h5 class="text-sm font-medium text-gray-700">Park Entrance</h5>
-                                             <div class="grid grid-cols-3 gap-2 items-center">
-                                                  <label class="block text-xs text-gray-600">Adults (₱80)</label>
-                                                  <input type="number" id="parkAdultCount" name="parkAdultCount" min="0"
-                                                       value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                                       onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span
-                                                            id="parkAdultTotal">0</span></div>
-                                             </div>
-
-                                             <div class="grid grid-cols-3 gap-2 items-center">
-                                                  <label class="block text-xs text-gray-600">Kids (₱50)</label>
-                                                  <input type="number" id="parkKidCount" name="parkKidCount" min="0"
-                                                       value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                                       onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span
-                                                            id="parkKidTotal">0</span></div>
-                                             </div>
-
-                                             <div class="grid grid-cols-3 gap-2 items-center">
-                                                  <label class="block text-xs text-gray-600">Seniors (₱50)</label>
-                                                  <input type="number" id="parkSeniorCount" name="parkSeniorCount"
-                                                       min="0" value="0"
-                                                       class="px-2 py-1 text-sm border border-darkgray rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                                       onchange="calculateTotals()">
-                                                  <div class="text-sm font-medium text-right">₱<span
-                                                            id="parkSeniorTotal">0</span></div>
-                                             </div>
-                                        </div>
-
-                                        <div
-                                             class="grid grid-cols-3 gap-2 items-center pt-2 border-t border-gray-200 mt-4">
-                                             <label class="block text-sm font-medium text-gray-700">Subtotal</label>
-                                             <div></div>
-                                             <div class="text-sm font-bold text-right">₱<span id="grandTotal">0</span>
-                                             </div>
-                                        </div>
-                                   </div>
-                              </div>
-
-                              <!-- Cottages Section -->
-                              <div class="mb-6">
-                                   <button type="button" class="flex items-center justify-between w-full"
-                                        onclick="toggleSection('cottagesSection')">
-                                        <h4 class="text-lg font-medium text-gray-900">Optional Cottages</h4>
-                                        <svg id="cottagesChevron" xmlns="http://www.w3.org/2000/svg"
-                                             class="h-5 w-5 text-gray-500 transform" fill="none" viewBox="0 0 24 24"
-                                             stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                   </button>
-
-                                   <div id="cottagesSection" class="mt-4">
-                                        <div id="cottageOptions" class="space-y-3">
-                                             <p class="text-sm text-gray-500">Loading cottage options...</p>
-                                        </div>
-
-                                        <div
-                                             class="grid grid-cols-3 gap-2 items-center pt-2 border-t border-gray-200 mt-4">
-                                             <label class="block text-sm font-medium text-gray-700">Cottage
-                                                  Total</label>
-                                             <div></div>
-                                             <div class="text-sm font-medium text-right">₱<span
-                                                       id="cottageTotal">0</span></div>
-                                        </div>
-                                   </div>
-                              </div>
-
-                         </div>
-                    </div>
-
-                    <!-- Final Total -->
-                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100 mb-6">
-                         <div class="flex justify-between items-center">
-                              <h4 class="text-lg font-bold text-gray-900">Final Total</h4>
-                              <div class="text-xl font-bold text-yellow-700">₱<span id="finalTotal">0</span></div>
-                         </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="flex justify-end space-x-3">
-                         <button type="button" onclick="closeDayTourModal()"
-                              class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
-                              Cancel
-                         </button>
-                         <button type="submit"
-                              class="px-4 py-2 bg-yellow-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
-                              Register Guest
-                         </button>
-                    </div>
-               </form>
-          </div>
-     </div>
-</div>
-
-<meta name="csrf-token" content="{{ csrf_token() }}">
-@endsection
-
-@section('content_js')
-<script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-
-<script>
+     <script>
      function toggleActiveHost(checkbox) {
           const isActive = checkbox.checked;
           const indicator = document.getElementById('hostStatusIndicator');
@@ -1378,74 +809,7 @@ $active = 'dashboard';
                checkbox.checked = !isActive;
           });
      }
-     // Global functions for modal operations
-     function openCheckInModal() {
-          document.body.classList.add('modal-open');
-          document.getElementById('checkInModal').classList.remove('hidden');
-     }
-
-     function closeCheckInModal() {
-          document.body.classList.remove('modal-open');
-          document.getElementById('checkInModal').classList.add('hidden');
-     }
-
-     function openCheckOutModal() {
-          document.body.classList.add('modal-open');
-          document.getElementById('checkOutModal').classList.remove('hidden');
-     }
-
-     function closeCheckOutModal() {
-          document.body.classList.remove('modal-open');
-          document.getElementById('checkOutModal').classList.add('hidden');
-     }
-
-     function showManualSearch() {
-          document.body.classList.add('modal-open');
-          closeCheckInModal();
-          document.getElementById('manualSearchContainer').classList.remove('hidden');
-     }
-
-     function closeManualSearch() {
-          document.body.classList.remove('modal-open');
-          document.getElementById('manualSearchContainer').classList.add('hidden');
-     }
-
-     function showCheckoutManualSearch() {
-          document.body.classList.add('modal-open');
-          closeCheckOutModal();
-          document.getElementById('checkoutManualSearchContainer').classList.remove('hidden');
-     }
-
-     function closeCheckoutManualSearch() {
-          document.body.classList.remove('modal-open');
-          document.getElementById('checkoutManualSearchContainer').classList.add('hidden');
-     }
-
-     // Day Tour Modal Functions
-     function openDayTourModal() {
-          document.body.classList.add('modal-open');
-          document.getElementById('dayTourModal').classList.remove('hidden');
-          loadCottageOptions();
-          calculateTotals(); // Initialize totals
-     }
-
-     function closeDayTourModal() {
-          document.body.classList.remove('modal-open');
-          document.getElementById('dayTourModal').classList.add('hidden');
-          // Reset form when closing
-          document.getElementById('dayTourForm').reset();
-          document.getElementById('grandTotal').textContent = '0';
-          document.getElementById('finalTotal').textContent = '0';
-          document.getElementById('cottageTotal').textContent = '0';
-     }
-
-     function toggleSection(sectionId) {
-          const section = document.getElementById(sectionId);
-          const chevron = document.getElementById(`${sectionId}Chevron`);
-          section.classList.toggle('hidden');
-          chevron.classList.toggle('rotate-180');
-     }
-
+     
      // Data Loading Functions
      function loadNextCheckin() {
           fetch('/get/bookings/next-checkin', {
@@ -1506,181 +870,6 @@ $active = 'dashboard';
           });
      }
 
-     function loadOccupiedFacilities() {
-          fetch('/admin/dashboard/occupied-facilities', {
-               method: 'GET',
-               headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-               }
-          })
-          .then(response => response.json())
-          .then(data => {
-               const container = document.getElementById('occupied-facilities-container');
-               
-               if (data.length === 0) {
-                    container.innerHTML = `
-                         <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              <p class="mt-2 text-gray-600">No facilities occupied today</p>
-                         </div>Active Admins
-                    `;
-                    return;
-               }
-               
-               let html = '';
-               data.forEach(facility => {
-                    const hasBreakfast = facility.has_breakfast ? `
-                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              Breakfast
-                         </span>
-                    ` : '';
-                    
-                    const imageUrl = facility.image_url ? facility.image_url : '/images/default-facility.jpg';
-                    
-                    html += `
-                         <div class="flex-shrink-0 w-64 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-                              <div class="h-40 bg-gray-100 overflow-hidden">
-                              <img src="${imageUrl}" alt="${facility.name}" class="w-full h-full object-cover">
-                              </div>
-                              <div class="p-4">
-                              <div class="flex justify-between items-start">
-                              <h3 class="font-medium text-gray-900 truncate">${facility.name}</h3>
-                              ${hasBreakfast}
-                              </div>
-                              <div class="mt-2">
-                              <p class="text-sm text-gray-600 truncate">
-                                   <span class="font-medium">Guest:</span> ${facility.user_name}
-                              </p>
-                              </div>
-                              <div class="mt-3 flex justify-between items-center text-xs text-gray-500">
-                              <span class="inline-flex items-center">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                   </svg>
-                                   Today
-                              </span>
-                              </div>
-                              </div>
-                         </div>
-                    `;
-               });
-               
-               container.innerHTML = html;
-          })
-          .catch(error => {
-               console.error('Error loading occupied facilities:', error);
-               const container = document.getElementById('occupied-facilities-container');
-               container.innerHTML = `
-                    <div class="flex-shrink-0 w-full h-48 flex flex-col items-center justify-center">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                         </svg>
-                         <p class="mt-2 text-gray-600">Failed to load facilities</p>
-                         <button onclick="loadOccupiedFacilities()" class="mt-2 text-sm text-red-600 hover:text-red-800">Retry</button>
-                    </div>
-               `;
-          });
-     }
-
-     function loadCottageOptions() {
-          fetch('/get/admin/cottages')
-               .then(response => response.json())
-               .then(data => {
-                    const container = document.getElementById('cottageOptions');
-                    if (data.length > 0) {
-                         let html = '';
-                         data.forEach(cottage => {
-                              html += `
-                              <div class="border-b border-gray-100 pb-3">
-                              <div class="flex items-start justify-between">
-                                   <div class="flex-1">
-                                        <label class="block text-sm text-gray-700">${cottage.name} (₱${cottage.price})</label>
-                                        <p class="text-xs text-gray-500">${cottage.description || ''}</p>
-                                        <p class="text-xs text-gray-500">Max: ${cottage.quantity || 1} per booking</p>
-                                   </div>
-                                   <div class="text-sm font-medium text-right">
-                                        ₱<span id="cottage_subtotal_${cottage.id}">0</span>
-                                   </div>
-                              </div>
-                              <div class="flex items-center space-x-2 mt-2">
-                                   <button type="button" onclick="decrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
-                                        class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
-                                        -
-                                   </button>
-                                   <input type="number" id="cottage_qty_${cottage.id}" 
-                                        name="cottages[${cottage.id}][quantity]" 
-                                        value="0" min="0" max="${cottage.quantity || 1}"
-                                        data-price="${cottage.price}"
-                                        class="w-12 px-2 py-1 text-sm border border-darkgray rounded-md text-center focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                                        onchange="updateCottageSubtotal('${cottage.id}', ${cottage.price})">
-                                   <button type="button" onclick="incrementCottageQuantity('${cottage.id}', ${cottage.price}, ${cottage.quantity || 1})" 
-                                        class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-md hover:bg-gray-300">
-                                        +
-                                   </button>
-                              </div>
-                              </div>
-                              `;
-                         });
-                         container.innerHTML = html;
-                    } else {
-                         container.innerHTML = '<p class="text-sm text-gray-500">No cottages available</p>';
-                    }
-               })
-               .catch(error => {
-                    console.error('Error loading cottages:', error);
-                    document.getElementById('cottageOptions').innerHTML = '<p class="text-sm text-red-500">Error loading cottages</p>';
-               });
-     }
-
-     function incrementCottageQuantity(cottageId, price, maxQuantity) {
-          const input = document.getElementById(`cottage_qty_${cottageId}`);
-          let value = parseInt(input.value) || 0;
-          if (value < maxQuantity) {
-               input.value = value + 1;
-               updateCottageSubtotal(cottageId, price);
-          }
-     }
-
-     function decrementCottageQuantity(cottageId, price) {
-          const input = document.getElementById(`cottage_qty_${cottageId}`);
-          let value = parseInt(input.value) || 0;
-          if (value > 0) {
-               input.value = value - 1;
-               updateCottageSubtotal(cottageId, price);
-          }
-     }
-
-     function updateCottageSubtotal(cottageId, price) {
-          const input = document.getElementById(`cottage_qty_${cottageId}`);
-          const quantity = parseInt(input.value) || 0;
-          const subtotal = quantity * price;
-          
-          document.getElementById(`cottage_subtotal_${cottageId}`).textContent = subtotal.toFixed(2);
-          calculateCottageTotal();
-     }
-
-     function calculateCottageTotal() {
-          let total = 0;
-          const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
-          
-          quantityInputs.forEach(input => {
-               const quantity = parseInt(input.value) || 0;
-               const price = parseFloat(input.dataset.price) || 0;
-               total += quantity * price;
-          });
-          
-          document.getElementById('cottageTotal').textContent = total.toFixed(2);
-          calculateFinalTotal();
-     }
-
      // Utility Functions
      function formatDate(dateString) {
           if (!dateString) return '-';
@@ -1693,353 +882,6 @@ $active = 'dashboard';
           if (!checkin || !checkout) return 0;
           const diff = new Date(checkout) - new Date(checkin);
           return Math.floor(diff / (1000 * 60 * 60 * 24));
-     }
-
-     // Search Functions
-     function performSearch() {
-          // Get all search field values
-          const firstName = document.getElementById('firstNameInput').value.trim();
-          const lastName = document.getElementById('lastNameInput').value.trim();
-          const reservationCode = document.getElementById('reservationCode').value.trim();
-          
-          // Check if any search field has value
-          if (!firstName && !lastName && !reservationCode) {
-               alert('Please enter at least one search criteria');
-               return;
-          }
-          
-          const resultsContainer = document.getElementById('searchResults');
-          resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
-          
-          // Build query string with all parameters
-          const params = new URLSearchParams();
-          
-          if (reservationCode) params.append('reservationCode', reservationCode);
-          if (firstName) params.append('firstname', firstName);
-          if (lastName) params.append('lastname', lastName);
-          
-          fetch(`/check-in/search-guests?${params.toString()}`)
-               .then(response => response.json())
-               .then(data => {
-                    if (data.length > 0) {
-                         let html = '<div class="space-y-3">';
-                         
-                         // Group by user for better organization (optional)
-                         const bookingsByUser = {};
-                         data.forEach(guest => {
-                              const userKey = guest.email || guest.name;
-                              if (!bookingsByUser[userKey]) {
-                              bookingsByUser[userKey] = [];
-                              }
-                              bookingsByUser[userKey].push(guest);
-                         });
-                         
-                         // Display all bookings
-                         Object.values(bookingsByUser).forEach(userBookings => {
-                              if (userBookings.length > 0) {
-                              const firstBooking = userBookings[0];
-                              
-                              // User header
-                              html += `
-                                   <div class="bg-gray-50 p-3 rounded-lg">
-                                        <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
-                                        <div class="text-sm text-gray-600 mt-1">
-                                             ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
-                                             ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
-                                        </div>
-                                   </div>
-                              `;
-                              
-                              // Individual bookings
-                              userBookings.forEach(guest => {
-                                   if (guest.payment_id) {
-                                        html += `
-                                             <div class="p-4 border rounded-lg hover:bg-gray-100 cursor-pointer ml-4 transition-colors shadow-sm" 
-                                                  onclick="selectGuest('${guest.payment_id}')">
-                                                  <div class="flex justify-between items-start">
-                                                  <div>
-                                                       <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
-                                                       ${guest.checkin_date ? `
-                                                            <p class="text-sm text-gray-600">
-                                                                 Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
-                                                            </p>
-                                                       ` : ''}
-                                                       <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
-                                                  </div>
-                                                  <div class="text-right">
-                                                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                            ${guest.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
-                                                            guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                            guest.status === 'checked_in' ? 'bg-blue-100 text-blue-800' : 
-                                                            'bg-gray-100 text-gray-800'}">
-                                                            ${guest.status}
-                                                       </span>
-                                                       <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
-                                                  </div>
-                                                  </div>
-                                             </div>
-                                        `;
-                                   }
-                              });
-                              }
-                         });
-                         
-                         html += '</div>';
-                         resultsContainer.innerHTML = html;
-                    } else {
-                         resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No bookings found matching your criteria</p></div>';
-                    }
-               })
-               .catch(error => {
-                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
-                    console.error('Search error:', error);
-               });
-     }
-
-     function performCheckoutSearch() {
-          // Get all search field values
-          const firstName = document.getElementById('checkoutFirstNameInput').value.trim();
-          const lastName = document.getElementById('checkoutLastNameInput').value.trim();
-          const reservationCode = document.getElementById('checkoutReservationCode').value.trim();
-          
-          // Check if any search field has value
-          if (!firstName && !lastName && !reservationCode) {
-               alert('Please enter at least one search criteria');
-               return;
-          }
-          
-          const resultsContainer = document.getElementById('checkoutSearchResults');
-          resultsContainer.innerHTML = '<div class="text-center py-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
-          
-          // Build query string with all parameters
-          const params = new URLSearchParams();
-          
-          if (reservationCode) params.append('reservationCode', reservationCode);
-          if (firstName) params.append('firstname', firstName);
-          if (lastName) params.append('lastname', lastName);
-          
-          fetch(`/check-out/search-guests?${params.toString()}`)
-               .then(response => response.json())
-               .then(data => {
-                    if (data.length > 0) {
-                         let html = '<div class="space-y-3">';
-                         
-                         // Group by user for better organization
-                         const bookingsByUser = {};
-                         data.forEach(guest => {
-                              const userKey = guest.email || guest.name;
-                              if (!bookingsByUser[userKey]) {
-                              bookingsByUser[userKey] = [];
-                              }
-                              bookingsByUser[userKey].push(guest);
-                         });
-                         
-                         // Display all bookings
-                         Object.values(bookingsByUser).forEach(userBookings => {
-                              if (userBookings.length > 0) {
-                              const firstBooking = userBookings[0];
-                              
-                              // User header
-                              html += `
-                                   <div class="bg-gray-50 p-3 rounded-lg">
-                                        <h4 class="font-semibold text-gray-800">${firstBooking.name}</h4>
-                                        <div class="text-sm text-gray-600 mt-1">
-                                             ${firstBooking.email ? `Email: ${firstBooking.email}` : ''}
-                                             ${firstBooking.phone ? ` | Phone: ${firstBooking.phone}` : ''}
-                                        </div>
-                                   </div>
-                              `;
-                              
-                              // Individual bookings
-                              userBookings.forEach(guest => {
-                                   if (guest.payment_id) {
-                                        html += `
-                                             <div class="p-4 border rounded-lg hover:bg-green-50 cursor-pointer ml-4 transition-colors shadow-sm" 
-                                                  onclick="selectGuestForCheckout('${guest.payment_id}')">
-                                                  <div class="flex justify-between items-start">
-                                                  <div>
-                                                       <p class="text-sm text-gray-600">Reservation Code: <span class="font-bold">${guest.code}</span></p>
-                                                       ${guest.checkin_date ? `
-                                                            <p class="text-sm text-gray-600">
-                                                                 Dates: ${guest.checkin_date} to ${guest.checkout_date || 'N/A'}
-                                                            </p>
-                                                       ` : ''}
-                                                       <p class="text-sm text-gray-500">Booked: ${guest.booking_date}</p>
-                                                  </div>
-                                                  <div class="text-right">
-                                                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                            ${guest.status === 'checked_in' ? 'bg-green-100 text-green-800' : 
-                                                            guest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                            'bg-gray-100 text-gray-800'}">
-                                                            ${guest.status}
-                                                       </span>
-                                                       <p class="text-sm text-green-600 font-medium mt-1">Payment ID: ${guest.payment_id}</p>
-                                                  </div>
-                                                  </div>
-                                             </div>
-                                        `;
-                                   }
-                              });
-                              }
-                         });
-                         
-                         html += '</div>';
-                         resultsContainer.innerHTML = html;
-                    } else {
-                         resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">No checked-in guests found matching your criteria</p></div>';
-                    }
-               })
-               .catch(error => {
-                    resultsContainer.innerHTML = '<div class="text-center py-6"><p class="text-red-500">Error searching. Please try again.</p></div>';
-                    console.error('Checkout search error:', error);
-               });
-     }
-
-     // Selection Functions
-     function selectGuest(paymentId) {
-          window.location.href = `/check-in/success/${paymentId}`;
-     }
-
-     function selectGuestForCheckout(paymentId) {
-          window.location.href = `/check-out/receipt/${paymentId}`;
-     }
-
-     // Calculation Functions
-     function calculateTotals() {
-          const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
-          
-          // Show/hide sections based on selection
-          document.getElementById('poolFees').classList.toggle('hidden', tourOption === 'park');
-          document.getElementById('parkFees').classList.toggle('hidden', tourOption === 'pool');
-
-          if (tourOption === 'park') {
-               cottageSection.classList.add('hidden');
-               // Reset cottage selections
-               document.querySelectorAll('input[id^="cottage_qty_"]').forEach(input => {
-                    input.value = 0;
-                    updateCottageSubtotal(input.id.replace('cottage_qty_', ''), parseFloat(input.dataset.price));
-               });
-          } else {
-               cottageSection.classList.remove('hidden');
-          }
-          
-          // Calculate pool fees if selected
-          if (tourOption === 'pool' || tourOption === 'both') {
-               const poolAdultCount = parseInt(document.getElementById('poolAdultCount').value) || 0;
-               const poolKidCount = parseInt(document.getElementById('poolKidCount').value) || 0;
-               const poolSeniorCount = parseInt(document.getElementById('poolSeniorCount').value) || 0;
-               
-               const poolAdultTotal = poolAdultCount * 150;
-               const poolKidTotal = poolKidCount * 100;
-               const poolSeniorTotal = poolSeniorCount * 100;
-               
-               document.getElementById('poolAdultTotal').textContent = poolAdultTotal;
-               document.getElementById('poolKidTotal').textContent = poolKidTotal;
-               document.getElementById('poolSeniorTotal').textContent = poolSeniorTotal;
-          } else {
-               // Reset pool values if not selected
-               document.getElementById('poolAdultCount').value = 0;
-               document.getElementById('poolKidCount').value = 0;
-               document.getElementById('poolSeniorCount').value = 0;
-               document.getElementById('poolAdultTotal').textContent = '0';
-               document.getElementById('poolKidTotal').textContent = '0';
-               document.getElementById('poolSeniorTotal').textContent = '0';
-          }
-          
-          // Calculate park fees if selected
-          if (tourOption === 'park' || tourOption === 'both') {
-               const parkAdultCount = parseInt(document.getElementById('parkAdultCount').value) || 0;
-               const parkKidCount = parseInt(document.getElementById('parkKidCount').value) || 0;
-               const parkSeniorCount = parseInt(document.getElementById('parkSeniorCount').value) || 0;
-               
-               const parkAdultTotal = parkAdultCount * 80;
-               const parkKidTotal = parkKidCount * 50;
-               const parkSeniorTotal = parkSeniorCount * 50;
-               
-               document.getElementById('parkAdultTotal').textContent = parkAdultTotal;
-               document.getElementById('parkKidTotal').textContent = parkKidTotal;
-               document.getElementById('parkSeniorTotal').textContent = parkSeniorTotal;
-          } else {
-               // Reset park values if not selected
-               document.getElementById('parkAdultCount').value = 0;
-               document.getElementById('parkKidCount').value = 0;
-               document.getElementById('parkSeniorCount').value = 0;
-               document.getElementById('parkAdultTotal').textContent = '0';
-               document.getElementById('parkKidTotal').textContent = '0';
-               document.getElementById('parkSeniorTotal').textContent = '0';
-          }
-          calculateCottageTotal();
-     }
-
-     function calculateCottageTotal() {
-          let total = 0;
-          const quantityInputs = document.querySelectorAll('input[id^="cottage_qty_"]');
-          
-          quantityInputs.forEach(input => {
-               const quantity = parseInt(input.value) || 0;
-               const price = parseFloat(input.dataset.price) || 0;
-               total += quantity * price;
-          });
-          
-          document.getElementById('cottageTotal').textContent = total.toFixed(2);
-          calculateFinalTotal(); // Update the final total
-     }
-
-     function calculateFinalTotal() {
-          const tourOption = document.querySelector('input[name="tourOption"]:checked').value;
-          let entranceTotal = 0;
-
-          if (tourOption === 'pool' || tourOption === 'both') {
-               entranceTotal += parseInt(document.getElementById('poolAdultTotal').textContent) || 0;
-               entranceTotal += parseInt(document.getElementById('poolKidTotal').textContent) || 0;
-               entranceTotal += parseInt(document.getElementById('poolSeniorTotal').textContent) || 0;
-          }
-          
-          if (tourOption === 'park' || tourOption === 'both') {
-               entranceTotal += parseInt(document.getElementById('parkAdultTotal').textContent) || 0;
-               entranceTotal += parseInt(document.getElementById('parkKidTotal').textContent) || 0;
-               entranceTotal += parseInt(document.getElementById('parkSeniorTotal').textContent) || 0;
-          }
-          
-          const cottageTotal = parseFloat(document.getElementById('cottageTotal').textContent) || 0;
-          const finalTotal = entranceTotal + cottageTotal;
-          
-          document.getElementById('grandTotal').textContent = entranceTotal.toFixed(2);
-          document.getElementById('finalTotal').textContent = finalTotal.toFixed(2);
-     }
-
-     // QR Code Processing Functions
-     async function readQRCodeFromImage(file) {
-          return new Promise((resolve, reject) => {
-               const reader = new FileReader();
-               reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                         try {
-                              const canvas = document.createElement('canvas');
-                              const ctx = canvas.getContext('2d');
-                              canvas.width = img.width;
-                              canvas.height = img.height;
-                              ctx.drawImage(img, 0, 0);
-                              
-                              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                              const code = jsQR(imageData.data, imageData.width, imageData.height);
-                              
-                              if (code) {
-                              resolve(code.data);
-                              } else {
-                              reject(new Error("Could not read QR code from the image. Please ensure the image is clear and contains a valid QR code."));
-                              }
-                         } catch (error) {
-                              reject(error);
-                         }
-                    };
-                    img.onerror = () => reject(new Error("Failed to load image"));
-                    img.src = e.target.result;
-               };
-               reader.onerror = () => reject(new Error("Failed to read file"));
-               reader.readAsDataURL(file);
-          });
      }
 
      function fetchActiveAdmins() {
@@ -2118,33 +960,33 @@ $active = 'dashboard';
      }
 
      async function fetchRooms() {
-    try {
-        const response = await fetch("{{ route('monitor.room.data') }}", {
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            }
-        });
+          try {
+               const response = await fetch("{{ route('monitor.room.data') }}", {
+                    headers: {
+                         "X-Requested-With": "XMLHttpRequest",
+                         "Content-Type": "application/json",
+                         "Accept": "application/json",
+                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    }
+               });
 
-        if (!response.ok) throw new Error("Network error");
+               if (!response.ok) throw new Error("Network error");
 
-        const data = await response.json();
-        renderRooms(data);
-    } catch (err) {
-        console.error("Fetch error:", err);
-        document.getElementById('room-grid').innerHTML = `
-            <div class="col-span-full text-center py-4 text-red-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <p>Failed to load room status</p>
-                <button onclick="fetchRooms()" class="mt-2 text-sm text-red-600 hover:text-red-800">Retry</button>
-            </div>
-        `;
-    }
-}
+               const data = await response.json();
+               renderRooms(data);
+          } catch (err) {
+               console.error("Fetch error:", err);
+               document.getElementById('room-grid').innerHTML = `
+                    <div class="col-span-full text-center py-4 text-red-500">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                         </svg>
+                         <p>Failed to load room status</p>
+                         <button onclick="fetchRooms()" class="mt-2 text-sm text-red-600 hover:text-red-800">Retry</button>
+                    </div>
+               `;
+          }
+     }
 
      function renderRooms(data) {
           const grid = document.getElementById("room-grid");
@@ -2154,7 +996,9 @@ $active = 'dashboard';
                grid.innerHTML = `
                     <div class="col-span-full text-center py-8">
                          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                   d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 
+                                   9 9 0 0118 0z" />
                          </svg>
                          <p class="mt-2 text-gray-600">No facilities found</p>
                     </div>
@@ -2172,25 +1016,30 @@ $active = 'dashboard';
 
                const div = document.createElement("div");
                div.className = `
-                    p-3 rounded-lg shadow text-center text-white text-sm cursor-pointer
-                    ${isOccupied ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}
-                    transition-colors duration-200
+                    p-3 rounded-lg shadow text-center text-sm
+                    ${isOccupied ? 'bg-red-500 text-white' : 'bg-blue-50 text-gray-700'}
                `;
                div.innerHTML = `
-                    <h3 class="font-semibold">${facility.name}</h3>
-                    <p class="text-xs italic text-gray-100">${facility.category ?? 'No Category'}</p>
-                    <p class="mt-1 font-medium">${isOccupied ? 'Occupied' : 'Available'}</p>
+                    <h3 class="font-semibold ${isOccupied ? 'text-white' : 'text-gray-700'}">
+                         ${facility.name}
+                    </h3>
+                    <p class="text-xs italic ${isOccupied ? 'text-gray-100' : 'text-gray-500'}">
+                         ${facility.category ?? 'No Category'}
+                    </p>
+                    <p class="mt-1 font-medium ${isOccupied ? 'text-white' : 'text-gray-600'}">
+                         ${isOccupied ? 'Occupied' : 'Available'}
+                    </p>
                `;
                
-               // Add click event to show details if needed
+               // Optional click event
                div.addEventListener('click', () => {
-                    // You can implement a modal or details view here
                     console.log('Facility clicked:', facility);
                });
                
                grid.appendChild(div);
           });
      }
+     
 
      function loadRoomMonitoring() {
           // Show loading state
@@ -2207,6 +1056,7 @@ $active = 'dashboard';
      // Document Ready Function
      document.addEventListener('DOMContentLoaded', function() {
           fetchRooms();
+          loadData();
           // Initialize dashboard stats
           fetch(`/admin/dashboard/stats`, {
                method: 'GET',
@@ -2229,12 +1079,11 @@ $active = 'dashboard';
           
           // Load initial data
           loadNextCheckin();
-          loadOccupiedFacilities();
           fetchActiveAdmins();
+          
 
           // Set up periodic refreshes
           setInterval(loadNextCheckin, 300000);
-          setInterval(loadOccupiedFacilities, 300000);
           setInterval(fetchActiveAdmins, 300000);
           
           // Set up event listeners for all View buttons
@@ -2250,24 +1099,100 @@ $active = 'dashboard';
           const qrImagePreview = document.getElementById('qr-image-preview');
           const fileNameSpan = document.getElementById('file-name');
           const processQrBtn = document.getElementById('process-qr-btn');
-          
-          qrUploadInput.addEventListener('change', function(e) {
-               const file = e.target.files[0];
-               if (!file) return;
+
+          let incomeChart;
+
+          function formatCurrency(amount) {
+               return '₱' + parseFloat(amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+          }
+
+          function loadData() {
+               // Show loading, hide error
+               document.getElementById('loading').style.display = 'flex';
+               document.getElementById('error-message').style.display = 'none';
                
-               fileNameSpan.textContent = file.name;
-               qrUploadPreview.classList.remove('hidden');
-               document.getElementById('upload-instructions').classList.add('hidden');
-               
-               if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                         qrImagePreview.src = e.target.result;
-                         qrImagePreview.classList.remove('hidden');
-                    };
-                    reader.readAsDataURL(file);
+               // Make AJAX request to Laravel API endpoint
+               fetch('/api/monthly-income')
+                    .then(response => {
+                         if (!response.ok) {
+                              throw new Error('Network response was not ok');
+                         }
+                         return response.json();
+                    })
+                    .then(data => {
+                         // Hide loading
+                         document.getElementById('loading').style.display = 'none';
+ 
+                         // Create or update chart - ensure data has the correct structure
+                         if (data.chartData && data.chartData.labels && data.chartData.datasets) {
+                              createOrUpdateChart(data.chartData);
+                         } else {
+                              console.error('Invalid chart data structure:', data);
+                              document.getElementById('error-message').style.display = 'block';
+                              document.getElementById('error-message').innerHTML = `
+                                   <h3>Invalid chart data</h3>
+                                   <p>Please check the API response format</p>
+                                   <button onclick="loadData()" style="margin-top: 15px; padding: 8px 15px; background: #4b6cb7; color: white; border: none; border-radius: 5px; cursor: pointer;">Retry</button>
+                              `;
+                         }
+                    })
+                    .catch(error => {
+                         console.error('Error fetching data:', error);
+                         document.getElementById('loading').style.display = 'none';
+                         document.getElementById('error-message').style.display = 'block';
+                    });
                }
-          });
+          // Create or update the chart
+          function createOrUpdateChart(chartData) {
+               const ctx = document.getElementById('incomeChart').getContext('2d');
+               
+               // If chart already exists, destroy it
+               if (incomeChart) {
+                    incomeChart.destroy();
+               }
+               
+               // Create new chart
+               incomeChart = new Chart(ctx, {
+                    type: 'line',
+                    data: chartData,
+                    options: {
+                         responsive: true,
+                         maintainAspectRatio: false,
+                         plugins: {
+                         legend: {
+                              position: 'top',
+                         },
+                         tooltip: {
+                              mode: 'index',
+                              intersect: false,
+                              callbacks: {
+                                   label: function(context) {
+                                        return `Income: ${formatCurrency(context.raw)}`;
+                                   }
+                              }
+                         }
+                         },
+                         scales: {
+                         y: {
+                              beginAtZero: true,
+                              grid: {
+                                   color: 'rgba(0, 0, 0, 0.05)'
+                              },
+                              ticks: {
+                                   callback: function(value) {
+                                        return formatCurrency(value);
+                                   }
+                              }
+                         },
+                         x: {
+                              grid: {
+                                   display: false
+                              }
+                         }
+                         }
+                    }
+               });
+          }
 
           processQrBtn.addEventListener('click', async function() {
                const file = qrUploadInput.files[0];
@@ -2548,5 +1473,5 @@ $active = 'dashboard';
           document.getElementById('parkKidCount').addEventListener('change', calculateTotals);
           document.getElementById('parkSeniorCount').addEventListener('change', calculateTotals);
      });
-</script>
-@endsection
+     </script>
+     @endsection

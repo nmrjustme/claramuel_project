@@ -71,12 +71,7 @@ class InquirerController extends Controller
             ->where('status', 'pending_confirmation');
     
         $bookings = $query->paginate($perPage);
-        $newCount = FacilityBookingLog::where('is_read', false)->count();
-        
-        // Count pending payments (assuming this means bookings with pending payment status)
-        $pendingPayments = FacilityBookingLog::whereHas('payments', function($q) {
-            $q->where('status', 'pending');
-        })->count();
+        $newCount = FacilityBookingLog::where('status', 'pending_confirmation')->count();
         
         $total_PaymentUnderVerification = Payments::where('status', 'under_verification')->count();
         
@@ -270,13 +265,8 @@ class InquirerController extends Controller
     {
         try {
             $validated = $request->validate([
-                'custom_message' => 'nullable|string|max:500',
                 'send_notifier' => 'sometimes|boolean',
-                'amount_paid' => 'required|numeric|min:0.01'
             ]);
-
-            Payments::where('facility_log_id', $bookingId)
-                ->update(['amount_paid' => $validated['amount_paid']]);
             
             $booking = FacilityBookingLog::with([
                 'payments', 
@@ -331,7 +321,7 @@ class InquirerController extends Controller
             
             if ($request->input('send_notifier', true)) {
                 $this->sendVerificationEmail($booking, $qrCodeUrl, $customMessage);
-                $this->sendSMS($booking->id, $customMessage);
+                //$this->sendSMS($booking->id, $customMessage);
             }
             
             return response()->json([

@@ -25,17 +25,25 @@ class MayaWebhookSetupController extends Controller
     {
         Log::info('Maya Webhook Received:', $request->all());
         
-        $event = $request->input('name');
-
+        // Some payloads use "paymentStatus", some only "status"
+        $event = $request->input('paymentStatus') ?? $request->input('status');
+        
         switch ($event) {
             case 'PAYMENT_SUCCESS':
+            case 'CHECKOUT_SUCCESS':
                 return $this->updateOrder('paid', $request);
+
             case 'PAYMENT_FAILED':
+            case 'CHECKOUT_FAILURE':
                 return $this->updateOrder('failed', $request);
+
             case 'PAYMENT_EXPIRED':
                 return $this->updateOrder('expired', $request);
+
             case 'PAYMENT_CANCELLED':
+            case 'CHECKOUT_DROPOUT':
                 return $this->updateOrder('cancelled', $request);
+
             default:
                 Log::info("Maya Webhook: Event {$event} ignored");
                 return response()->json(['message' => "Event {$event} ignored"], 200);
@@ -44,28 +52,36 @@ class MayaWebhookSetupController extends Controller
     
     public function updateOrder($status, $request)
     {
-        $orderId = $request->input('requestReferenceNumber');
-        $order = Order::where('reference_number', $orderId)->first();
+        // Always prefer requestReferenceNumber to find your order
+        $orderId = $request->input('requestReferenceNumber')
+            ?? $request->input('receiptNumber')
+            ?? $request->input('transactionReferenceNumber');
+
+        // Payment Method 
+        $paymentScheme = $request->input('fundSource.details.scheme');
+
         
+        $order = Order::where('reference_number', $orderId)->first();
+
         if (!$order) {
             Log::error("Order not found for reference: {$orderId}");
             return response()->json(['error' => 'Order not found'], 404);
         }
-        
-        $token = $order->token;
-        
+
         $order->status = $status;
+        $order->payment_scheme = $paymentScheme;
+        
+        $amount = $order->amount;
         $order->save();
-        
-        if ($status === 'paid') {
-            $this->storeBookingInDatabase($token, $orderId);
-        }
-        
+
+        $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
+
         Log::info("Order {$orderId} marked as " . strtoupper($status));
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);
     }
-    
-    private function storeBookingInDatabase($token, $orderId)
+
+
+    private function storeBookingInDatabase($token, $orderId, $amount, $paymentScheme)
     {
         $bookingData = Cache::get('booking_confirmation_' . $token);
         // Start database transaction
@@ -168,16 +184,7 @@ class MayaWebhookSetupController extends Controller
                 ]);
 
                 $total_price = $bookingData['total_price'] ?? 0;
-                $half_of_total_price = ($total_price * 0.5);
-                // Create payment record
-                Payments::create([
-                    'facility_log_id' => $bookingLog->id,
-                    'status' => 'paid',
-                    'amount' => $half_of_total_price,
-                    'reference_no' => $orderId,
-                    'payment_date' => now(),
-                    'amount_paid' => $half_of_total_price,
-                ]);
+
 
                 // Process guest types for this facility
                 if (isset($bookingData['guest_types'][$facility->id])) {
@@ -192,7 +199,19 @@ class MayaWebhookSetupController extends Controller
                         }
                     }
                 }
+                
             }
+
+            // Create payment record
+            Payments::create([
+                'facility_log_id' => $bookingLog->id,
+                'status' => 'paid',
+                'amount' => $amount,
+                'method' => $paymentScheme,
+                'reference_no' => $orderId,
+                'payment_date' => now(),
+            ]);
+
 
             // Commit transaction
             DB::commit();
@@ -221,5 +240,4 @@ class MayaWebhookSetupController extends Controller
             throw $e; // Re-throw to handle in the controller
         }
     }
-
 }

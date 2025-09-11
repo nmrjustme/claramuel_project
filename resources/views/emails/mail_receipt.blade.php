@@ -158,16 +158,22 @@
             <div class="receipt">
                 <div class="section">
                     @php 
+                        // Calculate total amount from booking summaries
                         $totalAmount = 0;
                         foreach ($booking->summaries as $summary) {
                             $subtotal = $summary->bookingDetails->sum('total_price');
                             $totalAmount += $subtotal;
                         }
                         
-                        // Get the latest payment or first payment
+                        // Calculate payment information correctly
+                        $advancePaid = $booking->payments->sum('amount');
+                        $totalPaid = $advancePaid;
+                        $balance = $totalAmount - $totalPaid;
+                        
+                        // Get the first payment for reference details
                         $payment = $booking->payments->first();
-                        $totalPaid = $payment->amount_paid;
                     @endphp
+
                     
                     <h2 class="section-title">Guest Information</h2>
                     
@@ -186,37 +192,38 @@
                         <span class="detail-value">{{ $booking->user->phone }}</span>
                     </div>
                     
-                    <h2 style="margin-top: 0;">Payment Details</h2>
+                    <h2 style="margin-top: 20px;">Payment Details</h2>
                     
-                    @if($payment)
-                    <div class="detail-row">
-                        <span class="detail-label">Advance Amount:</span>
-                        <span class="detail-value">₱{{ number_format($payment->amount, 2) }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Amount Paid:</span>
+                    @if($booking->payments && $booking->payments->count() > 0)
+                    <div class="detail-row" style="font-weight: bold;">
+                        <span class="detail-label">Advance Paid:</span>
                         <span class="detail-value">₱{{ number_format($totalPaid, 2) }}</span>
                     </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Balance (To be paid upon checkin):</span>
-                        <span class="detail-value">₱{{ number_format(($totalAmount - $totalPaid), 2) }}</span>
+                    <div class="detail-row" style="font-weight: bold; color: {{ $balance > 0 ? 'red' : 'green' }};">
+                        <span class="detail-label">Balance:</span>
+                        <span class="detail-value">
+                            ₱{{ number_format(abs($balance), 2) }}
+                            {{ $balance > 0 ? '(Due)' : '(FULLY PAID)' }}
+                        </span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Date:</span>
                         <span class="detail-value">
-                            {{ \Carbon\Carbon::parse($payment->payment_date)->format('F j, Y \a\t g:i A') }}
+                            {{ $payment && $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('F j, Y \a\t g:i A') : 'N/A' }}
                         </span>
                     </div>
                     
                     <div class="detail-row">
                         <span class="detail-label">Method:</span>
-                        <span class="detail-value">GCash</span>
+                        <span class="detail-value">{{ $payment && $payment->method ? ucfirst($payment->method) : 'GCash' }}</span>
                     </div>
                     
+                    @if($payment && $payment->reference_no)
                     <div class="detail-row">
                         <span class="detail-label">Reference:</span>
                         <span class="detail-value">{{ $payment->reference_no }}</span>
                     </div>
+                    @endif
                     @else
                     <div class="detail-row">
                         <span class="detail-label">Payment Status:</span>
@@ -249,7 +256,7 @@
                         <div style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
                             <div class="detail-row">
                                 <span class="detail-label">Room Type:</span>
-                                <span class="detail-value">{{ $summary->facility->name }} ₱{{ number_format($summary->facility->price, 2) }}/Per night</span>
+                                <span class="detail-value">{{ $summary->facility->name }} ₱{{ number_format($summary->facility_price, 2) }}/Per night</span>
                             </div>
                             
                             @if($guestsForFacility->count() > 0)
@@ -298,7 +305,7 @@
                             @if($summary->breakfast)
                             <div class="detail-row">
                                 <span class="detail-label">Breakfast:</span>
-                                <span class="detail-value">Included/₱{{ number_format($summary->breakfast->price, 2) }}</span>
+                                <span class="detail-value">Included/₱{{ number_format($summary->breakfast_price, 2) }}</span>
                             </div>
                             @endif
                         </div>

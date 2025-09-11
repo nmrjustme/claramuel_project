@@ -36,7 +36,7 @@ class BookingNew implements ShouldBroadcast
     {
         return new Channel('bookings');
     }
-
+    
     public function broadcastAs(): string
     {
         return 'booking.created';

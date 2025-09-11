@@ -13,6 +13,7 @@ use App\Models\Breakfast;
 use App\Models\FacilitySummary;
 use App\Models\FacilityBookingDetails;
 use App\Models\BookingGuestDetails;
+use App\Models\Payments;
 use App\Models\GuestType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -401,56 +402,64 @@ class BookingController extends Controller
             'data' => $booking,
         ]);
     }
-
+    
     public function getMyBookings(Request $request)
     {
         try {
-            $perPage = $request->input('per_page', 15);
+            $perPage = $request->input('per_page', 18);
             $page = $request->input('page', 1);
-            $search = $request->input('search', '');
-            
+            $firstName = $request->input('firstname', '');
+            $lastName = $request->input('lastname', '');
+            $checkinDate = $request->input('checkin_date', '');
+            $checkoutDate = $request->input('checkout_date', '');
+            $dateType = $request->input('date_type', 'checkin'); // Default to check-in
+            $status = $request->input('status', '');
+
             $query = FacilityBookingLog::with([
                 'user:id,firstname,lastname,email,phone',
                 'payments:id,facility_log_id,amount_paid,checkin_paid,remaining_balance_status,status',
                 'details:id,facility_booking_log_id,checkin_date,checkout_date',
-                'summaries.facility:id,name,price'
+                'summaries.facility:id,name,price', // Facility data
+                'summaries.breakfast', // Breakfast relationship (if you need breakfast details)
             ])
                 ->orderBy('created_at', 'desc');
 
-            // 🔍 Search functionality
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('id', 'like', "%$search%")
-                        ->orWhere('code', 'like', "%$search%")
-                        ->orWhereHas('user', function ($userQuery) use ($search) {
-                            $userQuery->where('firstname', 'like', "%$search%")
-                                ->orWhere('lastname', 'like', "%$search%")
-                                ->orWhere('email', 'like', "%$search%")
-                                ->orWhere('phone', 'like', "%$search%");
-                        });
+            // Search by first name
+            if ($firstName) {
+                $query->whereHas('user', function ($q) use ($firstName) {
+                    $q->where('firstname', 'like', "%$firstName%");
                 });
+            }
+
+            // Search by last name
+            if ($lastName) {
+                $query->whereHas('user', function ($q) use ($lastName) {
+                    $q->where('lastname', 'like', "%$lastName%");
+                });
+            }
+
+            // Search by check-in or check-out date
+            if ($checkinDate && $dateType === 'checkin') {
+                $query->whereHas('details', function ($q) use ($checkinDate) {
+                    $q->whereDate('checkin_date', $checkinDate);
+                });
+            } elseif ($checkoutDate && $dateType === 'checkout') {
+                $query->whereHas('details', function ($q) use ($checkoutDate) {
+                    $q->whereDate('checkout_date', $checkoutDate);
+                });
+            }
+
+            if ($status && $status !== 'all') {
+                $query->where('status', $status);
             }
 
             $bookings = $query->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
                 'data' => $bookings->map(function ($booking) {
-                    // ✅ Display status logic
+                    // Display status logic
                     $displayStatus = $booking->status;
-
-                    // Only override with payment status if booking is not yet checked in/out/cancelled
-                    if (in_array($booking->status, ['pending_confirmation', 'confirmed'])) {
-                        if ($booking->payments && count($booking->payments) > 0) {
-                            $latestPayment = $booking->payments->sortByDesc('created_at')->first();
-
-                            if ($latestPayment->remaining_balance_status === 'fully_paid') {
-                                $displayStatus = 'fully_paid';
-                            } elseif ($latestPayment->status === 'verified') {
-                                $displayStatus = 'verified';
-                            }
-                        }
-                    }
-
+                    
                     return [
                         'id' => $booking->id,
                         'user' => [
@@ -462,7 +471,15 @@ class BookingController extends Controller
                         'status' => $displayStatus,
                         'code' => $booking->code,
                         'details' => $booking->details,
-                        'summaries' => $booking->summaries,
+                        'summaries' => $booking->summaries->map(function ($summary) {
+                            return [
+                                'facility' => $summary->facility,
+                                'breakfast_id' => $summary->breakfast_id, // Include breakfast_id
+                                'breakfast' => $summary->breakfast, // Include breakfast relationship data if needed
+                                'breakfast_price' => $summary->breakfast_price
+                                // Include other summary fields you need
+                            ];
+                        }),
                         'payments' => $booking->payments,
                     ];
                 }),
@@ -482,6 +499,131 @@ class BookingController extends Controller
         }
     }
 
+
+    public function paymentDetails($id)
+    {
+        $booking = FacilityBookingLog::with(['payments', 'details'])->find($id);
+
+        if (!$booking) {
+            return response()->json([
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $booking
+        ]);
+    }
+
+    public function processMyPayment(Request $request, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_type' => 'required|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        $booking = FacilityBookingLog::with('payments')->find($id);
+
+        if (!$booking) {
+            return response()->json([
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        // Get the latest payment record for this booking
+        $payment = $booking->payments()->first();
+
+        if (!$payment) {
+            return response()->json([
+                'message' => 'No payment record found to update'
+            ], 404);
+        }
+
+        // Update fields
+        $payment->checkin_paid = $request->amount;
+        $payment->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment updated successfully',
+            'payment' => $payment
+        ]);
+    }
+
+
+    /**
+     * Check-in booking
+     */
+    public function checkin($id)
+    {
+        $booking = FacilityBookingLog::find($id);
+
+        if (!$booking) {
+            return response()->json([
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        if ($booking->status === 'checked_in') {
+            return response()->json([
+                'message' => 'Booking already checked in'
+            ], 400);
+        }
+
+        $booking->status = 'checked_in';
+        $booking->checked_in_at = now();
+        $booking->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking checked in successfully',
+            'booking_id' => $booking->id
+        ]);
+    }
+
+
+    // In your Laravel controller
+    public function processPayment(Request $request, $bookingId)
+    {
+        try {
+            $validated = $request->validate([
+                'amount' => 'required|numeric|min:0.01',
+                'notes' => 'nullable|string'
+            ]);
+
+            $booking = FacilityBookingLog::findOrFail($bookingId);
+
+            // Create payment record
+            $payment = new Payments();
+            $payment->booking_id = $bookingId;
+            $payment->amount_paid = $validated['amount'];
+            $payment->save();
+
+            // Update booking status if needed
+            if ($validated['payment_type'] === 'checkin') {
+                // Check if balance is fully paid
+                $totalAmount = $booking->details->sum('total_price');
+                $totalPaid = $booking->payments->sum('amount_paid');
+
+                if ($totalPaid >= $totalAmount) {
+                    $booking->status = 'confirmed';
+                    $booking->save();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment processed successfully',
+                'payment' => $payment
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process payment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 
     // public function getMyInquiries(Request $request)

@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Payments extends Model
 {
     protected $table = 'payments';
-    public $timestamps = false;
-    
+
     protected $fillable = [
         'facility_log_id',
         'event_log_id',
@@ -32,15 +31,16 @@ class Payments extends Model
         'qr_code_path',
         'qr_status',
     ];
+
     protected $casts = [
         'verified_at' => 'datetime',
     ];
-    
+
     public function verifiedBy()
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
-    
+
     public function scopeVerified($query)
     {
         return $query->whereNotNull('verified_at');

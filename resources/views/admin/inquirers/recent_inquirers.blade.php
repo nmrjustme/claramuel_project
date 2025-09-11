@@ -2,59 +2,13 @@
     // Global variable to track new inquiries
 let newInquiriesCount = 0;
 
-// Function to mark a single inquiry as read
-function markInquiryAsRead(inquiryId) {
-    return fetch(`/api/inquiries/mark-read/${inquiryId}`, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update the specific inquiry item in the UI
-            const inquiryItem = document.querySelector(`.inquiry-item[data-id="${inquiryId}"]`);
-            if (inquiryItem) {
-                inquiryItem.classList.remove('border-l-4', 'border-red-500', 'bg-red-50');
-                const unreadDot = inquiryItem.querySelector('.inline-block.h-2.w-2.rounded-full.bg-red-500');
-                if (unreadDot) unreadDot.remove();
-            }
-            
-            // Update the counter
-            updateNewInquiriesCount(data.newCount);
-            return data;
-        }
-        throw new Error(data.message || 'Failed to mark as read');
-    });
-}
-
-function openInquiriesPageAndSearch(code) {
+function openInquiriesPageAndSearch(id) {
     // Store the ID to search for in sessionStorage
-    sessionStorage.setItem('searchInquiryId', code);
+    sessionStorage.setItem('searchInquiryId', id);
     
     // Open the inquiries page
-    window.location.href = '/Inquiries';
+    window.location.href = '/admin/bookings';
 }
-
-// Function to handle view button clicks
-window.handleViewInquiry = function(button) {
-    const id = button.getAttribute('data-id');
-    
-    // Mark as read before opening modal
-    markInquiryAsRead(id)
-            .then(() => {
-                // Call the modal's open function after marking as read
-                if (typeof window.openModal_accept_inquirer === 'function') {
-                    window.openModal_accept_inquirer(button);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    };
-
 // Function to load inquiries via AJAX
 function loadInquiries(search = '') {
     showLoadingState('inquiries-container', 'Loading inquiries...');
@@ -115,7 +69,7 @@ function renderInquiries(inquiries) {
                     <p class="text-sm text-gray-500 truncate">${inquirer.user.phone}</p>
                 </div>
                 <button 
-                    onclick="openInquiriesPageAndSearch('${inquirer.code}')" 
+                    onclick="openInquiriesPageAndSearch('${inquirer.id}')" 
                     class="px-3 py-1 text-sm text-gray-700 hover:text-white hover:bg-red-600 border border-gray-300 rounded-md transition-colors"
                 >
                     View
@@ -140,36 +94,6 @@ function updateNewInquiriesCount(count) {
     }
     
     counterElement.dataset.prevCount = count;
-}
-
-// Function to mark all inquiries as read
-function markAllAsRead() {
-    fetch('/api/inquiries/mark-all-read', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            updateNewInquiriesCount(data.newCount);
-            
-            // Update all inquiry items in the UI
-            document.querySelectorAll('.inquiry-item').forEach(item => {
-                item.classList.remove('border-l-4', 'border-red-500', 'bg-red-50');
-                const unreadDot = item.querySelector('.inline-block.h-2.w-2.rounded-full.bg-red-500');
-                if (unreadDot) {
-                    unreadDot.remove();
-                }
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error marking all inquiries as read:', error);
-    });
 }
 
 // Function to filter inquiries based on search
@@ -231,7 +155,7 @@ function addNewInquiry(booking) {
             <p class="text-sm text-gray-500 truncate">${booking.user.phone}</p>
         </div>
         <button 
-            onclick="openInquiriesPageAndSearch('${booking.code}')" 
+            onclick="openInquiriesPageAndSearch('${booking.id}')" 
             class="px-3 py-1 text-sm text-gray-700 hover:text-white hover:bg-red-600 border border-gray-300 rounded-md transition-colors"
         >
             View

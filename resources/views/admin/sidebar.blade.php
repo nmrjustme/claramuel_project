@@ -39,18 +39,24 @@
                 <li>
                     <a href="{{ route('admin.bookings') }}"
                         class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'bookings' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="{{ $active === 'bookings' ? '2' : '1.5' }}"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
-                        <span>Bookings</span>
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="{{ $active === 'bookings' ? '2' : '1.5' }}"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            <span>Bookings</span>
+                        </div>
+                        <span id="inquiries-badge"
+                            class="hidden text-xs font-semibold bg-yellow-400 text-black px-2 py-0.5 rounded-full ml-2">
+                            0 new
+                        </span>
                     </a>
                 </li>
 
                 <!-- Inquiries Log -->
-                <li>
+                {{-- <li>
                     <a href="{{ route('admin.inquiries') }}"
                         class="flex items-center justify-between py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'inquiries' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
                         <div class="flex items-center">
@@ -62,12 +68,9 @@
                             </svg>
                             <span>Booking Logs</span>
                         </div>
-                        <span id="inquiries-badge"
-                            class="hidden text-xs font-semibold bg-yellow-400 text-black px-2 py-0.5 rounded-full ml-2">
-                            0 new
-                        </span>
+                    
                     </a>
-                </li>
+                </li> --}}
 
                 <!-- Arrivals -->
                 <li>

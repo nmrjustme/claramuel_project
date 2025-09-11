@@ -733,7 +733,7 @@
                     <div class="flex flex-wrap justify-center gap-6">
                         <img src="{{ asset('imgs/banks/Maya_logo.svg') }}" alt="Maya" class="h-7">
                         <img src="{{ asset('imgs/banks/QR_Ph_Logo.svg.png') }}" alt="QR Ph" class="h-7">
-                        <img src="{{ asset('imgs/banks/GCash_Logo.svg') }}" alt="GCash" class="h-7">
+                        <img src="{{ asset('imgs/banks/gcash_wallet_Logo.svg') }}" alt="GCash" class="h-7">
                     </div>
                 </div>
 
