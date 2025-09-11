@@ -38,6 +38,21 @@
                         <span>Bookings</span>
                     </a>
                 </li>
+
+                <!-- Inquiries Log -->
+                <li>
+                    <a href="{{ route('admin.daytour.index') }}" class="flex items-center justify-between py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'inquiries' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ $active === 'inquiries' ? '2' : '1.5' }}" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span>Day Tour Logs</span>
+                        </div>
+                        <span id="inquiries-badge" class="hidden text-xs font-semibold bg-yellow-400 text-black px-2 py-0.5 rounded-full ml-2">
+                            0 new
+                        </span>
+                    </a>
+                </li>
                 
                 <!-- Inquiries Log -->
                 <li>
