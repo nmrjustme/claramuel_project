@@ -182,13 +182,22 @@
     <script type="module">
         document.addEventListener('DOMContentLoaded', function() {
             const sound = document.getElementById('notificationSound');
+            let audioUnlocked = false;
+            let notificationCooldown = false;
 
             // Unlock audio after first user interaction
             function unlockAudio() {
+                if (audioUnlocked) return;
+                
+                // Try to play and immediately pause to unlock audio
                 sound.play().then(() => {
                     sound.pause();
                     sound.currentTime = 0;
-                }).catch(err => console.log("Unlock failed:", err));
+                    audioUnlocked = true;
+                    console.log("Audio unlocked successfully");
+                }).catch(err => {
+                    console.log("Audio unlock attempt failed:", err);
+                });
 
                 document.removeEventListener('click', unlockAudio);
                 document.removeEventListener('keydown', unlockAudio);
@@ -197,9 +206,6 @@
             document.addEventListener('click', unlockAudio);
             document.addEventListener('keydown', unlockAudio);
 
-            // Initial load of all counts
-            // getAllUnreadCounts();
-            
             // Sidebar toggle functionality
             const sidebar = document.getElementById('sidebar');
             const toggleSidebarMobile = document.getElementById('toggleSidebarMobile');
@@ -219,20 +225,31 @@
             }
             
             // Event listeners for sidebar
-            toggleSidebarMobile.addEventListener('click', toggleSidebar);
-            sidebarClose.addEventListener('click', toggleSidebar);
-            sidebarOverlay.addEventListener('click', function() {
-                if (!sidebarOverlay.classList.contains('opacity-0')) {
-                    toggleSidebar();
-                }
-            });
+            if (toggleSidebarMobile) {
+                toggleSidebarMobile.addEventListener('click', toggleSidebar);
+            }
+            
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', toggleSidebar);
+            }
+            
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() {
+                    if (!sidebarOverlay.classList.contains('opacity-0')) {
+                        toggleSidebar();
+                    }
+                });
+            }
             
             // Close sidebar when clicking nav links (mobile)
-            document.querySelectorAll('#sidebar a').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth < 768) toggleSidebar();
+            const sidebarLinks = document.querySelectorAll('#sidebar a');
+            if (sidebarLinks.length > 0) {
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) toggleSidebar();
+                    });
                 });
-            });
+            }
             
             // Handle window resize
             window.addEventListener('resize', function() {
@@ -245,7 +262,7 @@
             });
             
             // Request notification permission
-            if (Notification.permission !== 'granted') {
+            if ("Notification" in window && Notification.permission !== 'granted') {
                 Notification.requestPermission().then(permission => {
                     console.log('Notification permission:', permission);
                 });
@@ -253,37 +270,103 @@
         });
 
         function playNotificationSound(sound) {
-            if (!sound) return;
-            sound.currentTime = 0;
-            sound.play().catch(err => console.log("Play blocked:", err));
-        }
-        // Function to fetch all unread counts
-        // function getAllUnreadCounts() {
-        //     showLoadingIndicators();
+            if (!sound || !audioUnlocked) return;
             
-        //     fetch(`/unread-counts/all`, {
-        //         method: 'GET',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        //         }
-        //     })
-        //     .then(response => {
-        //         if (!response.ok) {
-        //             throw new Error('Network response was not ok');
-        //         }
-        //         return response.json();
-        //     })
-        //     .then(data => {
-        //         updateAllBadges(data);
-        //     })
-        //     .catch(error => {
-        //         console.error('Error fetching unread counts:', error);
-        //         hideLoadingIndicators();
-        //         // Optionally show error to user
-        //         toastr.error('Failed to load notification counts', 'Error');
-        //     });
-        // }
+            try {
+                sound.currentTime = 0;
+                sound.play().catch(err => {
+                    console.log("Sound play blocked:", err);
+                    // Try to unlock audio again if play fails
+                    audioUnlocked = false;
+                    unlockAudio();
+                });
+            } catch (error) {
+                console.error("Error playing sound:", error);
+            }
+        }
+
+        // Function to show notification with cooldown
+        function showNotification(title, message, sound) {
+            // Prevent notification spam
+            if (notificationCooldown) {
+                console.log("Notification cooldown active, skipping");
+                return;
+            }
+            
+            // Set cooldown
+            notificationCooldown = true;
+            setTimeout(() => {
+                notificationCooldown = false;
+            }, 3000); // 3 second cooldown
+            
+            // Play sound
+            playNotificationSound(sound);
+                                
+            // Show desktop notification
+            if ("Notification" in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(title, {
+                        body: message,
+                        icon: '/favicon.ico'
+                    });
+                } catch (error) {
+                    console.error("Error showing browser notification:", error);
+                }
+            }
+            
+            // Show toast notification
+            if (typeof toastr !== 'undefined') {
+                toastr.info(message, title, {
+                    timeOut: 5000,
+                    closeButton: true,
+                    progressBar: true,
+                    preventDuplicates: true // Prevent duplicate toasts
+                });
+            }
+        }
+
+        // Real-time updates with debouncing and duplicate prevention
+        let debounceTimer;
+        let lastEventId = null;
+        
+        window.Echo.channel('unread-counts')
+            .listen('.counts.updated', (e) => {
+                console.log('Real-time update received:', e);
+                
+                // Check for duplicate events
+                if (e.id && e.id === lastEventId) {
+                    console.log('Duplicate event detected, skipping');
+                    return;
+                }
+                lastEventId = e.id;
+                
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    updateAllBadges(e.counts);
+                }, 300); // 300ms debounce to prevent rapid updates
+            });
+
+        // Booking notifications with duplicate prevention
+        let lastBookingId = null;
+        
+        window.Echo.channel('bookings')
+            .listen('.booking.created', (e) => {
+                console.log('New booking received:', e);
+                
+                // Check for duplicate events
+                if (e.booking.id && e.booking.id === lastBookingId) {
+                    console.log('Duplicate booking detected, skipping');
+                    return;
+                }
+                lastBookingId = e.booking.id;
+                
+                const sound = document.getElementById('notificationSound');
+                showNotification(
+                    'New Booking', 
+                    `New booking from ${e.booking.user.firstname} ${e.booking.user.lastname} (ID: ${e.booking.id})`,
+                    sound
+                );
+            });
 
         // Function to update all badges
         function updateAllBadges(counts) {
@@ -327,43 +410,6 @@
                 el.style.display = 'none';
             });
         }
-
-        // Real-time updates with debouncing
-        let debounceTimer;
-        window.Echo.channel('unread-counts')
-            .listen('.counts.updated', (e) => {
-                console.log('Real-time update received:', e);
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    updateAllBadges(e.counts);
-                }, 300); // 300ms debounce to prevent rapid updates
-            });
-
-        // Booking notifications
-        window.Echo.channel('bookings')
-            .listen('.booking.created', (e) => {
-                console.log('New booking received:', e);
-                const sound = document.getElementById('notificationSound');
-                playNotificationSound(sound);
-                                
-                // Show desktop notification
-                if (Notification.permission === 'granted') {
-                    new Notification('New Booking', {
-                        body: `New booking from ${e.booking.user.firstname} ${e.booking.user.lastname} (ID: ${e.booking.id})`,
-                        icon: '/favicon.ico'
-                    });
-                }
-                
-                // Show toast notification
-                toastr.info(`New booking from ${e.booking.user.firstname} ${e.booking.user.lastname}`, 'New Booking', {
-                    timeOut: 5000,
-                    closeButton: true,
-                    progressBar: true
-                });
-                
-                // Refresh counts
-                // getAllUnreadCounts();
-            });
     </script>
 
     @yield('content_js')

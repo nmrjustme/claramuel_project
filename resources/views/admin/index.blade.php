@@ -462,7 +462,7 @@ $active = 'dashboard';
      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
 
           <!-- Total Bookings -->
-          <div class="status-card total-bookings shadow-sm">
+          <div class="status-card total-bookings border border-lightgray">
                <div class="card-content">
                     <div class="text-content">
                          <p class="stat-label">Total Bookings</p>
@@ -487,7 +487,7 @@ $active = 'dashboard';
           </div>
 
           <!-- Pending Confirmations -->
-          <div class="status-card pending-confirmations shadow-sm">
+          <div class="status-card pending-confirmations border border-lightgray">
                <div class="card-content">
                     <div class="text-content">
                          <p class="stat-label">Pending Confirmations</p>
@@ -511,7 +511,7 @@ $active = 'dashboard';
                </div>
           </div>
 
-          <div class="status-card awaiting-payments shadow-sm">
+          <div class="status-card awaiting-payments border border-lightgray">
                <div class="card-content">
                     <div class="text-content">
                          <p class="stat-label">Checked In</p>
@@ -536,7 +536,7 @@ $active = 'dashboard';
                </div>
           </div>
 
-          <div class="status-card checked-out shadow-sm">
+          <div class="status-card checked-out border border-lightgray">
                <div class="card-content">
                     <div class="text-content">
                          <p class="stat-label">Checked Out</p>

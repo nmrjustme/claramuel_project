@@ -2127,6 +2127,8 @@ $active = 'bookings';
         
         
         async function checkoutBooking(bookingId, button) {
+            
+            window.location.href = `/check-out/receipt/${bookingId}`;
             try {
                 // Show loading state on button
                 button.disabled = true;
