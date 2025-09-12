@@ -1936,8 +1936,7 @@ $active = 'bookings';
         function getButtonStates(status, checkinDate) {
             const states = {
                 confirm: { disabled: false, loading: false },
-                checkin: { disabled: false, loading: false },
-                checkout: { disabled: false, loading: false }
+                checkin: { disabled: false, loading: false }
             };
             
             // If dates are not provided, disable check-in/check-out buttons
@@ -1956,8 +1955,7 @@ $active = 'bookings';
             const CHECKIN_GRACE_PERIOD = 0; // No grace period by default
             
             // Check if today is within the legitimate period for check-in
-            const isCheckinPeriod = today >= new Date(checkin.getTime() - (CHECKIN_GRACE_PERIOD * 24 * 60 * 60 * 1000)) && 
-                                today <= checkout;
+            const isCheckinPeriod = today >= new Date(checkin.getTime() - (CHECKIN_GRACE_PERIOD * 24 * 60 * 60 * 1000))
             
             
             switch(status) {
