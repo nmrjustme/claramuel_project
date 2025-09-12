@@ -18,7 +18,7 @@
         <a href="{{ route('admin.daytour.logs') }}" 
            class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg shadow transition duration-200">
             <i class="fas fa-list-alt mr-2"></i>
-            View Logs
+            View Day Tour Logs
         </a>
     </div>
 
