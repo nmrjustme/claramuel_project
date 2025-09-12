@@ -1956,7 +1956,6 @@ $active = 'bookings';
             // Check if today is within the legitimate period for check-in
             const isCheckinPeriod = today >= new Date(checkin.getTime() - (CHECKIN_GRACE_PERIOD * 24 * 60 * 60 * 1000))
             
-            
             switch(status) {
                 case 'pending_confirmation':
                     states.confirm.disabled = false;
