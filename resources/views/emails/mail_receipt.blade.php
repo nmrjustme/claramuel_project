@@ -130,7 +130,6 @@
         </div>
         
         <div class="custom-message">
-            <div class="confirmation-title">Reservation Confirmed!</div>
             <p>Dear {{ $booking->user->firstname }},</p>
             <p>Your reservation request has been <strong>accepted and confirmed</strong>. We're delighted to inform you that everything is set for your upcoming stay.</p>
             

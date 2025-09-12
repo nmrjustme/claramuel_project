@@ -321,7 +321,7 @@ class InquirerController extends Controller
             
             if ($request->input('send_notifier', true)) {
                 $this->sendVerificationEmail($booking, $qrCodeUrl, $customMessage);
-                $this->sendSMS($booking->id, $customMessage);
+                //$this->sendSMS($booking->id, $customMessage);
             }
             
             return response()->json([

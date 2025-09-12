@@ -460,6 +460,14 @@ $active = 'bookings';
         background-color: #ffeaa7 !important;
         /* Slightly darker yellow on hover */
     }
+
+    .button-hint {
+        font-size: 0.7rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+        display: block;
+        font-style: italic;
+    }
 </style>
 @endsection
 
@@ -1341,7 +1349,7 @@ $active = 'bookings';
                             const statusInfo = STATUS_CONFIG[displayStatus] || {class: 'bg-yellow-600', text: displayStatus.toUpperCase()};
                             const isPending = displayStatus === 'pending_confirmation';
                             html += `
-                                <tr class="booking-row ${isPending ? 'pending' : ''}" data-booking-id="${booking.id}">
+                                <tr class="booking-row ${isPending ? 'pending' : ''} cursor-pointer" data-booking-id="${booking.id}">
                                     <td class="px-3 py-2">
                                         <div class="text-xs text-gray-900 font-medium">${booking.id}</div>
                                     </td>
@@ -1515,6 +1523,9 @@ $active = 'bookings';
                 const data = await response.json();
                 const booking = data.data;
                 const detail = booking.details?.[0];
+
+                const checkinDate = detail.checkin_date;
+                const checkoutDate = detail.checkout_date;
                 
                 // Use booking status directly (removed payment-based status logic)
                 const bookingStatus = booking.status;
@@ -1649,9 +1660,9 @@ $active = 'bookings';
                 ` : '';
                 // Generate action buttons HTML based on booking status
                 let actionButtonsHtml = '';
-                
+
                 // Get button states based on booking status
-                const buttonStates = getButtonStates(bookingStatus);
+                const buttonStates = getButtonStates(bookingStatus, checkinDate, checkoutDate);
                 
                 const checkoutUrl = `/check-out/receipt/${bookingId}`;
                 
@@ -1868,6 +1879,19 @@ $active = 'bookings';
                     ${actionButtonsHtml ? `
                     <div class="px-3 py-3 bg-white sidebar-actions">
                         ${actionButtonsHtml}
+                        
+                        <!-- Add date information below the buttons -->
+                        <div class="text-xs text-gray-500 mt-2 space-y-1">
+                            ${!buttonStates.confirm.disabled ? `
+                                <div class="button-hint">Booking confirmation is available now</div>
+                            ` : ''}
+                            
+                            ${buttonStates.checkin.disabled ? `
+                                <div class="button-hint">Check-in will be enabled on ${formatDate(checkinDate)}</div>
+                            ` : `
+                                <div class="button-hint">Check-in is available now</div>
+                            `}
+                        </div>
                     </div>
                     ` : ''}
                 
@@ -1909,22 +1933,42 @@ $active = 'bookings';
         
         // Helper function to determine button states based on booking status
         
-        function getButtonStates(status) {
+        function getButtonStates(status, checkinDate) {
             const states = {
                 confirm: { disabled: false, loading: false },
                 checkin: { disabled: false, loading: false },
                 checkout: { disabled: false, loading: false }
             };
             
+            // If dates are not provided, disable check-in/check-out buttons
+            if (!checkinDate) {
+                states.checkin.disabled = true;
+                return states;
+            }
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to compare dates only
+            
+            const checkin = new Date(checkinDate);
+            checkin.setHours(0, 0, 0, 0);
+            
+            // Optional: Add grace periods
+            const CHECKIN_GRACE_PERIOD = 0; // No grace period by default
+            
+            // Check if today is within the legitimate period for check-in
+            const isCheckinPeriod = today >= new Date(checkin.getTime() - (CHECKIN_GRACE_PERIOD * 24 * 60 * 60 * 1000)) && 
+                                today <= checkout;
+            
+            
             switch(status) {
                 case 'pending_confirmation':
                     states.confirm.disabled = false;
-                    states.checkin.disabled = true;
+                    states.checkin.disabled = true; // Can't check in until confirmed
                     states.checkout.disabled = true;
                     break;
                 case 'confirmed':
                     states.confirm.disabled = true;
-                    states.checkin.disabled = false;
+                    states.checkin.disabled = !isCheckinPeriod; // Only enable during legitimate period
                     states.checkout.disabled = true;
                     break;
                 case 'checked_in':
