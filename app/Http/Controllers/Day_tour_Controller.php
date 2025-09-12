@@ -456,46 +456,32 @@ public function update(Request $request, $id)
 
 public function checkAvailability(Request $request)
 {
-    $date = $request->date;
-    
-    \Log::info('Availability check requested for date: ' . $date);
-    
-    if (!$date) {
-        \Log::warning('No date provided for availability check');
-        return response()->json(['error' => 'Date is required'], 400);
-    }
-    
-    try {
-        \Log::info('Checking availability for facilities on date: ' . $date);
-        
-        $facilities = Facility::all()->map(function($facility) use ($date) {
-            $booked = BookingGuestDetails::where('facility_id', $facility->id)
-                ->whereHas('dayTourLog', function($query) use ($date) {
-                    $query->where('date_tour', $date); // Use the provided date
-                })
-                ->sum('facility_quantity');
-            
-            $available = max(0, $facility->quantity - $booked);
-            
-            \Log::debug("Facility {$facility->id}: {$available} available ({$booked} booked) on {$date}");
-            
-            return [
-                'id' => $facility->id,
-                'name' => $facility->name,
-                'available' => $available,
-                'total' => $facility->quantity,
-                'booked' => $booked
-            ];
-        });
-        
-        \Log::info('Availability check completed successfully for date: ' . $date);
-        return response()->json($facilities);
-        
-    } catch (\Exception $e) {
-        \Log::error('Availability check error: ' . $e->getMessage());
-        return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
-    }
+    $date = $request->input('date');
+
+    // Only get Cottage and Villa categories
+    $facilities = Facility::whereIn('category', ['Cottage', 'Villa'])->get();
+
+    $availability = $facilities->map(function ($facility) use ($date) {
+        $bookedQty = BookingGuestDetails::where('facility_id', $facility->id)
+            ->whereHas('dayTourLog', function ($q) use ($date) {
+                $q->where('date_tour', $date);
+            })
+            ->sum('facility_quantity');
+
+        return [
+            'id'        => $facility->id,
+            'name'      => $facility->name,
+            'category'  => $facility->category,
+            'price'     => $facility->price,
+            'total'     => $facility->quantity,
+            'available' => max($facility->quantity - $bookedQty, 0),
+        ];
+    });
+
+    return response()->json($availability);
 }
+
+
 
 public function store(Request $request)
 {

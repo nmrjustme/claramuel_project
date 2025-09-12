@@ -8,21 +8,34 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <div class="p-6 bg-white rounded-xl border border-gray-100 shadow-sm h-full">
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-1">Day Tour Registration</h2>
-        <p class="text-sm text-gray-500">Register for a day tour by filling out the form below.</p>
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">Day Tour Registration</h2>
+            <p class="text-sm text-gray-500">Register for a day tour by filling out the form below.</p>
+        </div>
 
-        @if(session('success'))
-            <div id="flash-message" class="mb-4 p-4 rounded-lg bg-green-100 text-green-800 font-medium shadow-md transition transform duration-500">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div id="flash-message" class="mb-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md transition transform duration-500">
-                {{ session('error') }}
-            </div>
-        @endif
+        <!-- Button to go to Day Tour Logs -->
+        <a href="{{ route('admin.daytour.logs') }}" 
+           class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg shadow transition duration-200">
+            <i class="fas fa-list-alt mr-2"></i>
+            View Logs
+        </a>
     </div>
+
+    @if(session('success'))
+        <div id="flash-message" class="mt-4 p-4 rounded-lg bg-green-100 text-green-800 font-medium shadow-md transition transform duration-500">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div id="flash-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md transition transform duration-500">
+            {{ session('error') }}
+        </div>
+    @endif
+</div>
+
+    <!-- Registration Form -->
 
     <form method="POST" action="{{ route('admin.daytour.store') }}" class="space-y-8" id="dayTourForm">
         @csrf
@@ -30,6 +43,7 @@
         <!-- Guest Information Section -->
         <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
             <div class="flex items-center space-x-3 mb-6">
+                
                 <div class="p-3 bg-red-100 rounded-xl shadow-sm">
                     <i class="fas fa-user-circle text-red-500 text-xl"></i>
                 </div>
@@ -135,8 +149,8 @@
                     </label>
                     <select id="status" name="status" required
                         class="w-full px-4 py-3 pl-11 rounded-xl border-2 border-gray-100 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200 shadow-sm appearance-none">
-                        <option value="pending">Pending</option>
                         <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
                     </select>
                 </div>
             </div>
@@ -400,24 +414,17 @@ const guestRates = {
     }
 };
 
-// Calendar functionality
+/* =====================
+   Calendar functionality
+   ===================== */
 let currentDate = new Date();
 let selectedDate = new Date();
 
 function formatDateDisplay(date) {
-    return date.toLocaleDateString('en-US', { 
-        weekday: 'short', 
-        month: 'short', 
-        day: 'numeric',
-        year: 'numeric'
-    });
+    return date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
 }
-
 function formatDateForInput(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
 function toggleDatePicker() {
@@ -428,274 +435,205 @@ function toggleDatePicker() {
         renderCalendar();
     }
 }
-
 function changeMonth(direction) {
     currentDate.setMonth(currentDate.getMonth() + direction);
     renderCalendar();
 }
-
 function renderCalendar() {
     const calendarGrid = document.getElementById('calendarGrid');
     const currentMonthElement = document.getElementById('currentMonth');
-    
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                       'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     currentMonthElement.textContent = `${monthNames[month]} ${year}`;
-    
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
     calendarGrid.innerHTML = '';
-    
-    // Add empty cells for days before first day of month
-    for (let i = 0; i < firstDay; i++) {
+
+    for (let i=0;i<firstDay;i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'text-center text-sm text-gray-400 py-2';
         calendarGrid.appendChild(emptyCell);
     }
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    for (let d=1; d<=daysInMonth; d++){
+        const date = new Date(year, month, d);
         const cell = document.createElement('div');
         cell.className = 'text-center text-sm py-2 rounded-lg transition-all duration-200 calendar-day';
-        
-        const isSelected = selectedDate && 
-                          date.getDate() === selectedDate.getDate() &&
-                          date.getMonth() === selectedDate.getMonth() &&
-                          date.getFullYear() === selectedDate.getFullYear();
-        
+        const isSelected = selectedDate && d===selectedDate.getDate() && month===selectedDate.getMonth() && year===selectedDate.getFullYear();
         if (date < today) {
-            cell.className += ' unavailable-date';
+            cell.classList.add('unavailable-date');
         } else if (isSelected) {
-            cell.className += ' selected-date';
+            cell.classList.add('selected-date');
         } else {
-            cell.className += ' available-date';
+            cell.classList.add('available-date');
             cell.onclick = function() { selectDate(date); };
         }
-        
-        cell.textContent = day;
+        cell.textContent = d;
         calendarGrid.appendChild(cell);
     }
 }
-
 function selectDate(date) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
+    const today = new Date(); today.setHours(0,0,0,0);
     if (date < today) return;
-    
+
     selectedDate = date;
-    const formattedDate = formatDateForInput(date);
-    
     document.getElementById('walkinDateInput').value = formatDateDisplay(date);
-    document.getElementById('date_tour').value = formattedDate;
+    document.getElementById('date_tour').value = formatDateForInput(date);
 
-    checkAvailability();
+    updateAvailability();
     renderCalendar();
-    
-    setTimeout(() => {
-        document.getElementById('datePicker').classList.add('hidden');
-    }, 300);
+    setTimeout(() => document.getElementById('datePicker').classList.add('hidden'), 300);
 }
-
-// Close date picker when clicking outside
-document.addEventListener('click', function(event) {
+document.addEventListener('click', e => {
     const picker = document.getElementById('datePicker');
-    const dateInput = document.getElementById('walkinDateInput');
-    
-    if (!picker.contains(event.target) && event.target !== dateInput) {
+    if (!picker.contains(e.target) && e.target !== document.getElementById('walkinDateInput')) {
         picker.classList.add('hidden');
     }
 });
 
-// Check availability
-function checkAvailability() {
+/* =====================
+   Availability checker
+   ===================== */
+async function updateAvailability() {
     const date = document.getElementById('date_tour').value;
     if (!date) return;
 
-    document.querySelectorAll('.accommodation-input').forEach(input => {
-        input.disabled = true;
-        const availabilityText = input.parentElement.querySelector('.availability-text');
-        if (availabilityText) {
-            availabilityText.innerHTML = '<span class="text-blue-500">Checking...</span>';
-        }
+    // show loading state
+    document.querySelectorAll('.availability-text').forEach(el => {
+        el.textContent = 'Availability: Checking…';
+        el.classList.remove('text-green-600','text-red-500');
+        el.classList.add('text-gray-500');
     });
 
-    fetch(`/daytour/check-availability?date=${date}`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(facility => {
-                const element = document.querySelector(`.availability-text[data-id="${facility.id}"]`);
-                const input = document.querySelector(`input[name="accommodations[${facility.id}]"]`);
-                
-                if (element && input) {
-                    if (facility.available > 0) {
-                        element.innerHTML = `<span class="text-green-600">${facility.available} available</span>`;
-                    } else {
-                        element.innerHTML = '<span class="text-red-600">Sold out</span>';
-                    }
-                    
-                    input.disabled = facility.available === 0;
-                    input.setAttribute('max', facility.available);
-                    
-                    if (parseInt(input.value) > facility.available) {
-                        input.value = facility.available;
-                    }
-                }
-            });
-            calculateTotal();
-        })
-        .catch(error => {
-            console.error('Error checking availability:', error);
-            document.querySelectorAll('.availability-text').forEach(el => {
-                el.innerHTML = '<span class="text-red-500">Error loading</span>';
-            });
+    try {
+        const res = await fetch(`{{ url('/daytour/check-availability') }}?date=${encodeURIComponent(date)}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+
+        // update summary container
+        const container = document.getElementById('availability-container');
+        if (container) container.innerHTML = '';
+
+        data.forEach(item => {
+            const available = Number(item.available ?? 0);
+            // inline text
+            const el = document.querySelector(`.availability-text[data-id="${item.id}"]`);
+            if (el) {
+                el.textContent = `Availability: ${available}`;
+                el.classList.remove("text-gray-500","text-red-500","text-green-600");
+                el.classList.add(available>0 ? "text-green-600" : "text-red-500");
+            }
+            // input limit
+            const input = document.querySelector(`input[name="accommodations[${item.id}]"]`);
+            if (input) {
+                input.max = available;
+                input.disabled = available === 0;
+                if (parseInt(input.value) > available) input.value = available;
+            }
+            // summary panel
+            if (container) {
+                container.innerHTML += `
+                    <div class="p-4 border rounded-lg mb-2">
+                        <p class="font-bold">${item.name} - ₱${item.price}</p>
+                        <p class="${available>0?'text-green-600':'text-red-600'}">Available: ${available}</p>
+                    </div>`;
+            }
         });
+    } catch(err) {
+        console.error("Error fetching availability:", err);
+        document.querySelectorAll('.availability-text').forEach(el => {
+            el.textContent = 'Availability: Error';
+            el.classList.add('text-red-500');
+        });
+    }
 }
 
-// Calculate total
+/* =====================
+   Total calculation
+   ===================== */
 function calculateTotal() {
     let total = 0;
     let breakdown = [];
     const serviceType = document.querySelector('input[name="service_type"]:checked').value;
 
-    // Pool guests
-    if (serviceType === 'pool' || serviceType === 'both') {
-        const adults = parseInt(document.querySelector('input[name="pool_adult"]').value) || 0;
-        const kids = parseInt(document.querySelector('input[name="pool_kids"]').value) || 0;
-        const seniors = parseInt(document.querySelector('input[name="pool_seniors"]').value) || 0;
-
-        if (adults > 0) {
-            const amount = adults * guestRates.pool.adult;
-            total += amount;
-            breakdown.push(`Pool Adults: ${adults} × ₱${guestRates.pool.adult} = ₱${amount.toFixed(2)}`);
-        }
-        if (kids > 0) {
-            const amount = kids * guestRates.pool.kids;
-            total += amount;
-            breakdown.push(`Pool Kids: ${kids} × ₱${guestRates.pool.kids} = ₱${amount.toFixed(2)}`);
-        }
-        if (seniors > 0) {
-            const amount = seniors * guestRates.pool.seniors;
-            total += amount;
-            breakdown.push(`Pool Seniors: ${seniors} × ₱${guestRates.pool.seniors} = ₱${amount.toFixed(2)}`);
-        }
+    // Pool
+    if (serviceType==='pool' || serviceType==='both') {
+        const adults = parseInt(document.querySelector('input[name="pool_adult"]').value)||0;
+        const kids = parseInt(document.querySelector('input[name="pool_kids"]').value)||0;
+        const seniors = parseInt(document.querySelector('input[name="pool_seniors"]').value)||0;
+        if (adults>0){const amt=adults*guestRates.pool.adult; total+=amt; breakdown.push(`Pool Adults: ${adults} × ₱${guestRates.pool.adult} = ₱${amt.toFixed(2)}`);}
+        if (kids>0){const amt=kids*guestRates.pool.kids; total+=amt; breakdown.push(`Pool Kids: ${kids} × ₱${guestRates.pool.kids} = ₱${amt.toFixed(2)}`);}
+        if (seniors>0){const amt=seniors*guestRates.pool.seniors; total+=amt; breakdown.push(`Pool Seniors: ${seniors} × ₱${guestRates.pool.seniors} = ₱${amt.toFixed(2)}`);}
     }
-
-    // Park guests
-    if (serviceType === 'themed_park' || serviceType === 'both') {
-        const adults = parseInt(document.querySelector('input[name="park_adult"]').value) || 0;
-        const kids = parseInt(document.querySelector('input[name="park_kids"]').value) || 0;
-        const seniors = parseInt(document.querySelector('input[name="park_seniors"]').value) || 0;
-
-        if (adults > 0) {
-            const amount = adults * guestRates.park.adult;
-            total += amount;
-            breakdown.push(`Park Adults: ${adults} × ₱${guestRates.park.adult} = ₱${amount.toFixed(2)}`);
-        }
-        if (kids > 0) {
-            const amount = kids * guestRates.park.kids;
-            total += amount;
-            breakdown.push(`Park Kids: ${kids} × ₱${guestRates.park.kids} = ₱${amount.toFixed(2)}`);
-        }
-        if (seniors > 0) {
-            const amount = seniors * guestRates.park.seniors;
-            total += amount;
-            breakdown.push(`Park Seniors: ${seniors} × ₱${guestRates.park.seniors} = ₱${amount.toFixed(2)}`);
-        }
+    // Park
+    if (serviceType==='themed_park' || serviceType==='both') {
+        const adults = parseInt(document.querySelector('input[name="park_adult"]').value)||0;
+        const kids = parseInt(document.querySelector('input[name="park_kids"]').value)||0;
+        const seniors = parseInt(document.querySelector('input[name="park_seniors"]').value)||0;
+        if (adults>0){const amt=adults*guestRates.park.adult; total+=amt; breakdown.push(`Park Adults: ${adults} × ₱${guestRates.park.adult} = ₱${amt.toFixed(2)}`);}
+        if (kids>0){const amt=kids*guestRates.park.kids; total+=amt; breakdown.push(`Park Kids: ${kids} × ₱${guestRates.park.kids} = ₱${amt.toFixed(2)}`);}
+        if (seniors>0){const amt=seniors*guestRates.park.seniors; total+=amt; breakdown.push(`Park Seniors: ${seniors} × ₱${guestRates.park.seniors} = ₱${amt.toFixed(2)}`);}
     }
-
     // Accommodations
-    if (serviceType !== 'themed_park') {
+    if (serviceType!=='themed_park') {
         document.querySelectorAll('.accommodation-input').forEach(input => {
-            const qty = parseInt(input.value) || 0;
+            const qty = parseInt(input.value)||0;
             const price = parseFloat(input.dataset.price);
             const name = input.closest('div').querySelector('.font-semibold').textContent;
-            
-            if (qty > 0) {
-                const cost = qty * price;
-                total += cost;
-                breakdown.push(`${name}: ${qty} × ₱${price.toFixed(2)} = ₱${cost.toFixed(2)}`);
-            }
+            if (qty>0){const cost=qty*price; total+=cost; breakdown.push(`${name}: ${qty} × ₱${price.toFixed(2)} = ₱${cost.toFixed(2)}`);}
         });
     }
-
-    // Update display
     document.getElementById('totalAmount').textContent = total.toFixed(2);
-    document.getElementById('costBreakdown').innerHTML = breakdown.map(item => {
-        const parts = item.split('=');
-        return `<div class="flex justify-between py-1 border-b border-gray-100 last:border-0">
-                    <span>${parts[0]}</span>
-                    <span>${parts[1]}</span>
-                </div>`;
+    document.getElementById('costBreakdown').innerHTML = breakdown.map(i=>{
+        const [left,right]=i.split('=');
+        return `<div class="flex justify-between py-1 border-b border-gray-100 last:border-0"><span>${left}</span><span>${right}</span></div>`;
     }).join('');
 }
 
-// Update service selection UI
+/* =====================
+   Service selection
+   ===================== */
 function updateServiceSelection() {
     const selectedValue = document.querySelector('input[name="service_type"]:checked').value;
-    
-    document.querySelectorAll('.service-option').forEach(option => {
-        const label = option.querySelector('.service-label');
-        if (option.dataset.value === selectedValue) {
-            label.classList.add('border-red-500', 'bg-red-50');
-        } else {
-            label.classList.remove('border-red-500', 'bg-red-50');
-        }
+    document.querySelectorAll('.service-option').forEach(opt=>{
+        const label = opt.querySelector('.service-label');
+        if (opt.dataset.value===selectedValue){label.classList.add('border-red-500','bg-red-50');}
+        else {label.classList.remove('border-red-500','bg-red-50');}
     });
-    
-    document.getElementById('poolAccessFields').classList.toggle('hidden', selectedValue === 'themed_park');
-    document.getElementById('themedParkFields').classList.toggle('hidden', selectedValue === 'pool');
-    document.getElementById('accommodationSection').classList.toggle('hidden', selectedValue === 'themed_park');
-    
+    document.getElementById('poolAccessFields').classList.toggle('hidden', selectedValue==='themed_park');
+    document.getElementById('themedParkFields').classList.toggle('hidden', selectedValue==='pool');
+    document.getElementById('accommodationSection').classList.toggle('hidden', selectedValue==='themed_park');
     calculateTotal();
 }
 
-// Initialize when DOM is loaded
+/* =====================
+   Init
+   ===================== */
 document.addEventListener('DOMContentLoaded', function() {
-    // Set up calendar event listeners
-    document.getElementById('datePicker').addEventListener('click', function(e) {
+    document.getElementById('datePicker').addEventListener('click', e=>{
         if (e.target.closest('[data-action="prev-month"]')) changeMonth(-1);
         if (e.target.closest('[data-action="next-month"]')) changeMonth(1);
     });
+    document.querySelectorAll('input[name="service_type"]').forEach(r=>r.addEventListener('change', updateServiceSelection));
+    document.querySelectorAll('.guest-counter, .accommodation-input').forEach(i=>i.addEventListener('input', calculateTotal));
+    document.getElementById('date_tour').addEventListener('change', updateAvailability);
 
-    // Service type selection
-    document.querySelectorAll('input[name="service_type"]').forEach(radio => {
-        radio.addEventListener('change', updateServiceSelection);
-    });
-
-    // Number inputs
-    document.querySelectorAll('.guest-counter, .accommodation-input').forEach(input => {
-        input.addEventListener('input', calculateTotal);
-    });
-
-    // Date input change
-    document.getElementById('date_tour').addEventListener('change', checkAvailability);
-
-    // Initial setup
-    selectedDate = new Date();
+    selectedDate=new Date();
     document.getElementById('walkinDateInput').value = formatDateDisplay(selectedDate);
     document.getElementById('date_tour').value = formatDateForInput(selectedDate);
-    
+
     renderCalendar();
     updateServiceSelection();
     calculateTotal();
-    checkAvailability();
-    
-    // Flash message timeout
-    const flashMessage = document.getElementById('flash-message');
-    if (flashMessage) {
-        setTimeout(() => {
-            flashMessage.classList.add('opacity-0', 'translate-y-2');
-            setTimeout(() => flashMessage.remove(), 500);
-        }, 3000);
+    updateAvailability();
+
+    const flash = document.getElementById('flash-message');
+    if (flash) {
+        setTimeout(()=>{flash.classList.add('opacity-0','translate-y-2'); setTimeout(()=>flash.remove(),500);},3000);
     }
 });
 </script>
+
 @endsection

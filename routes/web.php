@@ -181,6 +181,8 @@ Route::get('/env-test', function() {
     ];
 });
 
+Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability']);
+
 Route::middleware(['auth'])->group(function () {
     //========================
     // Sidebar Routes
@@ -191,7 +193,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments');
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
-
+    
     
     // Get badge counts Unread or New
     Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
