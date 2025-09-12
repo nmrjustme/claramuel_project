@@ -1662,9 +1662,9 @@ $active = 'bookings';
 
                 // Get button states based on booking status
                 const buttonStates = getButtonStates(bookingStatus, checkinDate);
-                
+
                 const checkoutUrl = `/check-out/receipt/${bookingId}`;
-                
+
                 actionButtonsHtml = `
                     <button class="sidebar-btn bg-green-600 text-white hover:bg-green-700 ${buttonStates.confirm.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
                         data-action="confirm" data-booking-id="${bookingId}" ${buttonStates.confirm.disabled ? 'disabled' : ''}>
