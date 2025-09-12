@@ -182,6 +182,7 @@ Route::get('/env-test', function() {
 });
 
 Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability']);
+Route::get('/cottages/{date}', [Day_tour_Controller::class, 'getCottages'])->name('cottages.availability');
 
 Route::middleware(['auth'])->group(function () {
     //========================

@@ -481,6 +481,33 @@ public function checkAvailability(Request $request)
     return response()->json($availability);
 }
 
+public function getCottages($date)
+{
+    // Get cottage facility
+    $facility = Facility::where('category', 'Cottage')->first();
+
+    if (!$facility) {
+        return response()->json(['error' => 'No cottage facility found'], 404);
+    }
+
+    // Count booked quantity for the given date
+    $bookedQty = BookingGuestDetails::where('facility_id', $facility->id)
+        ->whereHas('dayTourLog', function ($q) use ($date) {
+            $q->where('date_tour', $date);
+        })
+        ->sum('facility_quantity');
+
+    // Generate "virtual" list of cottages
+    $cottages = [];
+    for ($i = 1; $i <= $facility->quantity; $i++) {
+        $cottages[] = [
+            'name'   => "Cottage #{$i}",
+            'status' => $i <= $bookedQty ? 'Occupied' : 'Available',
+        ];
+    }
+
+    return response()->json($cottages);
+}
 
 
 public function store(Request $request)
@@ -799,7 +826,6 @@ public function logs(Request $request)
     }
 
 
-    // Add these methods to your Day_tour_Controller class
 /**
  * Display cottage and villa monitoring dashboard
  */
@@ -853,52 +879,60 @@ public function monitorFacilities(Request $request)
     $allBookings = $bookingQuery->get()->groupBy('facility_id');
     
     // Calculate availability and bookings for each facility
-    $facilities = $facilities->map(function($facility) use ($allBookings) {
-        $facilityBookings = $allBookings->get($facility->id, collect());
-        
-        // For facilities in maintenance or cleaning, set availability to 0
-        if (in_array($facility->status, ['maintenance', 'cleaning'])) {
-            $facility->available = 0;
-            $facility->booked = 0;
-            $facility->occupancy_rate = 0;
-            $facility->bookings = collect();
-            $facility->display_status = $facility->status;
-            return $facility;
-        }
-        
-        $bookedQty = $facilityBookings->sum('facility_quantity');
-        $available = max(0, $facility->quantity - $bookedQty);
-        
-        // Update facility display status based on bookings
-        if ($bookedQty > 0 && $facility->status === 'available') {
-            $facility->display_status = 'occupied';
-        } elseif ($bookedQty === 0 && $facility->status === 'occupied') {
-            $facility->display_status = 'available';
-        } else {
-            $facility->display_status = $facility->status;
-        }
-        
-        // Get detailed booking information
-        $bookings = $facilityBookings->groupBy('day_tour_log_details_id')
-            ->map(function($bookingGroup) {
-                $log = $bookingGroup->first()->dayTourLog;
-                return [
-                    'booking_id' => $log->id,
-                    'customer' => $log->user ? $log->user->firstname . ' ' . $log->user->lastname : 'Unknown',
-                    'date' => $log->date_tour,
-                    'quantity' => $bookingGroup->sum('facility_quantity'),
-                    'status' => $log->status,
-                ];
-            })->values();
-        
-        $facility->available = $available;
-        $facility->booked = $bookedQty;
-        $facility->occupancy_rate = $facility->quantity > 0 ? 
-            round(($bookedQty / $facility->quantity) * 100, 2) : 0;
-        $facility->bookings = $bookings;
-        
+    $facilities = $facilities->map(function($facility) use ($allBookings, $date) {
+    $facilityBookings = $allBookings->get($facility->id, collect());
+
+    if (in_array($facility->status, ['maintenance', 'cleaning'])) {
+        $facility->available = 0;
+        $facility->booked = 0;
+        $facility->occupancy_rate = 0;
+        $facility->bookings = collect();
+        $facility->display_status = $facility->status;
+        $facility->units = []; // no units
         return $facility;
-    });
+    }
+
+    $bookedQty = $facilityBookings->sum('facility_quantity');
+    $available = max(0, $facility->quantity - $bookedQty);
+
+    if ($bookedQty > 0 && $facility->status === 'available') {
+        $facility->display_status = 'occupied';
+    } elseif ($bookedQty === 0 && $facility->status === 'occupied') {
+        $facility->display_status = 'available';
+    } else {
+        $facility->display_status = $facility->status;
+    }
+
+    $bookings = $facilityBookings->groupBy('day_tour_log_details_id')
+        ->map(function($bookingGroup) {
+            $log = $bookingGroup->first()->dayTourLog;
+            return [
+                'booking_id' => $log->id,
+                'customer'   => $log->user ? $log->user->firstname . ' ' . $log->user->lastname : 'Unknown',
+                'date'       => $log->date_tour,
+                'quantity'   => $bookingGroup->sum('facility_quantity'),
+                'status'     => $log->status,
+            ];
+        })->values();
+
+    $facility->available = $available;
+    $facility->booked = $bookedQty;
+    $facility->occupancy_rate = $facility->quantity > 0 ? 
+        round(($bookedQty / $facility->quantity) * 100, 2) : 0;
+    $facility->bookings = $bookings;
+
+    // 🔹 Generate individual unit list (e.g., Cottage #1 … Cottage #10)
+    $units = [];
+    for ($i = 1; $i <= $facility->quantity; $i++) {
+        $units[] = [
+            'name'   => "{$facility->name} #{$i}",
+            'status' => $i <= $bookedQty ? 'Occupied' : 'Available',
+        ];
+    }
+    $facility->units = $units;
+
+    return $facility;
+});
     
     // Calculate summary statistics - EXCLUDE maintenance/cleaning facilities from availability calculations
     $activeFacilities = $facilities->whereNotIn('status', ['maintenance', 'cleaning']);
