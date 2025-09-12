@@ -1525,7 +1525,6 @@ $active = 'bookings';
                 const detail = booking.details?.[0];
 
                 const checkinDate = detail.checkin_date;
-                const checkoutDate = detail.checkout_date;
                 
                 // Use booking status directly (removed payment-based status logic)
                 const bookingStatus = booking.status;
@@ -1662,7 +1661,7 @@ $active = 'bookings';
                 let actionButtonsHtml = '';
 
                 // Get button states based on booking status
-                const buttonStates = getButtonStates(bookingStatus, checkinDate, checkoutDate);
+                const buttonStates = getButtonStates(bookingStatus, checkinDate);
                 
                 const checkoutUrl = `/check-out/receipt/${bookingId}`;
                 
