@@ -5,7 +5,7 @@
 @endphp
 
 @section('content')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <div class="p-6 bg-white rounded-xl border border-gray-100 shadow-sm h-full">
     <div class="mb-6">
     <div class="flex items-center justify-between">
@@ -217,8 +217,8 @@
                                 {{ $type->type }} 
                                 <span class="text-blue-500">₱{{ number_format($type->rate, 2) }}</span>
                             </label>
-                            <input type="number" name="pool_{{ strtolower($type->type) }}" value="0" min="0" 
-                                class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all duration-200 guest-counter">
+                            <input type="number" name="pool_{{ strtolower($type->type) }}" value="0" min="0" required
+                                class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all duration-200 guest-counter" >
                         </div>
                     @endforeach
                 </div>
