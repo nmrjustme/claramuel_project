@@ -247,12 +247,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments');
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
-
     
     
     // Get badge counts Unread or New
-    // Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
-
+    Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
+    
     //========================
 
     // Day Tour Routes Group
@@ -282,6 +281,7 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     // Facility Calendar
     Route::get('/facility-calendar', [Day_tour_Controller::class, 'facilityCalendar'])->name('facility-calendar');
 });
+
     //========================
 
     //========================
