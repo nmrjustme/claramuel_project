@@ -24,6 +24,7 @@ use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\BookingLogController;
 use App\Http\Controllers\GuestTypeController;
 use App\Http\Controllers\DayTourController;
+use App\Http\Controllers\Day_tour_Controller;
 use App\Http\Controllers\BookingReplyController;
 use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\DB;
@@ -233,6 +234,9 @@ Route::get('/env-test', function () {
     ];
 });
 
+Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability']);
+Route::get('/cottages/{date}', [Day_tour_Controller::class, 'getCottages'])->name('cottages.availability');
+
 Route::middleware(['auth'])->group(function () {
     //========================
     // Sidebar Routes
@@ -244,10 +248,40 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
 
+    
+    
     // Get badge counts Unread or New
     // Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
 
     //========================
+
+    // Day Tour Routes Group
+Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
+    
+    // Main Day Tour Registration
+    Route::get('/', [Day_tour_Controller::class, 'index'])->name('index');
+    Route::get('/create', [Day_tour_Controller::class, 'create'])->name('create');
+    Route::post('/store', [Day_tour_Controller::class, 'store'])->name('store');
+    
+    // Facility Availability Check
+    Route::get('/facility-availability', [Day_tour_Controller::class, 'facilityAvailability'])->name('facility-availability');
+    Route::get('/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('check-availability');
+    
+    // Logs Management
+    Route::get('/logs', [Day_tour_Controller::class, 'logs'])->name('logs');
+    Route::get('/logs/{id}', [Day_tour_Controller::class, 'show'])->name('logs.show');
+    Route::get('/logs/{id}/edit', [Day_tour_Controller::class, 'edit'])->name('logs.edit');
+    Route::put('/logs/{id}', [Day_tour_Controller::class, 'update'])->name('logs.update');
+    Route::get('/logs/{id}/print', [Day_tour_Controller::class, 'print'])->name('logs.print');
+    
+    // Cottage & Villa Monitoring
+    Route::get('/cottages-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('cottages_monitoring');
+    Route::post('/facility/{id}/checkout', [Day_tour_Controller::class, 'checkoutFacility'])->name('checkout-facility');
+    Route::post('/facility/{id}/update-status', [Day_tour_Controller::class, 'updateFacilityStatus'])->name('update-facility-status');
+    
+    // Facility Calendar
+    Route::get('/facility-calendar', [Day_tour_Controller::class, 'facilityCalendar'])->name('facility-calendar');
+});
     //========================
 
     //========================

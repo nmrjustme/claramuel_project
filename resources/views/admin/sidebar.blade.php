@@ -55,6 +55,22 @@
                     </a>
                 </li>
 
+                <!--Day Tour -->
+                <li>
+                    <a href="{{ route('admin.daytour.index') }}"
+                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'day_tour' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="{{ $active === 'day_tour' ? '2' : '1.5' }}"
+                                    d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M6.05 17.95l-1.414-1.414M18.364 18.364l-1.414-1.414M6.05 6.05L4.636 7.464M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                            </svg>
+                            <span>Day Tour Logs</span>
+                        </div>
+                    </a>
+                </li>
+                
                 <!-- Inquiries Log -->
                 {{-- <li>
                     <a href="{{ route('admin.inquiries') }}"

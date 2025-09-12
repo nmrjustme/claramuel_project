@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Facility extends Model
 {
     use HasFactory;
@@ -55,9 +57,9 @@ class Facility extends Model
             ->using(AmenityFacility::class);
     }
 
-    public function guestDetails()
+    public function guestDetails(): HasMany
     {
-        return $this->hasMany(BookingGuestDetails::class);
+        return $this->hasMany(BookingGuestDetails::class, 'facility_id');
     }
     
 }
