@@ -26,44 +26,19 @@ use App\Http\Controllers\GuestTypeController;
 use App\Http\Controllers\DayTourController;
 use App\Http\Controllers\Day_tour_Controller;
 use App\Http\Controllers\BookingReplyController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\DB;
-use App\Models\FacilityBookingLog;
-use App\Models\Payments;
 use Illuminate\Http\Request;
-use App\Events\UnreadCountsUpdated;
-
 use Illuminate\Support\Facades\Hash;
-
-Route::get('/try/phone/cleaning/', function(){
-    function formatPhilNumber($rawnumber)
-    {
-        $number = (string) $rawnumber;
-        
-        // Remove non-digit characters
-        $number = preg_replace('/\D/', '', $number);
-        
-        // Prepend 63 for PH format
-        if (substr($number, 0, 1) === '0') {
-            $number = '63' . substr($number, 1);
-        } else {
-            $number = '63' . $number;
-        }
-        return $number;
-    }
-    
-    $booking = FacilityBookingLog::with('user')->findorFail(600);
-    $phone = (string) $booking->user->phone;
-    $formatted = formatPhilNumber($phone);
-    echo $formatted; // 639532713188
-});
-
-Route::get('/try/amount-paid/', function(){
-    $booking = FacilityBookingLog::with(['user', 'payments'])->findorFail(930);
-    $payment = $booking->payments->first();
-    $amount_paid = $payment->amount_paid;
-    
-    return (string) $amount_paid;
-});
+use App\Http\Controllers\MayaCheckoutController;
+use App\Http\Controllers\MayaWebhookController;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\MayaWebhookSetupController;
+use App\Http\Controllers\RoomMonitoringController;
+use App\Http\Controllers\AdminBookingsController;
+use App\Http\Controllers\AccountingController;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
 Route::get('/dashboard', [FacilitiesController::class, 'showData'])->name('dashboard');
@@ -73,10 +48,88 @@ Route::get('/customer/guest-types', [GuestTypeController::class, 'index'])->name
 
 Route::get('/dashboard/checkin_page/{id}', [CustomerBookingPageController::class, 'Data'])->name('facility.deal');
 
+
+// =======================
+// Maya Payment Routes
+// =======================
+// Checkout page
+Route::get('/maya-checkout', [MayaCheckoutController::class, 'index'])->name('maya.checkout');
+Route::post('/maya/create-session', [MayaCheckoutController::class, 'createCheckoutSession'])->name('maya.create.session');
+// Route::get('/maya/success/', [MayaCheckoutController::class, 'handleSuccess'])->name('maya.checkout.success');
+Route::get('/maya/payment-processing/{token}', [MayaCheckoutController::class, 'handleProcessing'])->name('maya.checkout.processing');
+Route::get('/maya/check-order/{token}', [MayaCheckoutController::class, 'checkOrder'])->name('maya.checkOrder');
+// Handle Failure, cancel, or expired
+Route::get('/maya/failure/{reason}/{order}/{token}', [MayaCheckoutController::class, 'handleFailure'])->name('maya.checkout.failure');
+
+Route::get('/maya/cancel', [MayaCheckoutController::class, 'handleCancel'])->name('maya.checkout.cancel');
+Route::post('/maya/webhook', [MayaCheckoutController::class, 'handleWebhook'])->name('maya.webhook');
+Route::get('/maya/status/{referenceNumber}', [MayaCheckoutController::class, 'checkPaymentStatus'])->name('maya.check.status');
+// Route::get('/maya/success/paid', [MayaCheckoutController::class, 'handleSuccessPaid'])->name('maya.success.checkout');
+// =======================
+Route::post('/maya/payment/webhook', [MayaWebhookSetupController::class, 'handle'])->name('maya.webhook.succes');
+
+
+
+Route::get('/test-maya-connection', function () {
+    $baseUrl   = config('services.maya.base_url');
+    // Change this line to use the public key
+    $publicKey = config('services.maya.public_key');
+
+    $payload = [
+        "totalAmount" => [
+            "value" => 1.00,
+            "currency" => "PHP"
+        ],
+        "buyer" => [
+            "firstName" => "Test",
+            "lastName" => "User",
+            "contact" => [
+                "phone" => "+639171234567",
+                "email" => "test@example.com"
+            ]
+        ],
+        "redirectUrl" => [
+            "success" => url('/maya/success'),
+            "failure" => url('/maya/failed'),
+            "cancel"  => url('/maya/cancel')
+        ],
+        "requestReferenceNumber" => uniqid()
+    ];
+
+    try {
+        // Authenticate with the public key for the Create Checkout endpoint
+        $response = Http::withBasicAuth($publicKey, '')
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+            ])
+            ->post("{$baseUrl}/checkout/v1/checkouts", $payload);
+
+        return redirect($response->json()['redirectUrl']);
+    } catch (\Exception $e) {
+        return ['error' => $e->getMessage()];
+    }
+});
+
+
+Route::get('try/webhook/again', function () {
+    $response = Http::withHeaders([
+        'accept' => 'application/json',
+        'authorization' => 'Basic c2stWDhxb2xZank2MmtJekVicjBRUksxaDRiNEtEVkhhTmN3TVlrMzlqSW5TbDo=',
+        'content-type' => 'application/json',
+    ])
+        ->post("https://pg-sandbox.paymaya.com/payments/v1/webhooks", [
+            'name' => 'PAYMENT_SUCCESS',
+            'callbackUrl' => 'https://5e708220a669.ngrok-free.app/try/maya/webhook',
+        ]);
+
+    Log::info('Webhook registration response: ', $response->json());
+});
+
 // =======================
 // Awaiting verification page 
 // =======================
-Route::get('/booking-awaiting', [BookingsController::class, 'pendingVerification']);
+Route::get('/booking-awaiting', [BookingsController::class, 'pendingVerification'])->name('booking-awaiting');
+
 
 Route::get('/WaitForConfirmation', [BookingController::class, 'WaitConfirmation'])
     ->name('booking.WaitConfirmation');
@@ -95,7 +148,7 @@ Route::get('/bookings/customer-info', [BookingsController::class, 'customerInfo'
 
 // Send email
 Route::post('/customer/send-email-otp', [EmailConfirmationController::class, 'sendOTP'])
-->name('booking.send_otp');
+    ->name('booking.send_otp');
 
 // Confirm the email
 Route::post('/verify/otp', [EmailConfirmationController::class, 'verifyOtp'])
@@ -108,7 +161,7 @@ Route::get('/booking/pending', function (Request $request) {
         'email' => 'required|email',
         'token' => 'required|string'
     ]);
-    
+
     return view('customer_pages.booking.otp_confirmation', [
         'email' => $request->email,
         'token' => $request->token
@@ -125,7 +178,7 @@ Route::get('/Book', [PoolParkbookingController::class, 'index'])->name('Pools_Pa
 Route::get('/Images/{id}', [AccommodationImgController::class, 'index'])->name('my_modals');
 
 
-Route::post('/book', [BookingController::class, 'store'])->name('bookings.store');// Ongoing
+Route::post('/book', [BookingController::class, 'store'])->name('bookings.store'); // Ongoing
 Route::post('/new/booking', [BookingController::class, 'stores'])->name('booking.stores');
 
 Route::get('/verify_email', [VerifyEmailController::class, 'verify'])->name('verify.email');
@@ -171,7 +224,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/image', [ProfileImageController::class, 'update'])->name('profile.image.update');
 });
 
-Route::get('/env-test', function() {
+Route::get('/env-test', function () {
     return [
         'PUSHER_APP_KEY' => env('PUSHER_APP_KEY'),
         'PUSHER_APP_SECRET' => env('PUSHER_APP_SECRET'),
@@ -195,10 +248,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
     
-    
     // Get badge counts Unread or New
-    Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
-    
+    // Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
+
     //========================
 
     // Day Tour Routes Group
@@ -229,7 +281,7 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/facility-calendar', [Day_tour_Controller::class, 'facilityCalendar'])->name('facility-calendar');
 });
     //========================
-    
+
     //========================
     //Email monitoring
     //========================
@@ -237,18 +289,32 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/inbox', [BookingReplyController::class, 'fetchInbox']);
     Route::post('/email/mark-as-read', [BookingReplyController::class, 'markAsRead']);
     Route::get('/emails/{email_id}/attachment/{attachment_id}', [BookingReplyController::class, 'downloadAttachment'])
-    ->name('emails.download.attachment');
+        ->name('emails.download.attachment');
     //========================
-    
-    
+
+
     Route::get('/admin/dashboard/stats', [AdminController::class, 'getStats']);
     Route::get('booking-logs', [BookingLogController::class, 'index'])->name('admin.booking-logs');
-    
+
     // Booking log route
+    // Route::get('/get/inquiries/booking', [BookingController::class, 'getMyInquiries'])->name('my_inquiries_bookings');
+
+    Route::get('/get/inquiries/confirmed', [BookingController::class, 'getConfirmedInquiries']);
+    Route::get('/get/inquiries/pending', [BookingController::class, 'getPendingInquiries']);
+
+    //========================
+    // Bookings Page
+    //========================
     Route::get('/get/mybooking', [BookingController::class, 'getMyBookings'])->name('my_bookings');
-    
     Route::get('/get/admin/bookings', [BookingController::class, 'index']);
-    
+    Route::get('/get/admin/bookings/guest/details/', [BookingController::class, 'guestDetailsList'])->name('guest.details.list');
+
+
+    Route::get('/get/show/bookings/checkin/{id}', [BookingController::class, 'paymentDetails']);
+    Route::post('/bookings/{id}/process-payment', [BookingController::class, 'processMyPayment']);
+    Route::post('/bookings/{id}/checkin', [BookingController::class, 'checkin']);
+    //========================
+
     //========================
     // Dashboard Routes
     //========================
@@ -264,28 +330,45 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::post('/host/status', [AdminController::class, 'updateActiveHost']);
     // Get Active Admins
     Route::get('/admin/active-admins', [AdminController::class, 'getActiveAdmins']);
+
+    //Get Rooms avaibilities monitoring
+    Route::get('/room/monitoring', [RoomMonitoringController::class, 'index']);
+    Route::get('/room/monitoring/data', [RoomMonitoringController::class, 'data'])->name('monitor.room.data');
+
+    Route::get('admin/bookings/management', [AdminBookingsController::class, 'index']);
+
+
+    Route::get('/rooms/get', function () {
+        return view('admin.monitoring.index');
+    });
+    
+    // Revenue monitoring
+    Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
+    Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
+    Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');
     //========================
     
     
     Route::get('/get/show/bookings/{booking}', [BookingController::class, 'show']);
 
     Route::get('/admin/bookings/export/', [BookingController::class, 'export'])->name('admin.bookings.export');
-    
+
     Route::get('/facility_management', [AdminController::class, 'facilities'])->name('admin.facilities');
     Route::get('/events_management', [AdminController::class, 'events'])->name('admin.events');
     Route::get('/users_management', [AdminController::class, 'users'])->name('admin.users');
     Route::get('/overall_bookings', [AdminController::class, 'overall_bookings'])->name('admin.overall_bookings');
-    
+
     // open modal booking details each customer
     Route::get('/booking-details/{id}', [InquirerController::class, 'getBookingDetails'])->name('admin.inquirer.show');
-    
+
     Route::get('/admin/booking-details/{id}', [BookingController::class, 'bookingDetails'])->name('admin.booking.details');
+
     // open modal payment details each customer
     Route::get('/payment-details/{id}', [InquirerController::class, 'getPaymentDetails'])->name('admin.inquirerPayment.show');
-    
+
     Route::post('/admin/inquiries/mark-all-as-read', [AdminController::class, 'markAllAsRead'])
         ->name('admin.inquiries.mark-all-as-read');
-    
+
     // =======================
     // ajax fetching data in recent Inquirers at admin index
     // =======================
@@ -330,10 +413,11 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     // =======================
     // Calendar
     // =======================
-    
+
     // calendar
     Route::get('/bookings/calendar', [BookingCalendarController::class, 'getCalendarData'])->name('admin.calendar.getDate');
     Route::get('/bookings/by-date', [BookingCalendarController::class, 'getBookingsByDate'])->name('admin.calendar.byDate');
+    Route::get('/facilities/availability/', [BookingCalendarController::class, 'getUnavailableDatesFacility'])->name('admin.getUnavailableDates');
 
     // =======================
     // Payments
@@ -346,32 +430,51 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/payments/search', [AdminPaymentController::class, 'search'])->name('payments.search');
 
     // Add these routes to your web.php
-    
+
     Route::post('/bookings/{booking}/verify-with-receipt', [InquirerController::class, 'verifyBookingWithReceipt'])
         ->name('payments.verify-with-receipt');
-    
+
     // Route::post('/payments/verify-qr', [PaymentsController::class, 'verifyQrCode'])
     //     ->name('payments.verify-qr');
-    
-    
+
+
     Route::post('/admin/payments/verify/{payment_id}', [PaymentsController::class, 'verifyScannedPayment'])
         ->name('admin.payments.verify');
 
     Route::get('/admin/payments/search', [AdminPaymentController::class, 'search'])->name('admin.payments.search');
-    
+
+    // =======================
+    // Check-in Routes
+    // =======================
+    Route::get('/next/check-in/list', [CheckinController::class, 'index'])->name('incoming.list');
+    Route::get('/next/check-in/list/data', [CheckinController::class, 'dataList'])->name('checkins.data');
+
     Route::get('/check-in/scanner', [CheckinController::class, 'showScanner'])->name('checkin.scanner');
     Route::post('/verify-qr-codes/checkin', [CheckinController::class, 'verifyQrCode']);
     Route::post('/check-in/process-qr-upload', [CheckInController::class, 'processUploadQrUpload']);
-    Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting']);
+    Route::get('/check-in/success/{id}', [CheckinController::class, 'showPrinting'])->name('show.print-checkout');
     Route::get('/qrScanner/customer-details/{paymentId}', [CheckinController::class, 'getCustomerDetails']);
-    
+    Route::get('/check-in/search-guests', [CheckinController::class, 'searchGuests']);
+    Route::post('/update/booking/status/{id}', [CheckinController::class, 'updateStatus']);
     Route::get('/check-in/used', function (Request $request) {
         $qrPath = $request->query('path');
         return view('admin.qr_in_used', ['qrPath' => $qrPath]);
     });
 
-    Route::get('/check-in/search-guests', [CheckinController::class, 'searchGuests']);
-    
+    Route::post('/decode-qr-booking', [CheckinController::class, 'decodeQrBooking']);
+    // =======================
+
+    // =======================
+    // Check-out Routes
+    // =======================
+    Route::get('/check-out/scanner', [CheckoutController::class, 'scannerPage'])->name('checkout.scanner');
+    Route::post('/verify-qr-codes/checkout', [CheckoutController::class, 'verifyQrCode']);
+    Route::get('/check-out/receipt/{id}', [CheckoutController::class, 'showPrinting'])->name('checkout.receipt');
+    Route::post('/check-out/process-qr-upload', [CheckoutController::class, 'processUploadQrUpload']);
+    Route::get('/check-out/search-guests', [CheckoutController::class, 'searchGuests']);
+    Route::post('/update/booking/checkout/status/{id}', [CheckoutController::class, 'updateStatus']);
+    // =======================
+
     Route::post('/payments/{paymentId}/update-remaining-status', [PaymentsController::class, 'updateRemainingStatus']);
 });
 
@@ -388,10 +491,13 @@ Route::post('/reject-booking/{id}', [InquirerController::class, 'rejectBooking']
 // =======================
 // Payments Redirection
 // =======================
-Route::get('/payment/create/{token}', [PaymentsController::class, 'payments'])->name('customer.booking.payments');
+// Route::get('/payment/create/{token}', [PaymentsController::class, 'payments'])->name('customer.booking.payments');
+Route::get('/payment/create/{token}', [MayaCheckoutController::class, 'createCheckoutSession'])->name('customer.booking.payments');
 // =======================
 
 Route::get('/NotVerified', [PaymentsController::class, 'notVerified'])->name('not.verified');
+Route::get('/payment/order/status/{token}', [PaymentsController::class, 'checkOrderStatus'])
+    ->name('payment.status');
 
 
 Route::get('/link-expired', function () {

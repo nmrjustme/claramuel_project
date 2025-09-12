@@ -10,6 +10,7 @@ class GuestType extends Model
     
     protected $fillable = [
         'type',
+        'location',
         'rate'
     ];
 

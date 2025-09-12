@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\FacilityBookingLog;
 use App\Models\FacilityBookingDetails;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class BookingCalendarController extends Controller
 {
@@ -51,7 +52,7 @@ class BookingCalendarController extends Controller
                 ->whereHas('details', function($query) use ($startOfMonth, $endOfMonth) {
                     $query->where(function($q) use ($startOfMonth, $endOfMonth) {
                         $q->whereBetween('checkin_date', [$startOfMonth, $endOfMonth])
-                          ->orWhereBetween('checkout_date', [$startOfMonth, $endOfMonth]);
+                            ->orWhereBetween('checkout_date', [$startOfMonth, $endOfMonth]);
                     });
                 })
                 ->get();
@@ -145,8 +146,9 @@ class BookingCalendarController extends Controller
                         'status' => $log->status,
                         'payment_status' => $log->payment_status,
                         'total_price' => $detail->total_price ?? 0,
-                        'amount_paid' => $log->payments->sum('amount') ?? 0,
-                        'breakfast' => $detail->breakfast_id !== null
+                        'amount_paid' => ($log->payments->sum('amount') + ($log->payments->sum('amount_paid') ?? 0)) ?? 0,
+                        'breakfast' => $detail->facilitySummary->breakfast_id !== null,
+                        
                     ];
                 }
             }
@@ -166,6 +168,57 @@ class BookingCalendarController extends Controller
                 'success' => false,
                 'message' => 'Error loading bookings for date',
                 'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    public function getUnavailableDatesFacility()
+    {
+        try {
+            $now = now()->format('Y-m-d');
+            
+            $dates = DB::table('facilities as fac')
+                ->join('facility_summary as fac_sum', 'fac_sum.facility_id', '=', 'fac.id')
+                ->join('facility_booking_details as fac_details', 'fac_details.facility_summary_id', '=', 'fac_sum.id')
+                ->join('facility_booking_log as fac_log', 'fac_log.id', '=', 'fac_details.facility_booking_log_id')
+                ->join('payments', 'payments.facility_log_id', '=', 'fac_log.id')
+                ->where('fac_log.status', '!=', 'pending_confirmation')
+                ->where('payments.status', 'verified')
+                ->where('fac_details.checkout_date', '>=', $now)
+                ->select([
+                    'fac.id as facility_id', 
+                    'fac_details.checkin_date', 
+                    'fac_details.checkout_date'
+                ])
+                ->get()
+                ->groupBy('facility_id')
+                ->map(function($dates) {
+                    return $dates->map(function($date) {
+                        $checkin = Carbon::parse($date->checkin_date)
+                            ->setTimezone(config('app.timezone'));
+                        $checkout = Carbon::parse($date->checkout_date)
+                            ->setTimezone(config('app.timezone'))
+                            ->subDay(); // Subtract one day from checkout
+                        
+                        return [
+                            'checkin_date' => $checkin->format('Y-m-d'),
+                            'checkout_date' => $checkout->format('Y-m-d')
+                        ];
+                    });
+                });
+            
+            return response()->json([
+                'success' => true,
+                'dates' => $dates
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error fetching unavailable dates: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch unavailable dates',
+                'dates' => []
             ], 500);
         }
     }

@@ -329,7 +329,7 @@ function renderCalendarDayCell(day, dayBookings) {
                         </div>
                     `).join('')}
                     ${booking.facilities.length > 3 ? `<div class="facility-item">+${booking.facilities.length - 3} more</div>` : ''}
-                    ${booking.has_breakfast ? '<div class="text-xs text-green-600 mt-1">+ Breakfast</div>' : ''}
+                    ${booking.breakfast ? '<div class="text-xs text-green-600 mt-1">+ Breakfast</div>' : ''}
                 </div>
             `;
         }

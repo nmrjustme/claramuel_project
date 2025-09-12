@@ -46,6 +46,7 @@ class EmailConfirmationController extends Controller
             'breakfast_included' => 'sometimes|boolean',
             'breakfast_price' => 'required_if:breakfast_included,true|numeric|min:0',
             'total_price' => 'required|numeric|min:0',
+            'amount_to_pay' => 'required|numeric|min:0',
         ]);
         
         // Check if validation fails
@@ -263,8 +264,9 @@ class EmailConfirmationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'OTP verified successfully!',
-            'redirect_url' => route('booking.redirect', ['token' => $token]),
-            'reservation_code' => $reservationCode
+            'redirect_url' => route('customer.booking.payments', ['token' => $token]),
+            'reservation_code' => $reservationCode,
+            'token' => $token,
         ]);
     }
     

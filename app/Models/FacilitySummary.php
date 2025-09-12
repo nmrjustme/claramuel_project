@@ -13,7 +13,9 @@ class FacilitySummary extends Model
 
     protected $fillable = [
         'facility_id',
+        'facility_price',
         'breakfast_id',
+        'breakfast_price',
         'facility_booking_log_id',
         'day_tour_log_details_id',
         'qty',
@@ -28,7 +30,7 @@ class FacilitySummary extends Model
     {
         return $this->belongsTo(Facility::class, 'facility_id');
     }
-
+    
     public function bookingDetails()
     {
         return $this->hasMany(FacilityBookingDetails::class, 'facility_summary_id');

@@ -5,9 +5,16 @@
 @source '../**/*.js';
 
 @theme {
-     --color-lightgray: oklch(0.7878 0 0);
-     --color-darkgray: oklch(0.5445 0 0);
+     --color-lightgray: oklch(0.9031 0 0);
+     --color-darkgray: oklch(0.7021 0 0);
      --color-backgroundcolor: oklch(0.9603 0 129.63);
      --color-primary: #DC2626;
      --color-payment: #FF0000;
+
+     --color-primary-red: #d32f2f;
+     --color-dark-red: #b71c1c;
+     --color-light-red: #ef5350;
+     --color-lighter-red: #ffcdd2;
+     --color-text-dark: #333;
+     --color-text-light: #fff;
 }    

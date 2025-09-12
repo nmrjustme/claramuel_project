@@ -23,7 +23,7 @@ class BookingVerifiedMail extends Mailable
     
     public function build()
     {
-        $mail = $this->subject('Payment Verified - Reservation Code '.$this->booking->code)
+        $mail = $this->subject('Booking Confirmed - Reservation Code '.$this->booking->code)
             ->view('emails.mail_receipt')
             ->with([
                 'booking' => $this->booking,
