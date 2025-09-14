@@ -415,7 +415,7 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     // =======================
     // Calendar
     // =======================
-
+    
     // calendar
     Route::get('/bookings/calendar', [BookingCalendarController::class, 'getCalendarData'])->name('admin.calendar.getDate');
     Route::get('/bookings/by-date', [BookingCalendarController::class, 'getBookingsByDate'])->name('admin.calendar.byDate');

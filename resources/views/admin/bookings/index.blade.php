@@ -1935,7 +1935,8 @@ $active = 'bookings';
         function getButtonStates(status, checkinDate) {
             const states = {
                 confirm: { disabled: false, loading: false },
-                checkin: { disabled: false, loading: false }
+                checkin: { disabled: false, loading: false },
+                checkout: { disabled: false, loading: false}
             };
             
             // If dates are not provided, disable check-in/check-out buttons
