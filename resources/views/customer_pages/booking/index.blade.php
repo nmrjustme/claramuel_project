@@ -1183,7 +1183,7 @@
                               <span id="nights-display">Minimum stay: 1 night</span>
                          </div>
 
-                         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm">
+                         <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg shadow-sm">
                               <div class="flex items-start">
                                    <div>
                                         <p class="text-sm font-semibold text-gray-800">Important Reminder</p>
