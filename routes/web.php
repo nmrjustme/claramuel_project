@@ -38,6 +38,7 @@ use App\Http\Controllers\MayaWebhookSetupController;
 use App\Http\Controllers\RoomMonitoringController;
 use App\Http\Controllers\AdminBookingsController;
 use App\Http\Controllers\AccountingController;
+use App\Http\Controllers\AdminlistUser;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
@@ -71,7 +72,7 @@ Route::post('/maya/payment/webhook', [MayaWebhookSetupController::class, 'handle
 
 
 Route::get('/test-maya-connection', function () {
-    $baseUrl   = config('services.maya.base_url');
+    $baseUrl = config('services.maya.base_url');
     // Change this line to use the public key
     $publicKey = config('services.maya.public_key');
 
@@ -91,7 +92,7 @@ Route::get('/test-maya-connection', function () {
         "redirectUrl" => [
             "success" => url('/maya/success'),
             "failure" => url('/maya/failed'),
-            "cancel"  => url('/maya/cancel')
+            "cancel" => url('/maya/cancel')
         ],
         "requestReferenceNumber" => uniqid()
     ];
@@ -196,7 +197,7 @@ Route::get('/Payment/Submitted', function () {
 })->name('payments.submitted');
 
 // This Condition is to verify email first before proceed
-Route::middleware(['auth', 'verified'])->group(function () {});
+Route::middleware(['auth', 'verified'])->group(function () { });
 
 // Amenities Modal Route
 Route::get('/api/facilities/{facility}/amenities', [BookingsController::class, 'getAmenities'])
@@ -206,11 +207,11 @@ Route::get('/api/facilities/{facility}/amenities', [BookingsController::class, '
 Route::get('/test-insert-user', function () {
     DB::table('users')->insert([
         'firstname' => 'Richter',
-        'lastname'  => 'Mayandoc',
-        'phone'     => '09169824195',
-        'role'      => 'Admin',
-        'email'     => 'rmayandoc0625@gmail.com',
-        'password'  => Hash::make('?richter11'),
+        'lastname' => 'Mayandoc',
+        'phone' => '09169824195',
+        'role' => 'Admin',
+        'email' => 'rmayandoc0625@gmail.com',
+        'password' => Hash::make('?richter11'),
     ]);
     return 'User inserted!';
 });
@@ -248,40 +249,55 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
 
+
+    // =========================
+    // Admin management routes
+    // =========================
+    Route::get('/admins/list/users', [AdminlistUser::class, 'index'])->name('users.list');
+    Route::get('/admins/list/users/list', [AdminlistUser::class, 'data']);
     
-    
+    Route::prefix('admin-management')->name('admin.')->group(function () {
+        Route::get('/', [AdminlistUser::class, 'index'])->name('list.management');
+        Route::get('/list', [AdminlistUser::class, 'data'])->name('list.data');
+        Route::post('/create', [AdminlistUser::class, 'create'])->name('list.create');
+        Route::put('/update/{id}', [AdminlistUser::class, 'update'])->name('list.update');
+        Route::delete('/delete/{id}', [AdminlistUser::class, 'delete'])->name('list.delete');
+        Route::post('/reset-password/{id}', [AdminlistUser::class, 'resetPassword'])->name('reset-password');
+    });
+    // =========================
+
     // Get badge counts Unread or New
     // Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
 
     //========================
 
     // Day Tour Routes Group
-Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
-    
-    // Main Day Tour Registration
-    Route::get('/', [Day_tour_Controller::class, 'index'])->name('index');
-    Route::get('/create', [Day_tour_Controller::class, 'create'])->name('create');
-    Route::post('/store', [Day_tour_Controller::class, 'store'])->name('store');
-    
-    // Facility Availability Check
-    Route::get('/facility-availability', [Day_tour_Controller::class, 'facilityAvailability'])->name('facility-availability');
-    Route::get('/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('check-availability');
-    
-    // Logs Management
-    Route::get('/logs', [Day_tour_Controller::class, 'logs'])->name('logs');
-    Route::get('/logs/{id}', [Day_tour_Controller::class, 'show'])->name('logs.show');
-    Route::get('/logs/{id}/edit', [Day_tour_Controller::class, 'edit'])->name('logs.edit');
-    Route::put('/logs/{id}', [Day_tour_Controller::class, 'update'])->name('logs.update');
-    Route::get('/logs/{id}/print', [Day_tour_Controller::class, 'print'])->name('logs.print');
-    
-    // Cottage & Villa Monitoring
-    Route::get('/cottages-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('cottages_monitoring');
-    Route::post('/facility/{id}/checkout', [Day_tour_Controller::class, 'checkoutFacility'])->name('checkout-facility');
-    Route::post('/facility/{id}/update-status', [Day_tour_Controller::class, 'updateFacilityStatus'])->name('update-facility-status');
-    
-    // Facility Calendar
-    Route::get('/facility-calendar', [Day_tour_Controller::class, 'facilityCalendar'])->name('facility-calendar');
-});
+    Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
+
+        // Main Day Tour Registration
+        Route::get('/', [Day_tour_Controller::class, 'index'])->name('index');
+        Route::get('/create', [Day_tour_Controller::class, 'create'])->name('create');
+        Route::post('/store', [Day_tour_Controller::class, 'store'])->name('store');
+
+        // Facility Availability Check
+        Route::get('/facility-availability', [Day_tour_Controller::class, 'facilityAvailability'])->name('facility-availability');
+        Route::get('/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('check-availability');
+
+        // Logs Management
+        Route::get('/logs', [Day_tour_Controller::class, 'admin.users'])->name('admin.users');
+        Route::get('/logs/{id}', [Day_tour_Controller::class, 'show'])->name('logs.show');
+        Route::get('/logs/{id}/edit', [Day_tour_Controller::class, 'edit'])->name('logs.edit');
+        Route::put('/logs/{id}', [Day_tour_Controller::class, 'update'])->name('logs.update');
+        Route::get('/logs/{id}/print', [Day_tour_Controller::class, 'print'])->name('logs.print');
+
+        // Cottage & Villa Monitoring
+        Route::get('/cottages-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('cottages_monitoring');
+        Route::post('/facility/{id}/checkout', [Day_tour_Controller::class, 'checkoutFacility'])->name('checkout-facility');
+        Route::post('/facility/{id}/update-status', [Day_tour_Controller::class, 'updateFacilityStatus'])->name('update-facility-status');
+
+        // Facility Calendar
+        Route::get('/facility-calendar', [Day_tour_Controller::class, 'facilityCalendar'])->name('facility-calendar');
+    });
     //========================
 
     //========================
@@ -343,14 +359,14 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/rooms/get', function () {
         return view('admin.monitoring.index');
     });
-    
+
     // Revenue monitoring
     Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
     Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
     Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');
     //========================
-    
-    
+
+
     Route::get('/get/show/bookings/{booking}', [BookingController::class, 'show']);
 
     Route::get('/admin/bookings/export/', [BookingController::class, 'export'])->name('admin.bookings.export');
@@ -415,7 +431,7 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     // =======================
     // Calendar
     // =======================
-    
+
     // calendar
     Route::get('/bookings/calendar', [BookingCalendarController::class, 'getCalendarData'])->name('admin.calendar.getDate');
     Route::get('/bookings/by-date', [BookingCalendarController::class, 'getBookingsByDate'])->name('admin.calendar.byDate');

@@ -6,7 +6,8 @@
 
 @section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<div class="p-6 bg-white rounded-xl border border-gray-100 shadow-sm h-full">
+
+<div class="p-6 rounded-xl border border-gray-100 h-full">
     <div class="mb-6">
     <div class="flex items-center justify-between">
         <div>
@@ -16,14 +17,14 @@
 
         <!-- Button to go to Day Tour Logs -->
         <a href="{{ route('admin.daytour.logs') }}" 
-           class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg shadow transition duration-200">
+           class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition duration-200">
             <i class="fas fa-list-alt mr-2"></i>
             View Day Tour Logs
         </a>
     </div>
 
     @if(session('success'))
-        <div id="flash-message" class="mt-4 p-4 rounded-lg bg-green-100 text-green-800 font-medium shadow-md transition transform duration-500">
+        <div id="flash-message" class="mt-4 p-4 rounded-lg bg-green-100 text-green-800 font-medium transition transform duration-500">
             {{ session('success') }}
         </div>
     @endif
@@ -41,7 +42,7 @@
         @csrf
         
         <!-- Guest Information Section -->
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
+        <div class="bg-white rounded-2xl border border-lightgray p-6">
             <div class="flex items-center space-x-3 mb-6">
                 
                 <div class="p-3 bg-red-100 rounded-xl shadow-sm">
@@ -157,7 +158,7 @@
         </div>
 
         <!-- Service Selection Section -->
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
+        <div class="bg-white rounded-2xl border border-lightgray p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="p-3 bg-blue-100 rounded-xl shadow-sm">
                     <i class="fas fa-bell text-blue-500 text-xl"></i>
@@ -246,7 +247,7 @@
         </div>
 
         <!-- Accommodations Section -->
-        <div id="accommodationSection" class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
+        <div id="accommodationSection" class="bg-white rounded-2xl border border-lightgray p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="p-3 bg-amber-100 rounded-xl shadow-sm">
                     <i class="fas fa-home text-amber-500 text-xl"></i>
@@ -304,7 +305,7 @@
         </div>
 
         <!-- Total Cost Section -->
-        <div class="bg-red-50 rounded-2xl border border-red-100 shadow-lg p-6">
+        <div class="bg-red-50 rounded-2xl border border-red-200  p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="p-3 bg-red-100 rounded-xl shadow-sm">
                     <i class="fas fa-receipt text-red-500 text-xl"></i>
