@@ -284,7 +284,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('check-availability');
 
         // Logs Management
-        Route::get('/logs', [Day_tour_Controller::class, 'admin.users'])->name('admin.users');
+        Route::get('/logs', [Day_tour_Controller::class, 'logs'])->name('logs');
         Route::get('/logs/{id}', [Day_tour_Controller::class, 'show'])->name('logs.show');
         Route::get('/logs/{id}/edit', [Day_tour_Controller::class, 'edit'])->name('logs.edit');
         Route::put('/logs/{id}', [Day_tour_Controller::class, 'update'])->name('logs.update');
