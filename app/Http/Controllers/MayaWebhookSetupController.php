@@ -74,7 +74,9 @@ class MayaWebhookSetupController extends Controller
         $amount = $order->amount;
         $order->save();
 
-        $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
+        if ($status == 'paid') {
+            $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
+        }
 
         Log::info("Order {$orderId} marked as " . strtoupper($status));
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);

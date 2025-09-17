@@ -144,33 +144,13 @@ class MayaCheckoutController extends Controller
                     ]
                 ]
             ];
-
-            Log::debug('Facility item created:', [
-                'name' => $facilityName,
-                'facility_price' => $facilityPrice,
-                'nights' => $nights,
-                'breakfast_included' => $isBreakfastIncluded,
-                'breakfast_cost' => $breakfastCost,
-                'facility_subtotal' => $facilitySubtotal,
-                'facility_payment_amount' => $facilityPaymentAmount,
-                'payment_ratio' => $paymentRatio,
-            ]);
         }
-
-        Log::debug('Price verification:', [
-            'total_price' => $total_price,
-            'amount_to_pay' => $amount_to_pay,
-            'calculated_payment_total' => $calculatedTotal,
-            'difference' => abs($amount_to_pay - $calculatedTotal)
-        ]);
-
         // ✅ Get configuration
         $baseUrl = config('services.maya.base_url');
         $publicKey = config('services.maya.public_key');
         $secretKey = config('services.maya.secret_key');
 
         if (!$baseUrl || !$publicKey || !$secretKey) {
-            Log::error('Maya configuration missing');
             return back()->with('error', 'Payment gateway configuration error. Please try again later.');
         }
         

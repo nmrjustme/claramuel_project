@@ -231,9 +231,6 @@
         <button onclick="window.close()" class="btn btn-secondary">
             <i class="fas fa-times mr-1"></i>Close
         </button>
-        <p style="margin-top: 8px; color: #6b7280; font-size: 10px;">
-            Optimized for single-page printing
-        </p>
     </div>
 
     <div class="receipt-container">

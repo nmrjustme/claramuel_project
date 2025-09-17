@@ -37,7 +37,7 @@
             </div>
 
             <button type="submit"
-                class="w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200">
+                class="w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 cursor-pointer">
                 Verify OTP
             </button>
         </form>
@@ -198,9 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Hide the leave confirmation modal
-    function hideLeaveConfirmation() {
-        modal.classList.add('hidden');
-        redirectData = null;
+    function LeaveConfirmation() {
+        window.location.href = '/bookings/customer-info';
     }
 
     // Proceed with the redirection
@@ -209,11 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
             window.open(redirectData.redirect_url, '_blank');
             window.location.href = '/bookings/customer-info';
         }
-        hideLeaveConfirmation();
     }
 
     // Modal event listeners
-    cancelButton.addEventListener('click', hideLeaveConfirmation);
+    cancelButton.addEventListener('click', LeaveConfirmation);
     proceedButton.addEventListener('click', proceedWithRedirection);
 
     // OTP form submission

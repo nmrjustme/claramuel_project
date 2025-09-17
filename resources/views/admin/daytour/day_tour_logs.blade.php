@@ -6,7 +6,8 @@
 
 @section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<div class="p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
+
+<div class="p-6 rounded-lg border border-gray-100">
     <div class="flex justify-between items-center mb-6">
     <h2 class="text-2xl font-bold text-gray-800">Day Tour Registration Logs</h2>
     <div class="flex justify-between items-center mb-6">
@@ -24,7 +25,7 @@
 </div>
 
     <!-- User-Friendly Search and Filters -->
-<div class="bg-gray-50 p-4 rounded-lg mb-6">
+<div class="bg-white border border-lightgray p-4 rounded-lg mb-6">
     <form method="GET" action="{{ route('admin.daytour.logs') }}">
         <!-- Basic Search Row -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">

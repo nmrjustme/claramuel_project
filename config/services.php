@@ -39,7 +39,7 @@ return [
         'token' => env('PHILSMS_API_TOKEN'),
         'sender' => env('PHILSMS_SENDER', 'MyApp'),
     ],
-
+ 
     'maya' => [
         'secret_key' => env('MAYA_SECRET_KEY'),
         'public_key' => env('MAYA_PUBLIC_KEY'),
