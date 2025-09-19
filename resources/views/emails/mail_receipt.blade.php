@@ -120,6 +120,59 @@
             font-size: 14px;
             color: #777777;
         }
+        
+        /* Addons styling */
+        .addons-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 8px;
+            border-left: 4px solid #4a90e2;
+        }
+        
+        .addon-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #d0e4ff;
+        }
+        
+        .addon-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .addon-name {
+            font-weight: bold;
+        }
+        
+        .addon-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .addon-price {
+            text-align: right;
+            min-width: 100px;
+        }
+        
+        .addons-total {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px solid #c0d8f0;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .no-addons {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +215,13 @@
                         foreach ($booking->summaries as $summary) {
                             $subtotal = $summary->bookingDetails->sum('total_price');
                             $totalAmount += $subtotal;
+                        }
+                        
+                        // Calculate addons total if they exist
+                        $addonsTotal = 0;
+                        if ($booking->guestAddons && $booking->guestAddons->count() > 0) {
+                            $addonsTotal = $booking->guestAddons->sum('total_cost');
+                            $totalAmount += $addonsTotal;
                         }
                         
                         // Calculate payment information correctly
@@ -230,17 +290,39 @@
                     </div>
                     @endif
                     
+                    <!-- Addons Section -->
+                    @if($booking->guestAddons && $booking->guestAddons->count() > 0)
+                    <div class="addons-section">
+                        <h2 style="margin-top: 0;">Additional Services</h2>
+                        
+                        @foreach($booking->guestAddons as $addon)
+                        <div class="addon-item">
+                            <div>
+                                <div class="addon-name">{{ $addon->type }}</div>
+                                <div class="addon-details">Quantity: {{ $addon->quantity }} × ₱{{ number_format($addon->cost, 2) }}</div>
+                            </div>
+                            <div class="addon-price">₱{{ number_format($addon->total_cost, 2) }}</div>
+                        </div>
+                        @endforeach
+                        
+                        <div class="addons-total">
+                            <span>Addons Total:</span>
+                            <span>₱{{ number_format($addonsTotal, 2) }}</span>
+                        </div>
+                    </div>
+                    @endif
+                    
                     <!-- Booking Details Section -->
                     <h2 style="margin-top: 20px;">Booking Summary</h2>
                     
                     @php 
-                        $totalAmount = 0;
+                        $facilitiesTotal = 0;
                     @endphp
                     
                     @foreach($booking->summaries as $summary)
                         @php
                             $subtotal = $summary->bookingDetails->sum('total_price');
-                            $totalAmount += $subtotal; 
+                            $facilitiesTotal += $subtotal; 
                             
                             $guestsForFacility = $booking->guestDetails
                                 ->where('facility_id', $summary->facility_id)
@@ -312,6 +394,18 @@
                     
                     <!-- Display the total amount -->
                     <div class="detail-row" style="margin-top: 15px; font-weight: bold;">
+                        <span class="detail-label">Facilities Total:</span>
+                        <span class="detail-value">₱{{ number_format($facilitiesTotal, 2) }}</span>
+                    </div>
+                    
+                    @if($booking->guestAddons && $booking->guestAddons->count() > 0)
+                    <div class="detail-row" style="font-weight: bold;">
+                        <span class="detail-label">Addons Total:</span>
+                        <span class="detail-value">₱{{ number_format($addonsTotal, 2) }}</span>
+                    </div>
+                    @endif
+                    
+                    <div class="detail-row" style="margin-top: 15px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px;">
                         <span class="detail-label">Total Amount:</span>
                         <span class="detail-value">₱{{ number_format($totalAmount, 2) }}</span>
                     </div>
