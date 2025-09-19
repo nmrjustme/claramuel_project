@@ -4,17 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\FacilityBookingLog;
 use App\Models\Payments;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\BookingConfirmationEmail;
 use App\Mail\BookingRejectionEmail;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
-use SimpleSoftwareIO\QrCode\Facades\QrCode; 
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\File;
@@ -275,7 +271,8 @@ class InquirerController extends Controller
                 'summaries.breakfast',
                 'summaries.bookingDetails',
                 'guestDetails.guestType',
-                'user' // Make sure user relationship exists for email
+                'user', // Make sure user relationship exists for email
+                'guestAddons'
             ])->findOrFail($bookingId);
             
             $checkout_date = $booking->details->first()->checkout_date;

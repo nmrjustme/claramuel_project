@@ -70,62 +70,6 @@ Route::get('/maya/status/{referenceNumber}', [MayaCheckoutController::class, 'ch
 Route::post('/maya/payment/webhook', [MayaWebhookSetupController::class, 'handle'])->name('maya.webhook.succes');
 
 
-
-Route::get('/test-maya-connection', function () {
-    $baseUrl = config('services.maya.base_url');
-    // Change this line to use the public key
-    $publicKey = config('services.maya.public_key');
-
-    $payload = [
-        "totalAmount" => [
-            "value" => 1.00,
-            "currency" => "PHP"
-        ],
-        "buyer" => [
-            "firstName" => "Test",
-            "lastName" => "User",
-            "contact" => [
-                "phone" => "+639171234567",
-                "email" => "test@example.com"
-            ]
-        ],
-        "redirectUrl" => [
-            "success" => url('/maya/success'),
-            "failure" => url('/maya/failed'),
-            "cancel" => url('/maya/cancel')
-        ],
-        "requestReferenceNumber" => uniqid()
-    ];
-
-    try {
-        // Authenticate with the public key for the Create Checkout endpoint
-        $response = Http::withBasicAuth($publicKey, '')
-            ->withHeaders([
-                'Content-Type' => 'application/json',
-            ])
-            ->post("{$baseUrl}/checkout/v1/checkouts", $payload);
-
-        return redirect($response->json()['redirectUrl']);
-    } catch (\Exception $e) {
-        return ['error' => $e->getMessage()];
-    }
-});
-
-
-Route::get('try/webhook/again', function () {
-    $response = Http::withHeaders([
-        'accept' => 'application/json',
-        'authorization' => 'Basic c2stWDhxb2xZank2MmtJekVicjBRUksxaDRiNEtEVkhhTmN3TVlrMzlqSW5TbDo=',
-        'content-type' => 'application/json',
-    ])
-        ->post("https://pg-sandbox.paymaya.com/payments/v1/webhooks", [
-            'name' => 'PAYMENT_SUCCESS',
-            'callbackUrl' => 'https://5e708220a669.ngrok-free.app/try/maya/webhook',
-        ]);
-
-    Log::info('Webhook registration response: ', $response->json());
-});
-
 // =======================
 // Awaiting verification page 
 // =======================
@@ -204,17 +148,6 @@ Route::get('/api/facilities/{facility}/amenities', [BookingsController::class, '
     ->name('facilities.amenities');
 
 
-Route::get('/test-insert-user', function () {
-    DB::table('users')->insert([
-        'firstname' => 'Richter',
-        'lastname' => 'Mayandoc',
-        'phone' => '09169824195',
-        'role' => 'Admin',
-        'email' => 'rmayandoc0625@gmail.com',
-        'password' => Hash::make('?richter11'),
-    ]);
-    return 'User inserted!';
-});
 
 
 Route::middleware('auth')->group(function () {
@@ -331,6 +264,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get/show/bookings/checkin/{id}', [BookingController::class, 'paymentDetails']);
     Route::post('/bookings/{id}/process-payment', [BookingController::class, 'processMyPayment']);
     Route::post('/bookings/{id}/checkin', [BookingController::class, 'checkin']);
+
+    Route::post('/admin/guest-addons', [BookingController::class, 'storeGuestAddons']);
     //========================
 
     //========================

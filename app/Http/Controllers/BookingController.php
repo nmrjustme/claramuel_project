@@ -14,7 +14,7 @@ use App\Models\FacilitySummary;
 use App\Models\FacilityBookingDetails;
 use App\Models\BookingGuestDetails;
 use App\Models\Payments;
-use App\Models\GuestType;
+use App\Models\GuestAddons;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -395,14 +395,15 @@ class BookingController extends Controller
             'details',
             'payments',
             'summaries.facility',
-            'guestDetails.guestType'
+            'guestDetails.guestType',
+            'guestAddons'
         ]);
 
         return response()->json([
             'data' => $booking,
         ]);
     }
-    
+
     public function getMyBookings(Request $request)
     {
         try {
@@ -459,7 +460,7 @@ class BookingController extends Controller
                 'data' => $bookings->map(function ($booking) {
                     // Display status logic
                     $displayStatus = $booking->status;
-                    
+
                     return [
                         'id' => $booking->id,
                         'user' => [
@@ -626,107 +627,6 @@ class BookingController extends Controller
     }
 
 
-    // public function getMyInquiries(Request $request)
-    // {
-    //     try {
-    //         $perPage = $request->input('per_page', 15);
-    //         $page = $request->input('page', 1);
-    //         $search = $request->input('search', '');
-    //         $status = $request->input('status', '');
-    //         $readStatus = $request->input('read_status', '');
-
-    //         $query = FacilityBookingLog::with([
-    //             'user',
-    //             'summaries.facility',
-    //             'summaries.breakfast',
-    //             'details',
-    //             'payments',
-    //         ])
-    //         ->whereIn('status', [
-    //             'pending_confirmation',
-    //             'confirmed',
-    //             'rejected'
-    //         ])
-    //         // 🔍 Search
-    //         ->when($search, function($query) use ($search) {
-    //             if (is_numeric($search)) {
-    //                 $query->where('id', $search);
-    //             } else {
-    //                 $query->where(function ($q) use ($search) {
-    //                     $q->whereHas('user', function($uq) use ($search) {
-    //                         $uq->where('firstname', 'like', "%{$search}%")
-    //                         ->orWhere('lastname', 'like', "%{$search}%")
-    //                         ->orWhere('email', 'like', "%{$search}%")
-    //                         ->orWhere('phone', 'like', "%{$search}%");
-    //                     })
-    //                     ->orWhere('code', 'like', "%{$search}%");
-    //                 });
-    //             }
-    //         })
-    //         // 📌 Status filtering
-    //         ->when($status, function($query) use ($status) {
-    //             if (in_array($status, ['pending_confirmation', 'confirmed', 'rejected'])) {
-    //                 $query->where('status', $status);
-    //             }
-    //         })
-    //         // 📌 Read status filtering
-    //         ->when($readStatus, function($query) use ($readStatus) {
-    //             if (in_array($readStatus, ['read', 'unread'])) {
-    //                 $query->where('is_read', $readStatus === 'read');
-    //             }
-    //         })
-    //         ->orderBy('created_at', 'desc')
-    //         ->whereIn('status', [ 'pending_confirmation', 'confirmed', 'rejected' ]);
-
-    //         // 📌 Status filtering
-    //         if ($status) {
-    //             switch ($status) {
-    //                 case 'pending_confirmation':
-    //                 case 'confirmed':
-    //                 case 'rejected':
-    //                     $query->where('status', $status);
-    //                     break;
-    //                 default:
-    //                     // No additional filtering for 'all'
-    //                     break;
-    //             }
-    //         }
-
-    //         // 📌 Read status filtering
-    //         if ($readStatus && in_array($readStatus, ['read', 'unread'])) {
-    //             $query->where('is_read', $readStatus === 'read');
-    //         }
-
-    //         $bookings = $query->paginate($perPage, ['*'], 'page', $page);
-
-    //         return response()->json([
-    //             'data' => $bookings->map(function ($booking) {
-    //                 return [
-    //                     'id' => $booking->id,
-    //                     'user' => [
-    //                         'firstname' => $booking->user->firstname ?? null,
-    //                         'lastname' => $booking->user->lastname ?? null,
-    //                         'email' => $booking->user->email ?? null,
-    //                     ],
-    //                     'is_read' => (bool) $booking->is_read,
-    //                     'status' => $booking->status, // ✅ Pure status only
-    //                     'code' => $booking->code,
-    //                     'created_at' => $booking->created_at->toDateTimeString(),
-    //                 ];
-    //             }),
-    //             'current_page' => $bookings->currentPage(),
-    //             'per_page' => $bookings->perPage(),
-    //             'last_page' => $bookings->lastPage(),
-    //             'total' => $bookings->total()
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'error' => 'Server Error',
-    //             'message' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function getConfirmedInquiries(Request $request)
     {
         try {
@@ -882,4 +782,56 @@ class BookingController extends Controller
             'data' => $bookings
         ]);
     }
+
+    public function storeGuestAddons(Request $request)
+    {
+        $request->validate([
+            'facility_booking_log_id' => 'required|exists:facility_booking_log,id',
+            'guests' => 'required|array',
+            'guests.*.type' => 'required|in:kid,adult,senior',
+            'guests.*.cost' => 'required|numeric|min:0',
+            'guests.*.quantity' => 'required|integer|min:1',
+            'guests.*.total_cost' => 'required|numeric|min:0'
+        ]);
+
+        try {
+            $facilityBookingLogId = $request->facility_booking_log_id;
+            $totalNewCost = 0;
+
+            // Save guest addons & calculate total new cost
+            foreach ($request->guests as $guest) {
+                GuestAddons::create([
+                    'facility_booking_log_id' => $facilityBookingLogId,
+                    'type' => $guest['type'],
+                    'cost' => $guest['cost'],
+                    'quantity' => $guest['quantity'],
+                    'total_cost' => $guest['total_cost']
+                ]);
+
+                $totalNewCost += $guest['total_cost']; // accumulate
+            }
+
+            // Fetch booking log with details
+            $bookingLog = FacilityBookingLog::with('details')->find($facilityBookingLogId);
+
+            if ($bookingLog && $bookingLog->details()->exists()) {
+                // Update all details rows by adding new addons cost
+                $bookingLog->details()->update([
+                    'total_price' => \DB::raw("total_price + " . (float) $totalNewCost)
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Guest composition saved successfully',
+                'added_cost' => $totalNewCost
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save guest composition: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 }
