@@ -58,7 +58,7 @@
             <p>Dear {{ $firstname }},</p>
 
             <p>We detect that your <strong>payment has failed</strong> due to one of the following reasons: 
-            <em>you closed the payment page, the transaction was cancelled, or the payment session expired</em>. 
+            <em>you closed the payment page, the transaction was cancelled, the payment session expired, insufficient funds, incorrect card details, or your bank declined the transaction</em>. 
             Please try again to complete your reservation.</p>
 
             <p>Your reservation will not be processed until payment is successfully completed. We recommend reattempting your booking at your earliest convenience.</p>
@@ -78,6 +78,7 @@
 
             <p>We look forward to assisting you and securing your stay at <strong>Mt. ClaRamuel Resort</strong>.</p>
         </div>
+
     </div>
 </body>
 </html>
