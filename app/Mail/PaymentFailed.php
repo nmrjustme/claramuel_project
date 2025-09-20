@@ -13,13 +13,13 @@ class PaymentFailed extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $booking;
+    public $firstname;
     /**
      * Create a new message instance.
      */
-    public function __construct($booking)
+    public function __construct($firstname)
     {
-        $this->booking = $booking;
+        $this->firstname = $firstname;
     }
 
     public function build() 
@@ -27,7 +27,7 @@ class PaymentFailed extends Mailable
         $mail = $this->subject('Booking Failed')
             ->view('emails.booking_failed')
             ->with([
-                'booking' => $this->booking,
+                'firstname' => $this->firstname,
             ]);
         return $mail;
     }

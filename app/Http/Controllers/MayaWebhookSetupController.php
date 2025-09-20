@@ -45,6 +45,7 @@ class MayaWebhookSetupController extends Controller
 
             case 'PAYMENT_CANCELLED':
             case 'CHECKOUT_DROPOUT':
+            case 'CHECKOUT_CANCELLED':
                 return $this->updateOrder('cancelled', $request);
 
             default:
@@ -76,15 +77,22 @@ class MayaWebhookSetupController extends Controller
         $order->save();
 
         if ($status == 'paid') {
-            $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme, $status);
+            $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
+            
+        } else if ($status == 'expired' || $status == 'failed' || $status == 'cancelled') {
+            $bookingData = Cache::get('booking_confirmation_' . $order->token);
+
+            if ($bookingData) {
+                Mail::to($bookingData['email'])->send(new PaymentFailed($bookingData['firstname']));
+                Cache::forget('booking_confirmation_' . $order->token);
+            }
             
         } 
-
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);
     }
 
 
-    private function storeBookingInDatabase($token, $orderId, $amount, $paymentScheme, $status)
+    private function storeBookingInDatabase($token, $orderId, $amount, $paymentScheme)
     {
         $bookingData = Cache::get('booking_confirmation_' . $token);
         // Start database transaction
@@ -229,12 +237,7 @@ class MayaWebhookSetupController extends Controller
                 $bookingLog
             ));
 
-            if ($status == 'expired' || $status == 'failed' || $status == 'cancelled') {
-                Mail::to($bookingData['email'])->send(new PaymentFailed(
-                    $bookingLog 
-                ));
-            } 
-
+            
             // Sending active admin email
             // if (User::where('role', 'Admin')->where('is_active', true)->exists()) {
             //     $this->sendEmailAdmin($bookingLog); 

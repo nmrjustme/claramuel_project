@@ -55,7 +55,7 @@
 <body>
     <div class="container">
         <div class="custom-message">
-            <p>Dear {{ $booking->user->firstname }},</p>
+            <p>Dear {{ $firstname }},</p>
 
             <p>We detect that your <strong>payment has failed</strong> due to one of the following reasons: 
             <em>you closed the payment page, the transaction was cancelled, or the payment session expired</em>. 
