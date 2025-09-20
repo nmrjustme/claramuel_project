@@ -18,6 +18,7 @@ use App\Models\FacilityBookingLog;
 use App\Models\Payments;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationReceived;
+use Illuminate\Support\Facades\Log;
 
 class MayaWebhookSetupController extends Controller
 {
