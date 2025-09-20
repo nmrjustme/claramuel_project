@@ -18,6 +18,7 @@ use App\Models\FacilityBookingLog;
 use App\Models\Payments;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationReceived;
+use App\Mail\PaymentFailed;
 use Illuminate\Support\Facades\Log;
 
 class MayaWebhookSetupController extends Controller
@@ -75,18 +76,15 @@ class MayaWebhookSetupController extends Controller
         $order->save();
 
         if ($status == 'paid') {
-            $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
+            $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme, $status);
             
         } 
-        // else if ($status == 'failed' || $status == 'expired' || $status == 'cancelled') {
-
-        // }
 
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);
     }
 
 
-    private function storeBookingInDatabase($token, $orderId, $amount, $paymentScheme)
+    private function storeBookingInDatabase($token, $orderId, $amount, $paymentScheme, $status)
     {
         $bookingData = Cache::get('booking_confirmation_' . $token);
         // Start database transaction
@@ -230,6 +228,13 @@ class MayaWebhookSetupController extends Controller
             Mail::to($bookingData['email'])->send(new ReservationReceived(
                 $bookingLog
             ));
+
+            if ($status == 'expired' || $status == 'failed' || $status == 'cancelled') {
+                Mail::to($bookingData['email'])->send(new PaymentFailed(
+                    $bookingLog 
+                ));
+            } 
+
             // Sending active admin email
             // if (User::where('role', 'Admin')->where('is_active', true)->exists()) {
             //     $this->sendEmailAdmin($bookingLog); 

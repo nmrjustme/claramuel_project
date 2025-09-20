@@ -194,7 +194,7 @@
             
             <p>If you have any questions, special requests, or need further assistance, please don’t hesitate to contact us. We want your stay with us to be both <strong>memorable</strong> and <strong>comfortable</strong>.</p>
             
-            <p>Thank you for choosing <strong>Mt. ClaRamuel Resort</strong>. We look forward to seeing you soon!</p>
+            <p>Thank you for choosing <strong>Mt. ClaRamuel Resort</strong></p>
         </div>
 
         <h1>Your Booking Details</h1>
