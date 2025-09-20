@@ -61,13 +61,13 @@
         }
 
         .custom-message {
-            background: #e6f4ea; /* soft green for verified/success */
-            border: 1px solid #b5dfc0;
-            border-left: 6px solid #34a853; /* Google green style accent */
+            background: #fff9e6; /* soft yellow for verified/success */
+            border: 1px solid #f0e6b5;
+            border-left: 6px solid #f4c542; /* yellow accent */
             padding: 25px;
             border-radius: 8px;
             margin: 20px 0;
-            color: #2d572c;
+            color: #7a5c00; /* dark yellow-brown text */
             position: relative;
             overflow: hidden;
         }
