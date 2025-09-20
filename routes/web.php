@@ -266,6 +266,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/bookings/{id}/checkin', [BookingController::class, 'checkin']);
 
     Route::post('/admin/guest-addons', [BookingController::class, 'storeGuestAddons']);
+    Route::delete('/delete/guest-addons/{addonId}', [BookingController::class, 'deleteAddon']);
     //========================
 
     //========================

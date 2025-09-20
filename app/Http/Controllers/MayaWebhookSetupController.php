@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Models\Order;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
@@ -17,6 +16,8 @@ use App\Models\BookingGuestDetails;
 use App\Events\BookingNew;
 use App\Models\FacilityBookingLog;
 use App\Models\Payments;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ReservationReceived;
 
 class MayaWebhookSetupController extends Controller
 {
@@ -45,7 +46,6 @@ class MayaWebhookSetupController extends Controller
                 return $this->updateOrder('cancelled', $request);
 
             default:
-                Log::info("Maya Webhook: Event {$event} ignored");
                 return response()->json(['message' => "Event {$event} ignored"], 200);
         }
     }
@@ -64,7 +64,6 @@ class MayaWebhookSetupController extends Controller
         $order = Order::where('reference_number', $orderId)->first();
 
         if (!$order) {
-            Log::error("Order not found for reference: {$orderId}");
             return response()->json(['error' => 'Order not found'], 404);
         }
 
@@ -76,9 +75,12 @@ class MayaWebhookSetupController extends Controller
 
         if ($status == 'paid') {
             $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
-        }
+            
+        } 
+        // else if ($status == 'failed' || $status == 'expired' || $status == 'cancelled') {
 
-        Log::info("Order {$orderId} marked as " . strtoupper($status));
+        // }
+
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);
     }
 
@@ -134,13 +136,6 @@ class MayaWebhookSetupController extends Controller
                 'booking_date' => now(),
                 'code' => $bookingData['reservation_code']
             ]);
-
-            Log::info('Booking confirmed via email', [
-                'booking_id' => $bookingLog->id,
-                'user_id' => $user->id,
-                'email' => $bookingData['email']
-            ]);
-
             // Get active breakfast price if included
             $breakfastId = null;
             $breakfastPricePerFacilityPerDay = 0;
@@ -218,27 +213,30 @@ class MayaWebhookSetupController extends Controller
             // Commit transaction
             DB::commit();
 
-            $bookingLog->load(['user']);
+            $bookingLog->load([
+                'payments', 
+                'details',
+                'summaries.facility',
+                'summaries.breakfast',
+                'summaries.bookingDetails',
+                'guestDetails.guestType',
+                'user', 
+                'guestAddons'
+            ]);
 
             event(new BookingNew($bookingLog)); // Event listener for new booking list
-
+            
+            Mail::to($bookingData['email'])->send(new ReservationReceived(
+                $bookingLog
+            ));
             // Sending active admin email
             // if (User::where('role', 'Admin')->where('is_active', true)->exists()) {
             //     $this->sendEmailAdmin($bookingLog); 
             // }
 
-            Log::info('booking recorded successfully');
-
             Cache::forget('booking_confirmation_' . $token);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Email confirmation booking failed:', [
-                'message' => $e->getMessage(),
-                'exception' => $e,
-                'trace' => $e->getTraceAsString(),
-                'booking_data' => $bookingData
-            ]);
-
             throw $e; // Re-throw to handle in the controller
         }
     }

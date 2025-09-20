@@ -834,4 +834,42 @@ class BookingController extends Controller
         }
     }
 
+    public function deleteAddon(Request $request, $addonId)
+    {
+        try {
+            $bookingId = $request->input('booking_id');
+
+            // Find the addon and verify it belongs to the booking
+            $addon = GuestAddons::where('id', $addonId)
+                ->where('facility_booking_log_id', $bookingId)
+                ->firstOrFail();
+
+            $costToRollback = $addon->total_cost;
+
+            // Fetch booking log with details
+            $bookingLog = FacilityBookingLog::with('details')->find($bookingId);
+
+            if ($bookingLog && $bookingLog->details()->exists()) {
+                // Subtract the addon cost from all detail rows
+                $bookingLog->details()->update([
+                    'total_price' => \DB::raw("total_price - " . (float) $costToRollback)
+                ]);
+            }
+
+            // Now delete the addon
+            $addon->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Guest addon deleted successfully',
+                'rolled_back_cost' => $costToRollback
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete guest addon: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

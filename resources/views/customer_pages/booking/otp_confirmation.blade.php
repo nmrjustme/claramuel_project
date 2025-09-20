@@ -83,7 +83,7 @@
             <button id="cancel-leave" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition duration-200">
                 Cancel
             </button>
-            <button id="proceed-leave" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200">
+            <button id="proceed-leave" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200 cursor-pointer">
                 Proceed
             </button>
         </div>
@@ -199,14 +199,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Hide the leave confirmation modal
     function LeaveConfirmation() {
-        window.location.href = '/bookings/customer-info';
+        window.location.href = `/dashboard/Bookings`;
     }
 
     // Proceed with the redirection
     function proceedWithRedirection() {
         if (redirectData) {
             window.open(redirectData.redirect_url, '_blank');
-            window.location.href = '/bookings/customer-info';
+            window.location.href = `/dashboard/Bookings`;
         }
     }
 
