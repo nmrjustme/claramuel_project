@@ -1,125 +1,122 @@
+{{-- resources/views/admin/daytour/facility-card.blade.php --}}
+
 @php
-    // Determine status for each facility
-    if ($facility->display_status === 'maintenance') {
-        $statusColor = 'gray';
-        $statusText = 'Maintenance';
-        $statusIcon = 'fas fa-tools';
-    } elseif ($facility->display_status === 'cleaning') {
-        $statusColor = 'yellow';
-        $statusText = 'Cleaning';
-        $statusIcon = 'fas fa-broom';
-    } elseif ($facility->display_status === 'occupied') {
-        $statusColor = 'red';
-        $statusText = 'Occupied';
-        $statusIcon = 'fas fa-users';
-    } else {
-        $statusColor = 'green';
-        $statusText = 'Available';
-        $statusIcon = 'fas fa-check-circle';
-    }
+    $status = strtolower($facility->display_status);
+
+    // Base card styles
+    $baseCardClasses = 'rounded-xl border shadow-sm transition-shadow duration-300 hover:shadow-lg flex flex-col justify-between';
+
+    // Status-based styles
+    $statusStyles = [
+        'occupied' => [
+            'card' => 'bg-red-600 border-red-600 text-white',
+            'text' => 'text-white',
+            'secondary' => 'text-red-200',
+            'button' => 'bg-red-700 hover:bg-red-600 text-white',
+            'details' => 'bg-red-600',
+        ],
+        'maintenance' => [
+            'card' => 'bg-yellow-400 border-yellow-400 text-white',
+            'text' => 'text-white',
+            'secondary' => 'text-yellow-100',
+            'button' => 'bg-yellow-500 hover:bg-yellow-400 text-white',
+            'details' => 'bg-yellow-400',
+        ],
+        'cleaning' => [
+            'card' => 'bg-blue-600 border-blue-600 text-white',
+            'text' => 'text-white',
+            'secondary' => 'text-blue-200',
+            'button' => 'bg-blue-700 hover:bg-blue-600 text-white',
+            'details' => 'bg-blue-600',
+        ],
+        'available' => [
+            'card' => 'bg-white border-gray-200 text-gray-900',
+            'text' => 'text-gray-900',
+            'secondary' => 'text-gray-500',
+            'button' => 'bg-gray-100 hover:bg-gray-200 text-gray-700',
+            'details' => 'bg-white',
+        ],
+    ];
+
+    $styles = $statusStyles[$status] ?? $statusStyles['available'];
 @endphp
 
-<div class="card-hover bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <!-- Status Header -->
-    <div class="bg-{{ $statusColor }}-50 p-4 border-b border-{{ $statusColor }}-100">
-        <div class="flex items-center justify-between">
-            <h3 class="font-semibold text-gray-800 text-lg">{{ $facility->name }}</h3>
-            <span class="status-badge bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
-                <i class="{{ $statusIcon }} mr-1.5"></i>{{ $statusText }}
-            </span>
-        </div>
-        <p class="text-sm text-gray-600 mt-1">{{ $facility->category }}</p>
+<div x-data="{ open: false }" class="{{ $baseCardClasses }} {{ $styles['card'] }}" role="region" aria-labelledby="facility-{{ $facility->id }}-name">
+    <div class="p-5 text-center space-y-2">
+        <h4 id="facility-{{ $facility->id }}-name" class="text-lg font-semibold {{ $styles['text'] }} truncate" title="{{ $facility->name }}">
+            {{ $facility->name }}
+        </h4>
+        <p class="text-xs font-medium uppercase tracking-wide {{ $styles['secondary'] }}">
+            {{ $facility->category }}
+        </p>
+
+        <p class="mt-1 text-sm font-semibold {{ $styles['text'] }} flex items-center justify-center gap-2">
+            <i class="fas fa-circle text-xs" :class="{
+                'text-red-300': '{{ $status }}' === 'occupied',
+                'text-yellow-300': '{{ $status }}' === 'maintenance',
+                'text-blue-300': '{{ $status }}' === 'cleaning',
+                'text-green-400': '{{ $status }}' === 'available',
+            }"></i>
+            {{ ucfirst($status) }}
+        </p>
     </div>
 
-    <!-- Facility Details -->
-    <div class="p-4">
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                <p class="text-2xl font-bold text-gray-800">{{ $facility->available }}</p>
-                <p class="text-xs text-gray-600 mt-1">Available</p>
-            </div>
-            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                <p class="text-2xl font-bold text-gray-800">{{ $facility->booked }}</p>
-                <p class="text-xs text-gray-600 mt-1">Booked</p>
-            </div>
-        </div>
+    @if(($facility->bookings && $facility->bookings->count()) || ($facility->units && count($facility->units)))
+        <button
+            @click="open = !open"
+            class="flex w-full items-center justify-center gap-2 rounded-b-xl border-t border-gray-300 py-2 text-xs font-semibold transition {{ $styles['button'] }}"
+            aria-expanded="false"
+            :aria-expanded="open.toString()"
+            aria-controls="facility-{{ $facility->id }}-details"
+            type="button"
+        >
+            <span x-show="!open" x-cloak><i class="fas fa-chevron-down"></i> View Details</span>
+            <span x-show="open" x-cloak><i class="fas fa-chevron-up"></i> Hide Details</span>
+        </button>
 
-        <!-- Occupancy Progress -->
-        <div class="mb-4">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-sm font-medium text-gray-700">Occupancy</span>
-                <span class="text-sm font-bold text-gray-800">{{ $facility->occupancy_rate }}%</span>
-            </div>
-            <div class="occupancy-bar">
-                <div class="occupancy-fill bg-{{ $facility->occupancy_rate > 75 ? 'red' : ($facility->occupancy_rate > 50 ? 'yellow' : 'green') }}-500" 
-                      style="width: {{ $facility->occupancy_rate }}%"></div>
-            </div>
-        </div>
+        <div
+            x-show="open"
+            x-transition
+            id="facility-{{ $facility->id }}-details"
+            class="border-t border-gray-300 p-4 text-xs {{ $styles['details'] }} {{ $styles['secondary'] }} space-y-4"
+            x-cloak
+        >
+            @if($facility->units && count($facility->units))
+                <div>
+                    <h5 class="font-semibold {{ $styles['text'] }} mb-2 border-b border-gray-300 pb-1">Units</h5>
+                    <ul class="space-y-1">
+                        @foreach($facility->units as $unit)
+                            @php
+                                $unitStatus = strtolower($unit['status']);
+                                $unitStatusClass = 'text-green-600 font-semibold';
+                                if ($unitStatus === 'occupied') {
+                                    $unitStatusClass = $status === 'available' ? 'text-red-600 font-semibold' : 'text-white font-semibold';
+                                } elseif ($status !== 'available') {
+                                    $unitStatusClass = 'text-green-300 font-semibold';
+                                }
+                            @endphp
+                            <li class="flex justify-between">
+                                <span>{{ $unit['name'] }}</span>
+                                <span class="{{ $unitStatusClass }}">{{ ucfirst($unit['status']) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-        <!-- Capacity Info -->
-        <div class="flex items-center justify-between text-sm text-gray-600 mb-4">
-            <span>Capacity: {{ $facility->quantity }} people</span>
-        </div>
-
-        <!-- Current Bookings -->
-        @if($facility->bookings && count($facility->bookings) > 0)
-        <div class="mb-4 p-3 bg-blue-50 rounded-lg">
-            <p class="text-xs font-semibold text-blue-800 mb-2">Active Bookings:</p>
-            @foreach($facility->bookings->take(2) as $booking)
-            <div class="text-xs text-blue-700 mb-1 flex justify-between">
-                <span>{{ Illuminate\Support\Str::limit($booking['customer'], 15) }}</span>
-                <span class="font-medium">{{ $booking['quantity'] }} units</span>
-            </div>
-            @endforeach
-            @if(count($facility->bookings) > 2)
-            <p class="text-xs text-blue-600 mt-1">+{{ count($facility->bookings) - 2 }} more</p>
+            @if($facility->bookings && $facility->bookings->count())
+                <div>
+                    <h5 class="font-semibold {{ $styles['text'] }} mb-2 border-b border-gray-300 pb-1">Bookings</h5>
+                    <ul class="space-y-2">
+                        @foreach($facility->bookings as $booking)
+                            <li>
+                                <p class="font-medium {{ $styles['text'] }}">{{ $booking['customer'] }}</p>
+                                <p>Qty: {{ $booking['quantity'] }} | Date: {{ $booking['date'] }} | Status: <span class="capitalize">{{ $booking['status'] }}</span></p>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
         </div>
-        @endif
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="p-4 bg-gray-50 border-t border-gray-200">
-        <div class="grid grid-cols-2 gap-2">
-            <!-- Status Update Buttons -->
-            <form action="{{ route('admin.daytour.update-facility-status', $facility->id) }}" method="POST">
-                @csrf
-                <input type="hidden" name="status" value="available">
-                <button type="submit" class="w-full px-3 py-2 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition flex items-center justify-center">
-                    <i class="fas fa-check mr-1"></i>Available
-                </button>
-            </form>
-            
-            <form action="{{ route('admin.daytour.update-facility-status', $facility->id) }}" method="POST">
-                @csrf
-                <input type="hidden" name="status" value="maintenance">
-                <button type="submit" class="w-full px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
-                    <i class="fas fa-tools mr-1"></i>Maintenance
-                </button>
-            </form>
-            
-            <form action="{{ route('admin.daytour.update-facility-status', $facility->id) }}" method="POST">
-                @csrf
-                <input type="hidden" name="status" value="cleaning">
-                <button type="submit" class="w-full px-3 py-2 bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-600 transition flex items-center justify-center">
-                    <i class="fas fa-broom mr-1"></i>Cleaning
-                </button>
-            </form>
-            
-            <!-- Checkout Button -->
-            @if($facility->booked > 0)
-            <form action="{{ route('admin.daytour.checkout-facility', $facility->id) }}" method="POST">
-                @csrf
-                <input type="hidden" name="date" value="{{ $date }}">
-                <button type="submit" class="w-full px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition flex items-center justify-center">
-                    <i class="fas fa-sign-out-alt mr-1"></i>Check Out
-                </button>
-            </form>
-            @else
-            <button class="w-full px-3 py-2 bg-gray-200 text-gray-500 text-xs rounded-lg cursor-not-allowed flex items-center justify-center">
-                <i class="fas fa-sign-out-alt mr-1"></i>No Checkouts
-            </button>
-            @endif
-        </div>
-    </div>
+    @endif
 </div>

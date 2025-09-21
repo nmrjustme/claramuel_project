@@ -153,16 +153,19 @@ private function getServiceType($log)
 // Update your show method to include service type
 public function show($id)
 {
-    $log = DayTourLogDetails::with([
-        'user',
-        'bookingGuestDetails.guestType',
-        'bookingGuestDetails.facility',
-    ])->findOrFail($id);
+    $log = DayTourLogDetails::with('user', 'bookingGuestDetails.guestType', 'bookingGuestDetails.facility')->findOrFail($id);
 
-    $serviceType = $this->getServiceType($log);
+    // Build service type summary (if you use it like your blade)
+    $serviceType = [
+        'type' => $log->service_type ?? 'Day Tour',
+        'total' => $log->bookingGuestDetails->sum('quantity'),
+        'pool_count' => $log->bookingGuestDetails->where('guestType.location', 'Pool')->sum('quantity'),
+        'park_count' => $log->bookingGuestDetails->where('guestType.location', 'Park')->sum('quantity'),
+    ];
 
     return view('admin.daytour.logs_show', compact('log', 'serviceType'));
 }
+
 
 public function edit($id)
 {
@@ -480,6 +483,7 @@ public function checkAvailability(Request $request)
 
     return response()->json($availability);
 }
+
 
 public function getCottages($date)
 {
@@ -825,48 +829,42 @@ public function logs(Request $request)
         return view('admin.daytour.day_tour_logs', compact('logs'));
     }
 
-
 /**
  * Display cottage and villa monitoring dashboard
  */
 public function monitorFacilities(Request $request)
 {
-    // Validate input
     $validated = $request->validate([
         'date' => 'nullable|date',
         'date_from' => 'nullable|date',
         'date_to' => 'nullable|date|after_or_equal:date_from',
-        'facility_type' => 'nullable|string|in:cottage,villa,both',
+        'facility_type' => 'nullable|string|in:cottage,villa,both,other,all',
         'status' => 'nullable|string|in:available,occupied,maintenance,cleaning',
     ]);
 
-    // Default to today if no date specified
     $date = $validated['date'] ?? now()->toDateString();
     $dateFrom = $validated['date_from'] ?? null;
     $dateTo = $validated['date_to'] ?? null;
-    
-    // Get facilities based on type filter
-    $facilityType = $validated['facility_type'] ?? 'both';
-    
+    $facilityType = $validated['facility_type'] ?? 'all';
+
+    // --------------------------
+    // COTTAGES & VILLAS LOGIC
+    // --------------------------
     $query = Facility::query();
-    
-    if ($facilityType !== 'both') {
-        $category = $facilityType === 'cottage' ? 'Cottage' : 'Private Villa';
-        $query->where('category', $category);
-    } else {
+    if ($facilityType === 'cottage') {
+        $query->where('category', 'Cottage');
+    } elseif ($facilityType === 'villa') {
+        $query->where('category', 'Private Villa');
+    } elseif ($facilityType === 'both' || $facilityType === 'all') {
         $query->whereIn('category', ['Cottage', 'Private Villa']);
     }
-    
-    // Status filter
     if (isset($validated['status'])) {
         $query->where('status', $validated['status']);
     }
-    
-    $facilities = $query->get();
-    
-    // Preload bookings data for all facilities in a single query
+    $cottagesVillas = $query->get();
+
     $bookingQuery = BookingGuestDetails::with(['dayTourLog.user', 'dayTourLog'])
-        ->whereIn('facility_id', $facilities->pluck('id'))
+        ->whereIn('facility_id', $cottagesVillas->pluck('id'))
         ->whereHas('dayTourLog', function($query) use ($date, $dateFrom, $dateTo) {
             if ($dateFrom && $dateTo) {
                 $query->whereBetween('date_tour', [$dateFrom, $dateTo]);
@@ -875,157 +873,142 @@ public function monitorFacilities(Request $request)
             }
             $query->whereIn('status', ['approved', 'paid']);
         });
-    
+
     $allBookings = $bookingQuery->get()->groupBy('facility_id');
-    
-    // Calculate availability and bookings for each facility
-    $facilities = $facilities->map(function($facility) use ($allBookings, $date) {
-    $facilityBookings = $allBookings->get($facility->id, collect());
 
-    if (in_array($facility->status, ['maintenance', 'cleaning'])) {
-        $facility->available = 0;
-        $facility->booked = 0;
-        $facility->occupancy_rate = 0;
-        $facility->bookings = collect();
-        $facility->display_status = $facility->status;
-        $facility->units = []; // no units
-        return $facility;
-    }
+    $cottagesVillas = $cottagesVillas->map(function($facility) use ($allBookings) {
+        $facilityBookings = $allBookings->get($facility->id, collect());
 
-    $bookedQty = $facilityBookings->sum('facility_quantity');
-    $available = max(0, $facility->quantity - $bookedQty);
+        if (in_array($facility->status, ['maintenance', 'cleaning'])) {
+            $facility->setAttribute('available', 0);
+            $facility->setAttribute('booked', 0);
+            $facility->setAttribute('occupancy_rate', 0);
+            $facility->setAttribute('bookings', collect());
+            $facility->setAttribute('units', []);
+            $facility->setAttribute('display_status', $facility->status);
+            return $facility;
+        }
 
-    if ($bookedQty > 0 && $facility->status === 'available') {
-        $facility->display_status = 'occupied';
-    } elseif ($bookedQty === 0 && $facility->status === 'occupied') {
-        $facility->display_status = 'available';
-    } else {
-        $facility->display_status = $facility->status;
-    }
+        $bookedQty = $facilityBookings->sum('facility_quantity');
+        $available = max(0, $facility->quantity - $bookedQty);
 
-    $bookings = $facilityBookings->groupBy('day_tour_log_details_id')
-        ->map(function($bookingGroup) {
-            $log = $bookingGroup->first()->dayTourLog;
+        $facility->setAttribute('display_status', $bookedQty > 0 && $facility->status === 'available'
+            ? 'occupied'
+            : ($bookedQty === 0 && $facility->status === 'occupied' ? 'available' : $facility->status));
+
+        $facility->setAttribute('bookings', $facilityBookings->groupBy('day_tour_log_details_id')->map(function($group) {
+            $log = $group->first()->dayTourLog;
             return [
                 'booking_id' => $log->id,
-                'customer'   => $log->user ? $log->user->firstname . ' ' . $log->user->lastname : 'Unknown',
-                'date'       => $log->date_tour,
-                'quantity'   => $bookingGroup->sum('facility_quantity'),
-                'status'     => $log->status,
+                'customer' => $log->user ? $log->user->firstname . ' ' . $log->user->lastname : 'Unknown',
+                'date' => $log->date_tour,
+                'quantity' => $group->sum('facility_quantity'),
+                'status' => $log->status,
             ];
-        })->values();
+        })->values());
 
-    $facility->available = $available;
-    $facility->booked = $bookedQty;
-    $facility->occupancy_rate = $facility->quantity > 0 ? 
-        round(($bookedQty / $facility->quantity) * 100, 2) : 0;
-    $facility->bookings = $bookings;
+        $facility->setAttribute('booked', $bookedQty);
+        $facility->setAttribute('available', $available);
+        $facility->setAttribute('occupancy_rate', $facility->quantity > 0 ? round(($bookedQty / $facility->quantity) * 100, 2) : 0);
 
-    // 🔹 Generate individual unit list (e.g., Cottage #1 … Cottage #10)
-    $units = [];
-    for ($i = 1; $i <= $facility->quantity; $i++) {
-        $units[] = [
-            'name'   => "{$facility->name} #{$i}",
-            'status' => $i <= $bookedQty ? 'Occupied' : 'Available',
-        ];
-    }
-    $facility->units = $units;
+        // Units
+        $units = [];
+        for ($i = 1; $i <= $facility->quantity; $i++) {
+            $units[] = [
+                'name' => "{$facility->name} #{$i}",
+                'status' => $i <= $bookedQty ? 'Occupied' : 'Available',
+            ];
+        }
+        $facility->setAttribute('units', $units);
 
-    return $facility;
-});
-    
-    // Calculate summary statistics - EXCLUDE maintenance/cleaning facilities from availability calculations
-    $activeFacilities = $facilities->whereNotIn('status', ['maintenance', 'cleaning']);
-    $totalCapacity = $activeFacilities->sum('quantity');
+        return $facility;
+    });
+
+    // --------------------------
+    // OTHER FACILITIES / ROOMS LOGIC
+    // --------------------------
+    $otherFacilities = Facility::where('type', 'room')
+        ->get()
+        ->map(function($facility) use ($date, $dateFrom, $dateTo) {
+            $query = DB::table('facilities as fac')
+                ->join('facility_summary as fac_sum', 'fac_sum.facility_id', '=', 'fac.id')
+                ->join('facility_booking_details as fac_details', 'fac_details.facility_summary_id', '=', 'fac_sum.id')
+                ->join('facility_booking_log as fac_log', 'fac_log.id', '=', 'fac_details.facility_booking_log_id')
+                ->join('payments', 'payments.facility_log_id', '=', 'fac_log.id')
+                ->join('users', 'users.id', '=', 'fac_log.user_id') // <-- join to get customer name
+                ->where('fac_log.status', '!=', 'pending_confirmation')
+                ->where('payments.status', 'verified')
+                ->where('fac.id', $facility->id);
+
+            if ($dateFrom && $dateTo) {
+                $query->where(function($q) use ($dateFrom, $dateTo) {
+                    $q->whereBetween('fac_details.checkin_date', [$dateFrom, $dateTo])
+                      ->orWhereBetween('fac_details.checkout_date', [$dateFrom, $dateTo]);
+                });
+            } else {
+                $query->whereDate('fac_details.checkin_date', '<=', $date)
+                      ->whereDate('fac_details.checkout_date', '>=', $date);
+            }
+
+            $unavailableDates = $query->select('fac_details.checkin_date', 'fac_details.checkout_date', 'users.firstname', 'users.lastname')->get();
+            $bookedQty = $unavailableDates->count();
+            $available = max(0, $facility->quantity - $bookedQty);
+
+            $facility->setAttribute('display_status', $bookedQty > 0 ? 'occupied' : 'available');
+            $facility->setAttribute('booked', $bookedQty);
+            $facility->setAttribute('available', $available);
+            $facility->setAttribute('occupancy_rate', $facility->quantity > 0 ? round(($bookedQty / $facility->quantity) * 100, 2) : 0);
+
+            $units = [];
+            for ($i = 1; $i <= $facility->quantity; $i++) {
+                $units[] = [
+                    'name' => "{$facility->name} #{$i}",
+                    'status' => $i <= $bookedQty ? 'Occupied' : 'Available',
+                ];
+            }
+            $facility->setAttribute('units', $units);
+
+            // Bookings with actual customer names
+            $facility->setAttribute('bookings', $unavailableDates->map(function($d) {
+                return [
+                    'customer' => $d->firstname . ' ' . $d->lastname,
+                    'date' => $d->checkin_date,
+                    'quantity' => 1,
+                    'status' => 'verified',
+                ];
+            }));
+
+            return $facility;
+        });
+
+    // --------------------------
+    // MERGE ALL
+    // --------------------------
+    $facilities = $cottagesVillas->merge($otherFacilities);
+
+    // Summary
+    $activeFacilities = $facilities->whereNotIn('display_status', ['maintenance', 'cleaning']);
+    $totalCapacity = $activeFacilities->sum('available') + $activeFacilities->sum('booked');
     $totalBooked = $activeFacilities->sum('booked');
-    
+
     $summary = [
         'total_facilities' => $facilities->count(),
         'total_available' => $activeFacilities->sum('available'),
         'total_booked' => $totalBooked,
         'total_capacity' => $totalCapacity,
         'overall_occupancy' => $totalCapacity > 0 ? round(($totalBooked / $totalCapacity) * 100, 2) : 0,
-        'maintenance_count' => $facilities->where('status', 'maintenance')->count(),
-        'cleaning_count' => $facilities->where('status', 'cleaning')->count(),
+        'maintenance_count' => $facilities->where('display_status', 'maintenance')->count(),
+        'cleaning_count' => $facilities->where('display_status', 'cleaning')->count(),
     ];
-    
-    return view('admin.daytour.cottages_monitoring', compact(
-        'facilities', 
-        'summary', 
-        'date', 
-        'dateFrom', 
-        'dateTo',
-        'facilityType'
+
+    return view('admin.daytour.facility_monitoring', compact(
+        'facilities', 'summary', 'date', 'dateFrom', 'dateTo', 'facilityType'
     ));
 }
 
-/**
- * Update facility status (available, occupied, maintenance, cleaning)
- */
-public function updateFacilityStatus(Request $request, $id)
-{
-    $validated = $request->validate([
-        'status' => 'required|in:available,occupied,maintenance,cleaning',
-        'notes' => 'nullable|string|max:500',
-    ]);
-    
-    $facility = Facility::findOrFail($id);
-    $previousStatus = $facility->status;
-    
-    // Update status
-    $facility->update([
-        'status' => $validated['status'],
-        'notes' => $validated['notes'] ?? null,
-    ]);
-    
-    // Log the status change
-    Log::info("Facility status updated", [
-        'facility_id' => $id,
-        'facility_name' => $facility->name,
-        'old_status' => $previousStatus,
-        'new_status' => $validated['status'],
-        'updated_by' => auth()->id(),
-        'notes' => $validated['notes'] ?? null,
-    ]);
-    
-    return redirect()->back()->with('success', $facility->name . ' status updated to ' . $validated['status'] . ' successfully!');
-}
 
-/**
- * Check out guests from a facility
- */
-public function checkoutFacility(Request $request, $facilityId)
-{
-    $validated = $request->validate([
-        'date' => 'required|date',
-    ]);
-    
-    $date = $validated['date'];
-    $facility = Facility::findOrFail($facilityId);
-    
-    DB::beginTransaction();
-    
-    try {
-        // Update the facility status to available
-        $facility->update(['status' => 'available']);
-        
-        DB::commit();
-        
-        return redirect()->back()
-            ->with('success', 'Guests checked out from ' . $facility->name . ' successfully! Facility status set to available.');
-            
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Checkout error: ' . $e->getMessage(), [
-            'facility_id' => $facilityId,
-            'date' => $date,
-            'user_id' => auth()->id()
-        ]);
-        
-        return redirect()->back()
-            ->with('error', 'Error during check-out: ' . $e->getMessage());
-    }
-}
+
+
 
 
 }
