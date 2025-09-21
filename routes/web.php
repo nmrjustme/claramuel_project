@@ -188,10 +188,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
     
     //========================
-
-    Route::get('/admins/list/users', [AdminlistUser::class, 'index'])->name('users.list');
-    Route::get('/admins/list/users/list', [AdminlistUser::class, 'data']);
-    
     Route::prefix('admin-management')->name('admin.')->group(function () {
         Route::get('/', [AdminlistUser::class, 'index'])->name('list.management');
         Route::get('/list', [AdminlistUser::class, 'data'])->name('list.data');
@@ -201,35 +197,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/reset-password/{id}', [AdminlistUser::class, 'resetPassword'])->name('reset-password');
     });
     
-
-    // Day Tour Routes Group
-    Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
-        
-        // Main Day Tour Registration
-        Route::get('/', [Day_tour_Controller::class, 'index'])->name('index');
-        Route::get('/create', [Day_tour_Controller::class, 'create'])->name('create');
-        Route::post('/store', [Day_tour_Controller::class, 'store'])->name('store');
-        
-        // Facility Availability Check
-        Route::get('/facility-availability', [Day_tour_Controller::class, 'facilityAvailability'])->name('facility-availability');
-        Route::get('/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('check-availability');
-        
-        // Logs Management
-        Route::get('/logs', [Day_tour_Controller::class, 'logs'])->name('logs');
-        Route::get('/logs/{id}', [Day_tour_Controller::class, 'show'])->name('logs.show');
-        Route::get('/logs/{id}/edit', [Day_tour_Controller::class, 'edit'])->name('logs.edit');
-        Route::put('/logs/{id}', [Day_tour_Controller::class, 'update'])->name('logs.update');
-        Route::get('/logs/{id}/print', [Day_tour_Controller::class, 'print'])->name('logs.print');
-        
-        // Cottage & Villa Monitoring
-        Route::get('/cottages-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('cottages_monitoring');
-        Route::post('/facility/{id}/checkout', [Day_tour_Controller::class, 'checkoutFacility'])->name('checkout-facility');
-        Route::post('/facility/{id}/update-status', [Day_tour_Controller::class, 'updateFacilityStatus'])->name('update-facility-status');
-        
-        // Facility Calendar
-        Route::get('/facility-calendar', [Day_tour_Controller::class, 'facilityCalendar'])->name('facility-calendar');
-    });
-    //========================
 
     //========================
     //Email monitoring
