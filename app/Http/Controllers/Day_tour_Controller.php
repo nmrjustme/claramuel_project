@@ -462,7 +462,7 @@ public function checkAvailability(Request $request)
     $date = $request->input('date');
 
     // Only get Cottage and Villa categories
-    $facilities = Facility::whereIn('category', ['Cottage', 'Villa'])->get();
+    $facilities = Facility::whereIn('category', ['Cottage', 'Private Villa'])->get();
 
     $availability = $facilities->map(function ($facility) use ($date) {
         $bookedQty = BookingGuestDetails::where('facility_id', $facility->id)

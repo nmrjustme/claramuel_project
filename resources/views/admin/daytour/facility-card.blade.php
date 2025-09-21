@@ -92,7 +92,7 @@
                                 if ($unitStatus === 'occupied') {
                                     $unitStatusClass = $status === 'available' ? 'text-red-600 font-semibold' : 'text-white font-semibold';
                                 } elseif ($status !== 'available') {
-                                    $unitStatusClass = 'text-green-300 font-semibold';
+                                    $unitStatusClass = 'text-green-400 font-semibold';
                                 }
                             @endphp
                             <li class="flex justify-between">

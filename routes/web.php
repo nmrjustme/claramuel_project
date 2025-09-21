@@ -278,7 +278,6 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     // Cottage & Villa Monitoring
     Route::get('/facility-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('facility_monitoring');
     Route::get('/admin/daytour/facility-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('admin.daytour.facility_monitoring');
-
     Route::post('/facility/{id}/checkout', [Day_tour_Controller::class, 'checkoutFacility'])->name('checkout-facility');
     Route::post('/facility/{id}/update-status', [Day_tour_Controller::class, 'updateFacilityStatus'])->name('update-facility-status');
     
