@@ -54,6 +54,65 @@
                         </span>
                     </a>
                 </li>
+
+                <!--Day Tour -->
+                <li>
+                    <a href="{{ route('admin.daytour.logs') }}"
+                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'day_tour' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="{{ $active === 'day_tour' ? '2' : '1.5' }}"
+                                    d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M6.05 17.95l-1.414-1.414M18.364 18.364l-1.414-1.414M6.05 6.05L4.636 7.464M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                            </svg>
+                            <span>Day Tour Logs</span>
+                        </div>
+                    </a>
+                </li>
+
+                <!-- Facility Monitoring -->
+                <li>
+                    <a href="{{ route('admin.daytour.facility_monitoring') }}"
+                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'facility_monitoring' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" 
+                                class="h-5 w-5 mr-3" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor">
+                                <path stroke-linecap="round" 
+                                    stroke-linejoin="round" 
+                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}" 
+                                    d="M3 9.75L12 4l9 5.75V19a2 2 0 01-2 2H5a2 2 0 01-2-2V9.75z" />
+                                <path stroke-linecap="round" 
+                                    stroke-linejoin="round" 
+                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}" 
+                                    d="M9 22V12h6v10" />
+                            </svg>
+                            <span>Facility Monitoring</span>
+                        </div>
+                    </a>
+                </li>
+                
+                <!-- Inquiries Log -->
+                {{-- <li>
+                    <a href="{{ route('admin.inquiries') }}"
+                        class="flex items-center justify-between py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'inquiries' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="{{ $active === 'inquiries' ? '2' : '1.5' }}"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span>Booking Logs</span>
+                        </div>
+                    
+                    </a>
+                </li> --}}
+
+                <!-- Arrivals -->
                 <li>
                     <a href="{{ route('incoming.list') }}"
                         class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'arrivals' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
