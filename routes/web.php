@@ -38,6 +38,7 @@ use App\Http\Controllers\MayaWebhookSetupController;
 use App\Http\Controllers\RoomMonitoringController;
 use App\Http\Controllers\AdminBookingsController;
 use App\Http\Controllers\AccountingController;
+use App\Http\Controllers\AdminlistUser;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('index');
@@ -68,62 +69,6 @@ Route::get('/maya/status/{referenceNumber}', [MayaCheckoutController::class, 'ch
 // =======================
 Route::post('/maya/payment/webhook', [MayaWebhookSetupController::class, 'handle'])->name('maya.webhook.succes');
 
-
-
-Route::get('/test-maya-connection', function () {
-    $baseUrl   = config('services.maya.base_url');
-    // Change this line to use the public key
-    $publicKey = config('services.maya.public_key');
-
-    $payload = [
-        "totalAmount" => [
-            "value" => 1.00,
-            "currency" => "PHP"
-        ],
-        "buyer" => [
-            "firstName" => "Test",
-            "lastName" => "User",
-            "contact" => [
-                "phone" => "+639171234567",
-                "email" => "test@example.com"
-            ]
-        ],
-        "redirectUrl" => [
-            "success" => url('/maya/success'),
-            "failure" => url('/maya/failed'),
-            "cancel"  => url('/maya/cancel')
-        ],
-        "requestReferenceNumber" => uniqid()
-    ];
-
-    try {
-        // Authenticate with the public key for the Create Checkout endpoint
-        $response = Http::withBasicAuth($publicKey, '')
-            ->withHeaders([
-                'Content-Type' => 'application/json',
-            ])
-            ->post("{$baseUrl}/checkout/v1/checkouts", $payload);
-
-        return redirect($response->json()['redirectUrl']);
-    } catch (\Exception $e) {
-        return ['error' => $e->getMessage()];
-    }
-});
-
-
-Route::get('try/webhook/again', function () {
-    $response = Http::withHeaders([
-        'accept' => 'application/json',
-        'authorization' => 'Basic c2stWDhxb2xZank2MmtJekVicjBRUksxaDRiNEtEVkhhTmN3TVlrMzlqSW5TbDo=',
-        'content-type' => 'application/json',
-    ])
-        ->post("https://pg-sandbox.paymaya.com/payments/v1/webhooks", [
-            'name' => 'PAYMENT_SUCCESS',
-            'callbackUrl' => 'https://5e708220a669.ngrok-free.app/try/maya/webhook',
-        ]);
-
-    Log::info('Webhook registration response: ', $response->json());
-});
 
 // =======================
 // Awaiting verification page 
@@ -196,24 +141,13 @@ Route::get('/Payment/Submitted', function () {
 })->name('payments.submitted');
 
 // This Condition is to verify email first before proceed
-Route::middleware(['auth', 'verified'])->group(function () {});
+Route::middleware(['auth', 'verified'])->group(function () { });
 
 // Amenities Modal Route
 Route::get('/api/facilities/{facility}/amenities', [BookingsController::class, 'getAmenities'])
     ->name('facilities.amenities');
 
 
-Route::get('/test-insert-user', function () {
-    DB::table('users')->insert([
-        'firstname' => 'Richter',
-        'lastname'  => 'Mayandoc',
-        'phone'     => '09169824195',
-        'role'      => 'Admin',
-        'email'     => 'rmayandoc0625@gmail.com',
-        'password'  => Hash::make('?richter11'),
-    ]);
-    return 'User inserted!';
-});
 
 
 Route::middleware('auth')->group(function () {
@@ -249,12 +183,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments');
     Route::get('/Calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
     Route::get('/facilities', [FacilitiesController::class, 'AdminIndex'])->name('admin.facilities.index');
+
     
     
     // Get badge counts Unread or New
     Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
     
     //========================
+    Route::prefix('admin-management')->name('admin.')->group(function () {
+        Route::get('/', [AdminlistUser::class, 'index'])->name('list.management');
+        Route::get('/list', [AdminlistUser::class, 'data'])->name('list.data');
+        Route::post('/create', [AdminlistUser::class, 'create'])->name('list.create');
+        Route::put('/update/{id}', [AdminlistUser::class, 'update'])->name('list.update');
+        Route::delete('/delete/{id}', [AdminlistUser::class, 'delete'])->name('list.delete');
+        Route::post('/reset-password/{id}', [AdminlistUser::class, 'resetPassword'])->name('reset-password');
+    });
+    
 
     // Day Tour Routes Group
 Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
@@ -318,6 +262,9 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/get/show/bookings/checkin/{id}', [BookingController::class, 'paymentDetails']);
     Route::post('/bookings/{id}/process-payment', [BookingController::class, 'processMyPayment']);
     Route::post('/bookings/{id}/checkin', [BookingController::class, 'checkin']);
+
+    Route::post('/admin/guest-addons', [BookingController::class, 'storeGuestAddons']);
+    Route::delete('/delete/guest-addons/{addonId}', [BookingController::class, 'deleteAddon']);
     //========================
 
     //========================
@@ -346,14 +293,14 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/rooms/get', function () {
         return view('admin.monitoring.index');
     });
-    
+
     // Revenue monitoring
     Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
     Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
     Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');
     //========================
-    
-    
+
+
     Route::get('/get/show/bookings/{booking}', [BookingController::class, 'show']);
 
     Route::get('/admin/bookings/export/', [BookingController::class, 'export'])->name('admin.bookings.export');

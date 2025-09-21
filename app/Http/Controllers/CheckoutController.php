@@ -282,7 +282,8 @@ class CheckoutController extends Controller
             'bookingLog.summaries.facility',
             'bookingLog.summaries.breakfast',
             'bookingLog.summaries.bookingDetails',
-            'bookingLog.guestDetails.guestType'
+            'bookingLog.guestDetails.guestType',
+            'bookingLog.guestAddons'
         ])->where('facility_log_id', $booking->id)->firstOrFail();
         
         $payment->bookingLog->update([

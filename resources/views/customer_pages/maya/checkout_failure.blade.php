@@ -44,9 +44,9 @@
 
                   <!-- Action Buttons -->
                   <div class="flex flex-col md:flex-row gap-4 justify-center w-full">
-                        <a href="{{ route('customer.booking.payments', ['token' => $token]) }}"
+                        <a href="{{ route('dashboard.bookings') }}"
                               class="w-full md:w-auto px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-200">
-                              Try Again
+                              Try to book again
                         </a>
                         <a href="/contact"
                               class="w-full md:w-auto px-6 py-3 bg-gray-100 text-gray-700 rounded-lg shadow-md hover:bg-gray-200 hover:shadow-lg transition-all duration-200">

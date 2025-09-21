@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Reservation Request is Confirmed - {{ $booking->code }}</title>
+    <title>Your reservation request has been received in mtclaramuel</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -61,13 +61,13 @@
         }
 
         .custom-message {
-            background: #e6f4ea; /* soft green for verified/success */
-            border: 1px solid #b5dfc0;
-            border-left: 6px solid #34a853; /* Google green style accent */
+            background: #fff9e6; /* soft yellow for verified/success */
+            border: 1px solid #f0e6b5;
+            border-left: 6px solid #f4c542; /* yellow accent */
             padding: 25px;
             border-radius: 8px;
             margin: 20px 0;
-            color: #2d572c;
+            color: #7a5c00; /* dark yellow-brown text */
             position: relative;
             overflow: hidden;
         }
@@ -177,21 +177,10 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Your Reservation is Confirmed.</h1>
-            <p>Reservation Code: {{ $booking->code }}</p>
-        </div>
-        
         <div class="custom-message">
             <p>Dear {{ $booking->user->firstname }},</p>
-            <p>Your reservation request has been <strong>accepted and confirmed</strong>. We're delighted to inform you that everything is set for your upcoming stay.</p>
             
-            @if($customMessage)
-                <p>{{ $customMessage }}</p>
-            @endif
-            
-            <p>We're looking forward to welcoming you to our resort. Please present your QR code upon arrival for a smooth check-in experience.</p>
-            
+            <p>Your reservation request has been <strong>successfully received</strong>. We’re pleased to inform you that a confirmation will be sent shortly to your <strong>registered email address</strong> and <strong>mobile number</strong>.</p>            
             <div class="resort-info">
                 <p><strong>Resort Location:</strong><br>
                 Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines</p>
@@ -203,9 +192,12 @@
                 Email: mtclaramuelresort@gmail.com</p>
             </div>
             
-            <p>If you have any questions or special requests, please don't hesitate to contact us.</p>
+            <p>If you have any questions, special requests, or need further assistance, please don’t hesitate to contact us. We want your stay with us to be both <strong>memorable</strong> and <strong>comfortable</strong>.</p>
+            
+            <p>Thank you for choosing <strong>Mt. ClaRamuel Resort</strong></p>
         </div>
-        <h1>Booking Receipt</h1>
+
+        <h1>Your Booking Details</h1>
         <div class="content">
             <div class="receipt">
                 <div class="section">
@@ -408,11 +400,6 @@
                     <div class="detail-row" style="margin-top: 15px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px;">
                         <span class="detail-label">Total Amount:</span>
                         <span class="detail-value">₱{{ number_format($totalAmount, 2) }}</span>
-                    </div>
-                    
-                    <div class="qr-code">
-                        <img src="{{ $qrCodeUrl }}" alt="Verification QR Code">
-                        <p>Present this QR code when claiming your reservation</p>
                     </div>
                 </div>
             </div>

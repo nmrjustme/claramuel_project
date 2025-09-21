@@ -463,11 +463,6 @@
                 @endforeach
             </div>
             
-            <div class="text-center mt-12">
-                <a href="#" class="inline-block bg-primary hover:bg-blue-900 text-white px-8 py-3 rounded-sm shadow-lg transition duration-300 font-medium btn-pulse">
-                    View Complete Gallery
-                </a>
-            </div>
         </div>
     </section>
 

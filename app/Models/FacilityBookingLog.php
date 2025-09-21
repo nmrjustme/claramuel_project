@@ -59,5 +59,10 @@ class FacilityBookingLog extends Model
         return $this->hasMany(BookingGuestDetails::class, 'facility_booking_log_id');
     }
 
+    public function guestAddons()
+    {
+        return $this->hasMany(GuestAddons::class, 'facility_booking_log_id');
+    }
+
     
 }   

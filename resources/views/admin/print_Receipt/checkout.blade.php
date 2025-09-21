@@ -110,6 +110,59 @@
             z-index: 0;
         }
 
+        /* Addons styling */
+        .addons-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 8px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .addon-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #d0e4ff;
+        }
+
+        .addon-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .addon-name {
+            font-weight: bold;
+        }
+
+        .addon-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .addon-price {
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .addons-total {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px solid #c0d8f0;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .no-addons {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+        }
+
         /* Modal styles */
         .modal-overlay {
             position: fixed;
@@ -259,11 +312,11 @@
                         </div>
                         <h1 class="text-2xl font-bold mb-1">CHECK-OUT RECEIPT</h1>
                         <p class="text-red-100 opacity-90 text-sm">Reservation Code: {{
-                            $payment->bookingLog->code }}</p>
+    $payment->bookingLog->code }}</p>
                         <p class="text-red-100 opacity-90 text-sm">
                             Check-out At:
                             {{ $payment->bookingLog->checked_out_at ?
-                            \Carbon\Carbon::parse($payment->bookingLog->checked_out_at)->format('F j, Y
+    \Carbon\Carbon::parse($payment->bookingLog->checked_out_at)->format('F j, Y
                             \a\t g:i A') : 'N/A' }}
                         </p>
                     </div>
@@ -289,22 +342,22 @@
                                         class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Full
                                         name:</span>
                                     <span class="font-medium text-gray-800 print-value">{{
-                                        $payment->bookingLog->user->firstname }} {{
-                                        $payment->bookingLog->user->lastname }}</span>
+    $payment->bookingLog->user->firstname }} {{
+    $payment->bookingLog->user->lastname }}</span>
                                 </div>
 
                                 <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span
                                         class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Email:</span>
                                     <span class="font-medium text-gray-800 print-value">{{
-                                        $payment->bookingLog->user->email }}</span>
+    $payment->bookingLog->user->email }}</span>
                                 </div>
 
                                 <div class="p-3 rounded-lg print:bg-transparent print:p-0 print:border-0 print-row">
                                     <span
                                         class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Phone:</span>
                                     <span class="font-medium text-gray-800 print-value">{{
-                                        $payment->bookingLog->user->phone ?? 'N/A' }}</span>
+    $payment->bookingLog->user->phone ?? 'N/A' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -324,128 +377,159 @@
                             </div>
 
                             @php
-                            // Calculate total amount from booking details
-                            $totalAmount = $payment->bookingLog
-                            ->details
-                            ->sum('total_price');
+                                // Calculate total amount from booking details
+                                $totalAmount = $payment->bookingLog
+                                    ->details
+                                    ->sum('total_price');
+
+                                // Calculate addons total if they exist
+                                $addonsTotal = 0;
+                                if ($payment->bookingLog->guestAddons && $payment->bookingLog->guestAddons->count() > 0) {
+                                    $addonsTotal = $payment->bookingLog->guestAddons->sum('total_cost');
+                                    $totalAmount += $addonsTotal;
+                                }
                             @endphp
 
                             @foreach($payment->bookingLog->summaries as $summary)
-                            @php
-                            $facility = $summary->facility;
-                            $bookingDetail = $summary->bookingDetails->first();
+                                @php
+                                    $facility = $summary->facility;
+                                    $bookingDetail = $summary->bookingDetails->first();
 
-                            if ($bookingDetail) {
-                            $breakfastPrice = $summary->breakfast ? $summary->breakfast_price : 0;
-                            $nights =
-                            $bookingDetail->checkin_date->diffInDays($bookingDetail->checkout_date);
-                            $subtotal = ($summary->facility_price + $breakfastPrice) * $nights;
-                            }
+                                    if ($bookingDetail) {
+                                        $breakfastPrice = $summary->breakfast ? $summary->breakfast_price : 0;
+                                        $nights =
+                                            $bookingDetail->checkin_date->diffInDays($bookingDetail->checkout_date);
+                                        $subtotal = ($summary->facility_price + $breakfastPrice) * $nights;
+                                    }
 
-                            $guestsForFacility = $payment->bookingLog->guestDetails
-                            ->where('facility_id', $summary->facility_id)
-                            ->groupBy('guest_type_id')
-                            ->map(function($items) {
-                            return [
-                            'type' => $items->first()->guestType->type ?? 'Unknown',
-                            'quantity' => $items->sum('quantity')
-                            ];
-                            });
+                                    $guestsForFacility = $payment->bookingLog->guestDetails
+                                        ->where('facility_id', $summary->facility_id)
+                                        ->groupBy('guest_type_id')
+                                        ->map(function ($items) {
+                                            return [
+                                                'type' => $items->first()->guestType->type ?? 'Unknown',
+                                                'quantity' => $items->sum('quantity')
+                                            ];
+                                        });
 
-                            @endphp
+                                @endphp
 
-                            @if($bookingDetail)
-                            <div class="highlight-box p-4 rounded-lg mb-4 print:border-0 print:p-0">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:block">
-                                    <div class="print-row">
-                                        <span
-                                            class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room
-                                            Type:</span>
-                                        <span class="font-medium text-gray-800 print-value">{{
-                                            $facility->name }} (₱{{
-                                            number_format($facility->price, 2) }}/night)</span>
-                                    </div>
-                                    <div class="print-row">
-                                        <span
-                                            class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room
-                                            Number:</span>
-                                        <span class="font-medium text-gray-800 print-value">{{
-                                            $facility->room_number ?? 'Not assigned' }}</span>
-                                    </div>
+                                @if($bookingDetail)
+                                                    <div class="highlight-box p-4 rounded-lg mb-4 print:border-0 print:p-0">
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:block">
+                                                            <div class="print-row">
+                                                                <span
+                                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room
+                                                                    Type:</span>
+                                                                <span class="font-medium text-gray-800 print-value">{{
+                                    $facility->name }} (₱{{
+                                    number_format($facility->price, 2) }}/night)</span>
+                                                            </div>
+                                                            <div class="print-row">
+                                                                <span
+                                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Room
+                                                                    Number:</span>
+                                                                <span class="font-medium text-gray-800 print-value">{{
+                                    $facility->room_number ?? 'Not assigned' }}</span>
+                                                            </div>
 
-                                    <div class="print-row">
-                                        <span
-                                            class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Check-in:</span>
-                                        <span class="font-medium text-gray-800 print-value">
-                                            {{ $bookingDetail->checkin_date->format('F j, Y g:i
-                                            A') }}
-                                        </span>
-                                    </div>
+                                                            <div class="print-row">
+                                                                <span
+                                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Check-in:</span>
+                                                                <span class="font-medium text-gray-800 print-value">
+                                                                    {{ $bookingDetail->checkin_date->format('F j, Y g:i
+                                                                    A') }}
+                                                                </span>
+                                                            </div>
 
-                                    <div class="print-row">
-                                        <span
-                                            class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Check-out:</span>
-                                        <span class="font-medium text-gray-800 print-value">
-                                            {{ $bookingDetail->checkout_date->format('F j, Y g:i
-                                            A') }}
-                                        </span>
-                                    </div>
+                                                            <div class="print-row">
+                                                                <span
+                                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Check-out:</span>
+                                                                <span class="font-medium text-gray-800 print-value">
+                                                                    {{ $bookingDetail->checkout_date->format('F j, Y g:i
+                                                                    A') }}
+                                                                </span>
+                                                            </div>
 
-                                    <div class="print-row">
-                                        <span
-                                            class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Duration:</span>
-                                        <span class="font-medium text-gray-800 print-value">
-                                            {{ $nights }} night(s)
-                                        </span>
-                                    </div>
+                                                            <div class="print-row">
+                                                                <span
+                                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Duration:</span>
+                                                                <span class="font-medium text-gray-800 print-value">
+                                                                    {{ $nights }} night(s)
+                                                                </span>
+                                                            </div>
 
-                                    @if($summary->breakfast)
-                                    <div class="print-row">
-                                        <span
-                                            class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Breakfast:</span>
-                                        <span class="font-medium text-gray-800 print-value">₱{{
-                                            number_format($summary->breakfast_price * $nights)
-                                            }}/morning(s)</span>
-                                    </div>
-                                    @endif
+                                                            @if($summary->breakfast)
+                                                                                    <div class="print-row">
+                                                                                        <span
+                                                                                            class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Breakfast:</span>
+                                                                                        <span class="font-medium text-gray-800 print-value">₱{{
+                                                                number_format($summary->breakfast_price * $nights)
+                                                                                            }}/morning(s)</span>
+                                                                                    </div>
+                                                            @endif
 
 
-                                    <div class="md:col-span-2 pt-2 print:block print-row">
-                                        <span class="text-sm font-medium text-gray-500 print-label">Subtotal:</span>
-                                        <span class="font-medium text-red-600 print-value">₱{{
-                                            number_format($subtotal, 2) }}</span>
-                                        <div class="divider my-2 print:hidden"></div>
+                                                            <div class="md:col-span-2 pt-2 print:block print-row">
+                                                                <span class="text-sm font-medium text-gray-500 print-label">Subtotal:</span>
+                                                                <span class="font-medium text-red-600 print-value">₱{{
+                                    number_format($subtotal, 2) }}</span>
+                                                                <div class="divider my-2 print:hidden"></div>
+                                                            </div>
+                                                        </div>
+                                                        @if($guestsForFacility->count() > 0)
+                                                                            <table class="w-full border-collapse">
+                                                                                @foreach($guestsForFacility as $guest)
+                                                                                                    <tr>
+                                                                                                        <td class="p-2 border-b border-gray-200 guest-type">{{
+                                                                                    $guest['type'] }}</td>
+                                                                                                        <td class="p-2 border-b border-gray-200 text-right guest-quantity">
+                                                                                                            {{ $guest['quantity'] }} guest(s)
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                @endforeach
+                                                                                <tr class="guest-total">
+                                                                                    <td class="p-2 font-semibold">Total Guests</td>
+                                                                                    <td class="p-2 text-right font-semibold">{{
+                                                            $guestsForFacility->sum('quantity') }}</td>
+                                                                                </tr>
+                                                                            </table>
+                                                        @else
+                                                            <p class="text-gray-500 italic">No guest details recorded</p>
+                                                        @endif
+                                                    </div>
+                                @endif
+                            @endforeach
+
+                            <!-- Addons Section -->
+                            @if($payment->bookingLog->guestAddons && $payment->bookingLog->guestAddons->count() > 0)
+                                <div class="addons-section">
+                                    <h2 style="margin-top: 0;">Additional Services</h2>
+
+                                    @foreach($payment->bookingLog->guestAddons as $addon)
+                                        <div class="addon-item">
+                                            <div>
+                                                <div class="addon-name">{{ $addon->type }}</div>
+                                                <div class="addon-details">Quantity: {{ $addon->quantity }} ×
+                                                    ₱{{ number_format($addon->cost, 2) }}</div>
+                                            </div>
+                                            <div class="addon-price">₱{{ number_format($addon->total_cost, 2) }}</div>
+                                        </div>
+                                    @endforeach
+
+                                    <div class="addons-total">
+                                        <span>Addons Total:</span>
+                                        <span>₱{{ number_format($addonsTotal, 2) }}</span>
                                     </div>
                                 </div>
-                                @if($guestsForFacility->count() > 0)
-                                <table class="w-full border-collapse">
-                                    @foreach($guestsForFacility as $guest)
-                                    <tr>
-                                        <td class="p-2 border-b border-gray-200 guest-type">{{
-                                            $guest['type'] }}</td>
-                                        <td class="p-2 border-b border-gray-200 text-right guest-quantity">
-                                            {{ $guest['quantity'] }} guest(s)</td>
-                                    </tr>
-                                    @endforeach
-                                    <tr class="guest-total">
-                                        <td class="p-2 font-semibold">Total Guests</td>
-                                        <td class="p-2 text-right font-semibold">{{
-                                            $guestsForFacility->sum('quantity') }}</td>
-                                    </tr>
-                                </table>
-                                @else
-                                <p class="text-gray-500 italic">No guest details recorded</p>
-                                @endif
-                            </div>
                             @endif
-                            @endforeach
 
                             <div
                                 class="flex justify-between items-center mt-6 pt-4 border-t-2 border-gray-200 print-row">
                                 <span class="text-lg font-bold text-gray-700 print-label">Total
                                     Amount:</span>
                                 <span class="text-xl font-bold text-red-600 print-value">₱{{
-                                    number_format($totalAmount, 2) }}</span>
+    number_format($totalAmount, 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -491,30 +575,30 @@
 
                                 <!-- Calculate advance paid and checkin paid -->
                                 @php
-                                // Calculate payments
-                                $advancePaid = $payment->amount;
-                                $checkinPaid = $payment->checkin_paid;
-                                $totalPaid = $advancePaid + $checkinPaid;
+                                    // Calculate payments
+                                    $advancePaid = $payment->amount;
+                                    $checkinPaid = $payment->checkin_paid;
+                                    $totalPaid = $advancePaid + $checkinPaid;
                                 @endphp
 
                                 <div class="payment-row">
                                     <span class="payment-label">Advance Paid:</span>
                                     <span class="payment-value text-green-600">₱{{
-                                        number_format($advancePaid, 2) }}</span>
+    number_format($advancePaid, 2) }}</span>
                                 </div>
 
                                 @if($checkinPaid > 0)
-                                <div class="payment-row">
-                                    <span class="payment-label">Paid at Check-in:</span>
-                                    <span class="payment-value text-green-600">₱{{
-                                        number_format($checkinPaid, 2) }}</span>
-                                </div>
+                                                            <div class="payment-row">
+                                                                <span class="payment-label">Paid at Check-in:</span>
+                                                                <span class="payment-value text-green-600">₱{{
+                                    number_format($checkinPaid, 2) }}</span>
+                                                            </div>
                                 @endif
 
                                 <div class="payment-row" style="font-weight: bold;">
                                     <span class="payment-label">Total Paid:</span>
                                     <span class="payment-value text-green-600">₱{{
-                                        number_format($totalPaid, 2) }}</span>
+    number_format($totalPaid, 2) }}</span>
                                 </div>
 
                                 <div
@@ -575,15 +659,15 @@
                                 <div class="payment-row">
                                     <span class="payment-label">Payment Date:</span>
                                     <span class="payment-value">{{
-                                        \Carbon\Carbon::parse($payment->payment_date)->format('F j,
+    \Carbon\Carbon::parse($payment->payment_date)->format('F j,
                                         Y \a\t g:i A') }}</span>
                                 </div>
 
                                 @if($payment->reference_no)
-                                <div class="payment-row">
-                                    <span class="payment-label">Reference:</span>
-                                    <span class="payment-value">{{ $payment->reference_no }}</span>
-                                </div>
+                                    <div class="payment-row">
+                                        <span class="payment-label">Reference:</span>
+                                        <span class="payment-value">{{ $payment->reference_no }}</span>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -614,28 +698,28 @@
         const printYesBtn = document.getElementById('printYesBtn');
         const yesText = document.getElementById('yesText');
         const loadingSpinner = document.getElementById('loadingSpinner');
-        
+
         // Payment ID from your template
         const paymentId = "{{ $payment->id }}";
-        
+
         // Function to show the print confirmation modal
         function showPrintConfirmModal() {
             printConfirmModal.classList.add('active');
         }
-        
+
         // Function to hide the print confirmation modal
         function hidePrintConfirmModal() {
             printConfirmModal.classList.remove('active');
         }
-        
+
         // Function to handle printing
         function handlePrint() {
             window.print();
-            
+
             // Show confirmation modal after a short delay to allow print dialog to appear
             setTimeout(showPrintConfirmModal, 500);
         }
-        
+
         // Function to update booking status
         async function updateBookingStatus() {
             try {
@@ -643,7 +727,7 @@
                 yesText.classList.add('hidden');
                 loadingSpinner.classList.remove('hidden');
                 printYesBtn.disabled = true;
-                
+
                 // Send request to update booking status
                 const response = await fetch(`/update/booking/checkout/status/${paymentId}`, {
                     method: 'POST',
@@ -655,13 +739,13 @@
                         status: 'completed'
                     })
                 });
-                
+
                 if (response.ok) {
                     // Success - show message and close modal after a delay
                     yesText.textContent = 'Success!';
                     yesText.classList.remove('hidden');
                     loadingSpinner.classList.add('hidden');
-                    
+
                     setTimeout(() => {
                         hidePrintConfirmModal();
                         // Reset button text for next time
@@ -676,7 +760,7 @@
             } catch (error) {
                 console.error('Error updating booking status:', error);
                 alert('Failed to update booking status. Please try again.');
-                
+
                 // Reset button state
                 yesText.textContent = 'Yes, successful';
                 yesText.classList.remove('hidden');
@@ -684,14 +768,14 @@
                 printYesBtn.disabled = false;
             }
         }
-        
+
         // Event listeners
         printNoBtn.addEventListener('click', () => {
             hidePrintConfirmModal();
         });
-        
+
         printYesBtn.addEventListener('click', updateBookingStatus);
-        
+
         // Close modal when clicking outside
         printConfirmModal.addEventListener('click', (e) => {
             if (e.target === printConfirmModal) {
