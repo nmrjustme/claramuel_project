@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Facility;
 use Illuminate\Support\Facades\Validator;
+use App\Models\BookingGuestDetails;
+use Illuminate\Support\Facades\DB;
 
 class DayTourController extends Controller
 {
@@ -53,4 +55,32 @@ class DayTourController extends Controller
             'total_amount' => 'required|numeric|min:0'
         ]);
     }
+
+    public function checkAvailability(Request $request)
+{
+    $date = $request->query('date');
+    
+    // Get all facilities
+    $facilities = Facility::all();
+
+    // Get booked quantities for that date
+    $booked = BookingGuestDetails::whereHas('dayTourLog', function($q) use ($date) {
+        $q->where('date_tour', $date)
+          ->whereIn('status', ['pending', 'paid', 'approved']); // consider these as booked
+    })->select('facility_id', DB::raw('SUM(facility_quantity) as total_booked'))
+      ->groupBy('facility_id')
+      ->pluck('total_booked', 'facility_id')
+      ->toArray();
+
+    $availability = $facilities->map(function($facility) use ($booked) {
+        $used = $booked[$facility->id] ?? 0;
+        return [
+            'id' => $facility->id,
+            'available' => max($facility->quantity - $used, 0),
+        ];
+    });
+
+    return response()->json($availability);
+}
+
 }

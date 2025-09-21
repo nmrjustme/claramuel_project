@@ -11,9 +11,9 @@
     <h2 class="text-2xl font-bold text-gray-800">Day Tour Registration Logs</h2>
     <div class="flex justify-between items-center mb-6">
     <div class="flex space-x-3">
-    <a href="{{ route('admin.daytour.cottages_monitoring') }}" 
+    <a href="{{ route('admin.daytour.facility_monitoring') }}" 
        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-        <i class="fas fa-tv mr-2"></i>Cottage Monitoring
+        <i class="fas fa-tv mr-2"></i>Facility Monitoring
     </a>
     <a href="{{ route('admin.daytour.index') }}" 
        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">

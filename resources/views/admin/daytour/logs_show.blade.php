@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Booking Details')
+@section('title', 'Show DayTour Details')
 @php
     $active = 'day_tour';
 @endphp
@@ -245,31 +245,34 @@
 
     <!-- Timeline -->
     <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-        <div class="flex items-center mb-4">
-            <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                <i class="fas fa-history text-gray-500"></i>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-800">Activity Timeline</h3>
+    <div class="flex items-center mb-4">
+        <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+            <i class="fas fa-history text-gray-500"></i>
         </div>
-        <div class="space-y-4">
-            <div class="flex items-start">
-                <div class="w-3 h-3 bg-green-500 rounded-full mt-2 mr-4"></div>
-                <div>
-                    <p class="font-medium text-gray-800">Booking Created</p>
-                    <p class="text-sm text-gray-500">{{ $log->created_at->format('M d, Y h:i A') }}</p>
-                </div>
-            </div>
-            @if($log->updated_at->gt($log->created_at))
-            <div class="flex items-start">
-                <div class="w-3 h-3 bg-blue-500 rounded-full mt-2 mr-4"></div>
-                <div>
-                    <p class="font-medium text-gray-800">Last Updated</p>
-                    <p class="text-sm text-gray-500">{{ $log->updated_at->format('M d, Y h:i A') }}</p>
-                </div>
-            </div>
-            @endif
-        </div>
+        <h3 class="text-lg font-semibold text-gray-800">Activity Timeline</h3>
     </div>
+    <div class="space-y-4">
+        <!-- Booking Created -->
+        <div class="flex items-start">
+            <div class="w-3 h-3 bg-green-500 rounded-full mt-2 mr-4"></div>
+            <div>
+                <p class="font-medium text-gray-800">Booking Created</p>
+                <p class="text-sm text-gray-500">{{ $log->created_at->format('M d, Y h:i A') }}</p>
+            </div>
+        </div>
+
+        <!-- Last Updated -->
+        @if($log->updated_at->gt($log->created_at))
+        <div class="flex items-start">
+            <div class="w-3 h-3 bg-blue-500 rounded-full mt-2 mr-4"></div>
+            <div>
+                <p class="font-medium text-gray-800">Last Updated</p>
+                <p class="text-sm text-gray-500">{{ $log->updated_at->format('M d, Y h:i A') }}</p>
+            </div>
+        </div>
+        @endif
+    </div>
+</div>
 </div>
 
 <style>

@@ -236,6 +236,8 @@ Route::get('/env-test', function () {
 
 Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability']);
 Route::get('/cottages/{date}', [Day_tour_Controller::class, 'getCottages'])->name('cottages.availability');
+Route::get('/daytour/check-availability', [DayTourController::class, 'checkAvailability']);
+
 
 Route::middleware(['auth'])->group(function () {
     //========================
@@ -274,7 +276,9 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/logs/{id}/print', [Day_tour_Controller::class, 'print'])->name('logs.print');
     
     // Cottage & Villa Monitoring
-    Route::get('/cottages-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('cottages_monitoring');
+    Route::get('/facility-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('facility_monitoring');
+    Route::get('/admin/daytour/facility-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('admin.daytour.facility_monitoring');
+
     Route::post('/facility/{id}/checkout', [Day_tour_Controller::class, 'checkoutFacility'])->name('checkout-facility');
     Route::post('/facility/{id}/update-status', [Day_tour_Controller::class, 'updateFacilityStatus'])->name('update-facility-status');
     
