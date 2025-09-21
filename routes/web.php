@@ -173,6 +173,15 @@ Route::get('/cottages/{date}', [Day_tour_Controller::class, 'getCottages'])->nam
 Route::get('/daytour/check-availability', [DayTourController::class, 'checkAvailability']);
 
 
+Route::prefix('admin-management')->name('admin.')->group(function () {
+        Route::get('/', [AdminlistUser::class, 'index'])->name('list.management');
+        Route::get('/list', [AdminlistUser::class, 'data'])->name('list.data');
+        Route::post('/create', [AdminlistUser::class, 'create'])->name('list.create');
+        Route::put('/update/{id}', [AdminlistUser::class, 'update'])->name('list.update');
+        Route::delete('/delete/{id}', [AdminlistUser::class, 'delete'])->name('list.delete');
+        Route::post('/reset-password/{id}', [AdminlistUser::class, 'resetPassword'])->name('reset-password');
+    });
+
 Route::middleware(['auth'])->group(function () {
     //========================
     // Sidebar Routes
@@ -190,14 +199,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/unread-counts/all', [AdminController::class, 'getAllUnreadCounts']);
     
     //========================
-    Route::prefix('admin-management')->name('admin.')->group(function () {
-        Route::get('/', [AdminlistUser::class, 'index'])->name('list.management');
-        Route::get('/list', [AdminlistUser::class, 'data'])->name('list.data');
-        Route::post('/create', [AdminlistUser::class, 'create'])->name('list.create');
-        Route::put('/update/{id}', [AdminlistUser::class, 'update'])->name('list.update');
-        Route::delete('/delete/{id}', [AdminlistUser::class, 'delete'])->name('list.delete');
-        Route::post('/reset-password/{id}', [AdminlistUser::class, 'resetPassword'])->name('reset-password');
-    });
+    
     
 
     // Day Tour Routes Group
