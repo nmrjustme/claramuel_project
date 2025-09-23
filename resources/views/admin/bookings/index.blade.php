@@ -704,106 +704,117 @@
 
 @section('content')
     <div class="min-h-screen px-6 py-6">
-        <div class="flex flex-col gap-4 mb-6">
-            <!-- Label -->
-            <h2 class="text-xl font-bold text-gray-800">
-                SEARCH TODAY'S GUEST CHECK-IN OR CHECKOUT
-            </h2>
+        <div class="flex flex-col mb-10">
+        <!-- Container -->
+        <div class="bg-white rounded-lg border border-lightgray">
+            
+            <!-- Title -->
+            <div class="px-4 pt-6 pb-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">
+                    SEARCH TODAY'S GUEST CHECK-IN OR CHECKOUT
+                </h2>
+            </div>
 
-
-            <!-- Container -->
-            <div class="bg-white rounded-lg border border-lightgray overflow-hidden">
-                <div class="flex flex-col md:flex-row gap-6 p-6">
-                    <!-- Manual Search Fields -->
-                    <div class="flex flex-col md:flex-row md:items-end flex-wrap gap-4 flex-1">
-                        <div class="flex flex-col min-w-[180px] flex-1">
-                            <label for="search-firstname" class="mb-1 text-lg font-medium text-gray-700">First Name</label>
-                            <input type="text" id="search-firstname" placeholder="Enter first name"
-                                class="w-full px-4 py-2.5 text-lg md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-lg hover:shadow-md">
-                        </div>
-
-                        <div class="flex flex-col min-w-[180px] flex-1">
-                            <label for="search-lastname" class="mb-1 text-lg font-medium text-gray-700">Last Name</label>
-                            <input type="text" id="search-lastname" placeholder="Enter last name"
-                                class="w-full px-4 py-2.5 text-lg md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-lg hover:shadow-md">
-                        </div>
-
-                        <div class="flex flex-col min-w-[180px] flex-1">
-                            <label for="search-date" class="mb-1 text-lg font-medium text-gray-700">Date <span
-                                    class="text-sm text-gray-500 font-normal">(Adjust if needed)</span></label>
-                            <input type="date" id="search-date" value="{{ date('Y-m-d') }}"
-                                class="w-full px-4 py-2.5 text-lg md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-lg hover:shadow-md">
-                        </div>
-                        <!-- Check-in/Check-out Toggle -->
-                        <div class="flex flex-col">
-                            <label class="text-lg font-medium text-gray-700 mb-2">Search Type</label>
-                            <div class="flex bg-gray-100 rounded-lg p-1 shadow-inner">
-                                <input type="radio" id="search-checkin" name="search-type" value="checkin"
-                                    class="hidden peer/checkin" checked>
-                                <label for="search-checkin"
-                                    class="px-4 py-2 rounded-md text-lg font-medium cursor-pointer transition-all duration-200 peer-checked/checkin:bg-red-600 peer-checked/checkin:text-white peer-checked/checkin:shadow-lg">
-                                    Check-in
-                                </label>
-
-                                <input type="radio" id="search-checkout" name="search-type" value="checkout"
-                                    class="hidden peer/checkout">
-                                <label for="search-checkout"
-                                    class="px-4 py-2 rounded-md text-lg font-medium cursor-pointer transition-all duration-200 peer-checked/checkout:bg-red-600 peer-checked/checkout:text-white peer-checked/checkout:shadow-lg">
-                                    Check-out
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Search and Clear Buttons -->
-                        <div class="flex flex-col md:flex-row md:items-end gap-2 mt-2 md:mt-0">
-                            <button id="search-button"
-                                class="px-5 py-2.5 bg-green-600 cursor-pointer text-white rounded-lg hover:bg-green-700 transition-all duration-200 text-lg font-medium shadow-md hover:shadow-lg active:scale-95">
-                                Search
-                            </button>
-                            <button id="clear-button"
-                                class="px-5 py-2.5 bg-gray-100 cursor-pointer text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-lg font-medium shadow-lg hover:shadow-md active:scale-95">
-                                Reset
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Divider with OR -->
-                    <div class="flex items-center justify-center my-2 md:my-0">
-                        <div class="hidden md:flex items-center h-12">
-                            <div class="border-t border-gray-300 w-6"></div>
-                            <span class="mx-2 text-lg font-medium text-gray-500">OR</span>
-                            <div class="border-t border-gray-300 w-6"></div>
-                        </div>
-                    </div>
-                    <!-- QR Scanner Button -->
+            <!-- Content -->
+            <div class="flex flex-col md:flex-row gap-8 p-8">
+                
+                <!-- Manual Search Fields -->
+                <div class="flex flex-col md:flex-row md:items-end flex-wrap gap-6 flex-1">
                     
-                    <div class="flex flex-col min-w-[200px]">
-                        <label class="mb-1 text-sm font-medium text-gray-600">Quick Access</label>
-                        <button id="qr-scanner-btn"
-                            class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md transition hover:shadow-lg active:scale-95 cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2m-10 0H5a2 2 0 01-2-2v-2" />
-                            </svg>
-                            Scan QR Code
+                    <div class="flex flex-col min-w-[200px] flex-1">
+                        <label for="search-firstname" class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">First Name</label>
+                        <input type="text" id="search-firstname" placeholder="Enter first name"
+                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                    </div>
+
+                    <div class="flex flex-col min-w-[200px] flex-1">
+                        <label for="search-lastname" class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Last Name</label>
+                        <input type="text" id="search-lastname" placeholder="Enter last name"
+                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                    </div>
+
+                    <div class="flex flex-col min-w-[200px] flex-1">
+                        <label for="search-date" class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Date <span
+                                class="text-xs text-gray-500 font-normal">(Adjust if needed)</span></label>
+                        <input type="date" id="search-date" value="{{ date('Y-m-d') }}"
+                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                    </div>
+
+                    <!-- Check-in/Check-out Toggle -->
+                    <div class="flex flex-col">
+                        <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Search Type</label>
+                        <div class="flex bg-gray-100 rounded-xl p-1 shadow-inner">
+                            <input type="radio" id="search-checkin" name="search-type" value="checkin"
+                                class="hidden peer/checkin" checked>
+                            <label for="search-checkin"
+                                class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkin:bg-red-600 peer-checked/checkin:text-white peer-checked/checkin:shadow-md">
+                                Check-in
+                            </label>
+
+                            <input type="radio" id="search-checkout" name="search-type" value="checkout"
+                                class="hidden peer/checkout">
+                            <label for="search-checkout"
+                                class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkout:bg-red-600 peer-checked/checkout:text-white peer-checked/checkout:shadow-md">
+                                Check-out
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Search and Clear Buttons -->
+                    <div class="flex flex-col md:flex-row md:items-end gap-3 mt-2 md:mt-0">
+                        <button id="search-button"
+                            class="px-6 py-2.5 bg-green-600 cursor-pointer text-white rounded-xl hover:bg-green-700 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
+                            Search
+                        </button>
+                        <button id="clear-button"
+                            class="px-6 py-2.5 bg-gray-200 cursor-pointer text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
+                            Reset
                         </button>
                     </div>
-                    
+                </div>
+
+                <!-- Divider with OR -->
+                <div class="flex items-center justify-center">
+                    <div class="hidden md:flex items-center h-12">
+                        <div class="border-t border-gray-300 w-10"></div>
+                        <span class="mx-3 text-sm font-semibold text-gray-500">OR</span>
+                        <div class="border-t border-gray-300 w-10"></div>
+                    </div>
+                </div>
+
+                <!-- QR Scanner Button -->
+                <div class="flex flex-col min-w-[220px]">
+                    <label class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Quick Access</label>
+                    <button id="qr-scanner-btn"
+                        class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 shadow-md transition hover:shadow-lg active:scale-95 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2m-10 0H5a2 2 0 01-2-2v-2" />
+                        </svg>
+                        Scan QR Code
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
+
+
 
         <div class="flex flex-col lg:flex-row gap-4">
             <!-- Main Content - Fixed width and overflow -->
             <div class="main-content lg:w-1/2 w-full">
                 <div class="glass-card p-4 hover-scale bg-white rounded-lg border border-lightgray">
 
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                         <!-- Left: Title -->
                         <div>
-                            <h1 class="text-xl font-bold text-gray-800">BOOKINGS MANAGEMENT</h1>
-                            <p class="text-gray-600 text-lg mt-1">Manage all guest reservations</p>
+                            <h2 class="text-xl font-bold text-gray-800">
+                                Bookings Management
+                            </h2>
+                            <p class="text-gray-600 text-base md:text-lg mt-1">
+                                Manage all guest reservations with ease
+                            </p>
                         </div>
 
                         <!-- Right: Search + Filter + Refresh -->
@@ -815,22 +826,21 @@
                                     <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                            clip-rule="evenodd">
-                                        </path>
+                                            clip-rule="evenodd"></path>
                                     </svg>
                                 </div>
                                 <input id="search-input" type="text"
-                                    class="block w-full pl-9 pr-10 py-2 text-base border border-gray-300 rounded-lg bg-white/70 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    placeholder="Search by name...">
+                                    class="block w-full pl-9 pr-10 py-2 text-sm md:text-base border border-gray-300 rounded-lg bg-white/70 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                    placeholder="Search reservations...">
                             </div>
 
                             <!-- Status Filter -->
                             <div class="flex items-center gap-2">
                                 <label for="status-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">
-                                    Filter:
+                                    Status:
                                 </label>
                                 <select id="status-filter"
-                                    class="w-full md:w-auto w-full pl-9 pr-10 py-2 text-sm cursor-pointer border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                                    class="w-full md:w-auto pl-3 pr-10 py-2 text-sm cursor-pointer border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
                                     <option value="all" selected>All Statuses</option>
                                     <option value="pending_confirmation">Pending</option>
                                     <option value="confirmed">Confirmed</option>
@@ -840,10 +850,9 @@
                             </div>
 
                             <!-- Refresh Button -->
-                            <button id="refreshBtn" 
-                                class="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
-                                    fill="currentColor">
+                            <button id="refreshBtn"
+                                class="flex items-center text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd"
                                         d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                                         clip-rule="evenodd" />
@@ -852,6 +861,7 @@
                             </button>
                         </div>
                     </div>
+
 
 
                     <hr class="border-gray-300 my-3">
@@ -1376,19 +1386,24 @@
                 const firstName = document.getElementById('search-firstname').value.trim();
                 const lastName = document.getElementById('search-lastname').value.trim();
                 const date = document.getElementById('search-date').value;
-
-                // Build search query with search type
-                let searchTerms = [];
-                if (firstName) searchTerms.push(`firstname:${firstName}`);
-                if (lastName) searchTerms.push(`lastname:${lastName}`);
-                if (date) searchTerms.push(`${searchType}_date:${date}`);
-
-                searchQuery = searchTerms.join(' ');
+                
+                // Build search parameters with proper validation
+                let searchParams = new URLSearchParams();
+                
+                if (firstName) searchParams.append('firstname', firstName);
+                if (lastName) searchParams.append('lastname', lastName);
+                if (date) {
+                    if (searchType === 'checkin') {
+                        searchParams.append('checkin_date', date);
+                    } else {
+                        searchParams.append('checkout_date', date);
+                    }
+                }
+                searchParams.append('date_type', searchType);
+                
                 currentPage = 1;
-
-                loadBookings(currentStatus, currentPage);
+                loadBookings(currentStatus, currentPage, searchParams.toString());
             }
-
 
             function clearSearch() {
                 document.getElementById('search-firstname').value = '';
@@ -1733,9 +1748,16 @@
             };
 
             // Function to load bookings
-            function loadBookings(status, page = 1) {
+            function loadBookings(status, page = 1, searchParams = '') {
                 return new Promise((resolve, reject) => {
                     const url = new URL(`/get/mybooking`, window.location.origin);
+
+                    if (searchParams) {
+                        const params = new URLSearchParams(searchParams);
+                        params.forEach((value, key) => {
+                            url.searchParams.append(key, value);
+                        });
+                    }
                     // Only add status parameter if it's not "all"
                     if (status !== 'all') {
                         url.searchParams.append('status', status);

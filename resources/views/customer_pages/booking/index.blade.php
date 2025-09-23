@@ -149,11 +149,19 @@
           right: 0.5rem;
      }
 
-     .scroll-arrow:hover {
-          background-color: white;
-          transform: scale(1.15) translateY(-50%);
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+     .scroll-arrow {
+          transition: all 0.3s ease;
      }
+
+     .scroll-arrow:hover {
+          background-color: #ffffff;
+          transform: scale(1.2) translateY(-50%) rotate(5deg);
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+          cursor: pointer;
+          border-radius: 50%;
+          color: #d81d2dff; /* nice blue accent */
+     }
+
 
      .scroll-arrow i {
           font-size: 1.25rem;
@@ -850,25 +858,84 @@
           <div class="lg:w-4/6">
                <div class="space-y-4">
                     <h3 class="category-title font-semibold text-dark mb-2">Available Accommodation</h3>
-
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                         <div class="flex items-center">
-                              <i class="fas fa-check-circle text-blue-500 mr-3 text-xl"></i>
-                              <div>
-                                   <h4 class="font-bold text-blue-800">All Rooms Include:</h4>
-                                   <ul class="text-sm text-blue-700 mt-1 space-y-1">
-                                        <li class="flex items-center"><i class="fas fa-swimming-pool mr-2"></i>
-                                             Complimentary pool access</li>
-                                        <li class="flex items-center"><i class="fas fa-torii-gate mr-2"></i> Unlimited
-                                             access to park</li>
-                                        <li class="flex items-center"><i class="fas fa-wifi mr-2"></i> Free high-speed
-                                             WiFi</li>
-                                        <li class="flex items-center"><i class="fas fa-parking mr-2"></i> Complimentary
-                                             parking</li>
+                    
+                    <!-- as one amenities -->
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6 w-full">
+                         <div class="flex items-start">
+                              <div class="bg-red-100 p-3 rounded-full mr-4 shadow-inner flex-shrink-0">
+                                   <i class="fas fa-check-circle text-red-600 text-2xl"></i>
+                              </div>
+                              <div class="flex-1">
+                                   <h4 class="font-bold text-red-900 text-xl mb-3 flex items-center">
+                                        All Rooms Include:
+                                        <span class="ml-2 text-red-600 text-sm font-normal bg-red-100 px-2 py-1 rounded-full">10 Premium Amenities</span>
+                                   </h4>
+                                   <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-red-800">
+                                        <li class="flex items-center p-2 rounded-lg">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-swimming-pool text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Complimentary pool access</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-torii-gate text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Unlimited access to park</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-wifi text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Free high-speed WiFi</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-parking text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Complimentary parking</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-mug-hot text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Free welcome drinks</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-bath text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Hot & cold shower</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-tv text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Cable TV / Smart TV</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-snowflake text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Air-conditioned rooms</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-utensils text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">Complimentary breakfast</span>
+                                        </li>
+                                        <li class="flex items-center p-2 rounded-lg transition-colors duration-200">
+                                             <div class="bg-red-200 p-2 rounded-full mr-3 flex-shrink-0">
+                                                  <i class="fas fa-concierge-bell text-red-700 w-5 text-center"></i>
+                                             </div>
+                                             <span class="text-left">24/7 front desk service</span>
+                                        </li>
                                    </ul>
                               </div>
                          </div>
                     </div>
+
 
                     <!-- Group rooms by category with Netflix-style horizontal scrolling -->
                     <div id="facilities-container" class="space-y-8">
@@ -980,14 +1047,14 @@
                                                                       <span>{{ $facility->pax }} Pax</span>
                                                                  </div>
                                                             </div>
-
+<!-- 
                                                             <button
                                                                  class="view-amenities-btn mt-2 text-sm text-primary font-medium flex items-center hover:text-primary-dark transition-colors"
                                                                  data-room-id="{{ $facility->id }}"
                                                                  data-amenities='@json($facility->amenities->map(function($a) { return ['
                                                                  name'=> $a->name]; }))'>
                                                                  <i class="fas fa-list mr-2"></i> View All Amenities
-                                                            </button>
+                                                            </button> -->
 
                                                             <!-- Booked dates only -->
 
@@ -1276,7 +1343,7 @@
 </div>
 
 <!-- Amenities Modal -->
-<div id="amenities-modal" class="fixed inset-0 z-[999] hidden">
+<!-- <div id="amenities-modal" class="fixed inset-0 z-[999] hidden">
      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
 
      <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -1295,7 +1362,7 @@
                </div>
           </div>
      </div>
-</div>
+</div> -->
 
 
 
@@ -1379,7 +1446,7 @@
                this.setDefaultDates();
                this.setupScrollArrows();
                this.setupUnavailableDatesToggle();
-               this.setupAmenitiesModal();
+               // this.setupAmenitiesModal();
                this.initializeCart();
           }
           

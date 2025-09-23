@@ -415,37 +415,56 @@ class BookingController extends Controller
             $checkoutDate = $request->input('checkout_date', '');
             $dateType = $request->input('date_type', 'checkin'); // Default to check-in
             $status = $request->input('status', '');
+            $search = $request->input('search', '');
+            $id = $request->input('id', '');
 
             $query = FacilityBookingLog::with([
                 'user:id,firstname,lastname,email,phone',
                 'payments:id,facility_log_id,amount_paid,checkin_paid,remaining_balance_status,status',
                 'details:id,facility_booking_log_id,checkin_date,checkout_date',
-                'summaries.facility:id,name,price', // Facility data
-                'summaries.breakfast', // Breakfast relationship (if you need breakfast details)
+                'summaries.facility:id,name,price',
+                'summaries.breakfast',
             ])
-                ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc');
+
+            // Search by ID
+            if ($id) {
+                $query->where('id', $id);
+            }
+
+            // General search across multiple fields
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('code', 'like', "%$search%")
+                    ->orWhereHas('user', function($userQuery) use ($search) {
+                        $userQuery->where('firstname', 'like', "%$search%")
+                                ->orWhere('lastname', 'like', "%$search%")
+                                ->orWhere('email', 'like', "%$search%")
+                                ->orWhere('phone', 'like', "%$search%");
+                    });
+                });
+            }
 
             // Search by first name
-            if ($firstName) {
-                $query->whereHas('user', function ($q) use ($firstName) {
+            if (!empty(trim($firstName))) {
+                $query->whereHas('user', function($q) use ($firstName) {
                     $q->where('firstname', 'like', "%$firstName%");
                 });
             }
 
-            // Search by last name
-            if ($lastName) {
-                $query->whereHas('user', function ($q) use ($lastName) {
+            if (!empty(trim($lastName))) {
+                $query->whereHas('user', function($q) use ($lastName) {
                     $q->where('lastname', 'like', "%$lastName%");
                 });
             }
 
             // Search by check-in or check-out date
             if ($checkinDate && $dateType === 'checkin') {
-                $query->whereHas('details', function ($q) use ($checkinDate) {
+                $query->whereHas('details', function($q) use ($checkinDate) {
                     $q->whereDate('checkin_date', $checkinDate);
                 });
             } elseif ($checkoutDate && $dateType === 'checkout') {
-                $query->whereHas('details', function ($q) use ($checkoutDate) {
+                $query->whereHas('details', function($q) use ($checkoutDate) {
                     $q->whereDate('checkout_date', $checkoutDate);
                 });
             }
@@ -457,7 +476,7 @@ class BookingController extends Controller
             $bookings = $query->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
-                'data' => $bookings->map(function ($booking) {
+                'data' => $bookings->map(function($booking) {
                     // Display status logic
                     $displayStatus = $booking->status;
 
@@ -472,13 +491,12 @@ class BookingController extends Controller
                         'status' => $displayStatus,
                         'code' => $booking->code,
                         'details' => $booking->details,
-                        'summaries' => $booking->summaries->map(function ($summary) {
+                        'summaries' => $booking->summaries->map(function($summary) {
                             return [
                                 'facility' => $summary->facility,
-                                'breakfast_id' => $summary->breakfast_id, // Include breakfast_id
-                                'breakfast' => $summary->breakfast, // Include breakfast relationship data if needed
+                                'breakfast_id' => $summary->breakfast_id,
+                                'breakfast' => $summary->breakfast,
                                 'breakfast_price' => $summary->breakfast_price
-                                // Include other summary fields you need
                             ];
                         }),
                         'payments' => $booking->payments,
