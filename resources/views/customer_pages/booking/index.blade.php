@@ -1158,7 +1158,7 @@
                                                                  </div>
                                                                  <div class="flex flex-col items-start">
                                                                       <button
-                                                                           class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-4 py-3 xs:px-5 xs:py-3 text-sm xs:text-base font-medium rounded-xl hover:scale-[1.02] transition-all duration-300 ease-out shadow-md hover:shadow-lg active:scale-[0.98] flex-shrink-0 bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-2 focus:ring-red-300 focus:outline-none"
+                                                                           class="book-button add-to-cart-btn btn-primary w-full xs:w-auto px-4 py-3 xs:px-5 xs:py-3 text-sm xs:text-base font-medium rounded-xl hover:scale-[1.02] transition-all duration-300 ease-out shadow-md hover:shadow-lg active:scale-[0.98] flex-shrink-0 bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-2 focus:ring-red-300 focus:outline-none cursor-pointer"
                                                                            data-room="{{ $facilityId }}">
                                                                            <span
                                                                                 class="flex items-center justify-center">

@@ -380,7 +380,7 @@
                             
                             <div class="detail-row">
                                 <span class="detail-label">Subtotal:</span>
-                                <span class="detail-value">₱{{ number_format($summary->facility->price * \Carbon\Carbon::parse($summary->bookingDetails->first()->checkin_date)->diffInDays($summary->bookingDetails->first()->checkout_date), 2) }}</span>
+                                <span class="detail-value">₱{{ number_format($summary->facility_price * \Carbon\Carbon::parse($summary->bookingDetails->first()->checkin_date)->diffInDays($summary->bookingDetails->first()->checkout_date), 2) }}</span>
                             </div>
                             
                             @if($summary->breakfast)

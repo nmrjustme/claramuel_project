@@ -423,7 +423,7 @@
                                                                     Type:</span>
                                                                 <span class="font-medium text-gray-800 print-value">{{
                                     $facility->name }} (₱{{
-                                    number_format($facility->price, 2) }}/night)</span>
+                                    number_format($summary->facility_price, 2) }}/night)</span>
                                                             </div>
                                                             <div class="print-row">
                                                                 <span
@@ -438,7 +438,7 @@
                                                                     class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Check-in:</span>
                                                                 <span class="font-medium text-gray-800 print-value">
                                                                     {{ $bookingDetail->checkin_date->format('F j, Y g:i
-                                                                    A') }}
+                                                                                            A') }}
                                                                 </span>
                                                             </div>
 
@@ -447,7 +447,7 @@
                                                                     class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Check-out:</span>
                                                                 <span class="font-medium text-gray-800 print-value">
                                                                     {{ $bookingDetail->checkout_date->format('F j, Y g:i
-                                                                    A') }}
+                                                                                            A') }}
                                                                 </span>
                                                             </div>
 
@@ -465,7 +465,7 @@
                                                                                             class="text-xs font-medium text-gray-500 uppercase tracking-wider print-label">Breakfast:</span>
                                                                                         <span class="font-medium text-gray-800 print-value">₱{{
                                                                 number_format($summary->breakfast_price * $nights)
-                                                                                            }}/morning(s)</span>
+                                                                                                                                            }}/morning(s)</span>
                                                                                     </div>
                                                             @endif
 

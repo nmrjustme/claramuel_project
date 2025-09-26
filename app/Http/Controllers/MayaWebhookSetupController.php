@@ -16,6 +16,7 @@ use App\Models\BookingGuestDetails;
 use App\Events\BookingNew;
 use App\Models\FacilityBookingLog;
 use App\Models\Payments;
+use App\Models\FacilityDiscount;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationReceived;
 use App\Mail\PaymentFailed;
@@ -27,10 +28,10 @@ class MayaWebhookSetupController extends Controller
     public function handle(Request $request)
     {
         Log::info('Maya Webhook Received:', $request->all());
-        
+
         // Some payloads use "paymentStatus", some only "status"
         $event = $request->input('paymentStatus') ?? $request->input('status');
-        
+
         switch ($event) {
             case 'PAYMENT_SUCCESS':
             case 'CHECKOUT_SUCCESS':
@@ -52,7 +53,7 @@ class MayaWebhookSetupController extends Controller
                 return response()->json(['message' => "Event {$event} ignored"], 200);
         }
     }
-    
+
     public function updateOrder($status, $request)
     {
         // Always prefer requestReferenceNumber to find your order
@@ -63,7 +64,7 @@ class MayaWebhookSetupController extends Controller
         // Payment Method 
         $paymentScheme = $request->input('fundSource.details.scheme');
 
-        
+
         $order = Order::where('reference_number', $orderId)->first();
 
         if (!$order) {
@@ -72,13 +73,13 @@ class MayaWebhookSetupController extends Controller
 
         $order->status = $status;
         $order->payment_scheme = $paymentScheme;
-        
+
         $amount = $order->amount;
         $order->save();
 
         if ($status == 'paid') {
             $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
-            
+
         } else if ($status == 'expired' || $status == 'failed' || $status == 'cancelled') {
             $bookingData = Cache::get('booking_confirmation_' . $order->token);
 
@@ -86,8 +87,8 @@ class MayaWebhookSetupController extends Controller
                 Mail::to($bookingData['email'])->send(new PaymentFailed($bookingData['firstname']));
                 Cache::forget('booking_confirmation_' . $order->token);
             }
-            
-        } 
+
+        }
         return response()->json(['message' => "Order {$orderId} updated to {$status}"], 200);
     }
 
@@ -143,6 +144,7 @@ class MayaWebhookSetupController extends Controller
                 'booking_date' => now(),
                 'code' => $bookingData['reservation_code']
             ]);
+
             // Get active breakfast price if included
             $breakfastId = null;
             $breakfastPricePerFacilityPerDay = 0;
@@ -159,10 +161,14 @@ class MayaWebhookSetupController extends Controller
             foreach ($bookingData['facilities'] as $facilityData) {
                 $facility = Facility::findOrFail($facilityData['facility_id']);
 
+                \Log::info("Facility: {$facility->id}");
+                // Calculate facility price with discount logic
+                $facilityPrice = $this->calculateDiscountedFacilityPrice($facility);
+
                 // Create facility summary
                 $facilitySummary = FacilitySummary::create([
                     'facility_id' => $facility->id,
-                    'facility_price' => $facility->price,
+                    'facility_price' => $facilityPrice, // Store discounted price
                     'breakfast_id' => $breakfastId,
                     'breakfast_price' => $breakfastPricePerFacilityPerDay,
                     'facility_booking_log_id' => $bookingLog->id,
@@ -189,7 +195,6 @@ class MayaWebhookSetupController extends Controller
 
                 $total_price = $bookingData['total_price'] ?? 0;
 
-
                 // Process guest types for this facility
                 if (isset($bookingData['guest_types'][$facility->id])) {
                     foreach ($bookingData['guest_types'][$facility->id] as $guestTypeId => $quantity) {
@@ -203,7 +208,6 @@ class MayaWebhookSetupController extends Controller
                         }
                     }
                 }
-                
             }
 
             // Create payment record
@@ -216,37 +220,67 @@ class MayaWebhookSetupController extends Controller
                 'payment_date' => now(),
             ]);
 
-
             // Commit transaction
             DB::commit();
 
             $bookingLog->load([
-                'payments', 
+                'payments',
                 'details',
                 'summaries.facility',
                 'summaries.breakfast',
                 'summaries.bookingDetails',
                 'guestDetails.guestType',
-                'user', 
+                'user',
                 'guestAddons'
             ]);
 
             event(new BookingNew($bookingLog)); // Event listener for new booking list
-            
+
             Mail::to($bookingData['email'])->send(new ReservationReceived(
                 $bookingLog
             ));
-
-            
-            // Sending active admin email
-            // if (User::where('role', 'Admin')->where('is_active', true)->exists()) {
-            //     $this->sendEmailAdmin($bookingLog); 
-            // }
 
             Cache::forget('booking_confirmation_' . $token);
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e; // Re-throw to handle in the controller
         }
+    }
+
+    /**
+     * Calculate discounted facility price based on active discounts
+     */
+    private function calculateDiscountedFacilityPrice(Facility $facility)
+    {
+        $today = now();
+        $basePrice = $facility->price;
+
+        // Check for active discounts for this facility
+        $activeDiscount = FacilityDiscount::where('facility_id', $facility->id)
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if (!$activeDiscount) {
+            return $basePrice; // No active discount, return base price
+        }
+
+        // Apply discount based on discount type
+        switch ($activeDiscount->discount_type) {
+            case 'percent':
+                $discountAmount = $basePrice * ($activeDiscount->discount_value / 100);
+                $discountedPrice = $basePrice - $discountAmount;
+                break;
+
+            case 'fixed':
+                $discountedPrice = $basePrice - $activeDiscount->discount_value;
+                break;
+
+            default:
+                $discountedPrice = $basePrice; // Unknown discount type, return base price
+        }
+
+        // Ensure price doesn't go below zero
+        return max($discountedPrice, 0);
     }
 }
