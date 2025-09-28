@@ -1,290 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Income Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .dashboard-container {
-            width: 100%;
-            max-width: 1200px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        .dashboard-header {
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            padding: 25px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .dashboard-header h1 {
-            font-weight: 600;
-            font-size: 28px;
-        }
-        
-        .dashboard-header p {
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-        
-        .stats-container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #eaeaea;
-        }
-        
-        .stat-box {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 10px;
-            min-width: 200px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            flex: 1;
-        }
-        
-        .stat-box h3 {
-            font-size: 16px;
-            color: #6c757d;
-            margin-bottom: 10px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #4b6cb7;
-        }
-        
-        .stat-box.best-month {
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-        }
-        
-        .stat-box.best-month h3, .stat-box.best-month .stat-value {
-            color: white;
-        }
-        
-        .chart-container {
-            padding: 30px;
-            position: relative;
-            height: 400px;
-        }
-        
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 300px;
-            flex-direction: column;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(75, 108, 183, 0.2);
-            border-radius: 50%;
-            border-top-color: #4b6cb7;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-message {
-            text-align: center;
-            padding: 30px;
-            color: #e74c3c;
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .stats-container {
-                flex-direction: column;
-            }
-            
-            .stat-box {
-                width: 100%;
-                margin: 10px 0;
-            }
-            
-            .chart-container {
-                height: 300px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <div>
-                <h1>Monthly Income Dashboard</h1>
-                <p>Visualization of revenue data</p>
-            </div>
+@extends('layouts.admin')
+@section('title', 'Accounting Dashboard')
+@php
+    $active = 'accounting';
+@endphp
+
+@section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<div class="p-6 bg-white rounded-xl border border-gray-100 shadow-sm h-full">
+
+    <!-- Header -->
+    <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">Accounting Dashboard</h2>
+            <p class="text-sm text-gray-500">View and track your revenue, monthly trends, and performance.</p>
         </div>
-        
-        <div class="stats-container">
-            <div class="stat-box">
-                <h3>Total Revenue</h3>
-                <div class="stat-value" id="total-revenue">0.00</div>
+
+        <a href="{{ route('admin.reports.export') }}" 
+           class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg shadow transition duration-200">
+            <i class="fas fa-file-export mr-2"></i> Export Reports
+        </a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid md:grid-cols-3 gap-6 mb-6">
+        @php
+            $cards = [
+                ['title'=>'Total Revenue','id'=>'totalRevenue','icon'=>'fa-wallet','bg'=>'green','value'=>'₱0.00'],
+                ['title'=>'Average Monthly','id'=>'averageMonthly','icon'=>'fa-calendar-alt','bg'=>'yellow','value'=>'₱0.00'],
+                ['title'=>'Best Month','id'=>'bestMonthName','icon'=>'fa-star','bg'=>'purple','value'=>'N/A','incomeId'=>'bestMonthIncome','incomeValue'=>'₱0.00'],
+            ];
+        @endphp
+
+        @foreach ($cards as $card)
+            <div class="bg-{{ $card['bg'] }}-50 rounded-2xl border border-{{ $card['bg'] }}-100 shadow-lg p-6 flex flex-col items-start">
+                <div class="p-3 bg-{{ $card['bg'] }}-100 rounded-xl shadow-sm mb-4">
+                    <i class="fas {{ $card['icon'] }} text-{{ $card['bg'] }}-500 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ $card['title'] }}</h3>
+                <p class="text-2xl font-bold text-{{ $card['bg'] }}-600" id="{{ $card['id'] }}">{{ $card['value'] }}</p>
+                @if(isset($card['incomeId']))
+                    <p class="text-lg font-bold text-{{ $card['bg'] }}-600" id="{{ $card['incomeId'] }}">{{ $card['incomeValue'] }}</p>
+                @endif
             </div>
-            
-            <div class="stat-box">
-                <h3>Average Monthly</h3>
-                <div class="stat-value" id="average-monthly">0.00</div>
+        @endforeach
+    </div>
+
+    <!-- Monthly Income Chart -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6 mb-6">
+        <div class="flex items-center space-x-3 mb-6">
+            <div class="p-3 bg-blue-100 rounded-xl shadow-sm">
+                <i class="fas fa-chart-line text-blue-500 text-xl"></i>
             </div>
-            
-            <div class="stat-box best-month">
-                <h3>Best Month</h3>
-                <div class="stat-value" id="best-month-income">0.00</div>
-                <div id="best-month-name">No data available</div>
-            </div>
+            <h3 class="text-xl font-semibold text-gray-800">Monthly Income Trend</h3>
         </div>
-        
-        <div class="error-message" id="error-message">
-            <h3>Unable to load data</h3>
-            <p>Please check your connection and try again</p>
-            <button onclick="loadData()" style="margin-top: 15px; padding: 8px 15px; background: #4b6cb7; color: white; border: none; border-radius: 5px; cursor: pointer;">Retry</button>
-        </div>
-        
-        <div class="chart-container">
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Loading income data...</p>
+        <canvas id="incomeChart" class="w-full h-80"></canvas>
+    </div>
+
+    <!-- Revenue Breakdown Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
+        <div class="flex items-center space-x-3 mb-6">
+            <div class="p-3 bg-red-100 rounded-xl shadow-sm">
+                <i class="fas fa-receipt text-red-500 text-xl"></i>
             </div>
-            <canvas id="incomeChart"></canvas>
+            <h3 class="text-xl font-semibold text-gray-800">Revenue Breakdown</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto text-left text-gray-700">
+                <thead class="bg-gray-100 rounded-t-xl">
+                    <tr>
+                        <th class="px-4 py-2">Month</th>
+                        <th class="px-4 py-2">Room Income</th>
+                        <th class="px-4 py-2">Day Tour Income</th>
+                        <th class="px-4 py-2">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="revenueBreakdown">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <script>
-        // Global chart variable
-        let incomeChart;
-        
-        // Format currency
-            function formatCurrency(amount) {
-                  return '₱' + parseFloat(amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-            }
-        
-        
-        // Load data from API
-        function loadData() {
-            // Show loading, hide error
-            document.getElementById('loading').style.display = 'flex';
-            document.getElementById('error-message').style.display = 'none';
-            
-            // Make AJAX request to Laravel API endpoint
-            fetch('/api/monthly-income')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Hide loading
-                    document.getElementById('loading').style.display = 'none';
-                    
-                    // Update stats
-                    document.getElementById('total-revenue').textContent = formatCurrency(data.totalRevenue);
-                    document.getElementById('average-monthly').textContent = formatCurrency(data.averageMonthly);
-                    document.getElementById('best-month-income').textContent = formatCurrency(data.bestMonth.income);
-                    document.getElementById('best-month-name').textContent = data.bestMonth.month;
-                    
-                    // Create or update chart
-                    createOrUpdateChart(data.chartData);
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('error-message').style.display = 'block';
-                });
-        }
-        
-        // Create or update the chart
-        function createOrUpdateChart(chartData) {
-            const ctx = document.getElementById('incomeChart').getContext('2d');
-            
-            // If chart already exists, destroy it
-            if (incomeChart) {
-                incomeChart.destroy();
-            }
-            
-            // Create new chart
-            incomeChart = new Chart(ctx, {
-                type: 'line',
-                data: chartData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Income: ${formatCurrency(context.raw)}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let incomeChart = null;
+
+async function fetchAccountingData() {
+    try {
+        const res = await fetch("{{ route('admin.api.monthly-income') }}");
+        const data = await res.json();
+
+        // --- Update summary cards ---
+        document.getElementById('totalRevenue').textContent = `₱${Number(data.totalRevenue).toLocaleString()}`;
+        document.getElementById('averageMonthly').textContent = `₱${Number(data.averageMonthly).toLocaleString()}`;
+        document.getElementById('bestMonthName').textContent = data.bestMonth.month ?? 'N/A';
+        document.getElementById('bestMonthIncome').textContent = `₱${Number(data.bestMonth.income ?? 0).toLocaleString()}`;
+
+        // --- Populate revenue breakdown table ---
+        const tbody = document.getElementById('revenueBreakdown');
+        tbody.innerHTML = '';
+
+        const labels = data.chartData.labels || [];
+        const roomData = data.chartData.datasets[0]?.data || [];
+        const dayTourData = data.chartData.datasets[1]?.data || [];
+
+        labels.forEach((label, i) => {
+            const room = roomData[i] ?? 0;
+            const daytour = dayTourData[i] ?? 0;
+            const total = room + daytour;
+            tbody.innerHTML += `
+                <tr class="border-b last:border-b-0">
+                    <td class="px-4 py-2">${label}</td>
+                    <td class="px-4 py-2">₱${Number(room).toLocaleString()}</td>
+                    <td class="px-4 py-2">₱${Number(daytour).toLocaleString()}</td>
+                    <td class="px-4 py-2 font-semibold">₱${Number(total).toLocaleString()}</td>
+                </tr>
+            `;
+        });
+
+        // --- Render or update Chart.js line chart ---
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        if (incomeChart) incomeChart.destroy();
+
+        incomeChart = new Chart(ctx, {
+            type: 'line',
+            data: data.chartData,
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => '₱' + value.toLocaleString()
                         }
                     }
                 }
-            });
-        }
-        
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', loadData);
-    </script>
-</body>
-</html>
+            }
+        });
+
+    } catch (err) {
+        console.error('Error fetching accounting data:', err);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', fetchAccountingData);
+
+async function fetchTopPerformers() {
+    const res = await fetch("{{ route('admin.api.top-performers') }}");
+    const data = await res.json();
+
+    const roomsList = document.getElementById('topRooms');
+    roomsList.innerHTML = '';
+    data.rooms.forEach(r => {
+        roomsList.innerHTML += `<li>${r.facility} - <strong>₱${Number(r.total_income).toLocaleString()}</strong></li>`;
+    });
+
+    const dayToursList = document.getElementById('topDayTours');
+    dayToursList.innerHTML = '';
+    data.daytours.forEach(r => {
+        dayToursList.innerHTML += `<li>${r.facility} - <strong>₱${Number(r.total_income).toLocaleString()}</strong></li>`;
+    });
+
+    const eventsList = document.getElementById('topEvents');
+    eventsList.innerHTML = '';
+    data.events.forEach(r => {
+        eventsList.innerHTML += `<li>${r.package} - <strong>₱${Number(r.total_income).toLocaleString()}</strong></li>`;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAccountingData();
+    fetchTopPerformers();
+});
+
+</script>
+
+@endsection

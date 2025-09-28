@@ -123,12 +123,21 @@
                         <span class="font-medium text-gray-800">{{ \Carbon\Carbon::parse($log->date_tour)->format('M d, Y') }}</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span class="text-gray-600">Status</span>
+                        <span class="text-gray-600">Reservation Status</span>
                         <span class="px-3 py-1 rounded-full text-xs font-semibold 
-                            {{ $log->status == 'paid' ? 'bg-green-100 text-green-800' : 
+                            {{ $log->status == 'Check_in' ? 'bg-green-100 text-green-800' : 
                                ($log->status == 'approved' ? 'bg-blue-100 text-blue-800' : 
-                               ($log->status == 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')) }}">
+                               ($log->status == 'Check_out' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')) }}">
                             {{ ucfirst($log->status) }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span class="text-gray-600"> Status</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold 
+                            {{ $log->reservation_status == 'paid' ? 'bg-green-100 text-green-800' : 
+                               ($log->reservation_status == 'approved' ? 'bg-blue-100 text-blue-800' : 
+                               ($log->reservation_status == 'pending' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')) }}">
+                            {{ ucfirst($log->reservation_status) }}
                         </span>
                     </div>
                     <div class="flex justify-between items-center py-2">

@@ -27,7 +27,7 @@
 <div class="bg-gray-50 p-4 rounded-lg mb-6">
     <form method="GET" action="{{ route('admin.daytour.logs') }}">
         <!-- Basic Search Row -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Search Everything</label>
                 <input type="text" name="search" value="{{ request('search') }}" 
@@ -37,11 +37,20 @@
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="reservation_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400">
+                    <option value="">All Status</option>
+                    <option value="pending" {{ request('reservation_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="paid" {{ request('reservation_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="approved" {{ request('reservation_status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Reservation Status</label>
                 <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400">
                     <option value="">All Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="checked_in" {{ request('status') == 'checked_in' ? 'selected' : '' }}>Checked in</option>
+                    <option value="checked_out" {{ request('status') == 'checked_out' ? 'selected' : '' }}>Checked out</option>
                 </select>
             </div>
 
@@ -104,17 +113,26 @@
             <!-- Guest Type -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Guest Type</label>
-                <input type="text" name="guest_type" value="{{ request('guest_type') }}" 
-                    placeholder="e.g., Adult, Kids, Senior"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400">
+                <select name="guest_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400">
+                    <option value="">All Guest type</option>
+                    <option value="Adult" {{ request('guest_type') ? 'selected' : '' }}>Adult </option>
+                    <option value="kids" {{ request('guest_type') ? 'selected' : '' }}>kids </option>
+                    <option value="Senior" {{ request('guest_type') ? 'selected' : '' }}>Senior </option>
+                </select>
             </div>
 
             <!-- Facility -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Facility</label>
-                <input type="text" name="facility" value="{{ request('facility') }}" 
-                    placeholder="e.g., Gazebo, Cottage"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400">
+                <select name="facility" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400">
+                    <option value="">All Cottage type</option>
+                    <option value="Bench" {{ request('facility') ? 'selected' : '' }}>Bench </option>
+                    <option value="Gazebo" {{ request('facility') ? 'selected' : '' }}>Gazebo </option>
+                    <option value="Cottage" {{ request('facility') ? 'selected' : '' }}>Cottage </option>
+                    <option value="Small family hall" {{ request('facility') ? 'selected' : '' }}>Small family hall </option>
+                    <option value="Big family hall" {{ request('facility') ? 'selected' : '' }}>Big family hall </option>
+                    <option value="Senior" {{ request('facility') ? 'selected' : '' }}> </option>
+                </select>
             </div>
         </div>
 
@@ -132,7 +150,7 @@
 </div>
 
     <!-- Filter Summary -->
-@if(request()->anyFilled(['search', 'date', 'date_from', 'date_to', 'status', 'service_type', 'guest_type', 'facility', 'min_price', 'max_price']))
+@if(request()->anyFilled(['search', 'date', 'date_from', 'date_to', 'status' ,'reservation_status', 'service_type', 'guest_type', 'facility', 'min_price', 'max_price']))
 <div class="mb-4 p-3 bg-blue-50 rounded-lg">
     <h3 class="text-sm font-medium text-blue-800 mb-2">Active Filters:</h3>
     <div class="flex flex-wrap gap-2">
@@ -168,6 +186,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accommodations</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reservation Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
@@ -244,10 +263,18 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                            {{ $log->status == 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                            {{ $log->resevation_status == 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                            {{ ucfirst($log->reservation_status) }}
+                        </span>
+                        
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                            {{ $log->status == 'Checked_in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-yellow-800' }}">
                             {{ ucfirst($log->status) }}
                         </span>
                     </td>
+                    
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
     <a href="{{ route('admin.daytour.logs.show', $log->id) }}" class="text-blue-600 hover:text-blue-900 mr-3">
         <i class="fas fa-eye mr-1"></i>View
