@@ -139,8 +139,6 @@
                         <span>Calendar</span>
                     </a>
                 </li>
-
-
                 <!-- Facilities -->
                 <li>
                     <a href="{{ route('admin.facilities.index') }}"
@@ -152,6 +150,19 @@
                                 d="M3 10h18M3 6h18M3 14h18M3 18h18" />
                         </svg>
                         <span>Facilities</span>
+                    </a>
+                </li>
+
+                <!-- Accounting -->
+                <li>
+                    <a href="{{ route('admin.accounting.index') }}"
+                    class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'accounting' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" 
+                                stroke-width="{{ $active === 'accounting' ? '2' : '1.5' }}" 
+                                d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0-6v2m0 16v2m8-10h2M2 12H0" />
+                        </svg>
+                        <span>Accounting</span>
                     </a>
                 </li>
 

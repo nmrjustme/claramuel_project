@@ -21,6 +21,7 @@
 
 @section('title', 'Facility Monitoring')
 
+
 @section('content')
 <div x-data="{ activeTab: 'all', loading: false }" class="min-h-screen p-6 bg-gray-50">
     {{-- FontAwesome, AlpineJS & Flatpickr --}}

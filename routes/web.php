@@ -168,9 +168,10 @@ Route::get('/env-test', function () {
     ];
 });
 
-Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability']);
+Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('daytour.checkAvailability');
 Route::get('/cottages/{date}', [Day_tour_Controller::class, 'getCottages'])->name('cottages.availability');
-Route::get('/daytour/check-availability', [DayTourController::class, 'checkAvailability']);
+
+
 
 
 Route::prefix('admin-management')->name('admin.')->group(function () {
@@ -200,7 +201,11 @@ Route::middleware(['auth'])->group(function () {
     
     //========================
     
-    
+   Route::prefix('admin/facilities')->name('admin.facilities.')->group(function () {
+    Route::get('{id}/details', [Day_tour_Controller::class, 'details'])->name('details');
+    Route::post('{id}/mark-available', [Day_tour_Controller::class, 'markAvailable'])->name('markAvailable');
+});
+
 
     // Day Tour Routes Group
 Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
@@ -224,9 +229,9 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     // Cottage & Villa Monitoring
     Route::get('/facility-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('facility_monitoring');
     Route::get('/admin/daytour/facility-monitoring', [Day_tour_Controller::class, 'monitorFacilities'])->name('admin.daytour.facility_monitoring');
-    Route::post('/facility/{id}/checkout', [Day_tour_Controller::class, 'checkoutFacility'])->name('checkout-facility');
-    Route::post('/facility/{id}/update-status', [Day_tour_Controller::class, 'updateFacilityStatus'])->name('update-facility-status');
-    
+    Route::post('daytour/{id}/checkin', [Day_tour_Controller::class, 'checkin'])->name('checkin');
+    Route::post('daytour/{id}/checkout', [Day_tour_Controller::class, 'checkout'])->name('checkout');
+
     // Facility Calendar
     Route::get('/facility-calendar', [Day_tour_Controller::class, 'facilityCalendar'])->name('facility-calendar');
 });
@@ -300,6 +305,11 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
     Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
     Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
     Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');
+    Route::get('/dashboard/revenue', [AccountingController::class, 'index'])->name('admin.accounting.index');
+    Route::get('/dashboard/reports/export', [AccountingController::class, 'export'])->name('admin.reports.export');
+    Route::get('/admin/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('admin.api.monthly-income');
+    Route::get('/admin/api/top-performers', [AccountingController::class, 'topPerformersApi'])->name('admin.api.top-performers');
+
     //========================
 
 

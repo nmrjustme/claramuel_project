@@ -4,11 +4,33 @@
     $active = 'day_tour';
 @endphp
 
+
+
 @section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="max-w-6xl mx-auto space-y-6 py-6">
+@if(session('success'))
+    <div id="flash-message" class="mt-4 p-4 rounded-lg bg-green-100 text-green-800 font-medium shadow-md transition transform duration-500">
+        {{ session('success') }}
+    </div>
+@endif
 
+@if(session('error'))
+    <div id="flash-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md transition transform duration-500">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if($errors->any())
+    <div id="flash-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md transition transform duration-500">
+        <ul class="list-disc list-inside space-y-1">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
     <!-- Header -->
     <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -76,15 +98,36 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                             <div class="relative">
                                 <i class="fas fa-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <select name="status" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
-                                    <option value="pending" {{ $log->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="paid" {{ $log->status == 'paid' ? 'selected' : '' }}>Paid</option>
-                                    <option value="approved" {{ $log->status == 'approved' ? 'selected' : '' }}>Approved</option>
-                                    <option value="rejected" {{ $log->status == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                <select name="reservation_status" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+                                    <option value="pending" {{ $log->reservation_status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="paid" {{ $log->reservation_status == 'paid' ? 'selected' : '' }}>Paid</option>
+                                    <option value="approved" {{ $log->reservation_status == 'approved' ? 'selected' : '' }}>Approved</option>
+                                    <option value="rejected" {{ $log->reservation_status == 'rejected' ? 'selected' : '' }}>Rejected</option>
                                 </select>
                                 <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                             </div>
                         </div>
+
+                        <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reservation Status</label>
+                        <div class="relative">
+                            @php
+                                // Determine icon based on current status
+                                $statusIcon = $log->checked_out_at 
+                                            ? 'fas fa-sign-out-alt' 
+                                            : ($log->checked_in_at ? 'fas fa-sign-in-alt' : 'fas fa-tag');
+                            @endphp
+                            <i class="{{ $statusIcon }} absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+
+                            <select name="status" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+                                <option value="" {{ !$log->checked_in_at && !$log->checked_out_at ? 'selected' : '' }}>Not Yet Checked-in</option>
+                                <option value="checked_in" {{ $log->checked_in_at && !$log->checked_out_at ? 'selected' : '' }}>Checked-in</option>
+                                <option value="checked_out" {{ $log->checked_out_at ? 'selected' : '' }}>Checked-Out</option>
+                            </select>
+
+                            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        </div>
+                    </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Calculated Total Price</label>
@@ -364,5 +407,29 @@ document.addEventListener('DOMContentLoaded', () => {
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
+    /* Flash message animation */
+    #flash-message {
+        animation: slideDown 0.5s ease-out, fadeOut 0.5s ease-in 3.5s forwards;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        to {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+    }
 </style>
 @endsection
