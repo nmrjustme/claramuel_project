@@ -272,6 +272,14 @@ Route::prefix('admin/daytour')->name('admin.daytour.')->group(function () {
 
     Route::post('/admin/guest-addons', [BookingController::class, 'storeGuestAddons']);
     Route::delete('/delete/guest-addons/{addonId}', [BookingController::class, 'deleteAddon']);
+
+    // In routes/web.php
+    Route::get('/user/verification-status', function () {
+        return response()->json([
+            'verified' => !is_null(Auth::user()->email_verified_at),
+            'email' => Auth::user()->email,
+        ]);
+    })->middleware('auth');
     //========================
 
     //========================

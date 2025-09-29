@@ -157,10 +157,14 @@
                 <li>
                     <a href="{{ route('admin.accounting.index') }}"
                     class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'accounting' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                             class="h-5 w-5 mr-3" 
+                             fill="none" 
+                             viewBox="0 0 24 24" 
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" 
-                                stroke-width="{{ $active === 'accounting' ? '2' : '1.5' }}" 
-                                d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0-6v2m0 16v2m8-10h2M2 12H0" />
+                                  stroke-width="{{ $active === 'accounting' ? '2' : '1.5' }}" 
+                                  d="M2.25 6.75h19.5v10.5H2.25zM6 9h.008v.008H6V9zm12 0h.008v.008H18V9zm-6 2.25a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" />
                         </svg>
                         <span>Accounting</span>
                     </a>

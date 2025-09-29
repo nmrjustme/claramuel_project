@@ -46,6 +46,7 @@
                             @csrf
                             <input type="file" id="profile-image" name="profile_img" class="hidden" accept="image/*" onchange="validateAndSubmit()">
                         </form>
+                        
                     </div>
                     
                     <!-- User info with subtle animations -->

@@ -704,6 +704,55 @@
 
 @section('content')
     <div class="min-h-screen px-6 py-6">
+         <!-- Email Verification Alert -->
+        @if (empty(Auth::user()->email_verified_at))
+            <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <!-- Icon -->
+                    <svg class="w-5 h-5 text-yellow-600 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 
+                            2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 
+                            0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+
+                    <!-- Text & Button -->
+                    <div class="flex-1">
+                        <h3 class="text-lg font-medium text-yellow-800">Email Verification Required</h3>
+                        <p class="text-yellow-700 mt-1">
+                            Please verify your email address before performing any actions in booking.  
+                            A verification link will be sent to your email.
+                        </p>
+
+                        <form method="POST" action="{{ route('verification.send') }}" class="mt-2">
+                            @csrf
+                            <button type="submit"
+                                    class="text-yellow-800 hover:text-yellow-900 underline text-sm font-medium cursor-pointer">
+                                Send Verification Email
+                            </button>
+                        </form>
+
+                        @if (session('status') == 'verification-link-sent')
+                            <div class="mt-2 flex items-center text-sm text-green-600">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 mr-1"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 
+                                        16zm3.707-9.293a1 1 0 00-1.414-1.414L9 
+                                        10.586 7.707 9.293a1 1 0 00-1.414 
+                                        1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"/>
+                                </svg>
+                                Verification link sent!
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
+
         <div class="flex flex-col mb-10">
         <!-- Container -->
         <div class="bg-white rounded-lg border border-lightgray">
@@ -2172,31 +2221,40 @@
 
                     // Get button states based on booking status
                     const buttonStates = getButtonStates(bookingStatus, checkinDate);
+                    // Check verification status and disable buttons if not verified
+                    const isVerified = await checkUserVerificationSilent(); // Silent check without showing modal
 
+                    // Apply verification restrictions
+                    if (!isVerified) {
+                        buttonStates.confirm.disabled = true;
+                        buttonStates.checkin.disabled = true;
+                        buttonStates.checkout.disabled = true;
+                    }
                     const checkoutUrl = `/check-out/receipt/${bookingId}`;
 
                     actionButtonsHtml = `
-                                                                    <button class="sidebar-btn bg-green-600 text-white hover:bg-green-700 ${buttonStates.confirm.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
-                                                                        data-action="confirm" data-booking-id="${bookingId}" ${buttonStates.confirm.disabled ? 'disabled' : ''}>
-                                                                        ${buttonStates.confirm.loading ? '<div class="btn-preloader"></div>' :
+                        <button class="sidebar-btn bg-green-600 text-white hover:bg-green-700 ${buttonStates.confirm.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
+                            data-action="confirm" data-booking-id="${bookingId}" ${buttonStates.confirm.disabled ? 'disabled' : ''}>
+                            ${buttonStates.confirm.loading ? '<div class="btn-preloader"></div>' :
                             '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'}
-                                                                        Confirm Booking
-                                                                    </button>
-                                                                    <button class="sidebar-btn bg-blue-600 text-white hover:bg-blue-700 ${buttonStates.checkin.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
-                                                                        data-action="checkin" data-booking-id="${bookingId}" ${buttonStates.checkin.disabled ? 'disabled' : ''}>
-                                                                        ${buttonStates.checkin.loading ? '<div class="btn-preloader"></div>' :
+                            Confirm Booking
+                            ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
+                        </button>
+                        <button class="sidebar-btn bg-blue-600 text-white hover:bg-blue-700 ${buttonStates.checkin.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
+                            data-action="checkin" data-booking-id="${bookingId}" ${buttonStates.checkin.disabled ? 'disabled' : ''}>
+                            ${buttonStates.checkin.loading ? '<div class="btn-preloader"></div>' :
                             '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" /> </svg>'}
-                                                                        Check-in Guest
-                                                                    </button>
-                                                                    <button class="sidebar-btn bg-purple-600 text-white hover:bg-purple-700 ${buttonStates.checkout.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
-                                                                        data-action="checkout" data-booking-id="${bookingId}" ${buttonStates.checkout.disabled ? 'disabled' : ''}>
-                                                                        ${buttonStates.checkout.loading ? '<div class="btn-preloader"></div>' :
+                            Check-in Guest
+                            ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
+                        </button>
+                        <button class="sidebar-btn bg-purple-600 text-white hover:bg-purple-700 ${buttonStates.checkout.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
+                            data-action="checkout" data-booking-id="${bookingId}" ${buttonStates.checkout.disabled ? 'disabled' : ''}>
+                            ${buttonStates.checkout.loading ? '<div class="btn-preloader"></div>' :
                             '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7l4 4m0 0l-4 4m4-4H7" /></svg>'}
-                                                                        Check-out Guest
-                                                                    </button>
-
-                                                                `;
-
+                            Check-out Guest
+                            ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
+                        </button>
+                    `;
                     // Generate the HTML template
                     const html = `
                             <div class="divide-y divide-gray-200 fade-in">
@@ -2529,6 +2587,37 @@
 
 
                     `;
+            }
+            
+            // Silent verification check (for UI state only)
+            async function checkUserVerificationSilent() {
+                try {
+                    const response = await fetch(`/user/verification-status`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                        }
+                    });
+
+                    const data = await response.json();
+                    
+                    // Add debugging
+                    console.log('Verification response:', data);
+                    console.log('email_verified_at value:', data.verified);
+                    console.log('Type of verified:', typeof data.verified);
+                    
+                    return data.verified === true;
+                } catch (error) {
+                    console.error('Error checking verification:', error);
+                    return false;
+                }
+            }
+
+            // Helper function
+            function isNull(value) {
+                return value === null || value === undefined;
             }
 
             // Function to handle addon deletion
