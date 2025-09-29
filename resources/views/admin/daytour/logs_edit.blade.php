@@ -10,29 +10,31 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="max-w-6xl mx-auto space-y-6 py-6">
-@if(session('success'))
-    <div id="flash-message" class="mt-4 p-4 rounded-lg bg-green-100 text-green-800 font-medium shadow-md transition transform duration-500">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if(session('error'))
-    <div id="flash-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md transition transform duration-500">
-        {{ session('error') }}
-    </div>
-@endif
-
-@if($errors->any())
-    <div id="flash-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md transition transform duration-500">
-        <ul class="list-disc list-inside space-y-1">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
     <!-- Header -->
     <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        @if(session('success'))
+            <div class="flash-message mt-4 p-4 rounded-lg bg-green-100 text-green-800 font-medium shadow-md">
+                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="flash-message mt-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md">
+                <i class="fas fa-exclamation-circle text-red-600 mr-2"></i>
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="flash-message mt-4 p-4 rounded-lg bg-red-100 text-red-800 font-medium shadow-md">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
@@ -52,20 +54,6 @@
                 </a>
             </div>
         </div>
-
-        @if(session('success'))
-            <div class="mt-4 p-4 rounded-xl bg-green-50 text-green-700 font-medium border border-green-200 flex items-center gap-2">
-                <i class="fas fa-check-circle text-green-600"></i>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mt-4 p-4 rounded-xl bg-red-50 text-red-700 font-medium border border-red-200 flex items-center gap-2">
-                <i class="fas fa-exclamation-circle text-red-600"></i>
-                {{ session('error') }}
-            </div>
-        @endif
     </div>
 
     <!-- Form -->

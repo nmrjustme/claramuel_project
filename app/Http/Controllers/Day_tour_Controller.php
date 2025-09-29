@@ -252,29 +252,52 @@ public function update(Request $request, $id)
         // 3. Handle check-in / check-out
         if (!empty($validated['status'])) {
             if ($validated['status'] === 'checked_in') {
-                // Only allow check-in if today is the reservation date or later
+                // ✅ Only allow check-in if today is the reservation date or later
                 if (now()->toDateString() >= $log->date_tour) {
                     $log->checked_in_at = now();
                     $log->checked_out_at = null; // reset check-out
                     $log->status = 'Checked_in';
+                } else {
+                    // ❌ Prevent early check-in
+                    return redirect()->back()
+                        ->with('error', 'Guests cannot check in before their reservation date.')
+                        ->withInput();
                 }
+
             } elseif ($validated['status'] === 'checked_out') {
+                // ✅ Only allow check-out if it's the reservation date or later AND already checked in
+                if (now()->toDateString() < $log->date_tour) {
+                    return redirect()->back()
+                        ->with('error', 'Guests cannot check out before their reservation date.')
+                        ->withInput();
+                }
+
+                if (!$log->checked_in_at) {
+                    return redirect()->back()
+                        ->with('error', 'Guests cannot check out without checking in first.')
+                        ->withInput();
+                }
+
+                // Proceed with check-out
                 $log->checked_out_at = now();
                 $log->status = 'Checked_out';
+            }
+        }
 
-                // if never checked in, mark checked_in_at automatically
-                if (!$log->checked_in_at) {
-                    $log->checked_in_at = now();
+        // 3b. Handle reservation status → overall status mapping
+        if (empty($validated['status'])) {
+            // Only if check-in/out was NOT explicitly triggered
+            if (in_array($validated['reservation_status'], ['paid', 'approved'])) {
+                if (now()->toDateString() < $log->date_tour) {
+                    $log->status = 'Reserved'; // Future reservation
+                } else {
+                    // On the same day, but not yet checked in
+                    $log->status = 'Awaiting Check-in';
                 }
-            }else {
-                // No explicit check-in/out update
-                if (in_array($validated['reservation_status'], ['paid', 'approved'])) {
-                    $log->status = 'Reserved';
-                } elseif ($validated['reservation_status'] === 'pending') {
-                    $log->status = 'Pending';
-                } elseif ($validated['reservation_status'] === 'rejected') {
-                    $log->status = 'Rejected';
-                }
+            } elseif ($validated['reservation_status'] === 'pending') {
+                $log->status = 'Pending Payment';
+            } elseif ($validated['reservation_status'] === 'rejected') {
+                $log->status = 'Rejected';
             }
         }
 
@@ -723,15 +746,25 @@ public function checkAvailability(Request $request)
 
 public function logs(Request $request)
     {
-    // 🔹 Auto check-out for Park guests (no matter what) + Pool guests without cottages
+    // 1️⃣ Auto mark NO-SHOW for unpaid/pending guests whose date has passed
     DayTourLogDetails::whereDate('date_tour', '<', today())
-    ->whereNull('checked_out_at')
-    ->update([
-        'checked_out_at' => now(),
-        'status' => 'checked_out',
-    ]);
+        ->where('reservation_status', 'pending')
+        ->whereNull('checked_in_at')
+        ->update([
+            'status' => 'No Show',
+            'checked_out_at' => now(),
+        ]);
 
-    // 🔹 Auto check-in: Any booking for today, approved/paid, not yet checked in
+    // 2️⃣ Auto check-out ONLY for paid/approved guests whose reservation date has passed
+    DayTourLogDetails::whereDate('date_tour', '<', today())
+        ->whereIn('reservation_status', ['approved', 'paid'])
+        ->whereNull('checked_out_at')
+        ->update([
+            'checked_out_at' => now(),
+            'status' => 'checked_out',
+        ]);
+
+    // 3️⃣ Auto check-in ONLY for today's paid/approved guests (not yet checked in)
     DayTourLogDetails::whereDate('date_tour', today())
         ->whereIn('reservation_status', ['approved', 'paid'])
         ->whereNull('checked_in_at')
@@ -739,6 +772,7 @@ public function logs(Request $request)
             'checked_in_at' => now(),
             'status' => 'checked_in',
         ]);
+
 
         // Validate input - FIXED: Added service_type validation
         $validated = $request->validate([

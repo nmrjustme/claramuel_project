@@ -203,31 +203,42 @@
 
                                         {{-- Action Buttons --}}
                                         @if(!empty($booking['booking_id']))
-                                            <div class="flex flex-col gap-2 self-start w-full sm:w-auto">
-                                                @if($booking['status'] !== 'checked_in' && $booking['status'] !== 'checked_out')
-                                                    <form action="{{ route('admin.daytour.checkin', $booking['booking_id']) }}" method="POST" class="w-full">
-                                                        @csrf
-                                                        <button type="submit"
-                                                                class="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 min-w-[100px]"
-                                                                onclick="return confirm('Confirm check-in for {{ $booking['customer'] }}?')"
-                                                                aria-label="Check in {{ $booking['customer'] }}">
-                                                            <i class="fas fa-sign-in-alt"></i> Check-in
-                                                        </button>
-                                                    </form>
-                                                @elseif($booking['status'] === 'checked_in')
-                                                    <form action="{{ route('admin.daytour.checkout', $booking['booking_id']) }}" method="POST" class="w-full">
-                                                        @csrf
-                                                        <button type="submit"
-                                                                class="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[100px]"
-                                                                onclick="return confirm('Confirm check-out for {{ $booking['customer'] }}?')"
-                                                                aria-label="Check out {{ $booking['customer'] }}">
-                                                            <i class="fas fa-sign-out-alt"></i> Check-out
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <span class="text-xs text-gray-400 italic text-center sm:text-left">Completed</span>
-                                                @endif
-                                            </div>
+                                            @php
+                                                $isTodayOrLater = \Carbon\Carbon::today()->gte(\Carbon\Carbon::parse($booking['date']));
+                                            @endphp
+
+                                            @if($isTodayOrLater)
+                                                <div class="flex flex-col gap-2 self-start w-full sm:w-auto">
+                                                    @if($booking['status'] !== 'checked_in' && $booking['status'] !== 'checked_out')
+                                                        {{-- Show Check-in only if today or later --}}
+                                                        <form action="{{ route('admin.daytour.checkin', $booking['booking_id']) }}" method="POST" class="w-full">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 min-w-[100px]"
+                                                                    onclick="return confirm('Confirm check-in for {{ $booking['customer'] }}?')"
+                                                                    aria-label="Check in {{ $booking['customer'] }}">
+                                                                <i class="fas fa-sign-in-alt"></i> Check-in
+                                                            </button>
+                                                        </form>
+                                                    @elseif($booking['status'] === 'checked_in')
+                                                        {{-- Show Check-out only if today or later --}}
+                                                        <form action="{{ route('admin.daytour.checkout', $booking['booking_id']) }}" method="POST" class="w-full">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[100px]"
+                                                                    onclick="return confirm('Confirm check-out for {{ $booking['customer'] }}?')"
+                                                                    aria-label="Check out {{ $booking['customer'] }}">
+                                                                <i class="fas fa-sign-out-alt"></i> Check-out
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <span class="text-xs text-gray-400 italic text-center sm:text-left">Completed</span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                {{-- Hide buttons until reservation date --}}
+                                                <span class="text-xs text-gray-400 italic">Actions available on {{ \Carbon\Carbon::parse($booking['date'])->format('M d, Y') }}</span>
+                                            @endif
                                         @endif
                                     </div>
                                 </li>
