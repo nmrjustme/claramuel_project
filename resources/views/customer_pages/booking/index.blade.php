@@ -2265,8 +2265,25 @@
                totalElement.textContent = `₱${subtotal.toFixed(2)}`;
           }
 
+          // Add this method to BookingSystem class
+          setupBreakfastToggle() {
+               const breakfastToggle = document.getElementById('breakfast-toggle');
+               if (!breakfastToggle) return;
+               
+               // Set initial state
+               breakfastToggle.checked = this.breakfastIncluded;
+               
+               // Update event listener to handle state properly
+               breakfastToggle.addEventListener('change', (e) => {
+                    this.breakfastIncluded = e.target.checked;
+                    this.updateCartDisplay();
+                    this.saveCartToStorage();
+               });
+          }
+
           initializeCart() {
                this.cart = [];
+               this.setupBreakfastToggle();
                this.updateCartDisplay();
                this.validateCheckoutButton();
                if (this.cart.length > 0) {
