@@ -984,11 +984,15 @@ class BookingController extends Controller
             return ['error' => 'Maya API configuration incomplete'];
         }
 
-        $endpoint = "{$baseUrl}/p3/refund";
-        $requestReferenceNo = 'CLM-' . Str::upper(Str::random(8)) . '-REFUND';
+        $endpoint = "{$baseUrl}/p3/refund"; // ✅ as per Maya docs example (singular)
+        $requestReferenceNo = (string) Str::uuid();
         $idempotencyKey = (string) Str::uuid();
 
+        // Encode secret key for Basic Auth (like Maya example)
+        $encodedKey = base64_encode($secretKey . ':');
+
         $headers = [
+            'Authorization' => 'Basic ' . $encodedKey,
             'Request-Reference-No' => $requestReferenceNo,
             'X-Idempotency-Key' => $idempotencyKey,
             'Accept' => 'application/json',
@@ -996,41 +1000,42 @@ class BookingController extends Controller
         ];
 
         $body = [
-            'paymentTransactionReferenceNo' => $transactionReferenceNo,
+            'transactionReferenceNo' => $transactionReferenceNo,
             'reason' => $reason,
         ];
 
         try {
             $response = Http::withHeaders($headers)
                 ->timeout(30)
-                ->withBasicAuth($secretKey, '')
                 ->post($endpoint, $body);
 
             $responseData = $response->json();
             $statusCode = $response->status();
 
-            Log::info('Refund Response', [
+            Log::info('Maya Refund Response', [
                 'status' => $statusCode,
                 'body' => $responseData,
                 'transaction_ref' => $transactionReferenceNo,
-                'request_ref' => $requestReferenceNo
+                'request_ref' => $requestReferenceNo,
             ]);
 
-            // Handle specific error cases
+            // Handle auth errors
             if ($statusCode === 401) {
                 return [
-                    'error' => 'API authentication failed. Check key scopes and permissions.',
+                    'error' => 'Invalid or unauthorized key scope. Use a valid Secret Key (sk-...) with refund permissions.',
                     'code' => $responseData['code'] ?? 'AUTH_ERROR',
                     'reference' => $responseData['reference'] ?? null,
-                    'status' => $statusCode
+                    'status' => $statusCode,
                 ];
             }
 
+            // Handle failed refund
             if ($statusCode >= 400) {
                 return [
                     'error' => $responseData['error'] ?? 'Refund request failed',
                     'code' => $responseData['code'] ?? 'UNKNOWN_ERROR',
-                    'status' => $statusCode
+                    'status' => $statusCode,
+                    'reference' => $responseData['reference'] ?? null,
                 ];
             }
 
@@ -1039,16 +1044,17 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             Log::error('Refund failed: ' . $e->getMessage(), [
                 'transaction_ref' => $transactionReferenceNo,
-                'endpoint' => $endpoint
+                'endpoint' => $endpoint,
             ]);
 
             return [
                 'error' => true,
                 'message' => $e->getMessage(),
-                'status' => 500
+                'status' => 500,
             ];
         }
     }
+
 
     private function sendCancellationNotification($booking, $refundAmount, $reason)
     {
