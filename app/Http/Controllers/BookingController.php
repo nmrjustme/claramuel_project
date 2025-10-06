@@ -996,7 +996,7 @@ class BookingController extends Controller
         ];
 
         $body = [
-            'transactionReferenceNo' => $transactionReferenceNo,
+            'paymentTransactionReferenceNo' => $transactionReferenceNo,
             'reason' => $reason,
         ];
 
