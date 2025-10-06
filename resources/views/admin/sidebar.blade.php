@@ -35,24 +35,74 @@
                     </a>
                 </li>
 
-                <!-- Bookings -->
+                <!-- Manage Bookings Dropdown -->
                 <li>
-                    <a href="{{ route('admin.bookings') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'bookings' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="{{ $active === 'bookings' ? '2' : '1.5' }}"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    <div class="relative">
+                        <button
+                            class="flex items-center justify-between w-full py-3 px-4 rounded-lg transition-all duration-200 {{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}"
+                            id="manage-bookings-dropdown" aria-expanded="false">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="{{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? '2' : '1.5' }}"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                <span>Manage Bookings</span>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
-                            <span>Bookings</span>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="mt-1 ml-4 overflow-hidden transition-all duration-300 ease-in-out max-h-0"
+                            id="manage-bookings-menu">
+                            <ul class="space-y-1">
+                                <!-- Bookings -->
+                                <li>
+                                    <a href="{{ route('admin.bookings') }}"
+                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'bookings' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="{{ $active === 'bookings' ? '2' : '1.5' }}"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                        </svg>
+                                        <span>Bookings</span>
+                                    </a>
+                                </li>
+                                
+                                <!-- Arrivals -->
+                                <li>
+                                    <a href="{{ route('incoming.list') }}"
+                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'arrivals' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="{{ $active === 'arrivals' ? '2' : '1.5' }}"
+                                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
+                                        </svg>
+                                        <span>Arrivals</span>
+                                    </a>
+                                </li>
+                                
+                                <!-- Calendar -->
+                                <li>
+                                    <a href="{{ route('admin.calendar') }}"
+                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'calendar' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="{{ $active === 'calendar' ? '2' : '1.5' }}"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>Calendar</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
-                        <span id="inquiries-badge"
-                            class="hidden text-xs font-semibold bg-yellow-400 text-black px-2 py-0.5 rounded-full ml-2">
-                            0 new
-                        </span>
-                    </a>
+                    </div>
                 </li>
 
                 <!--Day Tour -->
@@ -76,69 +126,20 @@
                     <a href="{{ route('admin.daytour.facility_monitoring') }}"
                         class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'facility_monitoring' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
                         <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" 
-                                class="h-5 w-5 mr-3" 
-                                fill="none" 
-                                viewBox="0 0 24 24" 
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
-                                <path stroke-linecap="round" 
-                                    stroke-linejoin="round" 
-                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}" 
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}"
                                     d="M3 9.75L12 4l9 5.75V19a2 2 0 01-2 2H5a2 2 0 01-2-2V9.75z" />
-                                <path stroke-linecap="round" 
-                                    stroke-linejoin="round" 
-                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}" 
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}"
                                     d="M9 22V12h6v10" />
                             </svg>
                             <span>Facility Monitoring</span>
                         </div>
                     </a>
                 </li>
-                
-                <!-- Inquiries Log -->
-                {{-- <li>
-                    <a href="{{ route('admin.inquiries') }}"
-                        class="flex items-center justify-between py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'inquiries' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="{{ $active === 'inquiries' ? '2' : '1.5' }}"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            <span>Booking Logs</span>
-                        </div>
-                    
-                    </a>
-                </li> --}}
 
-                <!-- Arrivals -->
-                <li>
-                    <a href="{{ route('incoming.list') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'arrivals' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="{{ $active === 'arrivals' ? '2' : '1.5' }}"
-                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
-                        </svg>
-                        <span>Arrivals</span>
-                    </a>
-                </li>
-
-                <!-- Calendar -->
-                <li>
-                    <a href="{{ route('admin.calendar') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'calendar' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="{{ $active === 'calendar' ? '2' : '1.5' }}"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>Calendar</span>
-                    </a>
-                </li>
                 <!-- Facilities -->
                 <li>
                     <a href="{{ route('admin.facilities.index') }}"
@@ -156,17 +157,28 @@
                 <!-- Accounting -->
                 <li>
                     <a href="{{ route('admin.accounting.index') }}"
-                    class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'accounting' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                             class="h-5 w-5 mr-3" 
-                             fill="none" 
-                             viewBox="0 0 24 24" 
-                             stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" 
-                                  stroke-width="{{ $active === 'accounting' ? '2' : '1.5' }}" 
-                                  d="M2.25 6.75h19.5v10.5H2.25zM6 9h.008v.008H6V9zm12 0h.008v.008H18V9zm-6 2.25a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" />
+                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'accounting' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="{{ $active === 'accounting' ? '2' : '1.5' }}"
+                                d="M2.25 6.75h19.5v10.5H2.25zM6 9h.008v.008H6V9zm12 0h.008v.008H18V9zm-6 2.25a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" />
                         </svg>
                         <span>Accounting</span>
+                    </a>
+                </li>
+
+                <!-- Earnings Chart -->
+                <li>
+                    <a href="{{ route('earnings.chart') }}"
+                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'earnings' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="{{ $active === 'earnings' ? '2' : '1.5' }}"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Earnings Chart</span>
                     </a>
                 </li>
 
@@ -225,3 +237,34 @@
         </div>
     </div>
 </aside>
+
+<!-- JavaScript for dropdown functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownButton = document.getElementById('manage-bookings-dropdown');
+        const dropdownMenu = document.getElementById('manage-bookings-menu');
+        
+        dropdownButton.addEventListener('click', function() {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            
+            // Toggle the dropdown icon rotation
+            const icon = this.querySelector('svg:last-child');
+            icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+            
+            // Toggle the dropdown menu
+            if (isExpanded) {
+                dropdownMenu.style.maxHeight = '0';
+            } else {
+                dropdownMenu.style.maxHeight = dropdownMenu.scrollHeight + 'px';
+            }
+        });
+        
+        // Auto-expand if current page is in the dropdown
+        if (dropdownMenu.querySelector('a.bg-red-700')) {
+            dropdownButton.setAttribute('aria-expanded', 'true');
+            dropdownButton.querySelector('svg:last-child').style.transform = 'rotate(180deg)';
+            dropdownMenu.style.maxHeight = dropdownMenu.scrollHeight + 'px';
+        }
+    });
+</script>

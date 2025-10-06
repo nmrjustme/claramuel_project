@@ -699,50 +699,111 @@
             opacity: 1;
             background-color: rgba(239, 68, 68, 0.1);
         }
+
+        /* Cancel Modal Styles */
+        .cancel-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cancel-modal.active {
+            display: flex;
+        }
+
+        .cancel-modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .cancel-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .cancel-modal-close:hover {
+            color: #374151;
+        }
+
+        .refund-option {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+
+        .modal-btn-confirm {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+        }
+
+        .modal-btn-confirm:hover {
+            background-color: #b91c1c;
+        }
+
+        .modal-btn-confirm:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
     </style>
 @endsection
 
 @section('content')
     <div class="min-h-screen px-6 py-6">
-         <!-- Email Verification Alert -->
+        <!-- Email Verification Alert -->
         @if (empty(Auth::user()->email_verified_at))
             <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div class="flex items-start">
                     <!-- Icon -->
                     <svg class="w-5 h-5 text-yellow-600 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 
-                            2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 
-                            0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 
+                                                    2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 
+                                                    0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
 
                     <!-- Text & Button -->
                     <div class="flex-1">
                         <h3 class="text-lg font-medium text-yellow-800">Email Verification Required</h3>
                         <p class="text-yellow-700 mt-1">
-                            Please verify your email address before performing any actions in booking.  
+                            Please verify your email address before performing any actions in booking.
                             A verification link will be sent to your email.
                         </p>
 
                         <form method="POST" action="{{ route('verification.send') }}" class="mt-2">
                             @csrf
                             <button type="submit"
-                                    class="text-yellow-800 hover:text-yellow-900 underline text-sm font-medium cursor-pointer">
+                                class="text-yellow-800 hover:text-yellow-900 underline text-sm font-medium cursor-pointer">
                                 Send Verification Email
                             </button>
                         </form>
 
                         @if (session('status') == 'verification-link-sent')
                             <div class="mt-2 flex items-center text-sm text-green-600">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 mr-1"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 
-                                        16zm3.707-9.293a1 1 0 00-1.414-1.414L9 
-                                        10.586 7.707 9.293a1 1 0 00-1.414 
-                                        1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 
+                                                                            16zm3.707-9.293a1 1 0 00-1.414-1.414L9 
+                                                                            10.586 7.707 9.293a1 1 0 00-1.414 
+                                                                            1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                                 Verification link sent!
                             </div>
@@ -754,105 +815,110 @@
 
 
         <div class="flex flex-col mb-10">
-        <!-- Container -->
-        <div class="bg-white rounded-lg border border-lightgray">
-            
-            <!-- Title -->
-            <div class="px-4 pt-6 pb-4 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800">
-                    SEARCH TODAY'S GUEST CHECK-IN OR CHECKOUT
-                </h2>
-            </div>
+            <!-- Container -->
+            <div class="bg-white rounded-lg border border-lightgray">
 
-            <!-- Content -->
-            <div class="flex flex-col md:flex-row gap-8 p-8">
-                
-                <!-- Manual Search Fields -->
-                <div class="flex flex-col md:flex-row md:items-end flex-wrap gap-6 flex-1">
-                    
-                    <div class="flex flex-col min-w-[200px] flex-1">
-                        <label for="search-firstname" class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">First Name</label>
-                        <input type="text" id="search-firstname" placeholder="Enter first name"
-                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
-                    </div>
+                <!-- Title -->
+                <div class="px-4 pt-6 pb-4 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800">
+                        SEARCH TODAY'S GUEST CHECK-IN OR CHECKOUT
+                    </h2>
+                </div>
 
-                    <div class="flex flex-col min-w-[200px] flex-1">
-                        <label for="search-lastname" class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Last Name</label>
-                        <input type="text" id="search-lastname" placeholder="Enter last name"
-                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
-                    </div>
+                <!-- Content -->
+                <div class="flex flex-col md:flex-row gap-8 p-8">
 
-                    <div class="flex flex-col min-w-[200px] flex-1">
-                        <label for="search-date" class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Date <span
-                                class="text-xs text-gray-500 font-normal">(Adjust if needed)</span></label>
-                        <input type="date" id="search-date" value="{{ date('Y-m-d') }}"
-                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
-                    </div>
+                    <!-- Manual Search Fields -->
+                    <div class="flex flex-col md:flex-row md:items-end flex-wrap gap-6 flex-1">
 
-                    <!-- Check-in/Check-out Toggle -->
-                    <div class="flex flex-col">
-                        <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Search Type</label>
-                        <div class="flex bg-gray-100 rounded-xl p-1 shadow-inner">
-                            <input type="radio" id="search-checkin" name="search-type" value="checkin"
-                                class="hidden peer/checkin" checked>
-                            <label for="search-checkin"
-                                class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkin:bg-red-600 peer-checked/checkin:text-white peer-checked/checkin:shadow-md">
-                                Check-in
-                            </label>
+                        <div class="flex flex-col min-w-[200px] flex-1">
+                            <label for="search-firstname"
+                                class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">First Name</label>
+                            <input type="text" id="search-firstname" placeholder="Enter first name"
+                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                        </div>
 
-                            <input type="radio" id="search-checkout" name="search-type" value="checkout"
-                                class="hidden peer/checkout">
-                            <label for="search-checkout"
-                                class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkout:bg-red-600 peer-checked/checkout:text-white peer-checked/checkout:shadow-md">
-                                Check-out
-                            </label>
+                        <div class="flex flex-col min-w-[200px] flex-1">
+                            <label for="search-lastname"
+                                class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Last Name</label>
+                            <input type="text" id="search-lastname" placeholder="Enter last name"
+                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                        </div>
+
+                        <div class="flex flex-col min-w-[200px] flex-1">
+                            <label for="search-date"
+                                class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Date <span
+                                    class="text-xs text-gray-500 font-normal">(Adjust if needed)</span></label>
+                            <input type="date" id="search-date" value="{{ date('Y-m-d') }}"
+                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                        </div>
+
+                        <!-- Check-in/Check-out Toggle -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Search
+                                Type</label>
+                            <div class="flex bg-gray-100 rounded-xl p-1 shadow-inner">
+                                <input type="radio" id="search-checkin" name="search-type" value="checkin"
+                                    class="hidden peer/checkin" checked>
+                                <label for="search-checkin"
+                                    class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkin:bg-red-600 peer-checked/checkin:text-white peer-checked/checkin:shadow-md">
+                                    Check-in
+                                </label>
+
+                                <input type="radio" id="search-checkout" name="search-type" value="checkout"
+                                    class="hidden peer/checkout">
+                                <label for="search-checkout"
+                                    class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkout:bg-red-600 peer-checked/checkout:text-white peer-checked/checkout:shadow-md">
+                                    Check-out
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Search and Clear Buttons -->
+                        <div class="flex flex-col md:flex-row md:items-end gap-3 mt-2 md:mt-0">
+                            <button id="search-button"
+                                class="px-6 py-2.5 bg-green-600 cursor-pointer text-white rounded-xl hover:bg-green-700 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
+                                Search
+                            </button>
+                            <button id="clear-button"
+                                class="px-6 py-2.5 bg-gray-200 cursor-pointer text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
+                                Reset
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Search and Clear Buttons -->
-                    <div class="flex flex-col md:flex-row md:items-end gap-3 mt-2 md:mt-0">
-                        <button id="search-button"
-                            class="px-6 py-2.5 bg-green-600 cursor-pointer text-white rounded-xl hover:bg-green-700 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
-                            Search
-                        </button>
-                        <button id="clear-button"
-                            class="px-6 py-2.5 bg-gray-200 cursor-pointer text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
-                            Reset
+                    <!-- Divider with OR -->
+                    <div class="flex items-center justify-center">
+                        <div class="hidden md:flex items-center h-12">
+                            <div class="border-t border-gray-300 w-10"></div>
+                            <span class="mx-3 text-sm font-semibold text-gray-500">OR</span>
+                            <div class="border-t border-gray-300 w-10"></div>
+                        </div>
+                    </div>
+
+                    <!-- QR Scanner Button -->
+                    <div class="flex flex-col min-w-[220px]">
+                        <label class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Quick Access</label>
+                        <button id="qr-scanner-btn"
+                            class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 shadow-md transition hover:shadow-lg active:scale-95 cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2m-10 0H5a2 2 0 01-2-2v-2" />
+                            </svg>
+                            Scan QR Code
                         </button>
                     </div>
-                </div>
-
-                <!-- Divider with OR -->
-                <div class="flex items-center justify-center">
-                    <div class="hidden md:flex items-center h-12">
-                        <div class="border-t border-gray-300 w-10"></div>
-                        <span class="mx-3 text-sm font-semibold text-gray-500">OR</span>
-                        <div class="border-t border-gray-300 w-10"></div>
-                    </div>
-                </div>
-
-                <!-- QR Scanner Button -->
-                <div class="flex flex-col min-w-[220px]">
-                    <label class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Quick Access</label>
-                    <button id="qr-scanner-btn"
-                        class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 shadow-md transition hover:shadow-lg active:scale-95 cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2m-10 0H5a2 2 0 01-2-2v-2" />
-                        </svg>
-                        Scan QR Code
-                    </button>
                 </div>
             </div>
         </div>
-    </div>
 
 
 
         <div class="flex flex-col lg:flex-row gap-4">
             <!-- Main Content - Fixed width and overflow -->
             <div class="main-content lg:w-1/2 w-full">
+
                 <div class="glass-card p-4 hover-scale bg-white rounded-lg border border-lightgray">
 
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -901,7 +967,8 @@
                             <!-- Refresh Button -->
                             <button id="refreshBtn"
                                 class="flex items-center text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                                    fill="currentColor">
                                     <path fill-rule="evenodd"
                                         d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                                         clip-rule="evenodd" />
@@ -916,29 +983,29 @@
                     <hr class="border-gray-300 my-3">
 
                     <!-- Booking Table - Fixed container -->
-                    <div class="table-container">
+                    <div class="table-container mt-4">
                         <div class="overflow-x-auto custom-scroll">
-                            <table class="min-w-full divide-y divide-gray-200 compact-table">
+                            <table class="w-full divide-y divide-gray-200 compact-table">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th
-                                            class="px-3 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             ID
                                         </th>
                                         <th
-                                            class="px-3 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Status
                                         </th>
                                         <th
-                                            class="px-3 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Guest
                                         </th>
                                         <th
-                                            class="px-3 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Check-in
                                         </th>
                                         <th
-                                            class="px-3 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Action
                                         </th>
                                     </tr>
@@ -946,19 +1013,21 @@
                                 <tbody class="bg-white divide-y divide-gray-200" id="bookings-table-body">
                                     <!-- Loading state -->
                                     <tr>
-                                        <td colspan="5" class="px-6 py-6 text-center">
-                                            <div class="flex justify-center">
-                                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600">
+                                        <td colspan="5" class="px-6 py-8 text-center">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <div
+                                                    class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mb-3">
                                                 </div>
+                                                <p class="text-gray-600 font-medium">Loading bookings...</p>
+                                                <p class="text-sm text-gray-500 mt-1">Please wait while we fetch your data
+                                                </p>
                                             </div>
-                                            <p class="mt-2 text-lg text-gray-500">Loading bookings...</p>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
                     <!-- Pagination -->
                     <div class="flex flex-col lg:flex-row justify-between items-center mt-4 gap-3">
                         <div id="pagination-info" class="text-sm text-gray-600"></div>
@@ -1135,6 +1204,107 @@
             </div>
         </div>
     </div>
+
+    <!-- Cancel Booking Modal -->
+    <div id="cancel-modal" class="cancel-modal">
+        <div class="cancel-modal-content">
+            <button id="cancel-modal-close" class="cancel-modal-close">&times;</button>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Cancel Booking</h2>
+
+            <div class="cancel-options mb-6">
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="refund-type" value="non_refundable" class="refund-option mr-3" checked>
+                        <span class="text-gray-700 font-medium">Non-refundable</span>
+                    </label>
+                    <p class="text-sm text-gray-500 ml-6 mt-1">No refund will be issued for this cancellation</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="refund-type" value="refundable" class="refund-option mr-3">
+                        <span class="text-gray-700 font-medium">Refundable</span>
+                    </label>
+                    <p class="text-sm text-gray-500 ml-6 mt-1">Issue a refund for this cancellation</p>
+                </div>
+            </div>
+
+            <!-- Refund Details Section (Initially Hidden) -->
+            <div id="refund-details" class="refund-details space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Refund Amount Type
+                    </label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="refund-amount-type" value="full" class="refund-option mr-2" checked>
+                            <span class="text-gray-700">Full Refund</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="refund-amount-type" value="half" class="refund-option mr-2">
+                            <span class="text-gray-700">Half Refund</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="refund-reason" class="block text-sm font-medium text-gray-700 mb-2">
+                        Refund Reason
+                    </label>
+                    <select id="refund-reason"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                        <option value="">Select a reason</option>
+                        <option value="guest_request">Guest Request</option>
+                        <option value="double_booking">Double Booking</option>
+                        <option value="facility_issue">Facility Issue</option>
+                        <option value="weather_conditions">Weather Conditions</option>
+                        <option value="emergency">Emergency</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div id="custom-reason-container" class="hidden">
+                    <label for="custom-reason" class="block text-sm font-medium text-gray-700 mb-2">
+                        Custom Reason
+                    </label>
+                    <textarea id="custom-reason" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        placeholder="Please specify the reason for cancellation..."></textarea>
+                </div>
+            </div>
+
+            <div class="cancel-summary mb-6 p-4 bg-gray-50 rounded-lg">
+                <h4 class="text-sm font-semibold text-gray-800 mb-2">Cancellation Summary</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Booking Code:</span>
+                        <span id="cancel-booking-id" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Guest:</span>
+                        <span id="cancel-guest-name" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Amount:</span>
+                        <span id="cancel-total-amount" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Amount Paid:</span>
+                        <span id="cancel-amount-paid" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between border-t border-gray-200 pt-2 mt-2">
+                        <span class="text-gray-800 font-semibold">Refund Amount:</span>
+                        <span id="cancel-refund-summary" class="font-semibold text-red-600">₱0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-action-buttons">
+                <button id="cancel-modal-cancel" class="modal-btn modal-btn-cancel">Back</button>
+                <button id="cancel-modal-confirm" class="modal-btn modal-btn-confirm">Confirm Cancellation</button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('content_js')
@@ -1172,6 +1342,252 @@
             const guestModalCancel = document.getElementById('guest-modal-cancel');
             const guestModalSave = document.getElementById('guest-modal-save');
             let currentFacilityBookingLogId = null;
+
+            // Cancel Booking Modal Functionality
+            const cancelModal = document.getElementById('cancel-modal');
+            const cancelModalClose = document.getElementById('cancel-modal-close');
+            const cancelModalCancel = document.getElementById('cancel-modal-cancel');
+            const cancelModalConfirm = document.getElementById('cancel-modal-confirm');
+            const refundOptions = document.querySelectorAll('input[name="refund-type"]');
+            const refundAmountOptions = document.querySelectorAll('input[name="refund-amount-type"]');
+            const refundReason = document.getElementById('refund-reason');
+            const customReasonContainer = document.getElementById('custom-reason-container');
+            const customReason = document.getElementById('custom-reason');
+
+            let currentCancellingBookingId = null;
+
+            // Event Listeners for Cancel Modal
+            cancelModalClose.addEventListener('click', closeCancelModal);
+            cancelModalCancel.addEventListener('click', closeCancelModal);
+
+            cancelModal.addEventListener('click', function (e) {
+                if (e.target === cancelModal) {
+                    closeCancelModal();
+                }
+            });
+
+            // Refund type change handler
+            refundOptions.forEach(option => {
+                option.addEventListener('change', function () {
+                    updateRefundSection();
+                    calculateRefundSummary();
+                });
+            });
+
+            // Refund amount type change handler
+            refundAmountOptions.forEach(option => {
+                option.addEventListener('change', function () {
+                    calculateRefundSummary();
+                });
+            });
+
+            // Refund reason change handler
+            refundReason.addEventListener('change', function () {
+                if (this.value === 'other') {
+                    customReasonContainer.classList.remove('hidden');
+                } else {
+                    customReasonContainer.classList.add('hidden');
+                    customReason.value = '';
+                }
+            });
+
+            // Cancel button click handlers (event delegation)
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('.btn-cancel')) {
+                    const button = e.target.closest('.btn-cancel');
+                    const bookingId = button.dataset.bookingId;
+                    openCancelModal(bookingId);
+                }
+            });
+
+            // Confirm cancellation handler
+            cancelModalConfirm.addEventListener('click', function () {
+                if (currentCancellingBookingId) {
+                    confirmCancellation(currentCancellingBookingId);
+                }
+            });
+
+            function openCancelModal(bookingId) {
+                currentCancellingBookingId = bookingId;
+
+                // Reset form
+                document.querySelector('input[name="refund-type"][value="non_refundable"]').checked = true;
+                document.querySelector('input[name="refund-amount-type"][value="full"]').checked = true;
+                refundReason.value = '';
+                customReasonContainer.classList.add('hidden');
+                customReason.value = '';
+
+                // Load booking details for summary
+                loadBookingDetailsForCancellation(bookingId);
+
+                // Update UI
+                updateRefundSection();
+                calculateRefundSummary();
+
+                // Show modal
+                cancelModal.classList.add('active');
+            }
+
+            function closeCancelModal() {
+                cancelModal.classList.remove('active');
+                currentCancellingBookingId = null;
+            }
+
+            function updateRefundSection() {
+                const refundDetails = document.getElementById('refund-details');
+                const refundType = document.querySelector('input[name="refund-type"]:checked').value;
+
+                if (refundType === 'refundable') {
+                    refundDetails.classList.remove('hidden');
+                    cancelModalConfirm.disabled = false;
+                } else {
+                    refundDetails.classList.add('hidden');
+                    cancelModalConfirm.disabled = false;
+                }
+            }
+
+            async function loadBookingDetailsForCancellation(bookingId) {
+                try {
+                    // Show loading state
+                    document.getElementById('cancel-booking-id').textContent = 'Loading...';
+                    document.getElementById('cancel-guest-name').textContent = 'Loading...';
+                    document.getElementById('cancel-total-amount').textContent = 'Loading...';
+                    document.getElementById('cancel-amount-paid').textContent = 'Loading...';
+                    document.getElementById('cancel-refund-summary').textContent = '₱0.00';
+
+                    const response = await fetch(`/get/show/bookings/${bookingId}`, {
+                        method: 'GET',
+                        headers: headers,
+                        credentials: 'same-origin'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load booking details');
+                    }
+
+                    const data = await response.json();
+                    const booking = data.data;
+                    const detail = booking.details?.[0];
+
+                    // Calculate payment details
+                    const advancePaid = parseFloat(booking.payments?.[0]?.amount) || 0;
+                    const checkinPaid = parseFloat(booking.payments?.[0]?.checkin_paid) || 0;
+                    const totalAmount = booking.details?.reduce((sum, detail) => {
+                        return sum + parseFloat(detail.total_price || 0);
+                    }, 0) || 0;
+                    const totalPaid = advancePaid + checkinPaid;
+
+                    // Update summary
+                    document.getElementById('cancel-booking-id').textContent = booking.code || booking.id;
+                    document.getElementById('cancel-guest-name').textContent =
+                        `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
+                    document.getElementById('cancel-total-amount').textContent = formatCurrency(totalAmount);
+                    document.getElementById('cancel-amount-paid').textContent = formatCurrency(totalPaid);
+
+                    // Calculate initial refund summary
+                    calculateRefundSummary();
+
+                } catch (error) {
+                    console.error('Error loading booking details for cancellation:', error);
+                    showToast('error', 'Failed to load booking details');
+                    closeCancelModal();
+                }
+            }
+
+            function calculateRefundSummary() {
+                if (!currentCancellingBookingId) return;
+
+                const refundType = document.querySelector('input[name="refund-type"]:checked').value;
+                const amountPaidText = document.getElementById('cancel-amount-paid').textContent;
+
+                // Extract numeric value from currency string
+                const amountPaid = parseFloat(amountPaidText.replace(/[^\d.-]/g, '')) || 0;
+
+                let refundAmount = 0;
+
+                if (refundType === 'refundable') {
+                    const refundAmountType = document.querySelector('input[name="refund-amount-type"]:checked').value;
+
+                    if (refundAmountType === 'full') {
+                        refundAmount = amountPaid;
+                    } else if (refundAmountType === 'half') {
+                        refundAmount = amountPaid * 0.5;
+                    }
+                } else {
+                    refundAmount = 0;
+                }
+
+                document.getElementById('cancel-refund-summary').textContent = formatCurrency(refundAmount);
+            }
+
+            async function confirmCancellation(bookingId) {
+                try {
+                    // Get cancellation details
+                    const refundType = document.querySelector('input[name="refund-type"]:checked').value;
+                    const refundAmountType = document.querySelector('input[name="refund-amount-type"]:checked')?.value || '';
+                    const reason = refundReason.value === 'other' ? customReason.value : refundReason.value;
+
+                    // Validate required fields for refundable cancellation
+                    if (refundType === 'refundable') {
+                        if (!reason.trim()) {
+                            showToast('error', 'Please provide a reason for the refund');
+                            return;
+                        }
+                    }
+
+                    // Show loading state
+                    cancelModalConfirm.disabled = true;
+                    cancelModalConfirm.innerHTML = '<div class="btn-preloader"></div> Processing...';
+
+                    // Prepare cancellation data
+                    const cancellationData = {
+                        refund_type: refundType,
+                        reason: reason
+                    };
+
+                    if (refundType === 'refundable') {
+                        cancellationData.refund_amount_type = refundAmountType;
+                    }
+
+                    // Send cancellation request
+                    const response = await fetch(`/bookings/${bookingId}/cancel`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(cancellationData)
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || 'Failed to cancel booking');
+                    }
+
+                    // Show success message
+                    showToast('success', 'Booking cancelled successfully');
+
+                    // Close modal
+                    closeCancelModal();
+
+                    // Reload bookings and summary
+                    loadBookings(currentStatus, currentPage);
+                    if (currentBookingId === bookingId) {
+                        loadBookingSummary(bookingId);
+                    }
+
+                } catch (error) {
+                    console.error('Error cancelling booking:', error);
+                    showToast('error', error.message || 'Failed to cancel booking');
+
+                    // Reset button state
+                    cancelModalConfirm.disabled = false;
+                    cancelModalConfirm.textContent = 'Confirm Cancellation';
+                }
+            }
+
+            // Helper function to format currency (make sure this exists)
+            function formatCurrency(amount) {
+                return '₱' + parseFloat(amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            }
 
             const guestTypes = {
                 kid: { price: 0, quantity: 0, element: 'kid' },
@@ -1435,10 +1851,10 @@
                 const firstName = document.getElementById('search-firstname').value.trim();
                 const lastName = document.getElementById('search-lastname').value.trim();
                 const date = document.getElementById('search-date').value;
-                
+
                 // Build search parameters with proper validation
                 let searchParams = new URLSearchParams();
-                
+
                 if (firstName) searchParams.append('firstname', firstName);
                 if (lastName) searchParams.append('lastname', lastName);
                 if (date) {
@@ -1449,7 +1865,7 @@
                     }
                 }
                 searchParams.append('date_type', searchType);
-                
+
                 currentPage = 1;
                 loadBookings(currentStatus, currentPage, searchParams.toString());
             }
@@ -1790,6 +2206,10 @@
                     class: 'bg-blue-600',
                     text: 'CHECKED IN'
                 },
+                'cancelled': {
+                    class: 'bg-red-600',
+                    text: 'CANCELLED'
+                },
                 'checked_out': {
                     class: 'bg-purple-600',
                     text: 'CHECKED OUT'
@@ -1857,15 +2277,15 @@
 
                     // Show loading state
                     document.getElementById('bookings-table-body').innerHTML = `
-                                                                    <tr>
-                                                                        <td colspan="5" class="px-6 py-6 text-center">
-                                                                            <div class="flex justify-center">
-                                                                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
-                                                                            </div>
-                                                                            <p class="mt-2 text-lg text-gray-500">Loading bookings...</p>
-                                                                        </td>
-                                                                    </tr>
-                                                                `;
+                                                                                <tr>
+                                                                                    <td colspan="5" class="px-6 py-6 text-center">
+                                                                                        <div class="flex justify-center">
+                                                                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
+                                                                                        </div>
+                                                                                        <p class="mt-2 text-lg text-gray-500">Loading bookings...</p>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            `;
 
                     fetch(url, {
                         method: 'GET',
@@ -1891,15 +2311,15 @@
 
                             if (bookings.length === 0) {
                                 html = `
-                                                                            <tr>
-                                                                                <td colspan="5" class="px-6 py-6 text-center">
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                                    </svg>
-                                                                                    <p class="mt-2 text-lg text-gray-500">No bookings found</p>
-                                                                                </td>
-                                                                            </tr>
-                                                                        `;
+                                                                                        <tr>
+                                                                                            <td colspan="5" class="px-6 py-6 text-center">
+                                                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                                </svg>
+                                                                                                <p class="mt-2 text-lg text-gray-500">No bookings found</p>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    `;
                             } else {
                                 bookings.forEach(booking => {
                                     const detail = booking.details?.[0];
@@ -1908,35 +2328,38 @@
                                     const statusInfo = STATUS_CONFIG[displayStatus] || { class: 'bg-yellow-600', text: displayStatus.toUpperCase() };
                                     const isPending = displayStatus === 'pending_confirmation';
                                     html += `
-                                                                                <tr class="booking-row ${isPending ? 'pending' : ''} cursor-pointer" data-booking-id="${booking.id}">
-                                                                                    <td class="px-3 py-2">
-                                                                                        <div class="text-sm text-gray-900 font-medium">${booking.id}</div>
-                                                                                    </td>
-                                                                                    <td class="px-3 py-2">
-                                                                                        <span class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${statusInfo.class} text-white status-badge">
-                                                                                            ${statusInfo.text}
-                                                                                        </span>
-                                                                                    </td>
-                                                                                    <td class="px-3 py-2">
-                                                                                        <div class="text-lg text-gray-900">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</div>
-                                                                                        <div class="text-sm text-gray-500">${booking.user?.phone || 'No phone'}</div>
-                                                                                    </td>
-                                                                                    <td class="px-3 py-2">
-                                                                                        <div class="text-sm text-gray-900">${detail ? formatDate(detail.checkin_date) : 'N/A'}</div>
-                                                                                        <div class="text-sm text-gray-500">${detail ? getNights(detail.checkin_date, detail.checkout_date) + ' nights' : 'N/A'}</div>
-                                                                                    </td>
-                                                                                    <td class="px-3 py-2">
-                                                                                        <div class="flex flex-wrap gap-1 justify-start">
-                                                                                            <button class="action-btn-details btn-details" data-booking-id="${booking.id}" data-action="details">
-                                                                                                Details
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            `;
+                                                                                            <tr class="booking-row ${isPending ? 'pending' : ''} cursor-pointer" data-booking-id="${booking.id}">
+                                                                                                <td class="px-3 py-2">
+                                                                                                    <div class="text-sm text-gray-900 font-medium">${booking.id}</div>
+                                                                                                </td>
+                                                                                                <td class="px-3 py-2">
+                                                                                                    <span class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${statusInfo.class} text-white status-badge">
+                                                                                                        ${statusInfo.text}
+                                                                                                    </span>
+                                                                                                </td>
+                                                                                                <td class="px-3 py-2">
+                                                                                                    <div class="text-lg text-gray-900">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</div>
+                                                                                                    <div class="text-sm text-gray-500">${booking.user?.phone || 'No phone'}</div>
+                                                                                                </td>
+                                                                                                <td class="px-3 py-2">
+                                                                                                    <div class="text-sm text-gray-900">${detail ? formatDate(detail.checkin_date) : 'N/A'}</div>
+                                                                                                    <div class="text-sm text-gray-500">${detail ? getNights(detail.checkin_date, detail.checkout_date) + ' nights' : 'N/A'}</div>
+                                                                                                </td>
+                                                                                                <td class="px-3 py-2">
+                                                                                                    <div class="flex flex-wrap gap-1 justify-start">
+                                                                                                        <button class="action-btn-details btn-details" data-booking-id="${booking.id}" data-action="details">
+                                                                                                            Details
+                                                                                                        </button>
+                                                                                                        <button class="action-btn-details btn-cancel bg-red-600 hover:bg-red-800 text-white" 
+                                                                                                                data-booking-id="${booking.id}" data-action="cancel">
+                                                                                                            Cancel
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        `;
                                 });
                             }
-
                             document.getElementById('bookings-table-body').innerHTML = html;
 
                             // Add click handlers for action buttons
@@ -1982,28 +2405,28 @@
                             showToast('error', 'Failed to load bookings');
                             console.error('Error:', error);
                             document.getElementById('bookings-table-body').innerHTML = `
-                                                                        <tr>
-                                                                            <td colspan="5" class="px-6 py-6 text-center">
-                                                                                <div class="bg-red-50 border-l-4 border-red-400 p-3">
-                                                                                    <div class="flex">
-                                                                                        <div class="flex-shrink-0">
-                                                                                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                                                                            </svg>
-                                                                                        </div>
-                                                                                        <div class="ml-3">
-                                                                                            <p class="text-lg text-red-700">
-                                                                                                Failed to load bookings. Please try again later.
-                                                                                            </p>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <button onclick="loadBookings(currentStatus, currentPage)" class="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
-                                                                                        Retry
-                                                                                    </button>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    `;
+                                                                                    <tr>
+                                                                                        <td colspan="5" class="px-6 py-6 text-center">
+                                                                                            <div class="bg-red-50 border-l-4 border-red-400 p-3">
+                                                                                                <div class="flex">
+                                                                                                    <div class="flex-shrink-0">
+                                                                                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                                                                        </svg>
+                                                                                                    </div>
+                                                                                                    <div class="ml-3">
+                                                                                                        <p class="text-lg text-red-700">
+                                                                                                            Failed to load bookings. Please try again later.
+                                                                                                        </p>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <button onclick="loadBookings(currentStatus, currentPage)" class="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+                                                                                                    Retry
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                `;
                             reject(error);
                         });
                 });
@@ -2060,13 +2483,13 @@
                 try {
                     // Show loading state
                     document.getElementById('booking-summary').innerHTML = `
-                                                                    <div class="text-center py-6 px-3">
-                                                                        <div class="flex justify-center">
-                                                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
-                                                                        </div>
-                                                                        <p class="mt-2 text-lg text-gray-500">Loading booking details...</p>
-                                                                    </div>
-                                                                `;
+                                                                                <div class="text-center py-6 px-3">
+                                                                                    <div class="flex justify-center">
+                                                                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
+                                                                                    </div>
+                                                                                    <p class="mt-2 text-lg text-gray-500">Loading booking details...</p>
+                                                                                </div>
+                                                                            `;
 
                     // Fetch booking data
                     const response = await fetch(`/get/show/bookings/${bookingId}`, {
@@ -2121,10 +2544,10 @@
                             const price = summary.facility_price || 0;
 
                             return room ? `
-                                                                            <li class="flex justify-between py-1.5 border-b border-gray-100 last:border-0">
-                                                                                <span class="text-sm text-gray-700">${room.name}</span>
-                                                                                <span class="text-sm font-medium text-gray-800">${formatCurrency(price)}</span>
-                                                                            </li>` : '';
+                                                                                        <li class="flex justify-between py-1.5 border-b border-gray-100 last:border-0">
+                                                                                            <span class="text-sm text-gray-700">${room.name}</span>
+                                                                                            <span class="text-sm font-medium text-gray-800">${formatCurrency(price)}</span>
+                                                                                        </li>` : '';
                         }).join('')
                         : '<li class="text-sm text-gray-600 py-1.5">No room info available</li>';
 
@@ -2160,29 +2583,29 @@
                             // Create guest items HTML
                             const guestItems = Object.entries(guestTypeCounts).length
                                 ? `
-                                                                                <table class="w-full border-collapse mt-1">
-                                                                                    <tbody>
-                                                                                        ${Object.entries(guestTypeCounts).map(([type, quantity]) => `
-                                                                                            <tr>
-                                                                                                <td class="p-0.5 border-b border-gray-200 text-sm">${type}</td>
-                                                                                                <td class="p-0.5 border-b border-gray-200 text-sm text-right">${quantity} guest${quantity !== 1 ? 's' : ''}</td>
-                                                                                            </tr>
-                                                                                        `).join('')}
-                                                                                        <tr class="font-semibold">
-                                                                                            <td class="p-0.5 text-sm">Total Guests</td>
-                                                                                            <td class="p-0.5 text-sm text-right">${Object.values(guestTypeCounts).reduce((a, b) => a + b, 0)}</td>
-                                                                                        </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            `
+                                                                                            <table class="w-full border-collapse mt-1">
+                                                                                                <tbody>
+                                                                                                    ${Object.entries(guestTypeCounts).map(([type, quantity]) => `
+                                                                                                        <tr>
+                                                                                                            <td class="p-0.5 border-b border-gray-200 text-sm">${type}</td>
+                                                                                                            <td class="p-0.5 border-b border-gray-200 text-sm text-right">${quantity} guest${quantity !== 1 ? 's' : ''}</td>
+                                                                                                        </tr>
+                                                                                                    `).join('')}
+                                                                                                    <tr class="font-semibold">
+                                                                                                        <td class="p-0.5 text-sm">Total Guests</td>
+                                                                                                        <td class="p-0.5 text-sm text-right">${Object.values(guestTypeCounts).reduce((a, b) => a + b, 0)}</td>
+                                                                                                    </tr>
+                                                                                                </tbody>
+                                                                                            </table>
+                                                                                        `
                                 : '<p class="text-sm text-gray-500 italic mt-1">No guest details recorded</p>';
 
                             return `
-                                                                            <div class="mb-3 p-2 bg-gray-50 rounded">
-                                                                                <h4 class="text-sm font-semibold text-gray-800">${room.name}</h4>
-                                                                                ${guestItems}
-                                                                            </div>
-                                                                        `;
+                                                                                        <div class="mb-3 p-2 bg-gray-50 rounded">
+                                                                                            <h4 class="text-sm font-semibold text-gray-800">${room.name}</h4>
+                                                                                            ${guestItems}
+                                                                                        </div>
+                                                                                    `;
                         }).join('')
                         : '<p class="text-sm text-gray-500 italic">No room information available</p>';
 
@@ -2198,24 +2621,24 @@
 
                     // Generate breakfast HTML if available
                     const breakfastHtml = hasBreakfast ? `
-                                                                    <!-- Breakfast Information -->
-                                                                    <div class="px-3 py-3 bg-white">
-                                                                        <h4 class="text-sm font-semibold text-gray-800 flex items-center mb-1">                           
-                                                                            Breakfast Included
-                                                                        </h4>
-                                                                        <div class="mt-1 pl-5">
-                                                                        ${breakfastSummaries.map(summary => `
-                                                                            <div class="flex justify-between mb-1">
-                                                                                <span class="text-sm text-gray-600">${summary.facility.name} Breakfast:</span>
-                                                                                <span class="text-sm font-medium text-gray-800">
-                                                                                    ${summary.breakfast_price ? formatCurrency(summary.breakfast_price) : 'Included'}
-                                                                                </span>
-                                                                            </div>
-                                                                        `).join('')}
+                                                                                <!-- Breakfast Information -->
+                                                                                <div class="px-3 py-3 bg-white">
+                                                                                    <h4 class="text-sm font-semibold text-gray-800 flex items-center mb-1">                           
+                                                                                        Breakfast Included
+                                                                                    </h4>
+                                                                                    <div class="mt-1 pl-5">
+                                                                                    ${breakfastSummaries.map(summary => `
+                                                                                        <div class="flex justify-between mb-1">
+                                                                                            <span class="text-sm text-gray-600">${summary.facility.name} Breakfast:</span>
+                                                                                            <span class="text-sm font-medium text-gray-800">
+                                                                                                ${summary.breakfast_price ? formatCurrency(summary.breakfast_price) : 'Included'}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    `).join('')}
 
-                                                                        </div>
-                                                                    </div>
-                                                                ` : '';
+                                                                                    </div>
+                                                                                </div>
+                                                                            ` : '';
                     // Generate action buttons HTML based on booking status
                     let actionButtonsHtml = '';
 
@@ -2233,265 +2656,265 @@
                     const checkoutUrl = `/check-out/receipt/${bookingId}`;
 
                     actionButtonsHtml = `
-                        <button class="sidebar-btn bg-green-600 text-white hover:bg-green-700 ${buttonStates.confirm.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
-                            data-action="confirm" data-booking-id="${bookingId}" ${buttonStates.confirm.disabled ? 'disabled' : ''}>
-                            ${buttonStates.confirm.loading ? '<div class="btn-preloader"></div>' :
+                                    <button class="sidebar-btn bg-green-600 text-white hover:bg-green-700 ${buttonStates.confirm.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
+                                        data-action="confirm" data-booking-id="${bookingId}" ${buttonStates.confirm.disabled ? 'disabled' : ''}>
+                                        ${buttonStates.confirm.loading ? '<div class="btn-preloader"></div>' :
                             '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'}
-                            Confirm Booking
-                            ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
-                        </button>
-                        <button class="sidebar-btn bg-blue-600 text-white hover:bg-blue-700 ${buttonStates.checkin.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
-                            data-action="checkin" data-booking-id="${bookingId}" ${buttonStates.checkin.disabled ? 'disabled' : ''}>
-                            ${buttonStates.checkin.loading ? '<div class="btn-preloader"></div>' :
+                                        Confirm Booking
+                                        ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
+                                    </button>
+                                    <button class="sidebar-btn bg-blue-600 text-white hover:bg-blue-700 ${buttonStates.checkin.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
+                                        data-action="checkin" data-booking-id="${bookingId}" ${buttonStates.checkin.disabled ? 'disabled' : ''}>
+                                        ${buttonStates.checkin.loading ? '<div class="btn-preloader"></div>' :
                             '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" /> </svg>'}
-                            Check-in Guest
-                            ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
-                        </button>
-                        <button class="sidebar-btn bg-purple-600 text-white hover:bg-purple-700 ${buttonStates.checkout.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
-                            data-action="checkout" data-booking-id="${bookingId}" ${buttonStates.checkout.disabled ? 'disabled' : ''}>
-                            ${buttonStates.checkout.loading ? '<div class="btn-preloader"></div>' :
+                                        Check-in Guest
+                                        ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
+                                    </button>
+                                    <button class="sidebar-btn bg-purple-600 text-white hover:bg-purple-700 ${buttonStates.checkout.disabled ? 'opacity-60 cursor-not-allowed' : ''}" 
+                                        data-action="checkout" data-booking-id="${bookingId}" ${buttonStates.checkout.disabled ? 'disabled' : ''}>
+                                        ${buttonStates.checkout.loading ? '<div class="btn-preloader"></div>' :
                             '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7l4 4m0 0l-4 4m4-4H7" /></svg>'}
-                            Check-out Guest
-                            ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
-                        </button>
-                    `;
+                                        Check-out Guest
+                                        ${!isVerified ? '<span class="button-hint">Verify email to enable</span>' : ''}
+                                    </button>
+                                `;
                     // Generate the HTML template
                     const html = `
-                            <div class="divide-y divide-gray-200 fade-in">
-                                <!-- Header with Status and Guest Info -->
-                                <div class="px-3 py-3 bg-white">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h3 class="text-lg font-bold text-gray-900">${booking.code || 'N/A'}</h3>
-                                            <p class="text-sm text-gray-500 mt-0.5">Record ID: ${booking.id || 'N/A'}</p>
-                                        </div>
-                                        <span class="px-2 py-0.5 rounded-full text-xl font-semibold ${statusInfo.class} text-white status-badge">
-                                            ${statusInfo.text}
-                                        </span>
-                                    </div>
+                                        <div class="divide-y divide-gray-200 fade-in">
+                                            <!-- Header with Status and Guest Info -->
+                                            <div class="px-3 py-3 bg-white">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h3 class="text-lg font-bold text-gray-900">${booking.code || 'N/A'}</h3>
+                                                        <p class="text-sm text-gray-500 mt-0.5">Record ID: ${booking.id || 'N/A'}</p>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded-full text-xl font-semibold ${statusInfo.class} text-white status-badge">
+                                                        ${statusInfo.text}
+                                                    </span>
+                                                </div>
 
-                                    <!-- Payment Progress Bar -->
-                                    <div class="mb-3">
-                                        <div class="flex justify-between text-2xl lg:text-sm mb-1">
-                                            <span class="text-gray-600">Payment Progress</span>
-                                            <span class="font-medium">${Math.round(paidPercentage)}%</span>
-                                        </div>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: ${paidPercentage}%"></div>
-                                        </div>
-                                    </div>
+                                                <!-- Payment Progress Bar -->
+                                                <div class="mb-3">
+                                                    <div class="flex justify-between text-2xl lg:text-sm mb-1">
+                                                        <span class="text-gray-600">Payment Progress</span>
+                                                        <span class="font-medium">${Math.round(paidPercentage)}%</span>
+                                                    </div>
+                                                    <div class="progress-bar">
+                                                        <div class="progress-fill" style="width: ${paidPercentage}%"></div>
+                                                    </div>
+                                                </div>
 
-                                    <div class="mb-2">
-                                        <h4 class="text-sm font-semibold text-gray-800 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                            </svg>
+                                                <div class="mb-2">
+                                                    <h4 class="text-sm font-semibold text-gray-800 flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                                        </svg>
 
-                                            Guest Information
-                                        </h4>
-                                        <div class="mt-1 pl-5">
-                                            <p class="text-sm font-medium text-gray-800">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</p>
-                                            <p class="text-sm text-gray-600 mt-0.5">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                                </svg>
-                                                ${booking.user?.email || 'N/A'}
-                                            </p>
-                                            <p class="text-sm text-gray-600">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                                                </svg>
-                                                ${booking.user?.phone || 'N/A'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Stay Details -->
-                                <div class="px-3 py-3 bg-white">
-                                    <h4 class="text-sm font-semibold text-gray-800 flex items-center mb-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.5-12a.5.5 0 00-1 0v4.25l3.5 2.1a.5.5 0 10.5-.86l-3-1.8V6z" clip-rule="evenodd" />
-                                        </svg>
-                                        Stay Details
-                                    </h4>
-                                    <div class="mt-1 pl-5 space-y-1">
-                                        <div class="flex justify-between">
-                                            <span class="text-sm text-gray-600">Check-in:</span>
-                                            <span class="text-sm font-medium text-gray-800">
-                                                ${detail ? formatDate(detail.checkin_date) : 'N/A'}
-                                            </span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-sm text-gray-800">Check-out:</span>
-                                            <span class="text-sm font-medium text-gray-800">
-                                                ${detail ? formatDate(detail.checkout_date) : 'N/A'}
-                                            </span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-sm text-gray-600">Nights:</span>
-                                            <span class="text-sm font-medium text-gray-800">
-                                                ${detail ? getNights(detail.checkin_date, detail.checkout_date) : 'N/A'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Guest Composition -->
-                                <div class="px-3 py-3 bg-white">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <h4 class="text-sm font-semibold text-gray-800 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" 
-                                                class="h-3.5 w-3.5 mr-1.5 text-gray-400" 
-                                                viewBox="0 0 20 20" 
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd" 
-                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" 
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Guest Composition
-                                        </h4>
-
-                                        <!-- Add Guest Button -->
-                                        ${!isStatusDisabled ? `
-                                        <button id="add-guest-btn"
-                                            class="flex items-center px-3 py-1.5 bg-indigo-600 cursor-pointer hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-sm transition">
-                                            <svg xmlns="http://www.w3.org/2000/svg" 
-                                                class="h-4 w-4 mr-1" 
-                                                fill="none" 
-                                                viewBox="0 0 24 24" 
-                                                stroke="currentColor" 
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" 
-                                                    stroke-linejoin="round" 
-                                                    d="M12 4v16m8-8H4" />
-                                            </svg>
-                                            Add Guest
-                                        </button>
-                                        ` : ''}
-                                    </div>
-
-                                    <div class="mt-1 pl-5">
-                                        ${guestCompositionHtml}
-                                    </div>
-                                </div>
-
-                                ${guestAddonsHtml}
-
-
-                                <!-- Rooms Booked -->
-                                <div class="px-3 py-3 bg-white">
-                                    <h4 class="text-sm font-semibold text-gray-800 flex items-center mb-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M10 2L2 9h3v7h4v-4h2v4h4V9h3L10 2z" />
-                                        </svg>
-
-                                        Rooms Booked
-                                    </h4>
-                                    <ul class="mt-1 pl-5">
-                                        ${roomListHtml}
-                                    </ul>
-                                </div>
-
-                                <!-- Breakfast Information (if available) -->
-                                ${breakfastHtml}
-                                <!-- Payment Summary -->
-                                <div class="bg-white border border-gray-100 overflow-hidden">
-
-                                    <div class="px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 border-b border-gray-200">
-                                        <h4 class="text-lg font-semibold text-white flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-                                            </svg>
-                                            PAYMENT SUMMARY
-                                        </h4>
-                                    </div>
-
-                                    <div class="px-4 py-3 space-y-3">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-lg text-gray-600">Payment Scheme:</span>
-                                            <span class="text-lg font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                                                ${paymentScheme}
-                                            </span>
-                                        </div>
-
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-lg text-gray-600">Reference:</span>
-                                            <span class="text-lg font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded">
-                                                ${reference}
-                                            </span>
-                                        </div>
-
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div class="bg-gray-50 p-2.5 rounded-lg">
-                                                <p class="text-sm text-gray-500 mb-1">Total Amount</p>
-                                                <p class="text-lg font-semibold text-gray-800">${formatCurrency(totalAmount)}</p>
+                                                        Guest Information
+                                                    </h4>
+                                                    <div class="mt-1 pl-5">
+                                                        <p class="text-sm font-medium text-gray-800">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</p>
+                                                        <p class="text-sm text-gray-600 mt-0.5">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                                            </svg>
+                                                            ${booking.user?.email || 'N/A'}
+                                                        </p>
+                                                        <p class="text-sm text-gray-600">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                                            </svg>
+                                                            ${booking.user?.phone || 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div class="bg-green-50 p-2.5 rounded-lg">
-                                                <p class="text-sm text-green-600 mb-1">Advance Paid</p>
-                                                <p class="text-lg font-semibold text-green-700">${formatCurrency(advancePaid)}</p>
+                                            <!-- Stay Details -->
+                                            <div class="px-3 py-3 bg-white">
+                                                <h4 class="text-sm font-semibold text-gray-800 flex items-center mb-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.5-12a.5.5 0 00-1 0v4.25l3.5 2.1a.5.5 0 10.5-.86l-3-1.8V6z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    Stay Details
+                                                </h4>
+                                                <div class="mt-1 pl-5 space-y-1">
+                                                    <div class="flex justify-between">
+                                                        <span class="text-sm text-gray-600">Check-in:</span>
+                                                        <span class="text-sm font-medium text-gray-800">
+                                                            ${detail ? formatDate(detail.checkin_date) : 'N/A'}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex justify-between">
+                                                        <span class="text-sm text-gray-800">Check-out:</span>
+                                                        <span class="text-sm font-medium text-gray-800">
+                                                            ${detail ? formatDate(detail.checkout_date) : 'N/A'}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex justify-between">
+                                                        <span class="text-sm text-gray-600">Nights:</span>
+                                                        <span class="text-sm font-medium text-gray-800">
+                                                            ${detail ? getNights(detail.checkin_date, detail.checkout_date) : 'N/A'}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div class="bg-green-50 p-2.5 rounded-lg">
-                                                <p class="text-sm text-green-600 mb-1">Check-in Paid</p>
-                                                <p class="text-lg font-semibold text-green-700">${formatCurrency(checkinPaid)}</p>
+                                            <!-- Guest Composition -->
+                                            <div class="px-3 py-3 bg-white">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <h4 class="text-sm font-semibold text-gray-800 flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" 
+                                                            class="h-3.5 w-3.5 mr-1.5 text-gray-400" 
+                                                            viewBox="0 0 20 20" 
+                                                            fill="currentColor">
+                                                            <path fill-rule="evenodd" 
+                                                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" 
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        Guest Composition
+                                                    </h4>
+
+                                                    <!-- Add Guest Button -->
+                                                    ${!isStatusDisabled && bookingStatus !== 'cancelled' ? `
+                                                    <button id="add-guest-btn"
+                                                        class="flex items-center px-3 py-1.5 bg-indigo-600 cursor-pointer hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-sm transition">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" 
+                                                            class="h-4 w-4 mr-1" 
+                                                            fill="none" 
+                                                            viewBox="0 0 24 24" 
+                                                            stroke="currentColor" 
+                                                            stroke-width="2">
+                                                            <path stroke-linecap="round" 
+                                                                stroke-linejoin="round" 
+                                                                d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                        Add Guest
+                                                    </button>
+                                                    ` : ''}
+                                                </div>
+
+                                                <div class="mt-1 pl-5">
+                                                    ${guestCompositionHtml}
+                                                </div>
                                             </div>
 
-                                            <div class="bg-blue-50 p-2.5 rounded-lg">
-                                                <p class="text-sm text-blue-600 mb-1">Total Paid</p>
-                                                <p class="text-lg font-semibold text-blue-700">${formatCurrency(totalPayment)}</p>
+                                            ${guestAddonsHtml}
+
+
+                                            <!-- Rooms Booked -->
+                                            <div class="px-3 py-3 bg-white">
+                                                <h4 class="text-sm font-semibold text-gray-800 flex items-center mb-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M10 2L2 9h3v7h4v-4h2v4h4V9h3L10 2z" />
+                                                    </svg>
+
+                                                    Rooms Booked
+                                                </h4>
+                                                <ul class="mt-1 pl-5">
+                                                    ${roomListHtml}
+                                                </ul>
                                             </div>
+
+                                            <!-- Breakfast Information (if available) -->
+                                            ${breakfastHtml}
+                                            <!-- Payment Summary -->
+                                            <div class="bg-white border border-gray-100 overflow-hidden">
+
+                                                <div class="px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 border-b border-gray-200">
+                                                    <h4 class="text-lg font-semibold text-white flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        PAYMENT SUMMARY
+                                                    </h4>
+                                                </div>
+
+                                                <div class="px-4 py-3 space-y-3">
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="text-lg text-gray-600">Payment Scheme:</span>
+                                                        <span class="text-lg font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                                            ${paymentScheme}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="text-lg text-gray-600">Reference:</span>
+                                                        <span class="text-lg font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                                                            ${reference}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="grid grid-cols-2 gap-2">
+                                                        <div class="bg-gray-50 p-2.5 rounded-lg">
+                                                            <p class="text-sm text-gray-500 mb-1">Total Amount</p>
+                                                            <p class="text-lg font-semibold text-gray-800">${formatCurrency(totalAmount)}</p>
+                                                        </div>
+
+                                                        <div class="bg-green-50 p-2.5 rounded-lg">
+                                                            <p class="text-sm text-green-600 mb-1">Advance Paid</p>
+                                                            <p class="text-lg font-semibold text-green-700">${formatCurrency(advancePaid)}</p>
+                                                        </div>
+
+                                                        <div class="bg-green-50 p-2.5 rounded-lg">
+                                                            <p class="text-sm text-green-600 mb-1">Check-in Paid</p>
+                                                            <p class="text-lg font-semibold text-green-700">${formatCurrency(checkinPaid)}</p>
+                                                        </div>
+
+                                                        <div class="bg-blue-50 p-2.5 rounded-lg">
+                                                            <p class="text-sm text-blue-600 mb-1">Total Paid</p>
+                                                            <p class="text-lg font-semibold text-blue-700">${formatCurrency(totalPayment)}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="border-t border-gray-200 pt-3 mt-1">
+                                                        <div class="flex justify-between items-center py-2 ${balance > 0 ? 'bg-red-50 -mx-2 px-2 rounded' : 'bg-green-50 -mx-2 px-2 rounded'}">
+                                                            <span class="text-base font-semibold ${balance > 0 ? 'text-red-700' : 'text-green-700'}">Balance:</span>
+                                                            <span class="text-base font-bold ${balance > 0 ? 'text-red-700' : 'text-green-700'}">
+                                                                ${formatCurrency(Math.abs(balance))}
+                                                                <span class="text-sm font-normal ml-1">${balance > 0 ? '(Due)' : '(FULLY PAID)'}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    ${balance > 0 ? `
+                                                    <div class="mt-3 p-2.5 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                        <p class="text-sm text-yellow-800 flex items-start">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mt-0.5 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14a1 1 0 00.86-1.5L13.86 4.5a1 1 0 00-1.72 0L4.07 17.5a1 1 0 00.86 1.5z" />
+                                                            </svg>
+                                                            <span>Customer must pay the outstanding balance of ${formatCurrency(Math.abs(balance))} upon check-in</span>
+                                                        </p>
+                                                    </div>
+                                                    ` : ''}
+                                                </div>
+                                            </div>
+
+
+                                            <!-- Action Buttons -->
+                                            ${actionButtonsHtml ? `
+                                            <div class="px-3 py-3 bg-white sidebar-actions">
+                                                ${actionButtonsHtml}
+
+                                                <!-- Add date information below the buttons -->
+                                                <div class="text-sm text-gray-500 mt-2 space-y-1">
+                                                    ${!buttonStates.confirm.disabled ? `
+                                                        <div class="button-hint">Booking confirmation is available now</div>
+                                                    ` : ''}
+
+                                                    ${buttonStates.checkin.disabled ? `
+                                                        <div class="button-hint">Check-in will be enabled on ${formatDate(checkinDate)}</div>
+                                                    ` : `
+                                                        <div class="button-hint">Check-in is available now</div>
+                                                    `}
+                                                </div>
+                                            </div>
+                                            ` : ''}
+
                                         </div>
-
-                                        <div class="border-t border-gray-200 pt-3 mt-1">
-                                            <div class="flex justify-between items-center py-2 ${balance > 0 ? 'bg-red-50 -mx-2 px-2 rounded' : 'bg-green-50 -mx-2 px-2 rounded'}">
-                                                <span class="text-base font-semibold ${balance > 0 ? 'text-red-700' : 'text-green-700'}">Balance:</span>
-                                                <span class="text-base font-bold ${balance > 0 ? 'text-red-700' : 'text-green-700'}">
-                                                    ${formatCurrency(Math.abs(balance))}
-                                                    <span class="text-sm font-normal ml-1">${balance > 0 ? '(Due)' : '(FULLY PAID)'}</span>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        ${balance > 0 ? `
-                                        <div class="mt-3 p-2.5 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                            <p class="text-sm text-yellow-800 flex items-start">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mt-0.5 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14a1 1 0 00.86-1.5L13.86 4.5a1 1 0 00-1.72 0L4.07 17.5a1 1 0 00.86 1.5z" />
-                                                </svg>
-                                                <span>Customer must pay the outstanding balance of ${formatCurrency(Math.abs(balance))} upon check-in</span>
-                                            </p>
-                                        </div>
-                                        ` : ''}
-                                    </div>
-                                </div>
-
-
-                                <!-- Action Buttons -->
-                                ${actionButtonsHtml ? `
-                                <div class="px-3 py-3 bg-white sidebar-actions">
-                                    ${actionButtonsHtml}
-
-                                    <!-- Add date information below the buttons -->
-                                    <div class="text-sm text-gray-500 mt-2 space-y-1">
-                                        ${!buttonStates.confirm.disabled ? `
-                                            <div class="button-hint">Booking confirmation is available now</div>
-                                        ` : ''}
-
-                                        ${buttonStates.checkin.disabled ? `
-                                            <div class="button-hint">Check-in will be enabled on ${formatDate(checkinDate)}</div>
-                                        ` : `
-                                            <div class="button-hint">Check-in is available now</div>
-                                        `}
-                                    </div>
-                                </div>
-                                ` : ''}
-
-                            </div>
-                            `;
+                                        `;
 
                     // Insert HTML into DOM
                     document.getElementById('booking-summary').innerHTML = html;
@@ -2499,96 +2922,96 @@
                 } catch (error) {
                     console.error('Error:', error);
                     document.getElementById('booking-summary').innerHTML = `
-                            <div class="p-3">
-                                <div class="bg-red-50 border-l-4 border-red-400 p-2">
-                                    <div class="flex">
-                                        <div class="flex-shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" 
-                                                viewBox="0 0 20 20" 
-                                                fill="currentColor" 
-                                                class="h-4 w-4 text-red-400">
-                                            <path fill-rule="evenodd" 
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" 
-                                                    clip-rule="evenodd" />
-                                        </svg>
+                                        <div class="p-3">
+                                            <div class="bg-red-50 border-l-4 border-red-400 p-2">
+                                                <div class="flex">
+                                                    <div class="flex-shrink-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" 
+                                                            viewBox="0 0 20 20" 
+                                                            fill="currentColor" 
+                                                            class="h-4 w-4 text-red-400">
+                                                        <path fill-rule="evenodd" 
+                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" 
+                                                                clip-rule="evenodd" />
+                                                    </svg>
 
+                                                    </div>
+                                                    <div class="ml-2">
+                                                        <p class="text-sm text-red-700">
+                                                            Failed to load booking details. Please try again later.
+                                                        </p>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="ml-2">
-                                            <p class="text-sm text-red-700">
-                                                Failed to load booking details. Please try again later.
-                                            </p>
-                                        </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                                    `;
                 }
             }
 
             function generateGuestAddonsHtml(guestAddons) {
                 if (!guestAddons || guestAddons.length === 0) {
                     return `
-                            <div class="guest-addons-section">
-                                <div class="guest-addons-header">
-                                    <h4 class="text-sm font-semibold text-gray-800 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
-                                        Guest Addons
-                                    </h4>
-                                </div>
-                                <div class="guest-addons-list">
-                                    <p class="no-addons">No addons added yet</p>
-                                </div>
-                            </div>
-                        `;
+                                        <div class="guest-addons-section">
+                                            <div class="guest-addons-header">
+                                                <h4 class="text-sm font-semibold text-gray-800 flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                    </svg>
+                                                    Guest Addons
+                                                </h4>
+                                            </div>
+                                            <div class="guest-addons-list">
+                                                <p class="no-addons">No addons added yet</p>
+                                            </div>
+                                        </div>
+                                    `;
                 }
 
                 const addonsTotal = guestAddons.reduce((sum, addon) => sum + (parseFloat(addon.total_cost) || 0), 0);
 
                 return `
-                        <div class="w-full px-3 py-3 bg-white">
-                            <!-- Header -->
-                            <div class="guest-addons-header mb-2">
-                                <h4 class="guest-addons-title flex items-center text-sm font-semibold text-gray-800">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                    Guest Addons
-                                </h4>
-                            </div>
+                                    <div class="w-full px-3 py-3 bg-white">
+                                        <!-- Header -->
+                                        <div class="guest-addons-header mb-2">
+                                            <h4 class="guest-addons-title flex items-center text-sm font-semibold text-gray-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                                Guest Addons
+                                            </h4>
+                                        </div>
 
-                            <!-- Addons List -->
-                            <div class="guest-addons-list space-y-2 w-full">
-                                ${guestAddons.map(addon => `
-                                    <div class="guest-addon-item w-full" data-addon-id="${addon.id}">
-                                        <div class="flex items-center justify-between w-full">
-                                            <span class="guest-addon-name text-sm text-gray-700">${addon.quantity} x ${addon.type}</span>
-                                            <div class="flex items-center">
-                                                <span class="guest-addon-price mr-2 text-sm font-medium text-gray-800">${formatCurrency(addon.total_cost)}</span>
-                                                <button class="delete-addon-btn text-red-600 hover:text-red-800 cursor-pointer" data-addon-id="${addon.id}" data-booking-id="${currentBookingId}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
+                                        <!-- Addons List -->
+                                        <div class="guest-addons-list space-y-2 w-full">
+                                            ${guestAddons.map(addon => `
+                                                <div class="guest-addon-item w-full" data-addon-id="${addon.id}">
+                                                    <div class="flex items-center justify-between w-full">
+                                                        <span class="guest-addon-name text-sm text-gray-700">${addon.quantity} x ${addon.type}</span>
+                                                        <div class="flex items-center">
+                                                            <span class="guest-addon-price mr-2 text-sm font-medium text-gray-800">${formatCurrency(addon.total_cost)}</span>
+                                                            <button class="delete-addon-btn text-red-600 hover:text-red-800 cursor-pointer" data-addon-id="${addon.id}" data-booking-id="${currentBookingId}">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+
+                                            <!-- Total Row -->
+                                            <div class="guest-addon-item flex items-center justify-between border-t border-gray-300 pt-2 mt-2 w-full">
+                                                <span class="guest-addon-name font-semibold text-gray-900">Total Addons:</span>
+                                                <span class="guest-addon-price font-semibold text-gray-900">${formatCurrency(addonsTotal)}</span>
                                             </div>
                                         </div>
                                     </div>
-                                `).join('')}
-
-                                <!-- Total Row -->
-                                <div class="guest-addon-item flex items-center justify-between border-t border-gray-300 pt-2 mt-2 w-full">
-                                    <span class="guest-addon-name font-semibold text-gray-900">Total Addons:</span>
-                                    <span class="guest-addon-price font-semibold text-gray-900">${formatCurrency(addonsTotal)}</span>
-                                </div>
-                            </div>
-                        </div>
 
 
-                    `;
+                                `;
             }
-            
+
             // Silent verification check (for UI state only)
             async function checkUserVerificationSilent() {
                 try {
@@ -2602,12 +3025,12 @@
                     });
 
                     const data = await response.json();
-                    
+
                     // Add debugging
                     console.log('Verification response:', data);
                     console.log('email_verified_at value:', data.verified);
                     console.log('Type of verified:', typeof data.verified);
-                    
+
                     return data.verified === true;
                 } catch (error) {
                     console.error('Error checking verification:', error);
@@ -2640,19 +3063,19 @@
                     });
 
                     const result = await response.json();
-                    
+
                     if (!response.ok || !result.success) {
                         throw new Error(result.message || 'Failed to delete addon');
                     }
 
                     showToast('success', 'Addon deleted successfully');
-                    
+
                     // Remove the addon item from the UI
                     const addonItem = document.querySelector(`.guest-addon-item[data-addon-id="${addonId}"]`);
                     if (addonItem) {
                         addonItem.remove();
                     }
-                    
+
                     // Reload booking summary to update totals
                     if (bookingId) {
                         loadBookingSummary(bookingId);
@@ -2664,7 +3087,7 @@
             }
 
             // Add event delegation for delete buttons
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (e.target.closest('.delete-addon-btn')) {
                     const button = e.target.closest('.delete-addon-btn');
                     const addonId = button.dataset.addonId;
@@ -2717,6 +3140,11 @@
                         states.checkout.disabled = false;
                         break;
                     case 'checked_out':
+                        states.confirm.disabled = true;
+                        states.checkin.disabled = true;
+                        states.checkout.disabled = true;
+                        break;
+                    case 'cancelled': // Added cancelled case
                         states.confirm.disabled = true;
                         states.checkin.disabled = true;
                         states.checkout.disabled = true;
@@ -2951,16 +3379,16 @@
                         type === 'info' ? 'bg-blue-600' : 'bg-gray-600'
                     }`;
                 toast.innerHTML = `
-                                                                <div class="flex items-center">
-                                                                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${type === 'success' ? 'M5 13l4 4L19 7' :
+                                                                            <div class="flex items-center">
+                                                                                <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${type === 'success' ? 'M5 13l4 4L19 7' :
                         type === 'error' ? 'M6 18L18 6M6 6l12 12' :
                             'M13 16h-1v-4h-1m1-4h.01M21 a9 9 0 11-18 0 9 9 0 0118 0z'
                     }" />
-                                                                    </svg>
-                                                                    <span class="text-lg">${message}</span>
-                                                                </div>
-                                                            `;
+                                                                                </svg>
+                                                                                <span class="text-lg">${message}</span>
+                                                                            </div>
+                                                                        `;
 
                 // Add to DOM
                 document.body.appendChild(toast);
@@ -3005,30 +3433,35 @@
                 newRow.className = `booking-row ${isPending ? 'pending' : ''} fade-in cursor-pointer`;
                 newRow.dataset.bookingId = booking.id;
                 newRow.innerHTML = `
-                    <td class="px-3 py-2">
-                        <div class="text-sm text-gray-900 font-medium">${booking.id}</div>
-                    </td>
-                    <td class="px-3 py-2">
-                        <span class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${statusInfo.class} text-white status-badge">
-                            ${statusInfo.text}
-                        </span>
-                    </td>
-                    <td class="px-3 py-2">
-                        <div class="text-lg text-gray-900">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</div>
-                        <div class="text-sm text-gray-500">${booking.user?.phone || 'No phone'}</div>
-                    </td>
-                    <td class="px-3 py-2">
-                        <div class="text-sm text-gray-900">${formatDate(booking.created_at)}</div>
-                        <div class="text-sm text-gray-500">Just now</div>
-                    </td>
-                    <td class="px-3 py-2">
-                        <div class="flex flex-wrap gap-1 justify-start">
-                            <button class="action-btn-details btn-details" data-booking-id="${booking.id}" data-action="details">
-                                Details
-                            </button>
-                        </div>
-                    </td>
-                `;
+                                <td class="px-3 py-2">
+                                    <div class="text-sm text-gray-900 font-medium">${booking.id}</div>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <span class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${statusInfo.class} text-white status-badge">
+                                        ${statusInfo.text}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <div class="text-lg text-gray-900">${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}</div>
+                                    <div class="text-sm text-gray-500">${booking.user?.phone || 'No phone'}</div>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <div class="text-sm text-gray-900">${formatDate(booking.created_at)}</div>
+                                    <div class="text-sm text-gray-500">Just now</div>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <div class="flex flex-wrap gap-1 justify-start">
+                                        <button class="action-btn-details btn-details" data-booking-id="${booking.id}" data-action="details">
+                                            Details
+                                        </button>
+                                        <button class="action-btn-details btn-cancel bg-red-600 hover:bg-red-800 text-white" 
+                                                data-booking-id="${booking.id}" data-action="cancel">
+                                            Cancel
+                                        </button>
+
+                                    </div>
+                                </td>
+                            `;
 
                 // Add to the top of the table
                 tableBody.insertBefore(newRow, tableBody.firstChild);

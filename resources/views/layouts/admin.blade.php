@@ -109,7 +109,7 @@
     @include('admin.sidebar')
 
     <!-- Mobile sidebar overlay -->
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden pointer-events-none opacity-0 transition-all duration-300"
+    <div class="fixed inset-0 bg-black/50 z-30 md:hidden pointer-events-none opacity-0 transition-all duration-300"
         id="sidebar-overlay"></div>
 
     <!-- Main Content Area -->

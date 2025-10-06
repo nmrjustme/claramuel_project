@@ -19,6 +19,7 @@ class FacilityBookingLog extends Model
         'reference',
         'status',
         'code',
+        'token',
         'confirmed_at',
         'payment_status',
         'is_read',

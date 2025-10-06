@@ -425,7 +425,7 @@ class BookingController extends Controller
                 'summaries.facility:id,name,price',
                 'summaries.breakfast',
             ])
-            ->orderBy('created_at', 'desc');
+                ->orderBy('created_at', 'desc');
 
             // Search by ID
             if ($id) {
@@ -434,37 +434,37 @@ class BookingController extends Controller
 
             // General search across multiple fields
             if ($search) {
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('code', 'like', "%$search%")
-                    ->orWhereHas('user', function($userQuery) use ($search) {
-                        $userQuery->where('firstname', 'like', "%$search%")
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('firstname', 'like', "%$search%")
                                 ->orWhere('lastname', 'like', "%$search%")
                                 ->orWhere('email', 'like', "%$search%")
                                 ->orWhere('phone', 'like', "%$search%");
-                    });
+                        });
                 });
             }
 
             // Search by first name
             if (!empty(trim($firstName))) {
-                $query->whereHas('user', function($q) use ($firstName) {
+                $query->whereHas('user', function ($q) use ($firstName) {
                     $q->where('firstname', 'like', "%$firstName%");
                 });
             }
 
             if (!empty(trim($lastName))) {
-                $query->whereHas('user', function($q) use ($lastName) {
+                $query->whereHas('user', function ($q) use ($lastName) {
                     $q->where('lastname', 'like', "%$lastName%");
                 });
             }
 
             // Search by check-in or check-out date
             if ($checkinDate && $dateType === 'checkin') {
-                $query->whereHas('details', function($q) use ($checkinDate) {
+                $query->whereHas('details', function ($q) use ($checkinDate) {
                     $q->whereDate('checkin_date', $checkinDate);
                 });
             } elseif ($checkoutDate && $dateType === 'checkout') {
-                $query->whereHas('details', function($q) use ($checkoutDate) {
+                $query->whereHas('details', function ($q) use ($checkoutDate) {
                     $q->whereDate('checkout_date', $checkoutDate);
                 });
             }
@@ -476,7 +476,7 @@ class BookingController extends Controller
             $bookings = $query->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
-                'data' => $bookings->map(function($booking) {
+                'data' => $bookings->map(function ($booking) {
                     // Display status logic
                     $displayStatus = $booking->status;
 
@@ -491,7 +491,7 @@ class BookingController extends Controller
                         'status' => $displayStatus,
                         'code' => $booking->code,
                         'details' => $booking->details,
-                        'summaries' => $booking->summaries->map(function($summary) {
+                        'summaries' => $booking->summaries->map(function ($summary) {
                             return [
                                 'facility' => $summary->facility,
                                 'breakfast_id' => $summary->breakfast_id,
@@ -889,5 +889,120 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+    public function cancelBooking(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Find the booking
+            $booking = FacilityBookingLog::with(['payments', 'user', 'details'])
+                ->findOrFail($id);
+
+            // Check if booking can be cancelled
+            if ($booking->status === 'cancelled') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking is already cancelled.'
+                ], 400);
+            }
+
+            if ($booking->status === 'checked_out') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot cancel a checked-out booking.'
+                ], 400);
+            }
+
+            // Get cancellation data
+            $refundType = $request->input('refund_type', 'non_refundable');
+            $refundAmountType = $request->input('refund_amount_type', 'full');
+            $reason = $request->input('reason', 'Cancelled by admin');
+
+            // Calculate refund amount
+            $refundAmount = 0;
+            $payment = $booking->payments->first();
+
+            if ($refundType === 'refundable' && $payment) {
+                $totalPaid = ($payment->amount ?? 0) + ($payment->checkin_paid ?? 0);
+
+                if ($refundAmountType === 'full') {
+                    $refundAmount = $totalPaid;
+                } elseif ($refundAmountType === 'half') {
+                    $refundAmount = $totalPaid * 0.5;
+                }
+
+                // Update payment record with refund details
+                $payment->update([
+                    'refund_amount' => $refundAmount,
+                    'refund_reason' => $reason,
+                    'refund_date' => now(),
+                    'refund_type' => $refundAmountType
+                ]);
+            } elseif ($payment) {
+                // Non-refundable cancellation - just record the reason
+                $payment->update([
+                    'refund_amount' => 0,
+                    'refund_reason' => $reason,
+                    'refund_date' => now(),
+                    'refund_type' => 'none'
+                ]);
+            }
+
+            // Update booking status
+            $booking->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now()
+            ]);
+
+            // Send notification to user (you can implement this)
+            $this->sendCancellationNotification($booking, $refundAmount, $reason);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking cancelled successfully.',
+                'data' => [
+                    'booking_id' => $booking->id,
+                    'refund_amount' => $refundAmount,
+                    'refund_type' => $refundType,
+                    'cancellation_reason' => $reason
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Booking cancellation failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel booking: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function sendCancellationNotification($booking, $refundAmount, $reason)
+    {
+        // Implement your notification logic here
+        // This could be email, SMS, or in-app notification
+
+        $user = $booking->user;
+        $refundMessage = $refundAmount > 0
+            ? "A refund of ₱" . number_format($refundAmount, 2) . " will be processed."
+            : "This cancellation is non-refundable.";
+
+        // Example email notification
+        // Mail::to($user->email)->send(new BookingCancelledMail($booking, $refundAmount, $reason));
+
+        Log::info('Cancellation notification sent', [
+            'user_id' => $user->id,
+            'booking_id' => $booking->id,
+            'refund_amount' => $refundAmount,
+            'reason' => $reason
+        ]);
+    }
+
+
 
 }
