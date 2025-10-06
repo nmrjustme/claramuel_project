@@ -169,8 +169,6 @@ class MayaWebhookSetupController extends Controller
             // Process each facility
             foreach ($bookingData['facilities'] as $facilityData) {
                 $facility = Facility::findOrFail($facilityData['facility_id']);
-
-                \Log::info("Facility: {$facility->id}");
                 // Calculate facility price with discount logic
                 $facilityPrice = $this->calculateDiscountedFacilityPrice($facility);
 

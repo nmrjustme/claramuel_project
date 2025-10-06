@@ -10,6 +10,6 @@ class BookingModalController extends Controller
     public function showFacilityData()
     {
         $facilities = Facility::all();
-        return vie('admin.modals.book', ['facilities' => $facilities]);
+        return view('admin.modals.book', ['facilities' => $facilities]);
     }
 }

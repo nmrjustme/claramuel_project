@@ -154,7 +154,6 @@ class CheckinController extends Controller
                 'payment_id' => $payment->id
             ]);
         } catch (\Exception $e) {
-            \Log::error('Server error verifying QR: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage(),
@@ -278,8 +277,6 @@ class CheckinController extends Controller
                     'booking_id' => $bookingId
                 ], 404);
             }
-
-            \Log::info('QR upload verified successfully', ['payment_id' => $payment->id]);
             return response()->json([
                 'success' => true,
                 'message' => 'QR code verified successfully',
@@ -287,7 +284,6 @@ class CheckinController extends Controller
                 'payment_id' => $payment->id,
             ]);
         } catch (\Exception $e) {
-            \Log::error('QR upload processing error', ['exception' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage(),
@@ -310,7 +306,6 @@ class CheckinController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error fetching customer details:', ['exception' => $e]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching customer details: ' . $e->getMessage()

@@ -210,11 +210,6 @@ class MayaCheckoutController extends Controller
                 ])
                 ->post("{$baseUrl}/checkout/v1/checkouts", $requestBody);
 
-            Log::debug('Maya API Response:', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
             if ($response->successful()) {
                 $responseData = $response->json();
 
@@ -225,14 +220,6 @@ class MayaCheckoutController extends Controller
                     'status' => 'pending',
                     'token' => $token,
                     'payment_type' => $amount_to_pay < $total_price ? 'deposit' : 'full',
-                ]);
-
-                Log::info('Maya checkout created successfully', [
-                    'reference_number' => $rn,
-                    'checkout_id' => $responseData['checkoutId'] ?? null,
-                    'redirect_url' => $responseData['redirectUrl'] ?? null,
-                    'amount_paid' => $amount_to_pay,
-                    'payment_type' => $amount_to_pay < $total_price ? 'deposit' : 'full'
                 ]);
 
                 return redirect()->away($responseData['redirectUrl']);

@@ -24,6 +24,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Mail;
 use App\Events\BookingNew;
 use App\Mail\AdminNotification;
+use Illuminate\Support\Facades\Http;
 
 class BookingController extends Controller
 {
@@ -895,52 +896,43 @@ class BookingController extends Controller
         DB::beginTransaction();
 
         try {
-            // Find the booking
+            // Find booking with relations
             $booking = FacilityBookingLog::with(['payments', 'user', 'details'])
                 ->findOrFail($id);
 
-            // Check if booking can be cancelled
+            // Validation checks
             if ($booking->status === 'cancelled') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Booking is already cancelled.'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Booking is already cancelled.'], 400);
             }
 
             if ($booking->status === 'checked_out') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot cancel a checked-out booking.'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Cannot cancel a checked-out booking.'], 400);
             }
 
-            // Get cancellation data
+            // Cancellation data
             $refundType = $request->input('refund_type', 'non_refundable');
             $refundAmountType = $request->input('refund_amount_type', 'full');
             $reason = $request->input('reason', 'Cancelled by admin');
 
-            // Calculate refund amount
             $refundAmount = 0;
             $payment = $booking->payments->first();
 
             if ($refundType === 'refundable' && $payment) {
                 $totalPaid = ($payment->amount ?? 0) + ($payment->checkin_paid ?? 0);
 
-                if ($refundAmountType === 'full') {
-                    $refundAmount = $totalPaid;
-                } elseif ($refundAmountType === 'half') {
-                    $refundAmount = $totalPaid * 0.5;
-                }
+                $refundAmount = match ($refundAmountType) {
+                    'full' => $totalPaid,
+                    'half' => $totalPaid * 0.5,
+                    default => 0,
+                };
 
-                // Update payment record with refund details
                 $payment->update([
                     'refund_amount' => $refundAmount,
                     'refund_reason' => $reason,
                     'refund_date' => now(),
-                    'refund_type' => $refundAmountType
+                    'refund_type' => $refundAmountType,
                 ]);
             } elseif ($payment) {
-                // Non-refundable cancellation - just record the reason
                 $payment->update([
                     'refund_amount' => 0,
                     'refund_reason' => $reason,
@@ -950,12 +942,14 @@ class BookingController extends Controller
             }
 
             // Update booking status
-            $booking->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now()
-            ]);
+            $booking->update(['status' => 'cancelled']);
 
-            // Send notification to user (you can implement this)
+            // Call refund via Maya API if refundable
+            if ($refundType === 'refundable' && $payment && $payment->reference_no) {
+                $this->refund($payment->reference_no, $reason);
+            }
+
+            // Optional: send notification
             $this->sendCancellationNotification($booking, $refundAmount, $reason);
 
             DB::commit();
@@ -975,10 +969,84 @@ class BookingController extends Controller
             DB::rollBack();
             Log::error('Booking cancellation failed: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to cancel booking: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to cancel booking: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function refund($transactionReferenceNo, $reason)
+    {
+        $baseUrl = config('services.maya.base_url');
+        $secretKey = config('services.maya.secret_key');
+
+        // Validate configuration
+        if (!$secretKey || !$baseUrl) {
+            Log::error('Maya API configuration missing');
+            return ['error' => 'Maya API configuration incomplete'];
+        }
+
+        $endpoint = "{$baseUrl}/p3/refund";
+        $requestReferenceNo = 'CLM-' . Str::upper(Str::random(8)) . '-REFUND';
+        $idempotencyKey = (string) Str::uuid();
+
+        $headers = [
+            'Request-Reference-No' => $requestReferenceNo,
+            'X-Idempotency-Key' => $idempotencyKey,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
+
+        $body = [
+            'transactionReferenceNo' => $transactionReferenceNo,
+            'reason' => $reason,
+        ];
+
+        try {
+            $response = Http::withHeaders($headers)
+                ->timeout(30)
+                ->withBasicAuth($secretKey, '')
+                ->post($endpoint, $body);
+
+            $responseData = $response->json();
+            $statusCode = $response->status();
+
+            Log::info('Refund Response', [
+                'status' => $statusCode,
+                'body' => $responseData,
+                'transaction_ref' => $transactionReferenceNo,
+                'request_ref' => $requestReferenceNo
+            ]);
+
+            // Handle specific error cases
+            if ($statusCode === 401) {
+                return [
+                    'error' => 'API authentication failed. Check key scopes and permissions.',
+                    'code' => $responseData['code'] ?? 'AUTH_ERROR',
+                    'reference' => $responseData['reference'] ?? null,
+                    'status' => $statusCode
+                ];
+            }
+
+            if ($statusCode >= 400) {
+                return [
+                    'error' => $responseData['error'] ?? 'Refund request failed',
+                    'code' => $responseData['code'] ?? 'UNKNOWN_ERROR',
+                    'status' => $statusCode
+                ];
+            }
+
+            return $responseData;
+
+        } catch (\Exception $e) {
+            Log::error('Refund failed: ' . $e->getMessage(), [
+                'transaction_ref' => $transactionReferenceNo,
+                'endpoint' => $endpoint
+            ]);
+
+            return [
+                'error' => true,
+                'message' => $e->getMessage(),
+                'status' => 500
+            ];
         }
     }
 

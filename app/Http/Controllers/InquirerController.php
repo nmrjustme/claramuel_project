@@ -336,7 +336,6 @@ class InquirerController extends Controller
             ], 422);
             
         } catch (\Exception $e) {
-            \Log::error("Error confirming booking {$bookingId}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
@@ -369,7 +368,6 @@ class InquirerController extends Controller
                 $customMessage
             ));
         } catch (\Exception $e) {
-            \Log::error("Failed to send verification email for booking {$booking->id}: " . $e->getMessage());
             throw $e; // Re-throw to be handled by the main method
         }
     }
@@ -393,16 +391,11 @@ class InquirerController extends Controller
             
             $cleanPhoneNumber = $this->formatPhilNumber($booking->user->phone);
             
-            \Log::info("SMS Details - To: {$cleanPhoneNumber}, Message: {$message}");
-            
             $response = $this->sms->send($cleanPhoneNumber, $message);
-            
-            \Log::info("SMS API Response: ", $response);
             
             return $response; // Return the full response for debugging
 
         } catch (\Exception $e) {
-            \Log::error("SMS failed for booking {$booking->id}: " . $e->getMessage());
             
             return [
                 'success' => false,
@@ -489,11 +482,6 @@ class InquirerController extends Controller
                 // Send rejection email
                 $this->sendRejectionEmail($booking, $validated['custom_message'] ?? null);
     
-                Log::info("Booking rejected and email sent", [
-                    'booking_id' => $id, 
-                    'user_id' => auth()->id()
-                ]);
-    
                 return response()->json([
                     'success' => true,
                     'message' => 'Booking has been rejected and notification email sent.',
@@ -513,10 +501,6 @@ class InquirerController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error("Booking rejection failed: " . $e->getMessage(), [
-                'booking_id' => $id,
-                'exception' => $e
-            ]);
     
             return response()->json([
                 'success' => false,
@@ -546,16 +530,8 @@ class InquirerController extends Controller
             Mail::to($booking->user->email)->send(
                 new BookingRejectionEmail($booking, $customMessage)
             );
-    
-            Log::info("Rejection email sent", [
-                'booking_id' => $booking->id,
-                'email' => $booking->user->email
-            ]);
         } catch (\Exception $e) {
-            Log::error("Failed to send rejection email", [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
+
             throw $e;
         }
     }
