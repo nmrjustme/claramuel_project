@@ -554,12 +554,15 @@ public function store(Request $request)
     },
         ]);
 
-        // ✅ Auto check-in if today
-        if (\Carbon\Carbon::parse($request->date_tour)->isToday()) {
-            $dayTourLog->update([
-                'checked_in_at' => now(),
-                'status' => 'Checked_in',
-            ]);
+        // ✅ Auto check-in ONLY if paid or approved AND today
+if (
+    in_array($request->reservation_status, ['paid', 'approved']) &&
+    \Carbon\Carbon::parse($request->date_tour)->isToday()
+) {
+    $dayTourLog->update([
+        'checked_in_at' => now(),
+        'status' => 'Checked_in',
+    ]);
 }
         $totalPrice  = 0;
         $serviceType = $request->service_type;
@@ -772,7 +775,6 @@ public function logs(Request $request)
             'checked_in_at' => now(),
             'status' => 'checked_in',
         ]);
-
 
         // Validate input - FIXED: Added service_type validation
         $validated = $request->validate([
