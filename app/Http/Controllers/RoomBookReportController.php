@@ -10,6 +10,7 @@ use App\Models\FacilityBookingDetails;
 use App\Models\FacilitySummary;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class RoomBookReportController extends Controller
 {
@@ -30,19 +31,19 @@ class RoomBookReportController extends Controller
     public function getEarningsData(Request $request)
     {
         try {
-            \Log::info('=== ANALYTICS DEBUG START ===');
+            Log::info('=== ANALYTICS DEBUG START ===');
 
             $category = $request->input('category', '');
             $month = $request->input('month', date('m'));
             $year = $request->input('year', date('Y'));
 
-            \Log::info('Request parameters:', [
+            Log::info('Request parameters:', [
                 'category' => $category,
                 'month' => $month,
                 'year' => $year
             ]);
 
-            // Base query for rooms
+            // Base query for rooms using Eloquent
             $roomsQuery = Facility::where('type', 'room');
 
             if (!empty($category)) {
@@ -50,7 +51,7 @@ class RoomBookReportController extends Controller
             }
 
             $rooms = $roomsQuery->get();
-            \Log::info('Found rooms: ' . $rooms->count());
+            Log::info('Found rooms: ' . $rooms->count());
 
             if ($rooms->isEmpty()) {
                 return response()->json([
@@ -85,12 +86,12 @@ class RoomBookReportController extends Controller
             $totalBookings = 0;
 
             foreach ($rooms as $room) {
-                \Log::info("Processing room: " . $room->name);
-                
+                Log::info("Processing room: " . $room->name);
+
                 // Calculate earnings for THIS SPECIFIC ROOM
                 $roomEarnings = $this->calculateRoomEarnings($room->id, $month, $year);
                 $roomBookingCount = $this->calculateRoomBookings($room->id, $month, $year);
-                
+
                 $earningsData[] = $roomEarnings;
                 $labels[] = $room->name;
                 $totalEarnings += $roomEarnings;
@@ -107,7 +108,7 @@ class RoomBookReportController extends Controller
                 // Calculate room-specific stats
                 $occupancyRate = $this->calculateRoomOccupancy($room->id, $month, $year);
                 $averageRate = $roomBookingCount > 0 ? round($roomEarnings / $roomBookingCount, 2) : 0;
-                
+
                 $roomDetails[] = [
                     'id' => $room->id,
                     'name' => $room->name,
@@ -154,15 +155,15 @@ class RoomBookReportController extends Controller
                 ]
             ];
 
-            \Log::info('Response data prepared successfully');
-            \Log::info('Room Earnings Data:', $earningsData);
-            \Log::info('=== ANALYTICS DEBUG END ===');
+            Log::info('Response data prepared successfully');
+            Log::info('Room Earnings Data:', $earningsData);
+            Log::info('=== ANALYTICS DEBUG END ===');
 
             return response()->json($response);
 
         } catch (\Exception $e) {
-            \Log::error('Error in getEarningsData: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error in getEarningsData: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
 
             return response()->json([
                 'success' => false,
@@ -177,45 +178,132 @@ class RoomBookReportController extends Controller
         }
     }
 
-    /**
-     * Calculate earnings for a specific room - FIXED VERSION
-     * Now properly handles multiple rooms in one booking by dividing by room count
-     */
     private function calculateRoomEarnings($roomId, $month, $year)
     {
         try {
-            $query = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
-                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
-                ->where('summary.facility_id', $roomId)
-                ->where('facility_booking_log.status', '!=', 'pending_confirmation');
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
 
-            // Apply date filtering
-            if ($month && $year) {
-                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-                $query->whereBetween('details.checkin_date', [$startDate, $endDate]);
+            // Use Eloquent relationships
+            $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
+                ->whereHas('summaries', function ($query) use ($roomId) {
+                    $query->where('facility_id', $roomId);
+                })
+                ->whereHas('details', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('checkin_date', [$startDate, $endDate]);
+                })
+                ->where('status', '!=', 'pending_confirmation')
+                ->get();
+
+            $totalEarnings = 0;
+
+            Log::info('🧾 Calculating room earnings with Eloquent', [
+                'room_id' => $roomId,
+                'month' => $month,
+                'year' => $year,
+                'bookings_found' => $bookings->count(),
+            ]);
+
+            foreach ($bookings as $booking) {
+                // Get the specific facility summary for this room
+                $summaries = $booking->summaries
+                    ->where('facility_id', $roomId)
+                    ->first();
+
+                if (!$summaries) {
+                    continue;
+                }
+
+                $roomsInBooking = $booking->summaries->count();
+                $roomsInBooking = max($roomsInBooking, 1);
+
+                // Calculate per-room prices
+                $perRoomFacilityPrice = $summaries->facility_price;
+                $perRoomBreakfastPrice = $summaries->breakfast_price;
+                $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
+
+                // Get payment totals
+                $totalAmountPaid = $booking->payments->sum('amount');
+                $totalCheckinPaid = $booking->payments->sum('checkin_paid');
+                $bookingTotalPrice = $booking->details->sum('total_price');
+
+
+                // Apply payment logic
+                $roomEarnings = $this->applyPaymentLogicPerRoom(
+                    $roomBasePrice,
+                    $bookingTotalPrice,
+                    $totalAmountPaid,
+                    $totalCheckinPaid
+                );
+
+                Log::info('💰 Booking Calculation - Eloquent', [
+                    'booking_id' => $booking->id,
+                    'rooms_in_booking' => $roomsInBooking,
+                    'per_room_facility_price' => $perRoomFacilityPrice,
+                    'per_room_breakfast_price' => $perRoomBreakfastPrice,
+                    'room_base_price' => $roomBasePrice,
+                    'booking_total_price' => $bookingTotalPrice,
+                    'total_amount_paid' => $totalAmountPaid,
+                    'total_checkin_paid' => $totalCheckinPaid,
+                    'room_earnings' => $roomEarnings,
+                ]);
+
+                $totalEarnings += $roomEarnings;
             }
 
-            // Use subquery to get room count per booking and calculate per-room earnings
-            $totalEarnings = (float) $query->select(DB::raw('
-                SUM(
-                    (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
-                    GREATEST(
-                        (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
-                        1
-                    )
-                ) as total_earnings
-            '))->value('total_earnings');
-
-            \Log::info("Room $roomId earnings (adjusted for multiple rooms): " . $totalEarnings);
+            Log::info('✅ Total earnings computed', [
+                'room_id' => $roomId,
+                'total_earnings' => $totalEarnings,
+            ]);
 
             return $totalEarnings;
 
         } catch (\Exception $e) {
-            \Log::error("Error calculating earnings for room $roomId: " . $e->getMessage());
+            Log::error('❌ Error calculating room earnings', [
+                'room_id' => $roomId,
+                'error' => $e->getMessage(),
+            ]);
             return 0;
         }
     }
+
+
+    /**
+     * Calculate earnings for a specific room - FIXED VERSION
+     * Properly handles multi-room bookings and payment distribution
+     */
+    private function applyPaymentLogicPerRoom($roomBasePrice, $bookingTotalPrice, $totalAmountPaid, $totalCheckinPaid)
+    {
+        if ($totalAmountPaid == 0) {
+            return 0;
+        }
+
+        $totalPaymentsReceived = $totalAmountPaid + $totalCheckinPaid;
+
+        Log::info('💳 Payment Rules', [
+            'room_base_price' => $roomBasePrice,
+            'booking_total_price' => $bookingTotalPrice,
+            'amount_paid' => $totalAmountPaid,
+            'checkin_paid' => $totalCheckinPaid,
+            'total_payments' => $totalPaymentsReceived
+        ]);
+
+        // Full payment
+        if ($totalPaymentsReceived >= $bookingTotalPrice) {
+            Log::info('✅ Full payment - room earns full price');
+            return $roomBasePrice;
+        }
+
+        // Half payment
+        if ($totalAmountPaid == ($bookingTotalPrice / 2) && $totalCheckinPaid == 0) {
+            Log::info('✅ Half payment - room earns half price');
+            return $roomBasePrice / 2;
+        }
+
+        Log::warning('❌ Payment amount does not match full or half price');
+        return 0;
+    }
+
 
     /**
      * Alternative optimized version using subquery (better performance)
@@ -292,20 +380,28 @@ class RoomBookReportController extends Controller
         try {
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-            
-            // Calculate nights booked for this room
+
+            // Calculate nights booked for this room - FIXED calculation
             $nightsBooked = FacilityBookingDetails::join('facility_booking_log as log', 'facility_booking_details.facility_booking_log_id', '=', 'log.id')
                 ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
                 ->where('summary.facility_id', $roomId)
                 ->where('log.status', '!=', 'pending_confirmation')
                 ->whereBetween('checkin_date', [$startDate, $endDate])
-                ->sum(DB::raw('DATEDIFF(COALESCE(checkout_date, checkin_date), checkin_date)'));
+                ->get()
+                ->sum(function ($booking) {
+                    // Proper night calculation
+                    $checkin = Carbon::parse($booking->checkin_date);
+                    $checkout = $booking->checkout_date ? Carbon::parse($booking->checkout_date) : $checkin->copy()->addDay();
+
+                    // Calculate actual nights stayed
+                    return $checkin->diffInDays($checkout);
+                });
 
             $nightsBooked = $nightsBooked ?: 0;
-            
-            // Calculate available nights (days in the month)
-            $availableNights = $startDate->diffInDays($endDate);
-            
+
+            // Use exact days in month
+            $availableNights = $startDate->daysInMonth;
+
             $occupancyRate = $availableNights > 0 ? round(($nightsBooked / $availableNights) * 100, 1) : 0;
 
             \Log::info("Room $roomId occupancy: $occupancyRate% ($nightsBooked / $availableNights nights)");
@@ -336,19 +432,19 @@ class RoomBookReportController extends Controller
             }
 
             $bookings = $query->select(
-                    'details.checkin_date as date',
-                    'facility_booking_log.status',
-                    'summary.facility_price',
-                    'summary.breakfast_price',
-                    DB::raw('(SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id) as rooms_in_booking')
-                )
+                'details.checkin_date as date',
+                'facility_booking_log.status',
+                'summary.facility_price',
+                'summary.breakfast_price',
+                DB::raw('(SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id) as rooms_in_booking')
+            )
                 ->orderBy('details.checkin_date', 'desc')
                 ->limit($limit)
                 ->get()
                 ->map(function ($booking) {
                     $roomsInBooking = $booking->rooms_in_booking ?: 1;
                     $perRoomEarnings = ($booking->facility_price + $booking->breakfast_price) / $roomsInBooking;
-                    
+
                     return [
                         'date' => Carbon::parse($booking->date)->format('M j, Y'),
                         'amount' => number_format($perRoomEarnings, 2),
@@ -368,21 +464,35 @@ class RoomBookReportController extends Controller
     private function calculateTotalNightsBooked($month, $year, $category)
     {
         try {
-            $query = FacilityBookingDetails::join('facility_booking_log as log', 'facility_booking_details.facility_booking_log_id', '=', 'log.id')
+            $bookings = FacilityBookingDetails::join('facility_booking_log as log', 'facility_booking_details.facility_booking_log_id', '=', 'log.id')
                 ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
                 ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
                 ->where('facilities.type', 'room')
-                ->where('log.status', '!=', 'pending_confirmation');
+                ->where('log.status', '!=', 'pending_confirmation')
+                ->when(!empty($category), function ($query) use ($category) {
+                    $query->where('facilities.category', $category);
+                })
+                ->where(function ($query) use ($month, $year) {
+                    if ($month && $year) {
+                        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                        $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+                        $query->whereBetween('facility_booking_details.checkin_date', [$startDate, $endDate]);
+                    }
+                })
+                ->get();
 
-            if (!empty($category)) {
-                $query->where('facilities.category', $category);
-            }
+            // Calculate total nights using proper date difference
+            $totalNights = $bookings->sum(function ($booking) {
+                $checkin = Carbon::parse($booking->checkin_date);
+                $checkout = $booking->checkout_date ? Carbon::parse($booking->checkout_date) : $checkin->copy()->addDay();
 
-            $dateFilter = $this->applyDateFilter($query, $month, $year);
+                return $checkin->diffInDays($checkout);
+            });
 
-            $nights = $query->sum(DB::raw('DATEDIFF(COALESCE(checkout_date, checkin_date), checkin_date)'));
+            \Log::info("Total nights booked: $totalNights for $month/$year, category: $category");
 
-            return $nights ?: 0;
+            return $totalNights;
+
         } catch (\Exception $e) {
             \Log::error("Error calculating total nights booked: " . $e->getMessage());
             return 0;
