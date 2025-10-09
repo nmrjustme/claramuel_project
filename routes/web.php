@@ -209,7 +209,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/api/categories', [RoomBookReportController::class, 'getCategories'])->name('api.categories');
     // Route::get('/api/months', [RoomBookReportController::class, 'getAvailableMonths'])->name('api.months');
     // Route::get('/api/years', [RoomBookReportController::class, 'getAvailableYears'])->name('api.years');
-
+    
     Route::get('/analytics', [RoomBookReportController::class, 'index'])->name('earnings.chart');
     Route::get('/analytics/data', [RoomBookReportController::class, 'getEarningsData'])->name('earnings.data');
     Route::get('/analytics/category-earnings', [RoomBookReportController::class, 'getCategoryEarnings'])->name('earnings.category');

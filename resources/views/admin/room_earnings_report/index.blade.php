@@ -298,10 +298,6 @@
 						<span class="font-bold text-blue-600" id="quickTotalEarnings">₱0</span>
 					</div>
 					<div class="flex items-center gap-1">
-						<span class="text-gray-600">Bookings:</span>
-						<span class="font-bold text-purple-600" id="quickRoomsBooked">0</span>
-					</div>
-					<div class="flex items-center gap-1">
 						<span class="text-gray-600">Top:</span>
 						<span class="font-bold text-cyan-600" id="quickTopCategory">-</span>
 					</div>
@@ -997,7 +993,6 @@
 
 				// Update quick stats
 				$('#quickTotalEarnings').text('₱' + stats.totalEarnings.toLocaleString());
-				$('#quickRoomsBooked').text(stats.roomsBooked);
 				$('#quickTopCategory').text(stats.topCategory);
 
 				// Update comparison values if available

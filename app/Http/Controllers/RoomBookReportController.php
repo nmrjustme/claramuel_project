@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+
 class RoomBookReportController extends Controller
 {
     public function index()
@@ -160,7 +161,6 @@ class RoomBookReportController extends Controller
             Log::info('=== ANALYTICS DEBUG END ===');
 
             return response()->json($response);
-
         } catch (\Exception $e) {
             Log::error('Error in getEarningsData: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
@@ -257,7 +257,6 @@ class RoomBookReportController extends Controller
             ]);
 
             return $totalEarnings;
-
         } catch (\Exception $e) {
             Log::error('❌ Error calculating room earnings', [
                 'room_id' => $roomId,
@@ -279,7 +278,7 @@ class RoomBookReportController extends Controller
         }
 
         $totalPaymentsReceived = $totalAmountPaid + $totalCheckinPaid;
-
+        
         Log::info('💳 Payment Rules', [
             'room_base_price' => $roomBasePrice,
             'booking_total_price' => $bookingTotalPrice,
@@ -287,7 +286,7 @@ class RoomBookReportController extends Controller
             'checkin_paid' => $totalCheckinPaid,
             'total_payments' => $totalPaymentsReceived
         ]);
-
+        
         // Full payment
         if ($totalPaymentsReceived >= $bookingTotalPrice) {
             Log::info('✅ Full payment - room earns full price');
@@ -299,49 +298,9 @@ class RoomBookReportController extends Controller
             Log::info('✅ Half payment - room earns half price');
             return $roomBasePrice / 2;
         }
-
+        
         Log::warning('❌ Payment amount does not match full or half price');
         return 0;
-    }
-
-
-    /**
-     * Alternative optimized version using subquery (better performance)
-     */
-    private function calculateRoomEarningsOptimized($roomId, $month, $year)
-    {
-        try {
-            $query = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
-                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
-                ->where('summary.facility_id', $roomId)
-                ->where('facility_booking_log.status', '!=', 'pending_confirmation');
-
-            // Apply date filtering
-            if ($month && $year) {
-                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-                $query->whereBetween('details.checkin_date', [$startDate, $endDate]);
-            }
-
-            // Use subquery to get room count per booking and calculate per-room earnings
-            $totalEarnings = (float) $query->select(DB::raw('
-                SUM(
-                    (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
-                    GREATEST(
-                        (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
-                        1
-                    )
-                ) as total_earnings
-            '))->value('total_earnings');
-
-            \Log::info("Room $roomId earnings (optimized): " . $totalEarnings);
-
-            return $totalEarnings;
-
-        } catch (\Exception $e) {
-            \Log::error("Error calculating optimized earnings for room $roomId: " . $e->getMessage());
-            return 0;
-        }
     }
 
     /**
@@ -365,7 +324,6 @@ class RoomBookReportController extends Controller
             $bookingCount = $query->distinct()->count('facility_booking_log.id');
 
             return $bookingCount;
-
         } catch (\Exception $e) {
             \Log::error("Error calculating bookings for room $roomId: " . $e->getMessage());
             return 0;
@@ -407,7 +365,6 @@ class RoomBookReportController extends Controller
             \Log::info("Room $roomId occupancy: $occupancyRate% ($nightsBooked / $availableNights nights)");
 
             return $occupancyRate;
-
         } catch (\Exception $e) {
             \Log::error("Error calculating occupancy for room $roomId: " . $e->getMessage());
             return 0;
@@ -492,7 +449,6 @@ class RoomBookReportController extends Controller
             \Log::info("Total nights booked: $totalNights for $month/$year, category: $category");
 
             return $totalNights;
-
         } catch (\Exception $e) {
             \Log::error("Error calculating total nights booked: " . $e->getMessage());
             return 0;
@@ -537,19 +493,19 @@ class RoomBookReportController extends Controller
     private function getComparisonStats($month, $year, $category)
     {
         try {
-            $currentStats = $this->getPeriodStats($month, $year, $category);
+            // Get current period stats using the new monthly calculation
+            $currentEarnings = $this->calculateMonthlyEarnings($month, $year, $category);
+            $currentBookings = $this->getMonthlyBookingsCount($month, $year, $category);
 
+            // Get previous period
             $previousPeriod = $this->getPreviousPeriod($month, $year);
-            $previousStats = $this->getPeriodStats(
-                $previousPeriod['month'],
-                $previousPeriod['year'],
-                $category
-            );
+            $previousEarnings = $this->calculateMonthlyEarnings($previousPeriod['month'], $previousPeriod['year'], $category);
+            $previousBookings = $this->getMonthlyBookingsCount($previousPeriod['month'], $previousPeriod['year'], $category);
 
             return [
-                'earnings_change' => $this->calculatePercentageChange($currentStats['earnings'], $previousStats['earnings']),
-                'bookings_change' => $this->calculatePercentageChange($currentStats['bookings'], $previousStats['bookings']),
-                'occupancy_change' => $this->calculatePercentageChange($currentStats['occupancy'], $previousStats['occupancy'])
+                'earnings_change' => $this->calculatePercentageChange($currentEarnings, $previousEarnings),
+                'bookings_change' => $this->calculatePercentageChange($currentBookings, $previousBookings),
+
             ];
         } catch (\Exception $e) {
             \Log::error("Error calculating comparison stats: " . $e->getMessage());
@@ -558,6 +514,29 @@ class RoomBookReportController extends Controller
                 'bookings_change' => 0,
                 'occupancy_change' => 0
             ];
+        }
+    }
+
+    private function getMonthlyBookingsCount($month, $year, $category = null)
+    {
+        try {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            $query = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->where('facility_booking_log.status', '!=', 'pending_confirmation')
+                ->whereBetween('details.checkin_date', [$startDate, $endDate])
+                ->when($category, function ($q) use ($category) {
+                    $q->where('facilities.category', $category);
+                });
+
+            return $query->distinct()->count('facility_booking_log.id');
+        } catch (\Exception $e) {
+            \Log::error("Error getting monthly bookings count: " . $e->getMessage());
+            return 0;
         }
     }
 
@@ -664,7 +643,6 @@ class RoomBookReportController extends Controller
                 'success' => true,
                 'categoryEarnings' => $categoryEarnings
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Error in getCategoryEarnings: ' . $e->getMessage());
             return response()->json([
@@ -741,7 +719,7 @@ class RoomBookReportController extends Controller
             // Compare current year with previous 2 years
             for ($i = 0; $i < 3; $i++) {
                 $compareYear = $currentYear - $i;
-                $yearData = $this->getYearlyData($compareYear, $category);
+                $yearData = $this->getYearlyMonthlyData($compareYear, $category);
                 $data[$compareYear] = $yearData;
             }
 
@@ -751,6 +729,7 @@ class RoomBookReportController extends Controller
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
             ]);
         } catch (\Exception $e) {
+            \Log::error('Error in getComparisonData: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage()
@@ -758,38 +737,86 @@ class RoomBookReportController extends Controller
         }
     }
 
-    private function getYearlyData($year, $category)
+    private function getYearlyMonthlyData($year, $category)
     {
         $monthlyData = [];
 
         for ($month = 1; $month <= 12; $month++) {
-            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-
-            $earnings = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
-                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
-                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
-                ->where('facilities.type', 'room')
-                ->where('facility_booking_log.status', '!=', 'pending_confirmation')
-                ->when($category, function ($q) use ($category) {
-                    $q->where('facilities.category', $category);
-                })
-                ->whereBetween('details.checkin_date', [$startDate, $endDate])
-                ->select(DB::raw('
-                    SUM(
-                        (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
-                        GREATEST(
-                            (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
-                            1
-                        )
-                    ) as total_earnings
-                '))
-                ->value('total_earnings');
-
-            $monthlyData[] = $earnings ?: 0;
+            $monthlyEarnings = $this->calculateMonthlyEarnings($month, $year, $category);
+            $monthlyData[] = $monthlyEarnings;
         }
 
         return $monthlyData;
+    }
+
+    private function calculateMonthlyEarnings($month, $year, $category = null)
+    {
+        try {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
+                ->whereHas('summaries', function ($query) {
+                    $query->whereHas('facility', function ($q) {
+                        $q->where('type', 'room');
+                    });
+                })
+                ->whereHas('details', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('checkin_date', [$startDate, $endDate]);
+                })
+                ->where('status', '!=', 'pending_confirmation')
+                ->when($category, function ($query) use ($category) {
+                    $query->whereHas('summaries.facility', function ($q) use ($category) {
+                        $q->where('category', $category);
+                    });
+                })
+                ->get();
+
+            $totalMonthlyEarnings = 0;
+
+            foreach ($bookings as $booking) {
+                $roomsInBooking = $booking->summaries->count();
+                $roomsInBooking = max($roomsInBooking, 1);
+
+                // Calculate total booking price
+                $totalBookingPrice = $booking->details->sum('total_price');
+
+                // Get payment totals
+                $totalAmountPaid = $booking->payments->sum('amount');
+                $totalCheckinPaid = $booking->payments->sum('checkin_paid');
+
+                // Calculate earnings for EACH ROOM in this booking
+                foreach ($booking->summaries as $summary) {
+                    // Calculate per-room prices (same logic as room-level calculation)
+                    $perRoomFacilityPrice = $summary->facility_price;
+                    $perRoomBreakfastPrice = $summary->breakfast_price;
+                    $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
+
+                    // Apply the SAME payment logic as room-level calculation
+                    $roomEarnings = $this->applyPaymentLogicPerRoom(
+                        $roomBasePrice,
+                        $totalBookingPrice,
+                        $totalAmountPaid,
+                        $totalCheckinPaid
+                    );
+
+                    $totalMonthlyEarnings += $roomEarnings;
+                }
+            }
+
+            \Log::info("Monthly earnings calculated", [
+                'month' => $month,
+                'year' => $year,
+                'category' => $category,
+                'total_earnings' => $totalMonthlyEarnings,
+                'bookings_count' => $bookings->count()
+            ]);
+
+            return $totalMonthlyEarnings;
+        } catch (\Exception $e) {
+            \Log::error("Error calculating monthly earnings: " . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -815,7 +842,6 @@ class RoomBookReportController extends Controller
                 ->header('Content-Disposition', "attachment; filename=\"$filename\"")
                 ->header('Pragma', 'no-cache')
                 ->header('Expires', '0');
-
         } catch (\Exception $e) {
             \Log::error('Export error: ' . $e->getMessage());
             return back()->with('error', 'Failed to export data: ' . $e->getMessage());
