@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationReceived;
 use App\Mail\PaymentFailed;
 use Illuminate\Support\Facades\Log;
+use App\Services\InvoiceService;
 
 class MayaWebhookSetupController extends Controller
 {
@@ -95,6 +96,13 @@ class MayaWebhookSetupController extends Controller
 
     private function storeBookingInDatabase($token, $orderId, $amount, $paymentScheme)
     {
+        $existingBooking = FacilityBookingLog::where('token', $token)->first();
+        if ($existingBooking) {
+            // Delete the order token associated with this booking
+            Order::where('token', $token)->delete();
+            throw new \Exception('Reservation already exists. Order token has been cleaned up.');
+        }
+
         $bookingData = Cache::get('booking_confirmation_' . $token);
         // Start database transaction
         DB::beginTransaction();
@@ -142,6 +150,7 @@ class MayaWebhookSetupController extends Controller
             $bookingLog = FacilityBookingLog::create([
                 'user_id' => $user->id,
                 'booking_date' => now(),
+                'token' => $token,
                 'code' => $bookingData['reservation_code']
             ]);
 
@@ -160,8 +169,6 @@ class MayaWebhookSetupController extends Controller
             // Process each facility
             foreach ($bookingData['facilities'] as $facilityData) {
                 $facility = Facility::findOrFail($facilityData['facility_id']);
-
-                \Log::info("Facility: {$facility->id}");
                 // Calculate facility price with discount logic
                 $facilityPrice = $this->calculateDiscountedFacilityPrice($facility);
 
@@ -234,10 +241,16 @@ class MayaWebhookSetupController extends Controller
                 'guestAddons'
             ]);
 
+            // Generate PDF invoice
+            $invoiceService = new InvoiceService();
+            $pdf = $invoiceService->generateInvoice($bookingLog);
+
             event(new BookingNew($bookingLog)); // Event listener for new booking list
 
+            // Send email with PDF attachment
             Mail::to($bookingData['email'])->send(new ReservationReceived(
-                $bookingLog
+                $bookingLog,
+                $pdf
             ));
 
             Cache::forget('booking_confirmation_' . $token);

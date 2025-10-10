@@ -39,7 +39,7 @@ class MayaCheckoutController extends Controller
         $total_price = $bookingData['total_price'] ?? 0;
         $amount_to_pay = $bookingData['amount_to_pay'] ?? $total_price; // Use the correct amount to pay
         $reservation_code = $bookingData['reservation_code'] ?? 'NO-CODE';
-        
+
         $checkin = Carbon::parse($bookingData['checkin_date']);
         $checkout = Carbon::parse($bookingData['checkout_date']);
         $nights = $checkin->diffInDays($checkout);
@@ -92,13 +92,6 @@ class MayaCheckoutController extends Controller
             // Calculate subtotal (price per night * nights)
             $facilitySubtotal = $facilityPrice * $nights;
 
-            // Add breakfast if included
-            $breakfastCost = 0;
-            if ($isBreakfastIncluded) {
-                $breakfastCost = $breakfastPrice * $nights;
-                $facilitySubtotal += $breakfastCost;
-            }
-
             // Calculate the prorated amount for this facility
             $facilityPaymentAmount = $facilitySubtotal * $paymentRatio;
 
@@ -107,10 +100,6 @@ class MayaCheckoutController extends Controller
             $description = "Check-in: " . $checkin->format('M j, Y') .
                 " | Check-out: " . $checkout->format('M j, Y') .
                 " | Nights: " . $nights;
-
-            if ($isBreakfastIncluded) {
-                $description .= " | Breakfast: ₱" . number_format($breakfastCost, 2) . " (" . $nights . " mornings)";
-            }
 
             // Add payment type info to description
             if ($amount_to_pay < $total_price) {
@@ -144,7 +133,44 @@ class MayaCheckoutController extends Controller
                     ]
                 ]
             ];
+
+            // Add breakfast as a separate line item for each facility if included
+            if ($isBreakfastIncluded && $breakfastPrice > 0) {
+                $breakfastCost = $breakfastPrice * $nights;
+                $breakfastPaymentAmount = $breakfastCost * $paymentRatio;
+                $calculatedTotal += $breakfastPaymentAmount;
+
+                $items[] = [
+                    'name' => 'Breakfast for ' . $facilityName,
+                    'amount' => [
+                        'value' => $breakfastPaymentAmount,
+                        'currency' => 'PHP',
+                        'details' => [
+                            "discount" => 0,
+                            "serviceCharge" => 0,
+                            "shippingFee" => 0,
+                            "tax" => 0,
+                            "subtotal" => $breakfastPaymentAmount,
+                        ]
+                    ],
+                    'totalAmount' => [
+                        'value' => $breakfastPaymentAmount,
+                        'currency' => 'PHP',
+                        'details' => [
+                            "discount" => 0,
+                            "serviceCharge" => 0,
+                            "shippingFee" => 0,
+                            "tax" => 0,
+                            "subtotal" => $breakfastPaymentAmount
+                        ]
+                    ],
+                    
+                ];
+            }
         }
+
+        $rn = 'CLM-' . Str::upper(Str::random(8));
+
         // ✅ Get configuration
         $baseUrl = config('services.maya.base_url');
         $publicKey = config('services.maya.public_key');
@@ -153,8 +179,6 @@ class MayaCheckoutController extends Controller
         if (!$baseUrl || !$publicKey || !$secretKey) {
             return back()->with('error', 'Payment gateway configuration error. Please try again later.');
         }
-        
-        $rn = 'CLM-' . Str::upper(Str::random(8));
 
         $requestBody = [
             'totalAmount' => [
@@ -168,31 +192,14 @@ class MayaCheckoutController extends Controller
                     "subtotal" => $amount_to_pay
                 ]
             ],
-            // 'buyer' => [
-            //     'firstName' => $user_firstname,
-            //     'lastName' => $user_lastname,
-            //     'contact' => [
-            //         'phone' => $user_phone,
-            //         'email' => $user_email
-            //     ],
-            //     'billingAddress' => [
-            //         'line1' => 'Not specified',
-            //         'city' => 'Not specified',
-            //         'state' => 'Not specified',
-            //         'zipCode' => '0000',
-            //         'countryCode' => 'PH'
-            //     ]
-            // ],
             'items' => $items,
+            'requestReferenceNumber' => $rn,
             'redirectUrl' => [
                 'success' => route('booking-awaiting'),
                 'failure' => route('maya.checkout.failure', ['reason' => 'Failed', 'order' => $rn, 'token' => $token]),
                 'cancel' => route('maya.checkout.failure', ['reason' => 'Cancelled', 'order' => $rn, 'token' => $token]),
             ],
-            'requestReferenceNumber' => $rn,
         ];
-        
-        Log::debug('Maya Request Body:', $requestBody);
 
         try {
             $response = Http::withBasicAuth($publicKey, $secretKey)
@@ -202,11 +209,6 @@ class MayaCheckoutController extends Controller
                     'content-type' => 'application/json',
                 ])
                 ->post("{$baseUrl}/checkout/v1/checkouts", $requestBody);
-
-            Log::debug('Maya API Response:', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
 
             if ($response->successful()) {
                 $responseData = $response->json();
@@ -218,14 +220,6 @@ class MayaCheckoutController extends Controller
                     'status' => 'pending',
                     'token' => $token,
                     'payment_type' => $amount_to_pay < $total_price ? 'deposit' : 'full',
-                ]);
-
-                Log::info('Maya checkout created successfully', [
-                    'reference_number' => $rn,
-                    'checkout_id' => $responseData['checkoutId'] ?? null,
-                    'redirect_url' => $responseData['redirectUrl'] ?? null,
-                    'amount_paid' => $amount_to_pay,
-                    'payment_type' => $amount_to_pay < $total_price ? 'deposit' : 'full'
                 ]);
 
                 return redirect()->away($responseData['redirectUrl']);
@@ -259,14 +253,14 @@ class MayaCheckoutController extends Controller
             return back()->with('error', 'A network error occurred: ' . $e->getMessage());
         }
     }
-    
+
     public function handleProcessing($token)
     {
         $order = Order::where('token', $token)->latest()->first();
-        
+
         return view('customer_pages.maya.processing_payment', ['order' => $order, 'token' => $token]);
     }
-    
+
     public function checkOrder($token)
     {
         $order = Order::where('token', $token)->latest()->first();

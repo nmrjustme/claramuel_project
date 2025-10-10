@@ -24,6 +24,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Mail;
 use App\Events\BookingNew;
 use App\Mail\AdminNotification;
+use Illuminate\Support\Facades\Http;
 
 class BookingController extends Controller
 {
@@ -425,7 +426,7 @@ class BookingController extends Controller
                 'summaries.facility:id,name,price',
                 'summaries.breakfast',
             ])
-            ->orderBy('created_at', 'desc');
+                ->orderBy('created_at', 'desc');
 
             // Search by ID
             if ($id) {
@@ -434,37 +435,37 @@ class BookingController extends Controller
 
             // General search across multiple fields
             if ($search) {
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('code', 'like', "%$search%")
-                    ->orWhereHas('user', function($userQuery) use ($search) {
-                        $userQuery->where('firstname', 'like', "%$search%")
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('firstname', 'like', "%$search%")
                                 ->orWhere('lastname', 'like', "%$search%")
                                 ->orWhere('email', 'like', "%$search%")
                                 ->orWhere('phone', 'like', "%$search%");
-                    });
+                        });
                 });
             }
 
             // Search by first name
             if (!empty(trim($firstName))) {
-                $query->whereHas('user', function($q) use ($firstName) {
+                $query->whereHas('user', function ($q) use ($firstName) {
                     $q->where('firstname', 'like', "%$firstName%");
                 });
             }
 
             if (!empty(trim($lastName))) {
-                $query->whereHas('user', function($q) use ($lastName) {
+                $query->whereHas('user', function ($q) use ($lastName) {
                     $q->where('lastname', 'like', "%$lastName%");
                 });
             }
 
             // Search by check-in or check-out date
             if ($checkinDate && $dateType === 'checkin') {
-                $query->whereHas('details', function($q) use ($checkinDate) {
+                $query->whereHas('details', function ($q) use ($checkinDate) {
                     $q->whereDate('checkin_date', $checkinDate);
                 });
             } elseif ($checkoutDate && $dateType === 'checkout') {
-                $query->whereHas('details', function($q) use ($checkoutDate) {
+                $query->whereHas('details', function ($q) use ($checkoutDate) {
                     $q->whereDate('checkout_date', $checkoutDate);
                 });
             }
@@ -476,7 +477,7 @@ class BookingController extends Controller
             $bookings = $query->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
-                'data' => $bookings->map(function($booking) {
+                'data' => $bookings->map(function ($booking) {
                     // Display status logic
                     $displayStatus = $booking->status;
 
@@ -491,7 +492,7 @@ class BookingController extends Controller
                         'status' => $displayStatus,
                         'code' => $booking->code,
                         'details' => $booking->details,
-                        'summaries' => $booking->summaries->map(function($summary) {
+                        'summaries' => $booking->summaries->map(function ($summary) {
                             return [
                                 'facility' => $summary->facility,
                                 'breakfast_id' => $summary->breakfast_id,
@@ -889,5 +890,193 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+    public function cancelBooking(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Find booking with relations
+            $booking = FacilityBookingLog::with(['payments', 'user', 'details'])
+                ->findOrFail($id);
+
+            // Validation checks
+            if ($booking->status === 'cancelled') {
+                return response()->json(['success' => false, 'message' => 'Booking is already cancelled.'], 400);
+            }
+
+            if ($booking->status === 'checked_out') {
+                return response()->json(['success' => false, 'message' => 'Cannot cancel a checked-out booking.'], 400);
+            }
+
+            // Cancellation data
+            $refundType = $request->input('refund_type', 'non_refundable');
+            $refundAmountType = $request->input('refund_amount_type', 'full');
+            $reason = $request->input('reason', 'Cancelled by admin');
+
+            $refundAmount = 0;
+            $payment = $booking->payments->first();
+
+            if ($refundType === 'refundable' && $payment) {
+                $totalPaid = ($payment->amount ?? 0) + ($payment->checkin_paid ?? 0);
+
+                $refundAmount = match ($refundAmountType) {
+                    'full' => $totalPaid,
+                    'half' => $totalPaid * 0.5,
+                    default => 0,
+                };
+
+                $payment->update([
+                    'refund_amount' => $refundAmount,
+                    'refund_reason' => $reason,
+                    'refund_date' => now()->toDateTimeString(),
+                    'refund_type' => $refundAmountType,
+                ]);
+            } elseif ($payment) {
+                $payment->update([
+                    'refund_amount' => 0,
+                    'refund_reason' => $reason,
+                    'refund_date' => now()->toDateTimeString(),
+                    'refund_type' => 'none'
+                ]);
+            }
+
+            // Update booking status
+            $booking->update(['status' => 'cancelled']);
+
+            // Call refund via Maya API if refundable
+            if ($refundType === 'refundable' && $payment && $payment->reference_no) {
+                $this->refund($payment->reference_no, $reason);
+            }
+
+            // Optional: send notification
+            $this->sendCancellationNotification($booking, $refundAmount, $reason);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking cancelled successfully.',
+                'data' => [
+                    'booking_id' => $booking->id,
+                    'refund_amount' => $refundAmount,
+                    'refund_type' => $refundType,
+                    'cancellation_reason' => $reason
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Booking cancellation failed: ' . $e->getMessage());
+
+            return response()->json(['success' => false, 'message' => 'Failed to cancel booking: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function refund($transactionReferenceNo, $reason)
+    {
+        $baseUrl = config('services.maya.base_url');
+        $secretKey = config('services.maya.secret_key');
+
+        // Validate configuration
+        if (!$secretKey || !$baseUrl) {
+            Log::error('Maya API configuration missing');
+            return ['error' => 'Maya API configuration incomplete'];
+        }
+
+        $endpoint = "{$baseUrl}/p3/refund"; // ✅ as per Maya docs example (singular)
+        $requestReferenceNo = (string) Str::uuid();
+        $idempotencyKey = (string) Str::uuid();
+
+        // Encode secret key for Basic Auth (like Maya example)
+        $encodedKey = base64_encode($secretKey . ':');
+
+        $headers = [
+            'Authorization' => 'Basic ' . $encodedKey,
+            'Request-Reference-No' => $requestReferenceNo,
+            'X-Idempotency-Key' => $idempotencyKey,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
+
+        $body = [
+            'transactionReferenceNo' => $transactionReferenceNo,
+            'reason' => $reason,
+        ];
+
+        try {
+            $response = Http::withHeaders($headers)
+                ->timeout(30)
+                ->post($endpoint, $body);
+
+            $responseData = $response->json();
+            $statusCode = $response->status();
+
+            Log::info('Maya Refund Response', [
+                'status' => $statusCode,
+                'body' => $responseData,
+                'transaction_ref' => $transactionReferenceNo,
+                'request_ref' => $requestReferenceNo,
+            ]);
+
+            // Handle auth errors
+            if ($statusCode === 401) {
+                return [
+                    'error' => 'Invalid or unauthorized key scope. Use a valid Secret Key (sk-...) with refund permissions.',
+                    'code' => $responseData['code'] ?? 'AUTH_ERROR',
+                    'reference' => $responseData['reference'] ?? null,
+                    'status' => $statusCode,
+                ];
+            }
+
+            // Handle failed refund
+            if ($statusCode >= 400) {
+                return [
+                    'error' => $responseData['error'] ?? 'Refund request failed',
+                    'code' => $responseData['code'] ?? 'UNKNOWN_ERROR',
+                    'status' => $statusCode,
+                    'reference' => $responseData['reference'] ?? null,
+                ];
+            }
+
+            return $responseData;
+
+        } catch (\Exception $e) {
+            Log::error('Refund failed: ' . $e->getMessage(), [
+                'transaction_ref' => $transactionReferenceNo,
+                'endpoint' => $endpoint,
+            ]);
+
+            return [
+                'error' => true,
+                'message' => $e->getMessage(),
+                'status' => 500,
+            ];
+        }
+    }
+
+
+    private function sendCancellationNotification($booking, $refundAmount, $reason)
+    {
+        // Implement your notification logic here
+        // This could be email, SMS, or in-app notification
+
+        $user = $booking->user;
+        $refundMessage = $refundAmount > 0
+            ? "A refund of ₱" . number_format($refundAmount, 2) . " will be processed."
+            : "This cancellation is non-refundable.";
+
+        // Example email notification
+        // Mail::to($user->email)->send(new BookingCancelledMail($booking, $refundAmount, $reason));
+
+        Log::info('Cancellation notification sent', [
+            'user_id' => $user->id,
+            'booking_id' => $booking->id,
+            'refund_amount' => $refundAmount,
+            'reason' => $reason
+        ]);
+    }
+
+
 
 }

@@ -18,7 +18,6 @@ class GuestTypeController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Failed to fetch guest types: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,

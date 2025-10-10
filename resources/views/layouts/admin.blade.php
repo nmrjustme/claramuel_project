@@ -55,9 +55,9 @@
     @yield('content_css')
 </head>
 
-<body class="bg-gray-100">
-
-
+<body class="bg-gray-200">
+    
+    
     <!-- Mobile Header -->
     <div
         class="md:hidden mt-1 fixed top-0 left-0 right-0 bg-white shadow-md z-50 flex items-center justify-between p-4 h-16">
@@ -109,7 +109,7 @@
     @include('admin.sidebar')
 
     <!-- Mobile sidebar overlay -->
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden pointer-events-none opacity-0 transition-all duration-300"
+    <div class="fixed inset-0 bg-black/50 z-30 md:hidden pointer-events-none opacity-0 transition-all duration-300"
         id="sidebar-overlay"></div>
 
     <!-- Main Content Area -->

@@ -130,11 +130,6 @@ class EmailConfirmationController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            Log::error('Email sending failed:', [
-                'error' => $e->getMessage(),
-                'email' => $validatedData['email']
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to send OTP. Please try again.'
@@ -186,11 +181,6 @@ class EmailConfirmationController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            Log::error('Resend OTP failed:', [
-                'error' => $e->getMessage(),
-                'email' => $email
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to resend OTP. Please try again.'
@@ -255,12 +245,6 @@ class EmailConfirmationController extends Controller
         } else {
             Cache::forget('email_tokens_' . $email);
         }
-
-        Log::info('OTP verified successfully', [
-            'reservation_code' => $reservationCode,
-            'email' => $bookingData['email']
-        ]);
-
         return response()->json([
             'success' => true,
             'message' => 'OTP verified successfully!',
@@ -277,7 +261,6 @@ class EmailConfirmationController extends Controller
             $bookingData = Cache::get('booking_confirmation_' . $token);
             
             if (!$bookingData) {
-                Log::warning('Invalid or expired confirmation token');
                 return redirect()->route('invalid_link');
             }
             
@@ -303,11 +286,6 @@ class EmailConfirmationController extends Controller
             } else {
                 Cache::forget('email_tokens_' . $email);
             }
-
-            Log::info('Email confirmed successfully, ready for payment', [
-                'reservation_code' => $reservationCode,
-                'email' => $bookingData['email']
-            ]);
             
             // Redirect to payments page with the token // customer.booking.payments
             return redirect()->route('booking.redirect', ['token' => $token])->with([
@@ -316,10 +294,6 @@ class EmailConfirmationController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            Log::error('Email confirmation failed:', [
-                'error_message' => $e->getMessage(),
-            ]);
-            
             return redirect()->route('invalid_link');
         }
     }
@@ -333,7 +307,6 @@ class EmailConfirmationController extends Controller
             ->get();
         
         if ($admins->isEmpty()) {
-            Log::warning("No active admin with email found");
             return;
         }
         
@@ -343,11 +316,6 @@ class EmailConfirmationController extends Controller
                     new AdminNotification($booking)
                 );
                 
-                Log::info("Booking email sent to admin", [
-                    'booking_id' => $booking->id,
-                    'email' => $admin->email
-                ]);
-            
             } catch (\Exception $e) {
                 Log::error("Failed to send admin email", [
                     'booking_id' => $booking->id,
@@ -404,11 +372,6 @@ class EmailConfirmationController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            Log::error('Resend confirmation email failed:', [
-                'error' => $e->getMessage(),
-                'email' => $request->email
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to resend confirmation email. Please try again.'

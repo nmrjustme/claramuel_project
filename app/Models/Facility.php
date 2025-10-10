@@ -27,7 +27,13 @@ class Facility extends Model
         'quantity'
     ];
     
-    public function images () {
+    public function summaries () 
+    {
+        return $this->hasMany(FacilitySummary::class, 'facility_id');
+    }
+
+    public function images () 
+    {
         return $this->hasMany(FacilityImage::class, 'fac_id');
     }
     

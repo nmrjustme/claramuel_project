@@ -100,10 +100,6 @@ class BookingCalendarController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Calendar data error: '.$e->getMessage(), [
-                'exception' => $e,
-                'request' => $request->all()
-            ]);
             
             return response()->json([
                 'success' => false,
@@ -159,11 +155,6 @@ class BookingCalendarController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Bookings by date error: '.$e->getMessage(), [
-                'exception' => $e,
-                'request' => $request->all()
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Error loading bookings for date',

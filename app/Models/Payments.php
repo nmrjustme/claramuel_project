@@ -20,6 +20,7 @@ class Payments extends Model
         'amount_paid',
         'remaining_balance_status',
         'checkin_paid',
+        'refunded',
         'receipt_path',
         'payment_date',
         'is_read',
@@ -30,6 +31,11 @@ class Payments extends Model
         'verification_token',
         'qr_code_path',
         'qr_status',
+        
+        'refund_amount',
+        'refund_reason', 
+        'refund_type',
+        'refund_date '
     ];
 
     protected $casts = [

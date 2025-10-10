@@ -7,6 +7,15 @@ $active = 'dashboard';
 
 @section('content_css')
 <style>
+     .min-h-screen {
+          min-height: 100vh;
+          position: relative;
+     }
+
+     .flex.min-h-screen {
+          position: relative;
+     }
+
      #qr-reader {
           width: 100%;
           margin: 0 auto;
@@ -111,8 +120,6 @@ $active = 'dashboard';
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
           overflow: hidden;
      }
-
-
 
      .floating-action-btn {
           position: fixed;
@@ -384,54 +391,59 @@ $active = 'dashboard';
           color: #e74c3c;
           display: none;
      }
+
+     /* Bar Chart Specific Styles */
+     .bar-chart-container {
+          background: linear-gradient(135deg, #f8fafcff 0%, #f1f5f9 100%);
+          border: 1px solid #e2e8f0;
+     }
+
+     .chart-legend {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          margin-top: 15px;
+          flex-wrap: wrap;
+     }
+
+     .legend-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          color: #64748b;
+     }
+
+     .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 3px;
+     }
 </style>
 @endsection
 
 @section('content')
-<div class="min-h-screen px-6 py-6">
+
+<div class="min-h-screen px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
      <!-- Header with animated gradient -->
-     <div class="rounded-lg mb-4 overflow-hidden">
-          <div class="bg-gradient-to-r from-red-800 to-red-700 p-8 text-white rounded-lg relative overflow-hidden">
+     <div class="rounded-lg mb-4 sm:mb-6 overflow-hidden">
+          <div class="bg-gradient-to-r from-red-800 to-red-700 p-4 sm:p-6 md:p-8 text-white rounded-lg relative overflow-hidden">
                <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-white/0"></div>
                <div class="relative z-10">
-                    <div class="flex items-center justify-between">
-                         <div>
-                              <h1 class="text-3xl font-bold">Dashboard Overview</h1>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                         <div class="flex-1 min-w-0">
+                              <h1 class="text-xl sm:text-2xl md:text-3xl font-bold truncate">Dashboard Overview</h1>
                               @auth
-                              <p class="opacity-90 mt-2">
+                              <p class="opacity-90 mt-1 sm:mt-2 text-sm sm:text-base truncate">
                                    Welcome back, {{ auth()->user()->firstname }}! Here's what's happening today.
                               </p>
                               @endauth
                          </div>
-                         <div class="flex items-center space-x-4">
-
-                              <!-- Active Host Toggle with Indicator -->
-                              {{-- <div class="flex flex-col items-end">
-                                   <div class="flex items-center mb-1">
-                                        <label for="activeHost" class="mr-2 text-sm font-medium">Active Admin</label>
-                                        <label class="relative inline-flex items-center cursor-pointer">
-                                             <input type="checkbox" id="activeHost" class="sr-only peer"
-                                                  onchange="toggleActiveHost(this)" {{ auth()->user()->is_active ?
-                                             'checked' : '' }}>
-                                             <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer 
-                                                  peer-checked:bg-green-500 after:content-[''] after:absolute 
-                                                  after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 
-                                                  after:border after:rounded-full after:h-5 after:w-5 
-                                                  after:transition-all peer-checked:after:translate-x-full"></div>
-                                        </label>
-                                   </div>
-                                   <div id="hostStatusIndicator"
-                                        class="text-xs font-medium px-2 py-1 rounded-full 
-                                   {{ auth()->user()->is_active ? 'bg-green-100/20 text-green-100' : 'bg-gray-100/20 text-gray-200' }}">
-                                        {{ auth()->user()->is_active ?
-                                        '✓ Booking email notifications are enabled.' :
-                                        '✗ Booking email notifications are turned off.' }}
-                                   </div>
-                              </div> --}}
+                         <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0">
 
                               <!-- User Icon -->
-                              <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+                              <div class="bg-white/20 p-2 sm:p-3 rounded-lg backdrop-blur-sm">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -441,12 +453,12 @@ $active = 'dashboard';
                     </div>
 
                     <!-- Date and Time -->
-                    <div class="mt-6 flex items-center space-x-2">
-                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
+                    <div class="mt-4 sm:mt-6 flex flex-wrap gap-2">
+                         <span class="px-2 sm:px-3 py-1 bg-white/20 rounded-full text-xs sm:text-sm font-medium">
                               @php echo \Carbon\Carbon::now('Asia/Manila')->format('l, F j, Y'); @endphp
                          </span>
-                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                         <span class="px-2 sm:px-3 py-1 bg-white/20 rounded-full text-xs sm:text-sm font-medium flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none"
                                    viewBox="0 0 24 24" stroke="currentColor">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -459,25 +471,16 @@ $active = 'dashboard';
      </div>
 
      <!-- Status Cards -->
-     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-
+     <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
           <!-- Total Bookings -->
-          <div class="status-card total-bookings border border-lightgray">
+          <div class="status-card total-bookings border border-lightgray p-3 sm:p-4 md:p-6">
                <div class="card-content">
                     <div class="text-content">
-                         <p class="stat-label">Total Bookings</p>
-                         <h3 class="stat-value" id="total-bookings">0</h3>
-                         <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                   stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                              </svg>
-                              +5 This Week
-                         </p>
+                         <p class="stat-label text-xs sm:text-sm">Total Bookings</p>
+                         <h3 class="stat-value text-2xl sm:text-3xl" id="total-bookings">0</h3>
                     </div>
-                    <div class="icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none"
+                    <div class="icon-wrapper w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-600" fill="none"
                               viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -487,22 +490,14 @@ $active = 'dashboard';
           </div>
 
           <!-- Pending Confirmations -->
-          <div class="status-card pending-confirmations border border-lightgray">
+          <div class="status-card pending-confirmations border border-lightgray p-3 sm:p-4 md:p-6">
                <div class="card-content">
                     <div class="text-content">
-                         <p class="stat-label">Pending Confirmations</p>
-                         <h3 class="stat-value" id="total-pending">8</h3>
-                         <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                   stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              Awaiting response
-                         </p>
+                         <p class="stat-label text-xs sm:text-sm">Pending Confirmations</p>
+                         <h3 class="stat-value text-2xl sm:text-3xl" id="total-pending">8</h3>
                     </div>
-                    <div class="icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none"
+                    <div class="icon-wrapper w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-amber-600" fill="none"
                               viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -511,47 +506,30 @@ $active = 'dashboard';
                </div>
           </div>
 
-          <div class="status-card awaiting-payments border border-lightgray">
+          <div class="status-card awaiting-payments border border-lightgray p-3 sm:p-4 md:p-6">
                <div class="card-content">
                     <div class="text-content">
-                         <p class="stat-label">Checked In</p>
-                         <h3 class="stat-value" id="checked-in-total">0</h3>
-                         <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                   stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5a1 1 0 01-1-1v-5H9v5a1 1 0 01-1 1H3a1 1 0 01-1-1V9.75z" />
-                              </svg>
-                              Customer In-House
-                         </p>
+                         <p class="stat-label text-xs sm:text-sm">Checked In</p>
+                         <h3 class="stat-value text-2xl sm:text-3xl" id="checked-in-total">0</h3>
                     </div>
-                    <div class="icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-violet-600" fill="none"
+                    <div class="icon-wrapper w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-violet-600" fill="none"
                               viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                    d="M3 12l9-9 9 9M4 10v10h16V10" />
                          </svg>
                     </div>
-
                </div>
           </div>
 
-          <div class="status-card checked-out border border-lightgray">
+          <div class="status-card checked-out border border-lightgray p-3 sm:p-4 md:p-6">
                <div class="card-content">
                     <div class="text-content">
-                         <p class="stat-label">Checked Out</p>
-                         <h3 class="stat-value text-red-700" id="total-checked-out">8</h3>
-                         <p class="stat-change">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none"
-                                   viewBox="0 0 24 24" stroke="currentColor">
-                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-                              </svg>
-                              Customer Checked-Out
-                         </p>
+                         <p class="stat-label text-xs sm:text-sm">Checked Out</p>
+                         <h3 class="stat-value text-2xl sm:text-3xl text-red-700" id="total-checked-out">8</h3>
                     </div>
-                    <div class="icon-wrapper bg-gray-50">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none"
+                    <div class="icon-wrapper bg-gray-50 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-red-600" fill="none"
                               viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
@@ -562,38 +540,48 @@ $active = 'dashboard';
      </div>
 
      <!-- Main Content Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-4 sm:mb-5 md:mb-6">
           <!-- Middle Column (Revenue & Chart) -->
-          <div class="p-6 bg-white rounded-lg border border-gray-200">
+          <div class="p-4 sm:p-5 md:p-6 bg-white rounded-lg border border-gray-200">
                <div class="error-message" id="error-message" style="display:none;">
-                    <h3>Unable to load data</h3>
-                    <p>Please check your connection and try again</p>
-                    <button onclick="loadData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">Retry</button>
+                    <h3 class="text-lg sm:text-xl">Unable to load data</h3>
+                    <p class="text-sm sm:text-base">Please check your connection and try again</p>
+                    <button onclick="loadData()" class="mt-3 sm:mt-4 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base">Retry</button>
                </div>
 
-               <div class="chart-container bg-blue-50">
+               <div class="chart-container bar-chart-container h-64 sm:h-80 md:h-96">
                     <div class="loading" id="loading">
-                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                         <p>Loading income data...</p>
+                         <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-600 mx-auto"></div>
+                         <p class="mt-2 text-sm sm:text-base">Loading income data...</p>
                     </div>
                     <canvas id="incomeChart"></canvas>
+                    <div class="chart-legend" id="chart-legend"></div>
                </div>
           </div>
 
-          <!--Facilities Occupied Today section  -->
-          <div class="lg:col-span-2 p-6 bg-white rounded-lg border border-gray-200">
-               <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">Facilities Occupied Today</h2>
-                    <div class="flex items-center">
-                         <span class="text-sm text-gray-500 mr-3">
+          <!-- Facilities Occupied Today section -->
+          <div class="lg:col-span-2 p-3 sm:p-4 md:p-5 bg-white rounded-lg border border-gray-200">
+               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0 mb-3 sm:mb-4">
+                    <div class="min-w-0 flex-1">
+                         <h2 class="text-base sm:text-lg font-semibold text-gray-800 truncate">Rooms Occupied Today</h2>
+                         <span class="text-xs text-gray-500 sm:hidden mt-1 block">
                               @php
                               $today = \Carbon\Carbon::now('Asia/Manila')->toDateString();
-                              echo \Carbon\Carbon::now('Asia/Manila')->format('F j, Y');
+                              echo \Carbon\Carbon::now('Asia/Manila')->format('M j, Y');
                               @endphp
                          </span>
-                         <button onclick="loadRoomMonitoring()" class="text-gray-500 hover:text-red-600">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                         <span class="text-xs text-gray-500 hidden sm:block">
+                              @php
+                              $today = \Carbon\Carbon::now('Asia/Manila')->toDateString();
+                              echo \Carbon\Carbon::now('Asia/Manila')->format('M j, Y');
+                              @endphp
+                         </span>
+                         <button onclick="loadRoomMonitoring()"
+                              class="text-gray-500 hover:text-red-600 p-1 rounded hover:bg-gray-100 transition-colors"
+                              title="Refresh">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24"
                                    stroke="currentColor">
                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -604,52 +592,50 @@ $active = 'dashboard';
 
                <!-- Room monitoring grid -->
                <div id="room-grid"
-                    class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 p-2 sm:p-4">
+                    class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-1 sm:gap-2 p-1 sm:p-2">
                     <!-- JS will render here -->
-                    <div class="col-span-full text-center py-8">
-                         <div
-                              class="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-red-600 mx-auto">
+                    <div class="col-span-full text-center py-4 sm:py-6">
+                         <div class="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 border-b-2 border-red-600 mx-auto">
                          </div>
-                         <p class="mt-2 text-gray-500 text-sm sm:text-base">Loading...</p>
+                         <p class="mt-1 sm:mt-2 text-gray-500 text-xs sm:text-sm">Loading...</p>
                     </div>
                </div>
-          
           </div>
      </div>
 
      <!-- Bottom Grid -->
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-     
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-4 sm:mb-5 md:mb-6">
           <!-- Admins -->
-          <div class="p-6 bg-white rounded-lg border border-gray-200" id="active-admins-container">
-               <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Admin</h2>
+          <div class="p-4 sm:p-5 md:p-6 bg-white rounded-lg border border-gray-200" id="active-admins-container">
+               <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Admin</h2>
                     <button onclick="fetchActiveAdmins()" class="text-gray-500 hover:text-red-600">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                               stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                          </svg>
                     </button>
                </div>
-               <div id="active-admins-list" class="overflow-y-auto max-h-64 space-y-4 pr-2">
+               <div id="active-admins-list" class="overflow-y-auto max-h-48 sm:max-h-56 md:max-h-64 space-y-3 sm:space-y-4 pr-2">
                     <!-- Loading state -->
-                    <div class="text-center py-8">
-                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                         <p class="mt-2 text-gray-500">Loading active admins...</p>
+                    <div class="text-center py-4 sm:py-6">
+                         <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-600 mx-auto"></div>
+                         <p class="mt-2 text-gray-500 text-sm">Loading active admins...</p>
                     </div>
                </div>
           </div>
+
           <!-- Left Column (Next Check-in) -->
-          <div class="p-6 bg-white rounded-lg border border-gray-200">
+          <div class="p-4 sm:p-5 md:p-6 bg-white rounded-lg border border-gray-200">
                <!-- Next Check-in Section -->
                <div class="glass-card">
-                    <div class="flex items-center justify-between mb-4">
-                         <h3 class="text-lg font-semibold text-gray-800">Next Check-in</h3>
+                    <div class="flex items-center justify-between mb-3 sm:mb-4">
+                         <h3 class="text-base sm:text-lg font-semibold text-gray-800">Next Check-in</h3>
                          <a href="{{ route('incoming.list') }}">
                               <div
-                                   class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-1 rounded-full animate-pulse flex items-center cursor-pointer">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none"
+                                   class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full animate-pulse flex items-center cursor-pointer">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                              d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -658,63 +644,62 @@ $active = 'dashboard';
                               </div>
                          </a>
                     </div>
-                    <p class="text-gray-600 mb-4" id="next-checkin-time">Loading...</p>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base" id="next-checkin-time">Loading...</p>
 
-                    <div class="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-100">
-                         <div class="flex items-center mb-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                    <div class="bg-gradient-to-r from-red-50 to-red-100 p-3 sm:p-4 rounded-lg border border-red-100">
+                         <div class="flex items-center mb-1.5 sm:mb-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-1.5 sm:mr-2"
                                    viewBox="0 0 20 20" fill="currentColor">
                                    <path fill-rule="evenodd"
                                         d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
                                         clip-rule="evenodd" />
                               </svg>
-                              <p class="font-medium text-gray-800" id="next-checkin-date">-</p>
+                              <p class="font-medium text-gray-800 text-sm sm:text-base" id="next-checkin-date">-</p>
                          </div>
-                         <div class="flex items-center mb-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                         <div class="flex items-center mb-1.5 sm:mb-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-1.5 sm:mr-2"
                                    viewBox="0 0 20 20" fill="currentColor">
                                    <path fill-rule="evenodd"
                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
                                         clip-rule="evenodd" />
                               </svg>
-                              <p class="text-gray-600" id="next-checkin-nights">-</p>
+                              <p class="text-gray-600 text-sm sm:text-base" id="next-checkin-nights">-</p>
                          </div>
-                         <div class="flex items-center mb-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                         <div class="flex items-center mb-1.5 sm:mb-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-1.5 sm:w-2"
                                    viewBox="0 0 20 20" fill="currentColor">
                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                                         clip-rule="evenodd" />
                               </svg>
-                              <p class="font-medium text-gray-800" id="next-checkin-guest">-</p>
+                              <p class="font-medium text-gray-800 text-sm sm:text-base" id="next-checkin-guest">-</p>
                          </div>
                          <div class="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-1.5 sm:mr-2"
                                    viewBox="0 0 20 20" fill="currentColor">
                                    <path
                                         d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                               </svg>
-                              <p class="text-gray-600" id="next-checkin-phone">-</p>
+                              <p class="text-gray-600 text-sm sm:text-base" id="next-checkin-phone">-</p>
                          </div>
-                         <div class="flex items-center mt-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2"
+                         <div class="flex items-center mt-1.5 sm:mt-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-1.5 sm:mr-2"
                                    viewBox="0 0 20 20" fill="currentColor">
                                    <path fill-rule="evenodd"
                                         d="M9 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                                         clip-rule="evenodd" />
                               </svg>
-                              <p class="font-medium text-gray-800" id="next-checkin-booking-code">-</p>
+                              <p class="font-medium text-gray-800 text-sm sm:text-base" id="next-checkin-booking-code">-</p>
                          </div>
                     </div>
                </div>
           </div>
 
           <!-- Recent Enquiries -->
-          <div class="h-card h-card--no-header h-py-8 h-mb-24 h-mr-8 p-6 bg-white rounded-lg border border-gray-200">
-
-               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
+          <div class="h-card h-card--no-header h-py-6 sm:h-py-8 h-mb-20 sm:h-mb-24 h-mr-4 sm:h-mr-8 p-4 sm:p-5 md:p-6 bg-white rounded-lg border border-gray-200">
+               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-0">
                     <!-- Title + Badge -->
                     <div class="flex items-center">
-                         <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
+                         <h2 class="text-base sm:text-lg md:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
                          <span class="ml-2 bg-red-500 text-white 
                                    text-[10px] sm:text-xs md:text-sm 
                                    font-bold 
@@ -728,441 +713,389 @@ $active = 'dashboard';
 
                     <!-- Actions -->
                     <div class="flex flex-wrap gap-2 sm:gap-3">
-                         <a href="{{ route('admin.inquiries') }}" class="text-sm text-red-600 hover:text-red-800">View
+                         <a href="{{ route('admin.inquiries') }}" class="text-xs sm:text-sm text-red-600 hover:text-red-800">View
                               All</a>
                     </div>
                </div>
 
-
                <!-- Search Bar -->
-               <div class="relative mb-6">
+               <div class="relative mb-4 sm:mb-6">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                         <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                          </svg>
                     </div>
                     <input type="text" id="inquiry-search"
-                         class="block w-full pl-10 pr-3 py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                         class="block w-full pl-9 sm:pl-10 pr-3 py-1.5 sm:py-2 border border-darkgray rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm sm:text-sm"
                          placeholder="Search by id, reference, or name..." onkeyup="filterInquiries()">
                </div>
 
-               <div class="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scroll" id="inquiries-container">
+               <div class="space-y-3 sm:space-y-4 max-h-64 sm:max-h-80 md:max-h-96 overflow-y-auto pr-2 custom-scroll" id="inquiries-container">
                     <!-- Inquiries will be loaded here via AJAX -->
-                    <div class="text-center py-8">
-                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto">
+                    <div class="text-center py-4 sm:py-6">
+                         <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-600 mx-auto">
                          </div>
-                         <p class="mt-2 text-gray-500">Loading inquiries...</p>
+                         <p class="mt-2 text-gray-500 text-sm">Loading inquiries...</p>
                     </div>
                </div>
           </div>
 
           @include('admin.inquirers.recent_inquirers')
-
      </div>
+</div>
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
 
+@section('content_js')
+<script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-
-     <meta name="csrf-token" content="{{ csrf_token() }}">
-     @endsection
-
-     @section('content_js')
-     <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-
-     <script>
-          // function toggleActiveHost(checkbox) {
-     //      const isActive = checkbox.checked;
-     //      const indicator = document.getElementById('hostStatusIndicator');
-          
-     //      // Send AJAX request to update host status
-     //      fetch('/host/status', {
-     //           method: 'POST',
-     //           headers: {
-     //                'Content-Type': 'application/json',
-     //                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-     //                'Accept': 'application/json'
-     //           },
-     //           body: JSON.stringify({ is_active: isActive })
-     //      })
-     //      .then(response => {
-     //           if (!response.ok) {
-     //                throw new Error('Network response was not ok');
-     //           }
-     //           return response.json();
-     //      })
-     //      .then(data => {
-     //           // Update indicator
-     //           if(data.is_active) {
-     //                indicator.textContent = '✓ Receiving booking notifications';
-     //                indicator.classList.remove('bg-gray-100/20', 'text-gray-200');
-     //                indicator.classList.add('bg-green-100/20', 'text-green-100');
-     //           } else {
-     //                indicator.textContent = '✗ Not accepting bookings notification';
-     //                indicator.classList.remove('bg-green-100/20', 'text-green-100');
-     //                indicator.classList.add('bg-gray-100/20', 'text-gray-200');
-     //           }
-     //      })
-     //      .catch(error => {
-     //           console.error('Error:', error);
-     //           // Revert checkbox if update failed
-     //           checkbox.checked = !isActive;
-     //      });
-     // }
-     
+<script>
      // Data Loading Functions
-     function loadNextCheckin() {
-          fetch('/get/bookings/next-checkin', {
-               method: 'GET',
-               headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-               }
-          })
-          .then(response => {
-               if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-               }
-               return response.json();
-          })
-          .then(data => {
-               if (!data.success) {
-                    throw new Error(data.message || 'Failed to load next check-in');
-               }
-               
-               const container = document.getElementById('next-checkin-time');
-               
-               if (data.data) {
-                    const booking = data.data;
-                    const detail = booking.details[0];
-                    
-                    // Format the time display
-                    const daysUntil = data.days_until;
-                    let displayText;
-                    
-                    if (daysUntil < 1) {
-                         const hours = Math.round(daysUntil * 24);
-                         displayText = `${hours} hour${hours !== 1 ? 's' : ''} from now`;
-                    } else {
-                         displayText = `${daysUntil.toFixed(1)} day${daysUntil !== 1 ? 's' : ''} from now`;
-                    }
-                    
-                    container.textContent = displayText;
-                    document.getElementById('next-checkin-date').textContent = formatDate(detail.checkin_date);
-                    document.getElementById('next-checkin-nights').textContent = 
-                         `${getNights(detail.checkin_date, detail.checkout_date)} night${getNights(detail.checkin_date, detail.checkout_date) !== 1 ? 's' : ''}`;
-                    document.getElementById('next-checkin-guest').textContent = 
-                         `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
-                    document.getElementById('next-checkin-phone').textContent = booking.user?.phone || 'N/A';
-                    document.getElementById('next-checkin-booking-code').textContent = booking.code || 'N/A';
-               } else {
-                    container.textContent = 'No upcoming check-ins';
-                    ['next-checkin-date', 'next-checkin-nights', 'next-checkin-guest', 'next-checkin-phone'].forEach(id => {
-                         document.getElementById(id).textContent = '-';
-                    });
-               }
-          })
-          .catch(error => {
-               console.error('Error loading check-in data:', error);
-               document.getElementById('next-checkin-time').textContent = 'Error loading check-in data';
-               document.getElementById('next-checkin-time').classList.add('text-red-500');
-          });
-     }
-
-     // Utility Functions
-     function formatDate(dateString) {
-          if (!dateString) return '-';
-          const options = { year: 'numeric', month: 'long', day: 'numeric' };
-          return new Date(dateString).toLocaleDateString(undefined, options);
+function loadNextCheckin() {
+     fetch('/get/bookings/next-checkin', {
+          method: 'GET',
+          headers: {
+               'Accept': 'application/json',
+               'X-Requested-With': 'XMLHttpRequest',
+               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
           }
+     })
+     .then(response => {
+          if (!response.ok) {
+               throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+     })
+     .then(data => {
+          if (!data.success) {
+               throw new Error(data.message || 'Failed to load next check-in');
+          }
+          
+          const container = document.getElementById('next-checkin-time');
+          
+          if (data.data) {
+               const booking = data.data;
+               const detail = booking.details[0];
+               
+               // Format the time display
+               const daysUntil = data.days_until;
+               let displayText;
+               
+               if (daysUntil < 1) {
+                    const hours = Math.round(daysUntil * 24);
+                    displayText = `${hours} hour${hours !== 1 ? 's' : ''} from now`;
+               } else {
+                    displayText = `${daysUntil.toFixed(1)} day${daysUntil !== 1 ? 's' : ''} from now`;
+               }
+               
+               container.textContent = displayText;
+               document.getElementById('next-checkin-date').textContent = formatDate(detail.checkin_date);
+               document.getElementById('next-checkin-nights').textContent = 
+                    `${getNights(detail.checkin_date, detail.checkout_date)} night${getNights(detail.checkin_date, detail.checkout_date) !== 1 ? 's' : ''}`;
+               document.getElementById('next-checkin-guest').textContent = 
+                    `${booking.user?.firstname || 'Guest'} ${booking.user?.lastname || ''}`;
+               document.getElementById('next-checkin-phone').textContent = booking.user?.phone || 'N/A';
+               document.getElementById('next-checkin-booking-code').textContent = booking.code || 'N/A';
+          } else {
+               container.textContent = 'No upcoming check-ins';
+               ['next-checkin-date', 'next-checkin-nights', 'next-checkin-guest', 'next-checkin-phone'].forEach(id => {
+                    document.getElementById(id).textContent = '-';
+               });
+          }
+     })
+     .catch(error => {
+          console.error('Error loading check-in data:', error);
+          document.getElementById('next-checkin-time').textContent = 'Error loading check-in data';
+          document.getElementById('next-checkin-time').classList.add('text-red-500');
+     });
+}
 
-
-          function getNights(checkin, checkout) {
-          if (!checkin || !checkout) return 0;
-          const diff = new Date(checkout) - new Date(checkin);
-          return Math.floor(diff / (1000 * 60 * 60 * 24));
+// Utility Functions
+function formatDate(dateString) {
+     if (!dateString) return '-';
+     const options = { year: 'numeric', month: 'long', day: 'numeric' };
+     return new Date(dateString).toLocaleDateString(undefined, options);
      }
 
-     function fetchActiveAdmins() {
-          // Show loading state
-          document.getElementById('active-admins-list').innerHTML = `
-               <div class="text-center py-4">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                    <p class="mt-2 text-gray-500">Loading active admins...</p>
-               </div>
-          `;
-          
-          // Make AJAX request
-          fetch(`/admin/active-admins`, {
-               headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-               }
-          })
-          .then(response => response.json())
-          .then(data => {
-               if(data.length > 0) {
-                    let html = '';
-                    data.forEach(admin => {
-                         html += `
-                         <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                              <div class="relative flex-shrink-0">
-                                   <img src="{{ url('imgs/profiles') }}/${admin.profile_img}" 
-                                        alt="${admin.fullname}" 
-                                        class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
-                                   
-                              </div>
-                              <div class="ml-3 overflow-hidden">
-                                   <h3 class="font-medium text-gray-800 truncate">${admin.fullname}</h3>
-                                   <p class="text-sm text-gray-600 flex items-center mt-1">
-                                        ${admin.phone ? `
-                                             <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                             </svg>
-                                             <span class="truncate">${admin.phone}</span>
-                                        ` : `
-                                             <svg class="w-3.5 h-3.5 flex-shrink-0 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                             </svg>
-                                             <span class="truncate">${admin.email}</span>
-                                        `}
-                                   </p>
-                              </div>
+     function getNights(checkin, checkout) {
+     if (!checkin || !checkout) return 0;
+     const diff = new Date(checkout) - new Date(checkin);
+     return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function fetchActiveAdmins() {
+     // Show loading state
+     document.getElementById('active-admins-list').innerHTML = `
+          <div class="text-center py-3 sm:py-4">
+               <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-600 mx-auto"></div>
+               <p class="mt-2 text-gray-500 text-sm">Loading active admins...</p>
+          </div>
+     `;
+     
+     // Make AJAX request
+     fetch(`/admin/active-admins`, {
+          headers: {
+               'X-Requested-With': 'XMLHttpRequest',
+               'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          }
+     })
+     .then(response => response.json())
+     .then(data => {
+          if(data.length > 0) {
+               let html = '';
+               data.forEach(admin => {
+                    html += `
+                    <div class="flex items-center p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                         <div class="relative flex-shrink-0">
+                              <img src="{{ url('imgs/profiles') }}/${admin.profile_img}" 
+                                   alt="${admin.fullname}" 
+                                   class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-white shadow-sm">
+                              
                          </div>
-                         `;
-                    });
-                    document.getElementById('active-admins-list').innerHTML = html;
-               } else {
-                    document.getElementById('active-admins-list').innerHTML = `
-                         <div class="text-center py-4 text-gray-500">
-                              <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                              </svg>
-                              No active admins at the moment
+                         <div class="ml-2 sm:ml-3 overflow-hidden">
+                              <h3 class="font-medium text-gray-800 truncate text-sm sm:text-base">${admin.fullname}</h3>
+                              <p class="text-xs sm:text-sm text-gray-600 flex items-center mt-0.5 sm:mt-1">
+                                   ${admin.phone ? `
+                                        <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                        </svg>
+                                        <span class="truncate">${admin.phone}</span>
+                                   ` : `
+                                        <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span class="truncate">${admin.email}</span>
+                                   `}
+                              </p>
                          </div>
+                    </div>
                     `;
-               }
-          })
-          .catch(error => {
-               console.error('Error fetching active admins:', error);
+               });
+               document.getElementById('active-admins-list').innerHTML = html;
+          } else {
                document.getElementById('active-admins-list').innerHTML = `
-                    <div class="text-center py-4 text-red-500">
-                         <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    <div class="text-center py-3 sm:py-4 text-gray-500 text-sm">
+                         <svg class="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
                          </svg>
-                         Failed to load active admins
-                    </div>
-               `;
-          });
-     }
-
-     async function fetchRooms() {
-          try {
-               const response = await fetch("{{ route('monitor.room.data') }}", {
-                    headers: {
-                         "X-Requested-With": "XMLHttpRequest",
-                         "Content-Type": "application/json",
-                         "Accept": "application/json",
-                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    }
-               });
-
-               if (!response.ok) throw new Error("Network error");
-
-               const data = await response.json();
-               renderRooms(data);
-          } catch (err) {
-               console.error("Fetch error:", err);
-               document.getElementById('room-grid').innerHTML = `
-                    <div class="col-span-full text-center py-4 text-red-500">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                         </svg>
-                         <p>Failed to load room status</p>
-                         <button onclick="fetchRooms()" class="mt-2 text-sm text-red-600 hover:text-red-800">Retry</button>
+                         No active admins at the moment
                     </div>
                `;
           }
-     }
-     
-     function renderRooms(data) {
-          const grid = document.getElementById("room-grid");
-          grid.innerHTML = ""; // clear old content
-          
-          if (!data.facilities || data.facilities.length === 0) {
-               grid.innerHTML = `
-                    <div class="col-span-full text-center py-8">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                   d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 
-                                   9 9 0 0118 0z" />
-                         </svg>
-                         <p class="mt-2 text-gray-600">No facilities found</p>
-                    </div>
-               `;
-               return;
-          }
-          
-          data.facilities.forEach(facility => {
-               const unavailable = data.unavailableDates[facility.id] || [];
-               const today = data.today;
-               
-               const isOccupied = unavailable.some(date =>
-                    today >= date.checkin_date && today < date.checkout_date
-               );
-               
-               const div = document.createElement("div");
-               div.className = `
-                    p-4 sm:p-5 rounded-xl shadow-md
-                    text-center text-sm sm:text-base
-                    ${isOccupied ? 'bg-red-500 text-white' : 'bg-blue-50 text-gray-700'}
-               `;
-               
-               div.innerHTML = `
-                    <h3 class="font-semibold truncate ${isOccupied ? 'text-white' : 'text-gray-800'}">
-                         ${facility.name}
-                    </h3>
-                    <p class="text-xs sm:text-sm italic ${isOccupied ? 'text-gray-100' : 'text-gray-500'}">
-                         ${facility.category ?? 'No Category'}
-                    </p>
-                    <p class="mt-1 font-medium ${isOccupied ? 'text-white' : 'text-gray-600'}">
-                         ${isOccupied ? 'Occupied' : 'Available'}
-                    </p>
-               `;
-               
-               // Optional click event
-               div.addEventListener('click', () => {
-                    console.log('Facility clicked:', facility);
-               });
-               
-               grid.appendChild(div);
-          });
-     
-     }
-     
-
-     function loadRoomMonitoring() {
-          // Show loading state
-          document.getElementById('room-grid').innerHTML = `
-               <div class="col-span-full text-center py-8">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                    <p class="mt-2 text-gray-500">Refreshing room status...</p>
+     })
+     .catch(error => {
+          console.error('Error fetching active admins:', error);
+          document.getElementById('active-admins-list').innerHTML = `
+               <div class="text-center py-3 sm:py-4 text-red-500 text-sm">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    Failed to load active admins
                </div>
           `;
-          fetchRooms();
+     });
+}
+
+async function fetchRooms() {
+     try {
+          const response = await fetch("{{ route('monitor.room.data') }}", {
+               headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+               }
+          });
+
+          if (!response.ok) throw new Error("Network error");
+
+          const data = await response.json();
+          renderRooms(data);
+     } catch (err) {
+          console.error("Fetch error:", err);
+          document.getElementById('room-grid').innerHTML = `
+               <div class="col-span-full text-center py-2 sm:py-3 text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <p class="text-xs sm:text-sm">Failed to load room status</p>
+                    <button onclick="fetchRooms()" class="mt-0.5 sm:mt-1 text-xs text-red-600 hover:text-red-800 underline">Retry</button>
+               </div>
+          `;
+     }
+}
+
+function renderRooms(data) {
+     const grid = document.getElementById("room-grid");
+     grid.innerHTML = ""; // clear old content
+     
+     if (!data.facilities || data.facilities.length === 0) {
+          grid.innerHTML = `
+               <div class="col-span-full text-center py-4 sm:py-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 
+                              9 9 0 0118 0z" />
+                    </svg>
+                    <p class="mt-1 text-gray-600 text-xs sm:text-sm">No facilities found</p>
+               </div>
+          `;
+          return;
      }
      
-
-     // Document Ready Function
-     document.addEventListener('DOMContentLoaded', function() {
-          fetchRooms();
-          loadData();
-          // Initialize dashboard stats
-          fetch(`/admin/dashboard/stats`, {
-               method: 'GET',
-               headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-               }
-          })
-          .then(response => response.json()) 
-          .then(data => {
-               document.getElementById('total-bookings').textContent = data.total_booking;
-               document.getElementById('total-pending').textContent = data.pending;
-               document.getElementById('checked-in-total').textContent = data.checked_in_total;
-               document.getElementById('total-checked-out').textContent = data.total_checked_out;
-          })
-          .catch(error => {
-               console.error(`Fetching error:`, error); 
+     data.facilities.forEach(facility => {
+          const unavailable = data.unavailableDates[facility.id] || [];
+          const today = data.today;
+          
+          const isOccupied = unavailable.some(date =>
+               today >= date.checkin_date && today < date.checkout_date
+          );
+          
+          const div = document.createElement("div");
+          div.className = `
+               p-2 sm:p-3 rounded-lg shadow-sm border text-center text-xs
+               ${isOccupied ? 'bg-red-500 text-white border-red-600' : 'bg-blue-50 text-gray-700 border-blue-200'}
+          `;
+          
+          div.innerHTML = `
+               <h3 class="font-semibold truncate ${isOccupied ? 'text-white' : 'text-gray-800'} mb-0.5">
+                    ${facility.name}
+               </h3>
+               <p class="text-xs italic ${isOccupied ? 'text-red-100' : 'text-gray-500'} mb-1">
+                    ${facility.category ?? 'No Category'}
+               </p>
+               <span class="inline-block px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium ${
+                    isOccupied ? 'bg-red-600 text-white' : 'bg-green-100 text-green-800'
+               }">
+                    ${isOccupied ? 'Occupied' : 'Available'}
+               </span>
+          `;
+          
+          // Optional click event
+          div.addEventListener('click', () => {
+               console.log('Facility clicked:', facility);
           });
           
-          // Load initial data
-          loadNextCheckin();
-          fetchActiveAdmins();
-          
+          grid.appendChild(div);
+     });
+}
 
-          // Set up periodic refreshes
-          setInterval(loadNextCheckin, 300000);
-          setInterval(fetchActiveAdmins, 300000);
+function loadRoomMonitoring() {
+     // Show loading state
+     document.getElementById('room-grid').innerHTML = `
+          <div class="col-span-full text-center py-3 sm:py-4">
+               <div class="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-red-600 mx-auto"></div>
+               <p class="mt-1 sm:mt-2 text-gray-500 text-xs">Refreshing room status...</p>
+          </div>
+     `;
+     fetchRooms();
+}
 
-          let incomeChart;
-
-          function formatCurrency(amount) {
-               return '₱' + parseFloat(amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+// Document Ready Function
+document.addEventListener('DOMContentLoaded', function() {
+     fetchRooms();
+     loadData();
+     // Initialize dashboard stats
+     fetch(`/admin/dashboard/stats`, {
+          method: 'GET',
+          headers: {
+               'Accept': 'application/json',
+               'X-Requested-With': 'XMLHttpRequest',
+               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
           }
+     })
+     .then(response => response.json()) 
+     .then(data => {
+          document.getElementById('total-bookings').textContent = data.total_booking;
+          document.getElementById('total-pending').textContent = data.pending;
+          document.getElementById('checked-in-total').textContent = data.checked_in_total;
+          document.getElementById('total-checked-out').textContent = data.total_checked_out;
+     })
+     .catch(error => {
+          console.error(`Fetching error:`, error); 
+     });
+     
+     // Load initial data
+     loadNextCheckin();
+     fetchActiveAdmins();
+     
 
-          function loadData() {
-               // Show loading, hide error
-               document.getElementById('loading').style.display = 'flex';
-               document.getElementById('error-message').style.display = 'none';
-               
-               // Make AJAX request to Laravel API endpoint
-               fetch('/api/monthly-income')
-                    .then(response => {
-                         if (!response.ok) {
-                              throw new Error('Network response was not ok');
-                         }
-                         return response.json();
-                    })
-                    .then(data => {
-                         // Hide loading
-                         document.getElementById('loading').style.display = 'none';
- 
-                         // Create or update chart - ensure data has the correct structure
-                         if (data.chartData && data.chartData.labels && data.chartData.datasets) {
-                              createOrUpdateChart(data.chartData);
-                         } else {
-                              console.error('Invalid chart data structure:', data);
-                              document.getElementById('error-message').style.display = 'block';
-                              document.getElementById('error-message').innerHTML = `
-                                   <h3>Invalid chart data</h3>
-                                   <p>Please check the API response format</p>
-                                   <button onclick="loadData()" style="margin-top: 15px; padding: 8px 15px; background: #4b6cb7; color: white; border: none; border-radius: 5px; cursor: pointer;">Retry</button>
-                              `;
-                         }
-                    })
-                    .catch(error => {
-                         console.error('Error fetching data:', error);
-                         document.getElementById('loading').style.display = 'none';
+     // Set up periodic refreshes
+     setInterval(loadNextCheckin, 300000);
+     setInterval(fetchActiveAdmins, 300000);
+
+     let incomeChart;
+
+     function formatCurrency(amount) {
+          return '₱' + parseFloat(amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+     }
+
+     function loadData() {
+          // Show loading, hide error
+          document.getElementById('loading').style.display = 'flex';
+          document.getElementById('error-message').style.display = 'none';
+          
+          // Make AJAX request to Laravel API endpoint
+          fetch('/api/monthly-income')
+               .then(response => {
+                    if (!response.ok) {
+                         throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+               })
+               .then(data => {
+                    // Hide loading
+                    document.getElementById('loading').style.display = 'none';
+
+                    // Create or update chart - ensure data has the correct structure
+                    if (data.chartData && data.chartData.labels && data.chartData.datasets) {
+                         createOrUpdateChart(data.chartData);
+                    } else {
+                         console.error('Invalid chart data structure:', data);
                          document.getElementById('error-message').style.display = 'block';
-                    });
-               }
-          // Create or update the chart
-          function createOrUpdateChart(chartData) {
-               const ctx = document.getElementById('incomeChart').getContext('2d');
-               
-               // If chart already exists, destroy it
-               if (incomeChart) {
-                    incomeChart.destroy();
-               }
-               
-               // Create new chart
-               incomeChart = new Chart(ctx, {
-                    type: 'line',
-                    data: chartData,
-                    options: {
-                         responsive: true,
-                         maintainAspectRatio: false,
-                         plugins: {
+                         document.getElementById('error-message').innerHTML = `
+                              <h3 class="text-lg sm:text-xl">Invalid chart data</h3>
+                              <p class="text-sm sm:text-base">Please check the API response format</p>
+                              <button onclick="loadData()" style="margin-top: 15px; padding: 8px 15px; background: #4b6cb7; color: white; border: none; border-radius: 5px; cursor: pointer;">Retry</button>
+                         `;
+                    }
+               })
+               .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error-message').style.display = 'block';
+               });
+          }
+     // Create or update the chart
+     function createOrUpdateChart(chartData) {
+          const ctx = document.getElementById('incomeChart').getContext('2d');
+          
+          // If chart already exists, destroy it
+          if (incomeChart) {
+               incomeChart.destroy();
+          }
+          
+          // Create new chart with bar configuration
+          incomeChart = new Chart(ctx, {
+               type: 'bar',
+               data: chartData,
+               options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
                          legend: {
                               position: 'top',
                          },
-                         tooltip: {
-                              mode: 'index',
-                              intersect: false,
-                              callbacks: {
-                                   label: function(context) {
-                                        return `Income: ${formatCurrency(context.raw)}`;
-                                   }
-                              }
+                         datalabels: {
+                              display: false // Disable data labels for cleaner look
                          }
-                         },
-                         scales: {
+                    },
+                    scales: {
                          y: {
                               beginAtZero: true,
                               grid: {
@@ -1172,17 +1105,51 @@ $active = 'dashboard';
                                    callback: function(value) {
                                         return formatCurrency(value);
                                    }
+                              },
+                              title: {
+                                   display: false,
                               }
                          },
                          x: {
                               grid: {
                                    display: false
+                              },
+                              title: {
+                                   display: true,
                               }
                          }
-                         }
+                    },
+                    interaction: {
+                         mode: 'index',
+                         intersect: false
+                    },
+                    animation: {
+                         duration: 1000,
+                         easing: 'easeOutQuart'
                     }
-               });
-          }
-     });
-     </script>
-     @endsection
+               }
+          });
+
+          // Update legend
+          // updateChartLegend(chartData);
+     }
+
+     function updateChartLegend(chartData) {
+          const legendContainer = document.getElementById('chart-legend');
+          if (!chartData.datasets || !legendContainer) return;
+
+          let legendHTML = '';
+          chartData.datasets.forEach((dataset, index) => {
+               legendHTML += `
+                    <div class="legend-item">
+                         <div class="legend-color" style="background-color: ${dataset.backgroundColor || '#4b6cb7'}"></div>
+                         <span>${dataset.label || 'Dataset ' + (index + 1)}</span>
+                    </div>
+               `;
+          });
+          
+          legendContainer.innerHTML = legendHTML;
+     }
+});
+</script>
+@endsection

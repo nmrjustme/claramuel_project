@@ -95,7 +95,6 @@ class CheckoutController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Server error verifying QR: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage(),
@@ -106,14 +105,10 @@ class CheckoutController extends Controller
 
     public function processUploadQrUpload(Request $request)
     {
-        \Log::debug('QR Upload Verification Request', ['request' => $request->all()]);
 
         try {
             // ✅ Validate JSON request
             if (!$request->isJson()) {
-                \Log::error('Non-JSON request received for QR upload', [
-                    'content_type' => $request->header('Content-Type')
-                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Request must be JSON format',
@@ -122,10 +117,8 @@ class CheckoutController extends Controller
             }
             
             $data = $request->json()->all();
-            \Log::debug('Parsed QR upload data', ['data' => $data]);
             
             if (empty($data['qr_data'])) {
-                \Log::error('Missing qr_data field in upload', ['received_data' => $data]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Missing qr_data field',
@@ -141,7 +134,6 @@ class CheckoutController extends Controller
 
             $parts = explode('|', $qrRaw);
             if (count($parts) !== 2) {
-                \Log::error('Invalid QR format in upload', ['qr_data' => $qrRaw]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid QR code format'
@@ -155,7 +147,6 @@ class CheckoutController extends Controller
             $expireDate = Carbon::createFromTimestamp((int)$expireTs);
 
             if (!$bookingId) {
-                \Log::error('Invalid booking ID decoded from QR', ['hashId' => $hashId]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid QR code'
@@ -164,7 +155,6 @@ class CheckoutController extends Controller
 
             // ✅ Check expiry
             if (Carbon::now()->greaterThan($expireDate)) {
-                \Log::warning('Expired QR code uploaded', ['expired_at' => $expireDate->toDateTimeString()]);
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code has expired',
@@ -188,15 +178,12 @@ class CheckoutController extends Controller
                 ->first();
 
             if (!$payment) {
-                \Log::error('Payment not found for uploaded QR', ['booking_id' => $bookingId]);
                 return response()->json([
                     'success' => false,
                     'message' => 'QR code not recognized',
                     'booking_id' => $bookingId
                 ], 404);
             }
-
-            \Log::info('QR upload verified successfully', ['payment_id' => $payment->id]);
             return response()->json([
                 'success' => true,
                 'message' => 'QR code verified successfully',
@@ -205,7 +192,6 @@ class CheckoutController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('QR upload processing error', ['exception' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage(),

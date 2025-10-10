@@ -93,7 +93,6 @@ class BookingReplyController extends Controller
                         'attachments'    => $attachments,
                     ];
                 } catch (\Exception $e) {
-                    Log::warning('Error processing email: '.$e->getMessage());
                     continue;
                 }
             }
@@ -105,7 +104,6 @@ class BookingReplyController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            Log::error('IMAP Error: '.$e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Email server connection failed',
@@ -170,8 +168,7 @@ class BookingReplyController extends Controller
             }
 
             return abort(404, 'Attachment not found');
-        } catch (\Exception $e) {
-            Log::error('Attachment download failed: '.$e->getMessage());
+        } catch (\Exception $e) {;
             return abort(500, 'Failed to download attachment');
         }
     }
