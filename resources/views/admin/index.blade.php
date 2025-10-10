@@ -391,6 +391,34 @@ $active = 'dashboard';
           color: #e74c3c;
           display: none;
      }
+
+     /* Bar Chart Specific Styles */
+     .bar-chart-container {
+          background: linear-gradient(135deg, #f8fafcff 0%, #f1f5f9 100%);
+          border: 1px solid #e2e8f0;
+     }
+
+     .chart-legend {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          margin-top: 15px;
+          flex-wrap: wrap;
+     }
+
+     .legend-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          color: #64748b;
+     }
+
+     .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 3px;
+     }
 </style>
 @endsection
 
@@ -521,12 +549,13 @@ $active = 'dashboard';
                     <button onclick="loadData()" class="mt-3 sm:mt-4 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base">Retry</button>
                </div>
 
-               <div class="chart-container bg-blue-50 h-64 sm:h-80 md:h-96">
+               <div class="chart-container bar-chart-container h-64 sm:h-80 md:h-96">
                     <div class="loading" id="loading">
                          <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-600 mx-auto"></div>
                          <p class="mt-2 text-sm sm:text-base">Loading income data...</p>
                     </div>
                     <canvas id="incomeChart"></canvas>
+                    <div class="chart-legend" id="chart-legend"></div>
                </div>
           </div>
 
@@ -1051,47 +1080,76 @@ document.addEventListener('DOMContentLoaded', function() {
                incomeChart.destroy();
           }
           
-          // Create new chart
+          // Create new chart with bar configuration
           incomeChart = new Chart(ctx, {
-               type: 'line',
+               type: 'bar',
                data: chartData,
                options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                    legend: {
-                         position: 'top',
-                    },
-                    tooltip: {
-                         mode: 'index',
-                         intersect: false,
-                         callbacks: {
-                              label: function(context) {
-                                   return `Income: ${formatCurrency(context.raw)}`;
-                              }
+                         legend: {
+                              position: 'top',
+                         },
+                         datalabels: {
+                              display: false // Disable data labels for cleaner look
                          }
-                    }
                     },
                     scales: {
-                    y: {
-                         beginAtZero: true,
-                         grid: {
-                              color: 'rgba(0, 0, 0, 0.05)'
+                         y: {
+                              beginAtZero: true,
+                              grid: {
+                                   color: 'rgba(0, 0, 0, 0.05)'
+                              },
+                              ticks: {
+                                   callback: function(value) {
+                                        return formatCurrency(value);
+                                   }
+                              },
+                              title: {
+                                   display: false,
+                              }
                          },
-                         ticks: {
-                              callback: function(value) {
-                                   return formatCurrency(value);
+                         x: {
+                              grid: {
+                                   display: false
+                              },
+                              title: {
+                                   display: true,
+                                   text: 'Months'
                               }
                          }
                     },
-                    x: {
-                         grid: {
-                              display: false
-                         }
-                    }
+                    interaction: {
+                         mode: 'index',
+                         intersect: false
+                    },
+                    animation: {
+                         duration: 1000,
+                         easing: 'easeOutQuart'
                     }
                }
           });
+
+          // Update legend
+          // updateChartLegend(chartData);
+     }
+
+     function updateChartLegend(chartData) {
+          const legendContainer = document.getElementById('chart-legend');
+          if (!chartData.datasets || !legendContainer) return;
+
+          let legendHTML = '';
+          chartData.datasets.forEach((dataset, index) => {
+               legendHTML += `
+                    <div class="legend-item">
+                         <div class="legend-color" style="background-color: ${dataset.backgroundColor || '#4b6cb7'}"></div>
+                         <span>${dataset.label || 'Dataset ' + (index + 1)}</span>
+                    </div>
+               `;
+          });
+          
+          legendContainer.innerHTML = legendHTML;
      }
 });
 </script>

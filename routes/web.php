@@ -216,6 +216,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/analytics/comparison', [RoomBookReportController::class, 'getComparisonData'])->name('earnings.comparison');
     Route::get('/analytics/export', [RoomBookReportController::class, 'exportEarningsData'])->name('earnings.export');
     Route::get('/analytics/years', [RoomBookReportController::class, 'getAvailableYears'])->name('earnings.years');
+    Route::get('/analytics/cancellation-refund-data', [RoomBookReportController::class, 'getCancellationRefundData'])->name('earnings.cancellation-refund-data');
     //========================
 
     //========================
@@ -346,7 +347,7 @@ Route::middleware(['auth'])->group(function () {
         return view('admin.monitoring.index');
     });
 
-    // Revenue monitoring
+    // Revenue monitoringF
     Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
     Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
     Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');

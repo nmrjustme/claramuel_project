@@ -929,14 +929,14 @@ class BookingController extends Controller
                 $payment->update([
                     'refund_amount' => $refundAmount,
                     'refund_reason' => $reason,
-                    'refund_date' => now(),
+                    'refund_date' => now()->toDateTimeString(),
                     'refund_type' => $refundAmountType,
                 ]);
             } elseif ($payment) {
                 $payment->update([
                     'refund_amount' => 0,
                     'refund_reason' => $reason,
-                    'refund_date' => now(),
+                    'refund_date' => now()->toDateTimeString(),
                     'refund_type' => 'none'
                 ]);
             }
