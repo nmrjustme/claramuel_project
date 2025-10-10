@@ -360,7 +360,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
     Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
     Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');
-    Route::get('/dashboard/revenue', [AccountingController::class, 'index'])->name('admin.accounting.index');
     Route::get('/dashboard/reports/export', [AccountingController::class, 'export'])->name('admin.reports.export');
     Route::get('/admin/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('admin.api.monthly-income');
     Route::get('/admin/api/top-performers', [AccountingController::class, 'topPerformersApi'])->name('admin.api.top-performers');
@@ -376,8 +375,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('api.monthly-income');
     Route::get('/api/top-performers', [AccountingController::class, 'top-performers'])->name('top-performers'); // optional
 
-    // Exports
-    Route::get('/reports/export', [AccountingController::class, 'export'])->name('reports.export'); // CSV
     Route::get('/reports/pdf', [AccountingController::class, 'exportPdf'])->name('reports.pdf'); // PDF (optional)
 
     // Expenses CRUD
