@@ -10,6 +10,7 @@ use App\Models\FacilityBookingDetails;
 use App\Models\FacilitySummary;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class RoomBookReportController extends Controller
 {
@@ -85,9 +86,9 @@ class RoomBookReportController extends Controller
             $totalBookings = 0;
 
             foreach ($rooms as $room) {
-                \Log::info("Processing room: " . $room->name);
-                
-                // Calculate earnings for THIS SPECIFIC ROOM
+                Log::info("Processing room: " . $room->name);
+
+                // Calculate earnings for THIS SPECIFIC ROOM (now includes refund deductions)
                 $roomEarnings = $this->calculateRoomEarnings($room->id, $month, $year);
                 $roomBookingCount = $this->calculateRoomBookings($room->id, $month, $year);
 
@@ -183,76 +184,180 @@ class RoomBookReportController extends Controller
     private function calculateRoomEarnings($roomId, $month, $year)
     {
         try {
-            $query = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
-                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
-                ->where('summary.facility_id', $roomId)
-                ->where('facility_booking_log.status', '!=', 'pending_confirmation');
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
 
-            // Apply date filtering
-            if ($month && $year) {
-                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-                $query->whereBetween('details.checkin_date', [$startDate, $endDate]);
+            // Use Eloquent relationships
+            $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
+                ->whereHas('summaries', function ($query) use ($roomId) {
+                    $query->where('facility_id', $roomId);
+                })
+                ->whereHas('details', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('checkin_date', [$startDate, $endDate]);
+                })
+                ->where('status', '!=', 'pending_confirmation')
+                ->get();
+
+            $totalEarnings = 0;
+
+            Log::info('🧾 Calculating room earnings with Eloquent', [
+                'room_id' => $roomId,
+                'month' => $month,
+                'year' => $year,
+                'bookings_found' => $bookings->count(),
+            ]);
+
+            foreach ($bookings as $booking) {
+                // Get the specific facility summary for this room
+                $summaries = $booking->summaries
+                    ->where('facility_id', $roomId)
+                    ->first();
+
+                if (!$summaries) {
+                    continue;
+                }
+
+                $roomsInBooking = $booking->summaries->count();
+                $roomsInBooking = max($roomsInBooking, 1);
+
+                // Calculate per-room prices
+                $perRoomFacilityPrice = $summaries->facility_price;
+                $perRoomBreakfastPrice = $summaries->breakfast_price;
+                $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
+
+                // Get payment totals
+                $totalAmountPaid = $booking->payments->sum('amount');
+                $totalCheckinPaid = $booking->payments->sum('checkin_paid');
+                $bookingTotalPrice = $booking->details->sum('total_price');
+
+                // Calculate refunds for this booking that apply to this room
+                $roomRefunds = $this->calculateRoomRefunds($booking, $roomId);
+
+                // Apply payment logic per room
+                $roomEarnings = $this->applyPaymentLogicPerRoom(
+                    $roomBasePrice,
+                    $bookingTotalPrice,
+                    $totalAmountPaid,
+                    $totalCheckinPaid
+                );
+
+                // DEDUCT REFUNDS from room earnings
+                $roomNetEarnings = max(0, $roomEarnings - $roomRefunds);
+
+                Log::info('💰 Booking Calculation with Refunds - Eloquent', [
+                    'booking_id' => $booking->id,
+                    'rooms_in_booking' => $roomsInBooking,
+                    'per_room_facility_price' => $perRoomFacilityPrice,
+                    'per_room_breakfast_price' => $perRoomBreakfastPrice,
+                    'room_base_price' => $roomBasePrice,
+                    'booking_total_price' => $bookingTotalPrice,
+                    'total_amount_paid' => $totalAmountPaid,
+                    'total_checkin_paid' => $totalCheckinPaid,
+                    'room_earnings_before_refunds' => $roomEarnings,
+                    'room_refunds' => $roomRefunds,
+                    'room_net_earnings' => $roomNetEarnings,
+                ]);
+
+                $totalEarnings += $roomNetEarnings;
             }
 
-            // Use subquery to get room count per booking and calculate per-room earnings
-            $totalEarnings = (float) $query->select(DB::raw('
-                SUM(
-                    (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
-                    GREATEST(
-                        (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
-                        1
-                    )
-                ) as total_earnings
-            '))->value('total_earnings');
-
-            \Log::info("Room $roomId earnings (adjusted for multiple rooms): " . $totalEarnings);
+            Log::info('✅ Total earnings computed with refund deductions', [
+                'room_id' => $roomId,
+                'total_earnings' => $totalEarnings,
+            ]);
 
             return $totalEarnings;
         } catch (\Exception $e) {
-            \Log::error("Error calculating earnings for room $roomId: " . $e->getMessage());
+            Log::error('❌ Error calculating room earnings with refunds', [
+                'room_id' => $roomId,
+                'error' => $e->getMessage(),
+            ]);
             return 0;
         }
     }
 
 
     /**
-     * Alternative optimized version using subquery (better performance)
+     * Calculate refunds that apply to a specific room in a booking
      */
-    private function calculateRoomEarningsOptimized($roomId, $month, $year)
+    private function calculateRoomRefunds($booking, $roomId)
     {
         try {
-            $query = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
-                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
-                ->where('summary.facility_id', $roomId)
-                ->where('facility_booking_log.status', '!=', 'pending_confirmation');
-
-            // Apply date filtering
-            if ($month && $year) {
-                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-                $query->whereBetween('details.checkin_date', [$startDate, $endDate]);
+            $totalRefunds = 0;
+            
+            // Get all refund payments for this booking
+            $refundPayments = $booking->payments->where('refund_amount', '>', 0);
+            
+            if ($refundPayments->isEmpty()) {
+                return 0;
             }
 
-            // Use subquery to get room count per booking and calculate per-room earnings
-            $totalEarnings = (float) $query->select(DB::raw('
-                SUM(
-                    (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
-                    GREATEST(
-                        (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
-                        1
-                    )
-                ) as total_earnings
-            '))->value('total_earnings');
+            $roomsInBooking = $booking->summaries->count();
+            $roomsInBooking = max($roomsInBooking, 1);
 
-            \Log::info("Room $roomId earnings (optimized): " . $totalEarnings);
+            // Calculate total booking price for refund distribution
+            $totalBookingPrice = $booking->details->sum('total_price');
+            
+            // Get this room's base price
+            $roomSummary = $booking->summaries->where('facility_id', $roomId)->first();
+            if (!$roomSummary) {
+                return 0;
+            }
+            
+            $roomBasePrice = $roomSummary->facility_price + $roomSummary->breakfast_price;
+            
+            // Calculate room's share of total booking price
+            $roomShare = $totalBookingPrice > 0 ? ($roomBasePrice / $totalBookingPrice) : (1 / $roomsInBooking);
 
-            return $totalEarnings;
+            // Apply room's share to each refund
+            foreach ($refundPayments as $payment) {
+                $roomRefundAmount = $payment->refund_amount * $roomShare;
+                $totalRefunds += $roomRefundAmount;
+                
+                Log::info('💸 Room Refund Calculation', [
+                    'booking_id' => $booking->id,
+                    'room_id' => $roomId,
+                    'total_refund' => $payment->refund_amount,
+                    'room_share' => round($roomShare * 100, 2) . '%',
+                    'room_refund' => $roomRefundAmount,
+                    'refund_type' => $payment->refund_type
+                ]);
+            }
 
+            return $totalRefunds;
         } catch (\Exception $e) {
-            \Log::error("Error calculating optimized earnings for room $roomId: " . $e->getMessage());
+            Log::error('❌ Error calculating room refunds', [
+                'booking_id' => $booking->id,
+                'room_id' => $roomId,
+                'error' => $e->getMessage(),
+            ]);
             return 0;
         }
+
+        $totalPaymentsReceived = $totalAmountPaid + $totalCheckinPaid;
+
+        Log::info('💳 Payment Rules', [
+            'room_base_price' => $roomBasePrice,
+            'booking_total_price' => $bookingTotalPrice,
+            'amount_paid' => $totalAmountPaid,
+            'checkin_paid' => $totalCheckinPaid,
+            'total_payments' => $totalPaymentsReceived
+        ]);
+
+        // Full payment
+        if ($totalPaymentsReceived >= $bookingTotalPrice) {
+            Log::info('✅ Full payment - room earns full price');
+            return $roomBasePrice;
+        }
+
+        // Half payment
+        if ($totalAmountPaid == ($bookingTotalPrice / 2) && $totalCheckinPaid == 0) {
+            Log::info('✅ Half payment - room earns half price');
+            return $roomBasePrice / 2;
+        }
+
+        Log::warning('❌ Payment amount does not match full or half price');
+        return 0;
     }
 
     /**
@@ -730,30 +835,33 @@ class RoomBookReportController extends Controller
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth();
 
-            $earnings = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
-                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
-                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
-                ->where('facilities.type', 'room')
-                ->where('facility_booking_log.status', '!=', 'pending_confirmation')
-                ->when($category, function ($q) use ($category) {
-                    $q->where('facilities.category', $category);
-                })
-                ->whereBetween('details.checkin_date', [$startDate, $endDate])
-                ->select(DB::raw('
-                    SUM(
-                        (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
-                        GREATEST(
-                            (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
-                            1
-                        )
-                    ) as total_earnings
-                '))
-                ->value('total_earnings');
+            $roomsQuery = Facility::where('type', 'room');
+            if ($category) {
+                $roomsQuery->where('category', $category);
+            }
+            
+            $rooms = $roomsQuery->get();
+            $totalMonthlyEarnings = 0;
 
-            $monthlyData[] = $earnings ?: 0;
+            foreach ($rooms as $room) {
+                // This now includes refund deductions
+                $roomEarnings = $this->calculateRoomEarnings($room->id, $month, $year);
+                $totalMonthlyEarnings += $roomEarnings;
+            }
+
+            \Log::info("Monthly earnings calculated with refund deductions", [
+                'month' => $month,
+                'year' => $year,
+                'category' => $category,
+                'total_earnings' => $totalMonthlyEarnings,
+                'rooms_count' => $rooms->count()
+            ]);
+
+            return $totalMonthlyEarnings;
+        } catch (\Exception $e) {
+            \Log::error("Error calculating monthly earnings with refunds: " . $e->getMessage());
+            return 0;
         }
-
-        return $monthlyData;
     }
 
     /**
