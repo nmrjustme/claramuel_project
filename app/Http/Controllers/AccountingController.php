@@ -559,59 +559,322 @@ class AccountingController extends Controller
     }
 
     /**
-     * CSV export of combined report
-     */
-    public function export(Request $request)
-    {
+ * CSV export of combined report
+ */
+public function export(Request $request)
+{
+    try {
+        $period = $request->query('period', 'monthly');
+        $from = $request->query('from');
+        $to = $request->query('to');
+
         $data = $this->monthlyIncomeApi($request)->getData(true);
         $combined = $data['combined'] ?? [];
+        $chartData = $data['chartData'] ?? [];
 
-        $response = new StreamedResponse(function() use ($combined) {
+        // Get top performers for additional insights
+        $topPerformers = $this->getTopPerformersForExport($from, $to);
+
+        $filename = 'accounting_report_' . ($period ? $period . '_' : '') . now()->format('Y_m_d_His') . '.csv';
+
+        $response = new StreamedResponse(function() use ($combined, $data, $period, $from, $to, $topPerformers) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['Period','Room Income (Net)','Day Tour Income','Total Income','Expenses','Net Income']);
+            
+            // Add UTF-8 BOM for Excel compatibility
+            fwrite($handle, "\xEF\xBB\xBF");
+            
+            // Report Header
+            fputcsv($handle, ['ACCOUNTING REPORT - FINANCIAL SUMMARY']);
+            fputcsv($handle, ['Report Period', $period]);
+            fputcsv($handle, ['Date Range', $from && $to ? "$from to $to" : 'All Time']);
+            fputcsv($handle, ['Generated', now()->format('Y-m-d H:i:s')]);
+            fputcsv($handle, []); // Empty row
+
+            // Summary Statistics
+            fputcsv($handle, ['SUMMARY STATISTICS']);
+            fputcsv($handle, ['Total Income', '₱' . number_format($data['totalIncome'] ?? 0, 2)]);
+            fputcsv($handle, ['Total Expenses', '₱' . number_format($data['totalExpense'] ?? 0, 2)]);
+            fputcsv($handle, ['Net Income', '₱' . number_format($data['netTotal'] ?? 0, 2)]);
+            fputcsv($handle, ['Average Net Income', '₱' . number_format($data['average'] ?? 0, 2)]);
+            fputcsv($handle, ['Best Period', ($data['best']['label'] ?? 'N/A') . ' (₱' . number_format($data['best']['income'] ?? 0, 2) . ')']);
+            fputcsv($handle, []); // Empty row
+
+            // Income Breakdown
+            fputcsv($handle, ['INCOME BREAKDOWN']);
+            fputcsv($handle, ['Period', 'Room Income (Net)', 'Day Tour Income', 'Total Income', 'Expenses', 'Net Income', 'Profit Margin']);
+            
             foreach ($combined as $row) {
+                $profitMargin = $row['income'] > 0 ? ($row['net'] / $row['income']) * 100 : 0;
+                
                 fputcsv($handle, [
                     $row['label'] ?? '',
-                    $row['room'] ?? 0,
-                    $row['daytour'] ?? 0,
-                    $row['income'] ?? 0,
-                    $row['expense'] ?? 0,
-                    $row['net'] ?? 0,
+                    '₱' . number_format($row['room'] ?? 0, 2),
+                    '₱' . number_format($row['daytour'] ?? 0, 2),
+                    '₱' . number_format($row['income'] ?? 0, 2),
+                    '₱' . number_format($row['expense'] ?? 0, 2),
+                    '₱' . number_format($row['net'] ?? 0, 2),
+                    number_format($profitMargin, 1) . '%'
                 ]);
             }
+            fputcsv($handle, []); // Empty row
+
+            // Top Performers Section
+            fputcsv($handle, ['TOP PERFORMING ROOMS']);
+            fputcsv($handle, ['Room', 'Category', 'Total Income']);
+            foreach ($topPerformers['rooms'] as $room) {
+                fputcsv($handle, [
+                    $room['facility'],
+                    $room['category'],
+                    '₱' . number_format($room['total_income'], 2)
+                ]);
+            }
+            fputcsv($handle, []); // Empty row
+
+            fputcsv($handle, ['TOP PERFORMING DAY TOUR FACILITIES']);
+            fputcsv($handle, ['Facility', 'Total Income']);
+            foreach ($topPerformers['daytours'] as $daytour) {
+                fputcsv($handle, [
+                    $daytour->facility ?? $daytour['facility'] ?? 'N/A',
+                    '₱' . number_format($daytour->total_income ?? $daytour['total_income'] ?? 0, 2)
+                ]);
+            }
+            fputcsv($handle, []); // Empty row
+
+            // Performance Analysis
+            fputcsv($handle, ['PERFORMANCE ANALYSIS']);
+            fputcsv($handle, ['Metric', 'Value']);
+            
+            $totalRoomIncome = array_sum(array_column($combined, 'room'));
+            $totalDayTourIncome = array_sum(array_column($combined, 'daytour'));
+            $totalIncome = $totalRoomIncome + $totalDayTourIncome;
+            
+            $roomPercentage = $totalIncome > 0 ? ($totalRoomIncome / $totalIncome) * 100 : 0;
+            $dayTourPercentage = $totalIncome > 0 ? ($totalDayTourIncome / $totalIncome) * 100 : 0;
+            
+            fputcsv($handle, ['Room Income Contribution', number_format($roomPercentage, 1) . '%']);
+            fputcsv($handle, ['Day Tour Income Contribution', number_format($dayTourPercentage, 1) . '%']);
+            fputcsv($handle, ['Expense to Income Ratio', $totalIncome > 0 ? number_format(($data['totalExpense'] / $totalIncome) * 100, 1) . '%' : '0%']);
+            
+            // Find best and worst performing periods
+            $bestPeriod = collect($combined)->sortByDesc('net')->first();
+            $worstPeriod = collect($combined)->sortBy('net')->first();
+            
+            fputcsv($handle, ['Best Performing Period', ($bestPeriod['label'] ?? 'N/A') . ' (Net: ₱' . number_format($bestPeriod['net'] ?? 0, 2) . ')']);
+            fputcsv($handle, ['Worst Performing Period', ($worstPeriod['label'] ?? 'N/A') . ' (Net: ₱' . number_format($worstPeriod['net'] ?? 0, 2) . ')']);
+
             fclose($handle);
         });
 
-        $filename = 'accounting_report_' . now()->format('Y_m_d_His') . '.csv';
-        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
 
         return $response;
-    }
 
-    /**
-     * PDF export (requires barryvdh/laravel-dompdf)
-     */
-    public function exportPdf(Request $request)
-    {
+    } catch (\Exception $e) {
+        Log::error('Error exporting accounting report: ' . $e->getMessage());
+        
+        // Fallback to simple export if detailed one fails
+        return $this->exportSimple($request);
+    }
+}
+
+/**
+ * Simple fallback export
+ */
+private function exportSimple(Request $request)
+{
+    $data = $this->monthlyIncomeApi($request)->getData(true);
+    $combined = $data['combined'] ?? [];
+
+    $response = new StreamedResponse(function() use ($combined) {
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, ['Period','Room Income (Net)','Day Tour Income','Total Income','Expenses','Net Income']);
+        foreach ($combined as $row) {
+            fputcsv($handle, [
+                $row['label'] ?? '',
+                $row['room'] ?? 0,
+                $row['daytour'] ?? 0,
+                $row['income'] ?? 0,
+                $row['expense'] ?? 0,
+                $row['net'] ?? 0,
+            ]);
+        }
+        fclose($handle);
+    });
+
+    $filename = 'accounting_report_simple_' . now()->format('Y_m_d_His') . '.csv';
+    $response->headers->set('Content-Type', 'text/csv');
+    $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+
+    return $response;
+}
+
+/**
+ * Get top performers data for export
+ */
+private function getTopPerformersForExport($from = null, $to = null)
+{
+    try {
+        // Get top rooms with date filtering
+        $roomQuery = Facility::where('type', 'room');
+        $rooms = $roomQuery->get();
+        $roomEarnings = [];
+
+        foreach ($rooms as $room) {
+            $earnings = $this->calculateRoomEarningsForExport($room->id, $from, $to);
+            
+            if ($earnings > 0) {
+                $roomEarnings[] = [
+                    'facility' => $room->name,
+                    'category' => $room->category,
+                    'total_income' => $earnings
+                ];
+            }
+        }
+
+        // Sort by earnings descending and limit to top 10
+        usort($roomEarnings, function ($a, $b) {
+            return $b['total_income'] <=> $a['total_income'];
+        });
+        $topRooms = array_slice($roomEarnings, 0, 10);
+
+        // Get top day tours with date filtering
+        $dayTourQuery = DB::table('day_tour_log_details as dt')
+            ->join('booking_guest_details as bgd', 'dt.id', '=', 'bgd.day_tour_log_details_id')
+            ->join('facilities', 'bgd.facility_id', '=', 'facilities.id')
+            ->where('dt.reservation_status', 'paid')
+            ->whereExists(function ($subQuery) {
+                $subQuery->select(DB::raw(1))
+                    ->from('booking_guest_details as bgd2')
+                    ->join('guest_type as gt', 'bgd2.guest_type_id', '=', 'gt.id')
+                    ->whereColumn('bgd2.day_tour_log_details_id', 'dt.id')
+                    ->whereNull('bgd2.facility_id')
+                    ->where('bgd2.quantity', '>', 0);
+            });
+
+        if ($from && $to) {
+            $dayTourQuery->whereBetween('dt.date_tour', [$from, $to]);
+        }
+
+        $topDayTours = $dayTourQuery->select(
+                'facilities.name as facility', 
+                DB::raw('SUM(COALESCE(dt.total_price,0)) as total_income')
+            )
+            ->groupBy('facilities.name')
+            ->orderByDesc('total_income')
+            ->limit(10)
+            ->get();
+
+        return [
+            'rooms' => $topRooms,
+            'daytours' => $topDayTours
+        ];
+
+    } catch (\Exception $e) {
+        Log::error('Error getting top performers for export: ' . $e->getMessage());
+        return ['rooms' => [], 'daytours' => []];
+    }
+}
+
+/**
+ * Calculate room earnings for export with date filtering
+ */
+private function calculateRoomEarningsForExport($roomId, $from = null, $to = null)
+{
+    try {
+        $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
+            ->whereHas('summaries', function ($query) use ($roomId) {
+                $query->where('facility_id', $roomId);
+            })
+            ->where('status', '!=', 'pending_confirmation');
+
+        // Apply date filtering if provided
+        if ($from && $to) {
+            $bookings->whereHas('details', function ($query) use ($from, $to) {
+                $query->whereBetween('checkin_date', [$from, $to]);
+            });
+        }
+
+        $bookings = $bookings->get();
+        $totalEarnings = 0;
+
+        foreach ($bookings as $booking) {
+            $totalBookingPrice = $booking->details->sum('total_price');
+            $totalAmountPaid = $booking->payments->sum('amount');
+            $totalCheckinPaid = $booking->payments->sum('checkin_paid');
+
+            $summary = $booking->summaries->where('facility_id', $roomId)->first();
+            if (!$summary) {
+                continue;
+            }
+
+            $perRoomFacilityPrice = $summary->facility_price;
+            $perRoomBreakfastPrice = $summary->breakfast_price;
+            $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
+
+            $roomRefunds = $this->calculateRoomRefunds($booking, $roomId);
+            $roomEarnings = $this->applyPaymentLogicPerRoom(
+                $roomBasePrice,
+                $totalBookingPrice,
+                $totalAmountPaid,
+                $totalCheckinPaid
+            );
+
+            $roomNetEarnings = max(0, $roomEarnings - $roomRefunds);
+            $totalEarnings += $roomNetEarnings;
+        }
+
+        return $totalEarnings;
+
+    } catch (\Exception $e) {
+        Log::error("Error calculating room earnings for export (room $roomId): " . $e->getMessage());
+        return 0;
+    }
+}
+
+/**
+ * PDF export (requires barryvdh/laravel-dompdf)
+ */
+public function exportPdf(Request $request)
+{
+    try {
+        $period = $request->query('period', 'monthly');
+        $from = $request->query('from');
+        $to = $request->query('to');
+
         $data = $this->monthlyIncomeApi($request)->getData(true);
         $combined = $data['combined'] ?? [];
         $summary = [
             'totalIncome' => $data['totalIncome'] ?? 0,
             'totalExpense' => $data['totalExpense'] ?? 0,
             'netTotal' => $data['netTotal'] ?? 0,
+            'average' => $data['average'] ?? 0,
+            'best' => $data['best'] ?? ['label' => 'N/A', 'income' => 0],
+            'period' => $period,
+            'dateRange' => $from && $to ? "$from to $to" : 'All Time'
         ];
 
+        // Get additional data for PDF
+        $topPerformers = $this->getTopPerformersForExport($from, $to);
+
         if (!class_exists('\Barryvdh\DomPDF\Facade\Pdf')) {
-            // fallback to CSV if PDF lib not available
             return $this->export($request);
         }
 
         $pdf = \PDF::loadView('admin.accounting.report_pdf', [
             'combined' => $combined,
             'summary' => $summary,
+            'topPerformers' => $topPerformers,
+            'generatedAt' => now()->format('Y-m-d H:i:s')
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download('accounting_report_' . now()->format('Y_m_d_His') . '.pdf');
+
+    } catch (\Exception $e) {
+        Log::error('Error exporting PDF report: ' . $e->getMessage());
+        return $this->export($request); // Fallback to CSV
     }
+}
 }

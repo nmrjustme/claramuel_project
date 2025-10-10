@@ -802,11 +802,186 @@ private function getDefaultStats()
 }
 
     public function exportData(Request $request)
-    {
-        // Basic export implementation
-        return response()->json([
-            'success' => true,
-            'message' => 'Export functionality will be implemented here'
+{
+    try {
+        $category = $request->get('category');
+        $facilityType = $request->get('facility_type');
+        $month = $request->get('month', date('m'));
+        $year = $request->get('year', date('Y'));
+
+        Log::info('Exporting day tour data', [
+            'month' => $month,
+            'year' => $year,
+            'category' => $category,
+            'facilityType' => $facilityType
         ]);
+
+        // Get all the data using your existing methods
+        $revenueData = $this->getRevenueData($month, $year, $category, $facilityType);
+        $guestData = $this->getGuestDemographics($month, $year, $category, $facilityType);
+        $categoryData = $this->getCategoryDistribution($month, $year, $facilityType);
+        $facilityData = $this->getFacilityUtilization($month, $year, $category);
+        $stats = $this->getStatistics($month, $year, $category, $facilityType);
+        $bookings = $this->getDetailedBookings($month, $year, $category, $facilityType);
+
+        $filename = "day_tour_analytics_{$year}_{$month}" . 
+                   ($category ? "_{$category}" : "") . 
+                   ($facilityType ? "_{$facilityType}" : "") . ".csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0'
+        ];
+
+        $callback = function() use ($stats, $revenueData, $guestData, $categoryData, $facilityData, $bookings, $month, $year, $category, $facilityType) {
+            $handle = fopen('php://output', 'w');
+            
+            // Add UTF-8 BOM for Excel compatibility
+            fwrite($handle, "\xEF\xBB\xBF");
+            
+            // Summary Section
+            fputcsv($handle, ['DAY TOUR ANALYTICS REPORT']);
+            fputcsv($handle, ['Period', date('F Y', mktime(0, 0, 0, $month, 1, $year))]);
+            fputcsv($handle, ['Category Filter', $category ?: 'All Categories']);
+            fputcsv($handle, ['Facility Filter', $facilityType ?: 'All Facilities']);
+            fputcsv($handle, ['Generated', now()->format('Y-m-d H:i:s')]);
+            fputcsv($handle, []); // Empty row
+
+            // Key Statistics
+            fputcsv($handle, ['KEY STATISTICS']);
+            fputcsv($handle, ['Total Revenue', '₱' . number_format($stats['total_revenue'], 2)]);
+            fputcsv($handle, ['Total Bookings', $stats['total_bookings']]);
+            fputcsv($handle, ['Total Guests', $stats['total_guests']]);
+            fputcsv($handle, ['Top Category', $stats['top_category']]);
+            fputcsv($handle, ['Revenue Change', number_format($stats['revenue_change'], 1) . '%']);
+            fputcsv($handle, ['Bookings Change', number_format($stats['bookings_change'], 1) . '%']);
+            fputcsv($handle, ['Guests Change', number_format($stats['guests_change'], 1) . '%']);
+            fputcsv($handle, []); // Empty row
+
+            // Daily Revenue Trends
+            fputcsv($handle, ['DAILY REVENUE TRENDS']);
+            fputcsv($handle, ['Day', 'Revenue']);
+            foreach ($revenueData['labels'] as $index => $day) {
+                fputcsv($handle, [
+                    'Day ' . $day,
+                    '₱' . number_format($revenueData['data'][$index], 2)
+                ]);
+            }
+            fputcsv($handle, []); // Empty row
+
+            // Guest Demographics
+            fputcsv($handle, ['GUEST DEMOGRAPHICS']);
+            fputcsv($handle, ['Guest Type', 'Count']);
+            foreach ($guestData['labels'] as $index => $label) {
+                fputcsv($handle, [
+                    $label,
+                    $guestData['data'][$index]
+                ]);
+            }
+            fputcsv($handle, []); // Empty row
+
+            // Category Distribution
+            fputcsv($handle, ['CATEGORY DISTRIBUTION']);
+            fputcsv($handle, ['Category', 'Revenue']);
+            $totalCategoryRevenue = array_sum($categoryData);
+            foreach ($categoryData as $categoryName => $revenue) {
+                $percentage = $totalCategoryRevenue > 0 ? ($revenue / $totalCategoryRevenue) * 100 : 0;
+                fputcsv($handle, [
+                    $categoryName,
+                    '₱' . number_format($revenue, 2) . ' (' . number_format($percentage, 1) . '%)'
+                ]);
+            }
+            fputcsv($handle, []); // Empty row
+
+            // Facility Utilization
+            fputcsv($handle, ['FACILITY UTILIZATION']);
+            fputcsv($handle, ['Facility', 'Booking Count']);
+            foreach ($facilityData['labels'] as $index => $label) {
+                fputcsv($handle, [
+                    $label,
+                    $facilityData['data'][$index]
+                ]);
+            }
+            fputcsv($handle, []); // Empty row
+
+            // Detailed Bookings
+            fputcsv($handle, ['DETAILED BOOKINGS']);
+            fputcsv($handle, [
+                'Booking ID',
+                'Reference',
+                'Date',
+                'Customer Name',
+                'Phone',
+                'Email',
+                'Total Amount',
+                'Status',
+                'Guest Count',
+                'Category',
+                'Has Facility',
+                'Guest Types',
+                'Facilities Booked',
+                'Total Guest Revenue'
+            ]);
+
+            foreach ($bookings as $booking) {
+                // Format guest breakdown
+                $guestBreakdown = '';
+                $totalGuestRevenue = 0;
+                if (!empty($booking['guest_breakdown'])) {
+                    $guestTypes = [];
+                    foreach ($booking['guest_breakdown'] as $guest) {
+                        $guestRevenue = $guest['count'] * $guest['rate'];
+                        $totalGuestRevenue += $guestRevenue;
+                        $guestTypes[] = "{$guest['type']} ({$guest['location']}) x{$guest['count']} @ ₱{$guest['rate']} = ₱" . number_format($guestRevenue, 2);
+                    }
+                    $guestBreakdown = implode('; ', $guestTypes);
+                }
+
+                // Format facilities
+                $facilitiesBooked = '';
+                if (!empty($booking['facilities'])) {
+                    $facilityList = [];
+                    foreach ($booking['facilities'] as $facility) {
+                        $facilityList[] = "{$facility['name']} x{$facility['quantity']} @ ₱{$facility['price']}";
+                    }
+                    $facilitiesBooked = implode('; ', $facilityList);
+                }
+
+                fputcsv($handle, [
+                    $booking['id'],
+                    $booking['reference'],
+                    $booking['date'],
+                    $booking['customer_name'],
+                    $booking['phone'] ?? 'N/A',
+                    $booking['email'] ?? 'N/A',
+                    '₱' . number_format($booking['amount'], 2),
+                    $booking['status'],
+                    $booking['guest_count'],
+                    $booking['category'],
+                    $booking['has_facility'] ? 'Yes' : 'No',
+                    $guestBreakdown,
+                    $facilitiesBooked,
+                    '₱' . number_format($totalGuestRevenue, 2)
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+
+    } catch (\Exception $e) {
+        Log::error('Error exporting day tour data: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error exporting data: ' . $e->getMessage()
+        ], 500);
     }
+}
 }
