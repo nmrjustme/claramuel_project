@@ -713,7 +713,7 @@ $active = 'dashboard';
 
                     <!-- Actions -->
                     <div class="flex flex-wrap gap-2 sm:gap-3">
-                         <a href="{{ route('admin.inquiries') }}" class="text-xs sm:text-sm text-red-600 hover:text-red-800">View
+                         <a href="{{ route('admin.bookings') }}" class="text-xs sm:text-sm text-red-600 hover:text-red-800">View
                               All</a>
                     </div>
                </div>
