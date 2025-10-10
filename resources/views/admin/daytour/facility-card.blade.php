@@ -7,12 +7,13 @@
 
     $statusStyles = [
         'occupied' => [
-            'card' => 'bg-red-500 border-red-600 text-white',
-            'text' => 'text-white',
-            'secondary' => 'text-white/80',
-            'button' => 'bg-red-600 hover:bg-red-700 text-white',
-            'details' => 'bg-red-600/10',
-            'badge' => 'bg-red-600/20 text-red-200 border-red-400',
+            // MODIFIED: Switched to light red background with dark red text for less strain.
+            'card' => 'bg-red-50 border-red-300 text-red-800', 
+            'text' => 'text-red-800', // Changed to dark text
+            'secondary' => 'text-red-500', // Changed to muted dark red
+            'button' => 'bg-red-600 hover:bg-red-700 text-white', // Kept button dark for action
+            'details' => 'bg-red-100/30', // Adjusted details background to be light
+            'badge' => 'bg-red-100 text-red-700 border-red-300', // Adjusted badge for light background
         ],
         'maintenance' => [
             'card' => 'bg-yellow-400 border-yellow-500 text-white',
@@ -61,10 +62,10 @@
 @endphp
 
 <div x-data="{ open: false }" 
-     class="{{ $baseCardClasses }} {{ $styles['card'] }}" 
-     role="region" 
-     aria-labelledby="facility-{{ $facility->id }}-name"
-     x-cloak>
+      class="{{ $baseCardClasses }} {{ $styles['card'] }}" 
+      role="region" 
+      aria-labelledby="facility-{{ $facility->id }}-name"
+      x-cloak>
     
     {{-- Header --}}
     <div class="p-5 text-center space-y-2">
@@ -77,8 +78,10 @@
             {{ $facility->category }}
         </p>
         <div class="flex items-center justify-center gap-2">
+            {{-- Adjusted dot colors to be consistent with the new card background --}}
             <i class="fas fa-circle text-xs" :class="{
-                'text-red-300': '{{ $status }}' === 'occupied',
+                // Use a slightly darker color for the dot now that the background is light
+                'text-red-500': '{{ $status }}' === 'occupied', 
                 'text-yellow-300': '{{ $status }}' === 'maintenance',
                 'text-blue-300': '{{ $status }}' === 'cleaning',
                 'text-green-400': '{{ $status }}' === 'available',
@@ -126,15 +129,18 @@
                             @foreach($facility->units as $unit)
                                 @php
                                     $unitStatus = strtolower($unit['status']);
+                                    // Adjusted unit status class logic for the new light 'occupied' card design
                                     $unitStatusClass = 'text-green-600 font-semibold';
                                     if ($unitStatus === 'occupied') {
-                                        $unitStatusClass = $status === 'available' ? 'text-red-600 font-semibold' : 'text-white font-semibold';
+                                        // On the light red background, we want the occupied units to stand out but remain legible
+                                        $unitStatusClass = $status === 'available' ? 'text-red-600 font-semibold' : 'text-red-600 font-semibold';
                                     } elseif ($status !== 'available') {
                                         $unitStatusClass = 'text-green-600 font-semibold';
                                     }
                                 @endphp
                                 <li class="flex justify-between items-center py-1 rounded-md px-2 {{ $status !== 'available' ? 'bg-white/10' : 'hover:bg-gray-50' }}">
                                     <span class="text-sm truncate flex-1 min-w-0 pr-2" title="{{ $unit['name'] }}">{{ $unit['name'] }}</span>
+                                    {{-- Use the facility's badge style for consistency --}}
                                     <span class="px-2 py-1 rounded-full text-xs {{ $unitStatusClass }} border {{ $styles['badge'] }} whitespace-nowrap flex-shrink-0">
                                         <i class="fas {{ $unitStatus === 'occupied' ? 'fa-lock' : 'fa-unlock' }} mr-1"></i>
                                         {{ ucfirst($unit['status']) }}
@@ -153,14 +159,15 @@
                         </h5>
                         <ul class="space-y-3">
                             @foreach($facility->bookings as $booking)
-                                <li class="bg-white/10 rounded-lg p-3 border border-gray-200/30 {{ $status !== 'available' ? 'backdrop-blur-sm' : '' }}">
+                                {{-- Use white background for legibility on light status cards, but with a slight opacity for the colored card statuses --}}
+                                <li class="bg-white/90 rounded-lg p-3 border border-gray-200/80 shadow-sm">
                                     <div class="flex flex-col gap-3">
                                         {{-- Booking Info --}}
                                         <div class="flex-1 space-y-2 min-w-0">
-                                            <p class="font-medium {{ $styles['text'] }} truncate" title="{{ $booking['customer'] }}">
+                                            <p class="font-medium text-gray-900 truncate" title="{{ $booking['customer'] }}">
                                                 {{ $booking['customer'] }}
                                             </p>
-                                            <div class="flex flex-wrap items-center gap-2 text-xs">
+                                            <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                                                 <span class="flex items-center gap-1 whitespace-nowrap">
                                                     <i class="fas fa-house"></i> Qty: {{ $booking['quantity'] }}
                                                 </span>
@@ -169,19 +176,19 @@
                                                 </span>
                                             </div>
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <span class="text-xs whitespace-nowrap">Status:</span>
+                                                <span class="text-xs whitespace-nowrap text-gray-500">Status:</span>
                                                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold capitalize whitespace-nowrap flex-shrink-0
                                                     @if($booking['status'] === 'checked_in') bg-green-100 text-green-800 border border-green-300
                                                     @elseif($booking['status'] === 'checked_out') bg-gray-100 text-gray-800 border border-gray-300
                                                     @else bg-yellow-100 text-yellow-800 border border-yellow-300
                                                     @endif">
                                                     <i class="fas 
-                                                        @if($booking['status'] === 'checked_in') fa-check-circle
-                                                        @elseif($booking['status'] === 'checked_out') fa-clock
-                                                        @else fa-clock
-                                                        @endif
-                                                    "></i>
-                                                    {{ $booking['status'] }}
+                                                         @if($booking['status'] === 'checked_in') fa-check-circle
+                                                         @elseif($booking['status'] === 'checked_out') fa-clock
+                                                         @else fa-clock
+                                                         @endif
+                                                     "></i>
+                                                     {{ str_replace('_', ' ', $booking['status']) }}
                                                 </span>
                                             </div>
                                             {{-- Timeline --}}

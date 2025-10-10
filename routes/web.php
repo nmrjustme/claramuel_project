@@ -40,9 +40,13 @@ use App\Http\Controllers\AdminBookingsController;
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\AdminlistUser;
 use App\Http\Controllers\RoomBookReportController;
+use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\DayTourEarningsController;
+use App\Http\Controllers\AnalyticsController;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
 use App\Models\FacilityBookingLog;
 use App\Services\InvoiceService; // adjust namespace if different
+
 
 Route::get('/test-invoice/{id}', function ($id) {
     $booking = FacilityBookingLog::findOrFail($id);
@@ -188,8 +192,10 @@ Route::get('/env-test', function () {
 Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('daytour.checkAvailability');
 Route::get('/cottages/{date}', [Day_tour_Controller::class, 'getCottages'])->name('cottages.availability');
 
-
-
+// Day Tour Earnings Routes
+Route::get('/day-tour-earnings', [DayTourEarningsController::class, 'index'])->name('day_tour.earnings');
+Route::get('/day-tour-earnings/data', [DayTourEarningsController::class, 'getAnalyticsData'])->name('day_tour.earnings.data');
+Route::get('/day-tour-earnings/export', [DayTourEarningsController::class, 'exportData'])->name('day_tour.earnings.export');
 
 Route::prefix('admin-management')->name('admin.')->group(function () {
     Route::get('/', [AdminlistUser::class, 'index'])->name('list.management');
@@ -346,15 +352,39 @@ Route::middleware(['auth'])->group(function () {
         return view('admin.monitoring.index');
     });
 
-    // Revenue monitoring
-    Route::get('/dashboard/revenue', [AccountingController::class, 'index']);
-    Route::get('/income-chart', [AccountingController::class, 'showIncomeChart']);
-    Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('income.chart.data');
-    Route::get('/dashboard/revenue', [AccountingController::class, 'index'])->name('admin.accounting.index');
-    Route::get('/dashboard/reports/export', [AccountingController::class, 'export'])->name('admin.reports.export');
-    Route::get('/admin/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('admin.api.monthly-income');
-    Route::get('/admin/api/top-performers', [AccountingController::class, 'topPerformersApi'])->name('admin.api.top-performers');
+    // =====================
+    // 📊 ACCOUNTING MODULE
+    // =====================
 
+// Update your existing route or add this new one
+Route::get('/admin/accounting/comprehensive-data', [AccountingController::class, 'comprehensiveIncomeApi'])->name('admin.api.comprehensive-income');
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Accounting Dashboard
+    Route::get('/dashboard/revenue', [AccountingController::class, 'index'])->name('accounting.index');
+
+    // Data APIs (chart + filters)
+    Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('api.monthly-income');
+    Route::get('/api/top-performers', [AccountingController::class, 'top-performers'])->name('top-performers'); // optional
+
+    // Exports
+    Route::get('/reports/export', [AccountingController::class, 'export'])->name('reports.export'); // CSV
+    Route::get('/reports/pdf', [AccountingController::class, 'exportPdf'])->name('reports.pdf'); // PDF (optional)
+
+    // Expenses CRUD
+    Route::get('/expenses', [ExpensesController::class, 'index'])->name('expenses.index');
+    Route::get('/expenses/create', [ExpensesController::class, 'create'])->name('expenses.create');
+    Route::post('/expenses', [ExpensesController::class, 'store'])->name('expenses.store');
+    Route::get('/expenses/{expense}/edit', [ExpensesController::class, 'edit'])->name('expenses.edit');
+    Route::put('/expenses/{expense}', [ExpensesController::class, 'update'])->name('expenses.update');
+    Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
+
+    // API Recent expenses (AJAX)
+    Route::get('/api/expenses/recent', [ExpensesController::class, 'recentApi'])->name('api.expenses.recent');
+});
+
+// Backwards-compatible redirect (optional)
+Route::redirect('/dashboard/revenue', '/admin/dashboard/revenue');
     //========================
 
 

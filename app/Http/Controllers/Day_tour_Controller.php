@@ -25,7 +25,7 @@ class Day_tour_Controller extends Controller
         
         // Calculate availability for each facility using BookingGuestDetails
          $cottages = $facilities->where('category', 'Cottage');
-         $villas   = $facilities->where('category', 'Private Villa');
+         $villas   = $facilities->where('category', 'Villa');
 
         $guestTypes = GuestType::all();
 
@@ -138,7 +138,7 @@ public function edit($id)
     $guestTypes = GuestType::all();
 
     // Only Cottages and Villas
-    $facilities = Facility::whereIn('category', ['Cottage', 'Private Villa', 'Villa'])->get();
+    $facilities = Facility::whereIn('category', ['Cottage', 'Villa'])->get();
 
     // Separate booking details by guest vs facility
     $guestDetails = [];
@@ -229,7 +229,7 @@ public function update(Request $request, $id)
         }
 
         if (isset($validated['facilities'])) {
-            $validFacilityIds = Facility::whereIn('category', ['Cottage', 'Villa', 'Private Villa'])
+            $validFacilityIds = Facility::whereIn('category', ['Cottage', 'Villa'])
                 ->pluck('id')->toArray();
 
             foreach ($validated['facilities'] as $facilityId => $data) {
@@ -710,7 +710,7 @@ public function checkAvailability(Request $request)
     $date = $request->input('date');
 
     // Only cottages and private villas
-    $facilities = Facility::whereIn('category', ['Cottage', 'Private Villa'])->get();
+    $facilities = Facility::whereIn('category', ['Cottage', 'Villa'])->get();
 
     $availability = $facilities->map(function ($facility) use ($date) {
 
@@ -922,10 +922,10 @@ public function monitorFacilities(Request $request)
 
     if ($facilityType === 'cottage') {
         $query->where('category', 'Cottage');
-    } elseif ($facilityType === 'villa') {
-        $query->where('category', 'Private Villa');
-    } elseif ($facilityType === 'both' || $facilityType === 'all') {
-        $query->whereIn('category', ['Cottage', 'Private Villa']);
+    }elseif ($facilityType === 'both' || $facilityType === 'all') {
+        $query->whereIn('category', ['Cottage', 'Villa']);
+    }elseif ($facilityType === 'villa') {
+        $query->where('category','Villa');
     }
 
     $cottagesVillas = $query->get();
@@ -1129,9 +1129,9 @@ public function showAccomodation(Request $request)
     if ($facilityType === 'cottage') {
         $query->where('category', 'Cottage');
     } elseif ($facilityType === 'villa') {
-        $query->where('category', 'Private Villa');
+        $query->where('category', 'Villa');
     } elseif ($facilityType === 'both' || $facilityType === 'all') {
-        $query->whereIn('category', ['Cottage', 'Private Villa']);
+        $query->whereIn('category', ['Cottage', 'Villa']);
     }
 
     $cottagesVillas = $query->get();
