@@ -49,17 +49,15 @@ class AccountingController extends Controller
                         [
                             'label' => 'Room Income (Net of Refunds)',
                             'data' => array_column($combined, 'room'),
-                            'borderColor' => 'rgba(255, 0, 0, 1)', // solid red border
-                            'backgroundColor' => 'rgba(255, 0, 0, 0.8)', // slightly transparent red fill
+                            'borderColor' => 'rgba(34, 4, 10, 1)',
+                            'backgroundColor' => 'rgba(218, 20, 59, 1)', // completely solid
                         ],
                         [
                             'label' => 'Day Tour Income',
                             'data' => array_column($combined, 'daytour'),
-                            'borderColor' => '#D9C6B2', // beige/yellow border
-                            'backgroundColor' => 'rgba(217, 198, 178, 0.8)', // same color with 80% opacity
+                            'borderColor' => 'rgba(34, 4, 10, 1)',
+                            'backgroundColor' => 'rgba(178, 34, 34, 1)', // completely solid
                         ],
-
-
 
                     ],
                 ]

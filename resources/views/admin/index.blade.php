@@ -1116,7 +1116,6 @@ document.addEventListener('DOMContentLoaded', function() {
                               },
                               title: {
                                    display: true,
-                                   text: 'Months'
                               }
                          }
                     },
