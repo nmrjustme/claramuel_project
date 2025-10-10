@@ -2,7 +2,7 @@
 @section('title', 'Day Tour Analytics Dashboard')
 
 @php
-    $active = 'analytics'; // Update this to match your sidebar menu
+    $active = 'daytour-earnings'; // Update this to match your sidebar menu
 @endphp
 
 @section('content_css')
