@@ -55,9 +55,9 @@
     @yield('content_css')
 </head>
 
-<body class="bg-gray-100">
-
-
+<body class="bg-gray-200">
+    
+    
     <!-- Mobile Header -->
     <div
         class="md:hidden mt-1 fixed top-0 left-0 right-0 bg-white shadow-md z-50 flex items-center justify-between p-4 h-16">

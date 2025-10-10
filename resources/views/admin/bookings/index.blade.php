@@ -820,10 +820,10 @@
 
                 <!-- Title -->
                 <div class="px-4 pt-6 pb-4 border-b border-gray-200">
-                    <h2 class="text-xl font-bold text-gray-800">
-                        SEARCH TODAY'S GUEST CHECK-IN OR CHECKOUT
-                    </h2>
+                    <h2 class="text-2xl font-bold text-gray-800">Check-in</h2>
+                    <p class="text-sm text-gray-600 mt-1">Search today's guest check-in</p>
                 </div>
+
 
                 <!-- Content -->
                 <div class="flex flex-col md:flex-row gap-8 p-8">

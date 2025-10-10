@@ -10,8 +10,6 @@ use App\Models\FacilityBookingDetails;
 use App\Models\FacilitySummary;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-
 
 class RoomBookReportController extends Controller
 {
@@ -87,8 +85,8 @@ class RoomBookReportController extends Controller
             $totalBookings = 0;
 
             foreach ($rooms as $room) {
-                Log::info("Processing room: " . $room->name);
-
+                \Log::info("Processing room: " . $room->name);
+                
                 // Calculate earnings for THIS SPECIFIC ROOM
                 $roomEarnings = $this->calculateRoomEarnings($room->id, $month, $year);
                 $roomBookingCount = $this->calculateRoomBookings($room->id, $month, $year);
@@ -139,6 +137,9 @@ class RoomBookReportController extends Controller
             // Calculate comparison stats
             $comparisonStats = $this->getComparisonStats($month, $year, $category);
 
+            // Get total refunds for the period
+            $totalRefunds = $this->getTotalRefunds($month, $year, $category);
+
             $response = [
                 'success' => true,
                 'earnings' => $earningsData,
@@ -152,6 +153,7 @@ class RoomBookReportController extends Controller
                     'topCategory' => $topCategory,
                     'occupancyRate' => $occupancyRate,
                     'totalBookings' => $totalBookings,
+                    'totalRefunds' => $totalRefunds,
                     'comparison' => $comparisonStats
                 ]
             ];
@@ -181,91 +183,77 @@ class RoomBookReportController extends Controller
     private function calculateRoomEarnings($roomId, $month, $year)
     {
         try {
-            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+            $query = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
+                ->where('summary.facility_id', $roomId)
+                ->where('facility_booking_log.status', '!=', 'pending_confirmation');
 
-            // Use Eloquent relationships
-            $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
-                ->whereHas('summaries', function ($query) use ($roomId) {
-                    $query->where('facility_id', $roomId);
-                })
-                ->whereHas('details', function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('checkin_date', [$startDate, $endDate]);
-                })
-                ->where('status', '!=', 'pending_confirmation')
-                ->get();
-
-            $totalEarnings = 0;
-
-            Log::info('🧾 Calculating room earnings with Eloquent', [
-                'room_id' => $roomId,
-                'month' => $month,
-                'year' => $year,
-                'bookings_found' => $bookings->count(),
-            ]);
-
-            foreach ($bookings as $booking) {
-                // Get the specific facility summary for this room
-                $summaries = $booking->summaries
-                    ->where('facility_id', $roomId)
-                    ->first();
-
-                if (!$summaries) {
-                    continue;
-                }
-
-                $roomsInBooking = $booking->summaries->count();
-                $roomsInBooking = max($roomsInBooking, 1);
-
-                // Calculate per-room prices
-                $perRoomFacilityPrice = $summaries->facility_price;
-                $perRoomBreakfastPrice = $summaries->breakfast_price;
-                $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
-
-                // Get payment totals
-                $totalAmountPaid = $booking->payments->sum('amount');
-                $totalCheckinPaid = $booking->payments->sum('checkin_paid');
-                $bookingTotalPrice = $booking->details->sum('total_price');
-
-
-                // Apply payment logic
-                $roomEarnings = $this->applyPaymentLogicPerRoom(
-                    $roomBasePrice,
-                    $bookingTotalPrice,
-                    $totalAmountPaid,
-                    $totalCheckinPaid
-                );
-
-                Log::info('💰 Booking Calculation - Eloquent', [
-                    'booking_id' => $booking->id,
-                    'rooms_in_booking' => $roomsInBooking,
-                    'per_room_facility_price' => $perRoomFacilityPrice,
-                    'per_room_breakfast_price' => $perRoomBreakfastPrice,
-                    'room_base_price' => $roomBasePrice,
-                    'booking_total_price' => $bookingTotalPrice,
-                    'total_amount_paid' => $totalAmountPaid,
-                    'total_checkin_paid' => $totalCheckinPaid,
-                    'room_earnings' => $roomEarnings,
-                ]);
-
-                $totalEarnings += $roomEarnings;
+            // Apply date filtering
+            if ($month && $year) {
+                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+                $query->whereBetween('details.checkin_date', [$startDate, $endDate]);
             }
 
-            Log::info('✅ Total earnings computed', [
-                'room_id' => $roomId,
-                'total_earnings' => $totalEarnings,
-            ]);
+            // Use subquery to get room count per booking and calculate per-room earnings
+            $totalEarnings = (float) $query->select(DB::raw('
+                SUM(
+                    (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
+                    GREATEST(
+                        (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
+                        1
+                    )
+                ) as total_earnings
+            '))->value('total_earnings');
+
+            \Log::info("Room $roomId earnings (adjusted for multiple rooms): " . $totalEarnings);
 
             return $totalEarnings;
         } catch (\Exception $e) {
-            Log::error('❌ Error calculating room earnings', [
-                'room_id' => $roomId,
-                'error' => $e->getMessage(),
-            ]);
+            \Log::error("Error calculating earnings for room $roomId: " . $e->getMessage());
             return 0;
         }
     }
 
+
+    /**
+     * Alternative optimized version using subquery (better performance)
+     */
+    private function calculateRoomEarningsOptimized($roomId, $month, $year)
+    {
+        try {
+            $query = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
+                ->where('summary.facility_id', $roomId)
+                ->where('facility_booking_log.status', '!=', 'pending_confirmation');
+
+            // Apply date filtering
+            if ($month && $year) {
+                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+                $query->whereBetween('details.checkin_date', [$startDate, $endDate]);
+            }
+
+            // Use subquery to get room count per booking and calculate per-room earnings
+            $totalEarnings = (float) $query->select(DB::raw('
+                SUM(
+                    (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
+                    GREATEST(
+                        (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
+                        1
+                    )
+                ) as total_earnings
+            '))->value('total_earnings');
+
+            \Log::info("Room $roomId earnings (optimized): " . $totalEarnings);
+
+            return $totalEarnings;
+
+        } catch (\Exception $e) {
+            \Log::error("Error calculating optimized earnings for room $roomId: " . $e->getMessage());
+            return 0;
+        }
+    }
 
     /**
      * Calculate earnings for a specific room - FIXED VERSION
@@ -278,7 +266,7 @@ class RoomBookReportController extends Controller
         }
 
         $totalPaymentsReceived = $totalAmountPaid + $totalCheckinPaid;
-
+        
         Log::info('💳 Payment Rules', [
             'room_base_price' => $roomBasePrice,
             'booking_total_price' => $bookingTotalPrice,
@@ -286,7 +274,7 @@ class RoomBookReportController extends Controller
             'checkin_paid' => $totalCheckinPaid,
             'total_payments' => $totalPaymentsReceived
         ]);
-
+        
         // Full payment
         if ($totalPaymentsReceived >= $bookingTotalPrice) {
             Log::info('✅ Full payment - room earns full price');
@@ -298,7 +286,7 @@ class RoomBookReportController extends Controller
             Log::info('✅ Half payment - room earns half price');
             return $roomBasePrice / 2;
         }
-
+        
         Log::warning('❌ Payment amount does not match full or half price');
         return 0;
     }
@@ -653,7 +641,7 @@ class RoomBookReportController extends Controller
     }
 
     /**
-     * Calculate earnings by category - UPDATED to handle multiple rooms
+     * Calculate earnings by category - UPDATED to handle multiple rooms and refund deductions
      */
     private function calculateCategoryEarnings($month, $year, $filterCategory = '')
     {
@@ -667,33 +655,20 @@ class RoomBookReportController extends Controller
         $categoryEarnings = [];
 
         foreach ($categories as $category) {
-            $earnings = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
-                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
-                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
-                ->where('facilities.type', 'room')
-                ->where('facilities.category', $category)
-                ->where('facility_booking_log.status', '!=', 'pending_confirmation');
+            $roomsInCategory = Facility::where('type', 'room')
+                ->where('category', $category)
+                ->pluck('id');
 
-            // Apply date filtering
-            if ($month && $year) {
-                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-                $earnings->whereBetween('details.checkin_date', [$startDate, $endDate]);
+            $totalCategoryEarnings = 0;
+
+            foreach ($roomsInCategory as $roomId) {
+                // This now includes refund deductions automatically
+                $roomEarnings = $this->calculateRoomEarnings($roomId, $month, $year);
+                $totalCategoryEarnings += $roomEarnings;
             }
 
-            // Calculate per-room earnings by dividing by number of rooms in booking
-            $totalEarnings = (float) $earnings->select(DB::raw('
-                SUM(
-                    (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
-                    GREATEST(
-                        (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
-                        1
-                    )
-                ) as total_earnings
-            '))->value('total_earnings');
-
-            if ($totalEarnings > 0) {
-                $categoryEarnings[$category] = $totalEarnings;
+            if ($totalCategoryEarnings > 0) {
+                $categoryEarnings[$category] = $totalCategoryEarnings;
             }
         }
 
@@ -755,68 +730,30 @@ class RoomBookReportController extends Controller
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth();
 
-            $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
-                ->whereHas('summaries', function ($query) {
-                    $query->whereHas('facility', function ($q) {
-                        $q->where('type', 'room');
-                    });
+            $earnings = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->where('facility_booking_log.status', '!=', 'pending_confirmation')
+                ->when($category, function ($q) use ($category) {
+                    $q->where('facilities.category', $category);
                 })
-                ->whereHas('details', function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('checkin_date', [$startDate, $endDate]);
-                })
-                ->where('status', '!=', 'pending_confirmation')
-                ->when($category, function ($query) use ($category) {
-                    $query->whereHas('summaries.facility', function ($q) use ($category) {
-                        $q->where('category', $category);
-                    });
-                })
-                ->get();
+                ->whereBetween('details.checkin_date', [$startDate, $endDate])
+                ->select(DB::raw('
+                    SUM(
+                        (COALESCE(summary.facility_price, 0) + COALESCE(summary.breakfast_price, 0)) / 
+                        GREATEST(
+                            (SELECT COUNT(*) FROM facility_summary fs WHERE fs.facility_booking_log_id = facility_booking_log.id),
+                            1
+                        )
+                    ) as total_earnings
+                '))
+                ->value('total_earnings');
 
-            $totalMonthlyEarnings = 0;
-
-            foreach ($bookings as $booking) {
-                $roomsInBooking = $booking->summaries->count();
-                $roomsInBooking = max($roomsInBooking, 1);
-
-                // Calculate total booking price
-                $totalBookingPrice = $booking->details->sum('total_price');
-
-                // Get payment totals
-                $totalAmountPaid = $booking->payments->sum('amount');
-                $totalCheckinPaid = $booking->payments->sum('checkin_paid');
-
-                // Calculate earnings for EACH ROOM in this booking
-                foreach ($booking->summaries as $summary) {
-                    // Calculate per-room prices (same logic as room-level calculation)
-                    $perRoomFacilityPrice = $summary->facility_price;
-                    $perRoomBreakfastPrice = $summary->breakfast_price;
-                    $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
-
-                    // Apply the SAME payment logic as room-level calculation
-                    $roomEarnings = $this->applyPaymentLogicPerRoom(
-                        $roomBasePrice,
-                        $totalBookingPrice,
-                        $totalAmountPaid,
-                        $totalCheckinPaid
-                    );
-
-                    $totalMonthlyEarnings += $roomEarnings;
-                }
-            }
-
-            \Log::info("Monthly earnings calculated", [
-                'month' => $month,
-                'year' => $year,
-                'category' => $category,
-                'total_earnings' => $totalMonthlyEarnings,
-                'bookings_count' => $bookings->count()
-            ]);
-
-            return $totalMonthlyEarnings;
-        } catch (\Exception $e) {
-            \Log::error("Error calculating monthly earnings: " . $e->getMessage());
-            return 0;
+            $monthlyData[] = $earnings ?: 0;
         }
+
+        return $monthlyData;
     }
 
     /**
@@ -863,7 +800,7 @@ class RoomBookReportController extends Controller
         $exportData[] = [
             'Room Name',
             'Category',
-            'Earnings',
+            'Net Earnings (After Refunds)',
             'Bookings',
             'Occupancy Rate',
             'Average Daily Rate'
@@ -878,7 +815,7 @@ class RoomBookReportController extends Controller
             $exportData[] = [
                 'Room Name' => $room->name,
                 'Category' => $room->category,
-                'Earnings' => $roomEarnings,
+                'Net Earnings (After Refunds)' => $roomEarnings,
                 'Bookings' => $roomBookings,
                 'Occupancy Rate' => $occupancyRate,
                 'Average Daily Rate' => $averageRate
@@ -961,6 +898,373 @@ class RoomBookReportController extends Controller
                 'success' => false,
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Get cancellation and refund analytics data
+     */
+    public function getCancellationRefundData(Request $request)
+    {
+        try {
+            $category = $request->input('category', '');
+            $month = $request->input('month', date('m'));
+            $year = $request->input('year', date('Y'));
+
+            $stats = $this->getCancellationRefundStats($month, $year, $category);
+            $cancellationReasons = $this->getCancellationReasons($month, $year, $category);
+            $refundTrends = $this->getRefundTrends($month, $year, $category);
+            $recentRefunds = $this->getRecentRefunds($month, $year, $category);
+
+            return response()->json([
+                'success' => true,
+                'stats' => $stats,
+                'cancellationReasons' => $cancellationReasons,
+                'refundTrends' => $refundTrends,
+                'recentRefunds' => $recentRefunds
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in getCancellationRefundData: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to load cancellation/refund data'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get cancellation and refund statistics
+     */
+    private function getCancellationRefundStats($month, $year, $category)
+    {
+        try {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            // Total bookings (for cancellation rate calculation)
+            $totalBookings = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->whereBetween('details.checkin_date', [$startDate, $endDate])
+                ->when($category, function ($query) use ($category) {
+                    $query->where('facilities.category', $category);
+                })
+                ->distinct()
+                ->count('facility_booking_log.id');
+
+            // Cancelled bookings
+            $cancelledBookings = FacilityBookingLog::join('facility_summary as summary', 'facility_booking_log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facility_booking_details as details', 'facility_booking_log.id', '=', 'details.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->where('facility_booking_log.status', 'cancelled')
+                ->whereBetween('details.checkin_date', [$startDate, $endDate])
+                ->when($category, function ($query) use ($category) {
+                    $query->where('facilities.category', $category);
+                })
+                ->distinct()
+                ->count('facility_booking_log.id');
+
+            // Refund statistics
+            $refundStats = Payments::join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
+                ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->whereBetween('payments.refund_date', [$startDate, $endDate])
+                ->when($category, function ($query) use ($category) {
+                    $query->where('facilities.category', $category);
+                })
+                ->select(
+                    DB::raw('SUM(refund_amount) as total_refunds'),
+                    DB::raw('COUNT(CASE WHEN refund_type = "full" THEN 1 END) as full_refunds'),
+                    DB::raw('SUM(CASE WHEN refund_type = "full" THEN refund_amount ELSE 0 END) as full_refund_amount'),
+                    DB::raw('COUNT(CASE WHEN refund_type = "half" THEN 1 END) as partial_refunds'),
+                    DB::raw('SUM(CASE WHEN refund_type = "half" THEN refund_amount ELSE 0 END) as partial_refund_amount')
+                )
+                ->first();
+
+            // Total revenue for refund rate calculation
+            $totalRevenue = $this->calculateMonthlyEarnings($month, $year, $category);
+
+            // Calculate rates
+            $cancellationRate = $totalBookings > 0 ? round(($cancelledBookings / $totalBookings) * 100, 1) : 0;
+            $refundRate = $totalRevenue > 0 ? round(($refundStats->total_refunds / $totalRevenue) * 100, 1) : 0;
+
+            return [
+                'cancelledBookings' => $cancelledBookings,
+                'cancellationRate' => $cancellationRate,
+                'totalRefunds' => $refundStats->total_refunds ?? 0,
+                'refundRate' => $refundRate,
+                'fullRefunds' => $refundStats->full_refunds ?? 0,
+                'fullRefundAmount' => $refundStats->full_refund_amount ?? 0,
+                'partialRefunds' => $refundStats->partial_refunds ?? 0,
+                'partialRefundAmount' => $refundStats->partial_refund_amount ?? 0
+            ];
+        } catch (\Exception $e) {
+            \Log::error("Error getting cancellation refund stats: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get total refunds for a period
+     */
+    private function getTotalRefunds($month, $year, $category)
+    {
+        try {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            $totalRefunds = Payments::join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
+                ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->whereBetween('payments.refund_date', [$startDate, $endDate])
+                ->when($category, function ($query) use ($category) {
+                    $query->where('facilities.category', $category);
+                })
+                ->sum('refund_amount');
+
+            return $totalRefunds;
+        } catch (\Exception $e) {
+            \Log::error("Error getting total refunds: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get cancellation reasons breakdown
+     */
+    private function getCancellationReasons($month, $year, $category)
+    {
+        try {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            $reasons = Payments::join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
+                ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->where('log.status', 'cancelled')
+                ->whereBetween('payments.refund_date', [$startDate, $endDate])
+                ->when($category, function ($query) use ($category) {
+                    $query->where('facilities.category', $category);
+                })
+                ->whereNotNull('payments.refund_reason')
+                ->select('refund_reason', DB::raw('COUNT(*) as count'))
+                ->groupBy('refund_reason')
+                ->orderByDesc('count')
+                ->pluck('count', 'refund_reason')
+                ->toArray();
+
+            return $reasons;
+        } catch (\Exception $e) {
+            \Log::error("Error getting cancellation reasons: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get refund trends for the selected period - DYNAMIC VERSION
+     */
+    private function getRefundTrends($month, $year, $category)
+    {
+        try {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            // Determine the best grouping based on date range
+            $daysInRange = $startDate->diffInDays($endDate);
+            
+            if ($daysInRange <= 31) {
+                // Daily grouping for one month or less
+                return $this->getDailyRefundTrends($startDate, $endDate, $category);
+            } elseif ($daysInRange <= 93) {
+                // Weekly grouping for up to 3 months
+                return $this->getWeeklyRefundTrends($startDate, $endDate, $category);
+            } else {
+                // Monthly grouping for longer periods
+                return $this->getMonthlyRefundTrends($startDate, $endDate, $category);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Error getting refund trends: " . $e->getMessage());
+            return ['labels' => [], 'data' => []];
+        }
+    }
+
+    /**
+     * Get daily refund trends
+     */
+    private function getDailyRefundTrends($startDate, $endDate, $category)
+    {
+        $dailyRefunds = Payments::join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
+            ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
+            ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+            ->where('facilities.type', 'room')
+            ->whereBetween('payments.refund_date', [$startDate, $endDate])
+            ->when($category, function ($query) use ($category) {
+                $query->where('facilities.category', $category);
+            })
+            ->select(
+                DB::raw('DATE(refund_date) as date'),
+                DB::raw('SUM(refund_amount) as total_refunds'),
+                DB::raw('COUNT(*) as refund_count')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $labels = [];
+        $data = [];
+
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $dateStr = $currentDate->format('M j');
+            $labels[] = $dateStr;
+            
+            $refundForDate = $dailyRefunds->firstWhere('date', $currentDate->format('Y-m-d'));
+            $data[] = $refundForDate ? (float) $refundForDate->total_refunds : 0;
+            
+            $currentDate->addDay();
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'period' => 'daily'
+        ];
+    }
+
+    /**
+     * Get weekly refund trends
+     */
+    private function getWeeklyRefundTrends($startDate, $endDate, $category)
+    {
+        $weeklyRefunds = Payments::join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
+            ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
+            ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+            ->where('facilities.type', 'room')
+            ->whereBetween('payments.refund_date', [$startDate, $endDate])
+            ->when($category, function ($query) use ($category) {
+                $query->where('facilities.category', $category);
+            })
+            ->select(
+                DB::raw('YEAR(refund_date) as year'),
+                DB::raw('WEEK(refund_date, 1) as week'),
+                DB::raw('MIN(refund_date) as week_start'),
+                DB::raw('SUM(refund_amount) as total_refunds'),
+                DB::raw('COUNT(*) as refund_count')
+            )
+            ->groupBy('year', 'week')
+            ->orderBy('year')
+            ->orderBy('week')
+            ->get();
+
+        $labels = [];
+        $data = [];
+
+        foreach ($weeklyRefunds as $week) {
+            $weekStart = Carbon::parse($week->week_start);
+            $weekEnd = $weekStart->copy()->addDays(6);
+            
+            $label = $weekStart->format('M j') . ' - ' . $weekEnd->format('M j');
+            $labels[] = $label;
+            $data[] = (float) $week->total_refunds;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'period' => 'weekly'
+        ];
+    }
+
+    /**
+     * Get monthly refund trends
+     */
+    private function getMonthlyRefundTrends($startDate, $endDate, $category)
+    {
+        $monthlyRefunds = Payments::join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
+            ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
+            ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+            ->where('facilities.type', 'room')
+            ->whereBetween('payments.refund_date', [$startDate, $endDate])
+            ->when($category, function ($query) use ($category) {
+                $query->where('facilities.category', $category);
+            })
+            ->select(
+                DB::raw('YEAR(refund_date) as year'),
+                DB::raw('MONTH(refund_date) as month'),
+                DB::raw('SUM(refund_amount) as total_refunds'),
+                DB::raw('COUNT(*) as refund_count')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        $labels = [];
+        $data = [];
+
+        foreach ($monthlyRefunds as $month) {
+            $monthName = Carbon::create($month->year, $month->month, 1)->format('M Y');
+            $labels[] = $monthName;
+            $data[] = (float) $month->total_refunds;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'period' => 'monthly'
+        ];
+    }
+
+    /**
+     * Get recent refund details
+     */
+    private function getRecentRefunds($month, $year, $category, $limit = 10)
+    {
+        try {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            $refunds = Payments::join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
+                ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
+                ->join('facilities', 'summary.facility_id', '=', 'facilities.id')
+                ->where('facilities.type', 'room')
+                ->whereBetween('payments.refund_date', [$startDate, $endDate])
+                ->when($category, function ($query) use ($category) {
+                    $query->where('facilities.category', $category);
+                })
+                ->whereNotNull('payments.refund_amount')
+                ->select(
+                    'log.id as booking_id',
+                    'facilities.name as room_name',
+                    'payments.refund_date',
+                    'payments.refund_amount',
+                    'payments.refund_type',
+                    'payments.refund_reason'
+                )
+                ->orderBy('payments.refund_date', 'desc')
+                ->limit($limit)
+                ->get()
+                ->map(function ($refund) {
+                    return [
+                        'booking_id' => $refund->booking_id,
+                        'room_name' => $refund->room_name,
+                        'refund_date' => Carbon::parse($refund->refund_date)->format('M j, Y'),
+                        'refund_amount' => (float) $refund->refund_amount,
+                        'refund_type' => $refund->refund_type,
+                        'refund_reason' => $refund->refund_reason
+                    ];
+                })
+                ->toArray();
+
+            return $refunds;
+        } catch (\Exception $e) {
+            \Log::error("Error getting recent refunds: " . $e->getMessage());
+            return [];
         }
     }
 }
