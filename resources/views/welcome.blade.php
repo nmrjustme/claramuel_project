@@ -176,10 +176,10 @@
             </video>
             <div class="absolute inset-0 bg-black/40 z-10"></div>
             <div class="relative z-20 text-white px-6 max-w-6xl mx-auto">
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 hero-title font-serif animate-fadeInUp">
+                <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 hero-title font-serif animate-fadeInUp">
                     Mt. ClaRamuel Resort & Events Place
                 </h1> 
-                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fadeInUp" style="animation-delay: 0.2s;">
+                <p class="text-sm md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fadeInUp" style="animation-delay: 0.2s;">
                     A premier mountain retreat offering luxury accommodations and exceptional event venues in the heart of Isabela
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">

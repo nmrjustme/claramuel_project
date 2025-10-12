@@ -701,7 +701,7 @@ $active = 'dashboard';
                     <div class="flex items-center">
                          <h2 class="text-base sm:text-lg md:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
                          <span class="ml-2 bg-red-500 text-white 
-                                   text-[10px] sm:text-xs md:text-sm 
+                                   text-[10px] sm:text-xs md:text-sm
                                    font-bold 
                                    px-1.5 sm:px-2 md:px-3 
                                    py-0.5 sm:py-1 md:py-1.5 
