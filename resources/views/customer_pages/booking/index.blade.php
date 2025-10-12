@@ -176,7 +176,6 @@
 
           .scroll-arrow:hover {
                background-color: #ffffff;
-               transform: translateY(-30%) scale(1.1) rotate(5deg);
                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
                cursor: pointer;
                border-radius: 50%;
