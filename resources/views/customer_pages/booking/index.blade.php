@@ -1120,8 +1120,8 @@
                                    // Group facilities by category
                                    $groupedFacilities = $facilities->groupBy('category');
                                    echo "<script>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       </script>";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </script>";
                               @endphp
 
                               @foreach($groupedFacilities as $category => $facilitiesInCategory)
@@ -1232,7 +1232,7 @@
                                                                                                                              <i class="fas fa-bed feature-icon"></i>
                                                                                                                              <span>{{ $facility->bed_number }} bed{{
                                                                                 $facility->bed_number != 1 ? 's' : ''
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }}</span>
                                                                                                                         </div>
                                                                            @endif
                                                                            <div class="feature-item">
@@ -1312,7 +1312,7 @@
                                                                                                : $activeDiscount->discount_value
                                                                                           )
                                                                                      )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }}
                                                                                                                                        </div>
 
                                                                                                                                        <!-- Discount icon + text -->
@@ -1511,7 +1511,7 @@
                </div>
           </div>
      </div>
->
+
 
 
 
@@ -1632,10 +1632,10 @@
                               try {
                                    // Show loading state
                                    amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                <div class="col-span-3 py-8 flex flex-col items-center justify-center">
-                                                                                                                                                                                                                                                     <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                     <div class="text-lg">Loading amenities...</div>
-                                                                                                                                                                                                                                                </div>`;
+                                                                                                                                                                                                                                                     <div class="col-span-3 py-8 flex flex-col items-center justify-center">
+                                                                                                                                                                                                                                                          <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
+                                                                                                                                                                                                                                                          <div class="text-lg">Loading amenities...</div>
+                                                                                                                                                                                                                                                     </div>`;
 
                                    modal.classList.remove('hidden');
                                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -1647,25 +1647,25 @@
                                    if (response.ok && data.success) {
                                         // Populate amenities list
                                         amenitiesList.innerHTML = data.amenities.map(amenity => `
-                                                                                                                                                                                                                                                          <div class="amenity-item">
-                                                                                                                                                                                                                                                               <div class="amenity-icon">
-                                                                                                                                                                                                                                                                    <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
+                                                                                                                                                                                                                                                               <div class="amenity-item">
+                                                                                                                                                                                                                                                                    <div class="amenity-icon">
+                                                                                                                                                                                                                                                                         <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                    <div class="amenity-name">${amenity.name}</div>
                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                               <div class="amenity-name">${amenity.name}</div>
-                                                                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                                                                     `).join('');
+                                                                                                                                                                                                                                                          `).join('');
                                    } else {
                                         throw new Error(data.message || 'Failed to load amenities');
                                    }
                               } catch (error) {
                                    console.error('Error loading amenities:', error);
                                    amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                <div class="col-span-3 py-8 text-center">
-                                                                                                                                                                                                                                                     <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                     <div class="text-lg text-red-500">
-                                                                                                                                                                                                                                                          ${error.message || 'Failed to load amenities'}
-                                                                                                                                                                                                                                                     </div>
-                                                                                                                                                                                                                                                </div>`;
+                                                                                                                                                                                                                                                     <div class="col-span-3 py-8 text-center">
+                                                                                                                                                                                                                                                          <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
+                                                                                                                                                                                                                                                          <div class="text-lg text-red-500">
+                                                                                                                                                                                                                                                               ${error.message || 'Failed to load amenities'}
+                                                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                                                     </div>`;
                               }
                          }
                     });
@@ -1812,40 +1812,40 @@
                // CSS styles as template
                getCalendarStyles() {
                     return `
-                         /* Booked / unavailable days */
-                         .flatpickr-day.unavailable {
-                              background: #fee2e2 !important;
-                              color: #dc2626 !important;
-                              border-radius: 6px;
-                         }
-                         .flatpickr-day.unavailable:hover {
-                              background: #fecaca !important;
-                              color: #b91c1c !important;
-                         }
+                              /* Booked / unavailable days */
+                              .flatpickr-day.unavailable {
+                                   background: #fee2e2 !important;
+                                   color: #dc2626 !important;
+                                   border-radius: 6px;
+                              }
+                              .flatpickr-day.unavailable:hover {
+                                   background: #fecaca !important;
+                                   color: #b91c1c !important;
+                              }
 
-                         /* Available days */
-                         .flatpickr-day.available {
-                              background: #dcfce7 !important;
-                              color: #16a34a !important;
-                              border-radius: 6px;
-                         }
-                         .flatpickr-day.available:hover {
-                              background: #bbf7d0 !important;
-                              color: #15803d !important;
-                         }
+                              /* Available days */
+                              .flatpickr-day.available {
+                                   background: #dcfce7 !important;
+                                   color: #16a34a !important;
+                                   border-radius: 6px;
+                              }
+                              .flatpickr-day.available:hover {
+                                   background: #bbf7d0 !important;
+                                   color: #15803d !important;
+                              }
 
-                         /* Past days */
-                         .flatpickr-day.past-day {
-                              background: #f3f4f6 !important;
-                              color: #9ca3af !important;
-                              border-radius: 6px;
-                         }
+                              /* Past days */
+                              .flatpickr-day.past-day {
+                                   background: #f3f4f6 !important;
+                                   color: #9ca3af !important;
+                                   border-radius: 6px;
+                              }
 
-                         /* Disable interactions globally */
-                         .calendar-container .flatpickr-day {
-                              pointer-events: none !important;
-                         }
-                    `;
+                              /* Disable interactions globally */
+                              .calendar-container .flatpickr-day {
+                                   pointer-events: none !important;
+                              }
+                         `;
                }
 
                setupScrollArrows() {
@@ -1859,6 +1859,23 @@
                          const updateArrows = () => {
                               const scrollLeft = scrollContainer.scrollLeft;
                               const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+
+                              if (scrollLeft <= 10) {
+                                   leftArrow.style.opacity = '0';
+                                   leftArrow.style.pointerEvents = 'none';
+                              } else {
+                                   leftArrow.style.opacity = '1';
+                                   leftArrow.style.pointerEvents = 'auto';
+                              }
+
+                              // This part hides the right arrow when at the end
+                              if (scrollLeft >= maxScroll - 10) {
+                                   rightArrow.style.opacity = '0';
+                                   rightArrow.style.pointerEvents = 'none';
+                              } else {
+                                   rightArrow.style.opacity = '1';
+                                   rightArrow.style.pointerEvents = 'auto';
+                              }
                          };
 
                          updateArrows();
@@ -2360,22 +2377,22 @@
                          subtotal += itemTotal;
 
                          html += `
-                                                                                                                                                                                                                                           <div class="flex justify-between items-start border-b border-gray-100 pb-4">
-                                                                                                                                                                                                                                                <div class="flex items-start">
-                                                                                                                                                                                                                                                <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
-                                                                                                                                                                                                                                                <div>
-                                                                                                                                                                                                                                                     <h4 class="font-medium text-dark">${item.name}</h4>
-                                                                                                                                                                                                                                                     <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
+                                                                                                                                                                                                                                                <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                                                                                                                                                                                                                                                     <div class="flex items-start">
+                                                                                                                                                                                                                                                     <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
+                                                                                                                                                                                                                                                     <div>
+                                                                                                                                                                                                                                                          <h4 class="font-medium text-dark">${item.name}</h4>
+                                                                                                                                                                                                                                                          <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
+                                                                                                                                                                                                                                                     </div>
+                                                                                                                                                                                                                                                     </div>
+                                                                                                                                                                                                                                                     <div class="text-right">
+                                                                                                                                                                                                                                                     <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
+                                                                                                                                                                                                                                                     <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
+                                                                                                                                                                                                                                                          <i class="far fa-trash-alt mr-1"></i> Remove
+                                                                                                                                                                                                                                                     </button>
+                                                                                                                                                                                                                                                     </div>
                                                                                                                                                                                                                                                 </div>
-                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                <div class="text-right">
-                                                                                                                                                                                                                                                <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
-                                                                                                                                                                                                                                                <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
-                                                                                                                                                                                                                                                     <i class="far fa-trash-alt mr-1"></i> Remove
-                                                                                                                                                                                                                                                </button>
-                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                           </div>
-                                                                                                                                                                                                                                      `;
+                                                                                                                                                                                                                                           `;
                     });
 
                     container.innerHTML = html;
