@@ -587,9 +587,11 @@
                             <div>
                                 <h3 class="text-md sm:text-sm md:text-xl lg:text-2xl font-semibold text-gray-800 mb-1">
                                     Location</h3>
-                                <p class="text-gray-600 text-xs md:text-lg lg:text-xl">
+                                <p
+                                    class="text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">
                                     Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines
                                 </p>
+
                             </div>
                         </div>
 
@@ -602,13 +604,11 @@
                                     Contact</h3>
                                 <p class="text-gray-600 mb-1">
                                     <a href="tel:+639952901333"
-                                        class="hover:text-secondary transition text-xs md:text-lg lg:text-xl">+63 995
-                                        290
-                                        1333</a>
+                                        class="hover:text-secondary transition text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">+63 995 290 1333</a>
                                 </p>
                                 <p class="text-gray-600">
                                     <a href="mailto:mtclaramuelresort@gmail.com"
-                                        class="hover:text-secondary transition text-xs md:text-lg lg:text-xl">mtclaramuelresort@gmail.com</a>
+                                        class="hover:text-secondary transition text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">mtclaramuelresort@gmail.com</a>
                                 </p>
                             </div>
                         </div>
@@ -620,7 +620,7 @@
                             <div>
                                 <h3 class="text-md sm:text-sm md:text-xl lg:text-2xl font-semibold text-gray-800 mb-1">
                                     Operating Hours</h3>
-                                <p class="text-gray-600 text-xs md:text-lg lg:text-xl">
+                                <p class="text-gray-600 text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">
                                     Daily: 8:00 AM - 10:00 PM
                                 </p>
                             </div>

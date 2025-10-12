@@ -9,7 +9,7 @@
     
     <div class="container mx-auto px-6 py-12 flex justify-between items-center relative z-10">
         <div class="flex items-center">
-            <a href="/" class="text-2xl md:text-4xl text-white font-bold hover:text-red-200 transition-colors duration-300 font-display flex items-center">
+            <a href="/" class="text-lg sm:text-xl md:text-3xl lg:text-4xl text-white font-bold hover:text-red-200 transition-colors duration-300 font-display flex items-center">
                 <span class="text-shadow">ＭｔＣＬＡＲＡＭＵＥＬ.com</span>
             </a>
         </div>
