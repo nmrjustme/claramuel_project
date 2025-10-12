@@ -199,14 +199,18 @@
             </video>
             <div class="absolute inset-0 bg-black/40 z-10"></div>
             <div class="relative z-20 text-white px-6 max-w-6xl mx-auto">
-                <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 hero-title font-serif animate-fadeInUp">
-                    Mt. ClaRamuel Resort & Events Place
-                </h1>
-                <p class="text-sm md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fadeInUp"
-                    style="animation-delay: 0.2s;">
-                    A premier mountain retreat offering luxury accommodations and exceptional event venues in the heart
-                    of Isabela
-                </p>
+                <div class="text-center px-4 sm:px-6 md:px-12">
+                    <h1
+                        class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 font-serif animate-fadeInUp">
+                        Mt. ClaRamuel Resort & Events Place
+                    </h1>
+                    <p class="text-xs sm:text-sm md:text-lg lg:text-xl mb-6 sm:mb-8 max-w-2xl md:max-w-3xl mx-auto leading-relaxed animate-fadeInUp"
+                        style="animation-delay: 0.2s;">
+                        A premier mountain retreat offering luxury accommodations and exceptional
+                        event venues in the heart of Isabela.
+                    </p>
+                </div>
+
                 <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp"
                     style="animation-delay: 0.4s;">
                     <a href="{{ route('dashboard.bookings') }}"
@@ -243,8 +247,12 @@
                                 <i class="fas fa-clock text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
                             </div>
                             <div>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">Open Daily</p>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">8 AM - 10 PM</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">
+                                    Open Daily</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">
+                                    8 AM - 10 PM</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp"
@@ -253,8 +261,12 @@
                                 <i class="fas fa-home text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
                             </div>
                             <div>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">Luxury</p>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">Accommodations</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">
+                                    Luxury</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">
+                                    Accommodations</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp"
@@ -264,8 +276,12 @@
                                     class="fas fa-calendar-alt text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
                             </div>
                             <div>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">Event</p>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">Hosting</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">
+                                    Event</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">
+                                    Hosting</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 animate-fadeInUp"
@@ -274,8 +290,12 @@
                                 <i class="fas fa-utensils text-white text-sm sm:text-base md:text-lg lg:text-xl"></i>
                             </div>
                             <div>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">Fine</p>
-                                <p class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">Dining</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base font-semibold truncate">
+                                    Fine</p>
+                                <p
+                                    class="text-xs sm:text-sm md:text-base lg:text-sm xl:text-base text-gray-400 truncate">
+                                    Dining</p>
                             </div>
                         </div>
                     </div>
@@ -318,16 +338,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-accent animate-fadeInUp"
                             style="animation-delay: 0.3s;">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Our Mission</h3>
-                            <p class="text-gray-600 text-sm">
+                            <h3 class="text-md sm:text-xl xl-text-base font-bold text-gray-800 mb-3">Our Mission</h3>
+                            <p class="text-gray-600 text-xs sm:text-sm md:text-base lg:text-sm xl:text-base">
                                 To provide exceptional hospitality services while preserving the natural beauty that
                                 defines our location, creating memorable experiences for every guest.
                             </p>
                         </div>
                         <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-accent animate-fadeInUp"
                             style="animation-delay: 0.4s;">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Our Vision</h3>
-                            <p class="text-gray-600 text-sm">
+                            <h3 class="text-md sm:text-xl xl-text-base font-bold text-gray-800 mb-3">Our Vision</h3>
+                            <p class="text-gray-600 text-xs sm:text-sm md:text-base lg:text-sm xl:text-base">
                                 To be the premier destination for luxury retreats and exceptional event venues in the
                                 region.
                             </p>
@@ -337,15 +357,15 @@
                     <div class="flex items-center space-x-6">
                         <div class="text-center animate-fadeInUp" style="animation-delay: 0.5s;">
                             <p class="text-3xl font-bold text-primary">50+</p>
-                            <p class="text-gray-600 text-sm">Luxury Rooms</p>
+                            <p class="text-gray-600 text-xs sm:text-sm">Luxury Rooms</p>
                         </div>
                         <div class="text-center animate-fadeInUp" style="animation-delay: 0.6s;">
                             <p class="text-3xl font-bold text-primary">100+</p>
-                            <p class="text-gray-600 text-sm">Events Hosted</p>
+                            <p class="text-gray-600 text-xs sm:text-sm">Events Hosted</p>
                         </div>
                         <div class="text-center animate-fadeInUp" style="animation-delay: 0.7s;">
                             <p class="text-3xl font-bold text-primary">5+</p>
-                            <p class="text-gray-600 text-sm">Recreational Areas</p>
+                            <p class="text-gray-600 text-xs sm:text-sm">Recreational Areas</p>
                         </div>
                     </div>
                 </div>
@@ -376,7 +396,8 @@
                             <div class="bg-accent p-2 rounded-full mr-4">
                                 <i class="fas fa-bed text-white"></i>
                             </div>
-                            <h3 class="text-md sm:text-xl xl-text-base font-bold text-gray-800">Luxury Accommodations</h3>
+                            <h3 class="text-md sm:text-xl xl-text-base font-bold text-gray-800">Luxury Accommodations
+                            </h3>
                         </div>
                         <p class="text-gray-600 mb-4 text-xs sm:text-sm md:text-base lg:text-sm xl:text-base">
                             Experience unparalleled comfort in our well-appointed rooms and cottages, each designed with
@@ -456,7 +477,8 @@
                             <div class="bg-accent p-2 rounded-full mr-4">
                                 <i class="fas fa-swimming-pool text-white"></i>
                             </div>
-                            <h3 class="text-md sm:text-xl xl-text-base font-bold text-gray-800">Recreational Activities</h3>
+                            <h3 class="text-md sm:text-xl xl-text-base font-bold text-gray-800">Recreational Activities
+                            </h3>
                         </div>
                         <p class="text-gray-600 mb-4 text-xs sm:text-sm md:text-base lg:text-sm xl:text-base">
                             Engage in a variety of leisure activities designed to rejuvenate your mind and body.
@@ -518,21 +540,29 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-gray-800 text-white">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6 font-serif animate-fadeInUp">
+    <section class="relative py-20 md:py-80 text-white overflow-hidden">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <div class="bg-[url('{{ url('imgs/contact_bg.jpg') }}')] bg-cover bg-center bg-no-repeat absolute inset-0">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-r from-red-900/80 to-red-900/70"></div>
+        </div>
+
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <h2 class="text-2xl md:text-4xl lg:text-5xl font-bold mb-6 font-serif animate-fadeInUp">
                 Ready for an Unforgettable Experience?
             </h2>
-            <p class="text-xl mb-8 max-w-2xl mx-auto text-gray-200 animate-fadeInUp" style="animation-delay: 0.2s;">
+            <p class="text-sm md:text-lg lg:text-xl mb-8 max-w-2xl mx-auto text-gray-100 animate-fadeInUp"
+                style="animation-delay: 0.2s;">
                 Book your stay or event today and discover the magic of Mt. ClaRamuel
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
                 <a href="{{ route('dashboard.bookings') }}"
-                    class="inline-block bg-accent text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300 btn-pulse">
+                    class="inline-block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8 py-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
                     Book Now
                 </a>
                 <a href="tel:+639952901333"
-                    class="inline-block border-2 border-white hover:bg-white/10 text-white font-semibold px-8 py-3 rounded-sm shadow-lg transition duration-300">
+                    class="inline-block border-2 border-white hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105">
                     <i class="fas fa-phone mr-2"></i> +63 995 290 1333
                 </a>
             </div>
@@ -545,7 +575,7 @@
             <div class="flex flex-col lg:flex-row gap-12">
                 <div class="lg:w-1/2">
                     <h2
-                        class="text-3xl md:text-4xl font-bold text-gray-800 mb-6 section-title font-serif animate-fadeInUp">
+                        class="text-2xl md:text-4xl font-bold text-gray-800 mb-6 section-title font-serif animate-fadeInUp">
                         Contact <span class="text-primary">Information</span>
                     </h2>
 
@@ -555,8 +585,9 @@
                                 <i class="fas fa-map-marker-alt text-white"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-semibold text-gray-800 mb-1">Location</h3>
-                                <p class="text-gray-600">
+                                <h3 class="text-md sm:text-sm md:text-xl lg:text-2xl font-semibold text-gray-800 mb-1">
+                                    Location</h3>
+                                <p class="text-gray-600 text-xs md:text-lg lg:text-xl">
                                     Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines
                                 </p>
                             </div>
@@ -567,14 +598,17 @@
                                 <i class="fas fa-phone text-white"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-semibold text-gray-800 mb-1">Contact</h3>
+                                <h3 class="text-md sm:text-sm md:text-xl lg:text-2xl font-semibold text-gray-800 mb-1">
+                                    Contact</h3>
                                 <p class="text-gray-600 mb-1">
-                                    <a href="tel:+639952901333" class="hover:text-secondary transition">+63 995 290
+                                    <a href="tel:+639952901333"
+                                        class="hover:text-secondary transition text-xs md:text-lg lg:text-xl">+63 995
+                                        290
                                         1333</a>
                                 </p>
                                 <p class="text-gray-600">
                                     <a href="mailto:mtclaramuelresort@gmail.com"
-                                        class="hover:text-secondary transition">mtclaramuelresort@gmail.com</a>
+                                        class="hover:text-secondary transition text-xs md:text-lg lg:text-xl">mtclaramuelresort@gmail.com</a>
                                 </p>
                             </div>
                         </div>
@@ -584,8 +618,9 @@
                                 <i class="fas fa-clock text-white"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-semibold text-gray-800 mb-1">Operating Hours</h3>
-                                <p class="text-gray-600">
+                                <h3 class="text-md sm:text-sm md:text-xl lg:text-2xl font-semibold text-gray-800 mb-1">
+                                    Operating Hours</h3>
+                                <p class="text-gray-600 text-xs md:text-lg lg:text-xl">
                                     Daily: 8:00 AM - 10:00 PM
                                 </p>
                             </div>
@@ -630,7 +665,7 @@
                         <img src="{{ url('imgs/logo.png') }}" class="h-12 mr-3" alt="Logo">
                         <span class="text-xl font-bold">Mt. ClaRamuel Resort</span>
                     </div>
-                    <p class="text-gray-400 mb-6 animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <p class="text-gray-400 mb-6 animate-fadeInUp text-sm" style="animation-delay: 0.2s;">
                         A premier destination offering luxury accommodations and exceptional event venues in the heart
                         of Isabela's natural beauty.
                     </p>
