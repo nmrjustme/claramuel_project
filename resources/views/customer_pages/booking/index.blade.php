@@ -84,11 +84,13 @@
                     min-width: min(180px, 72vw);
                     width: min(240px, 82vw);
                     border-radius: 0.75rem;
-                    margin-bottom: 0.25rem; /* reduced spacing between cards */
+                    margin-bottom: 0.25rem;
+                    /* reduced spacing between cards */
                }
 
                .room-details {
-                    padding: 0.5rem !important; /* tighter padding */
+                    padding: 0.5rem !important;
+                    /* tighter padding */
                }
 
                .room-title {
@@ -130,7 +132,8 @@
 
                .room-image-container {
                     border-radius: 0.5rem 0.5rem 0 0;
-                    aspect-ratio: 4/2.8; /* reduced image height */
+                    aspect-ratio: 4/2.8;
+                    /* reduced image height */
                }
           }
 
@@ -752,14 +755,14 @@
           /* Floating notification */
           .notification {
                position: fixed;
-               bottom: 20px;
+               top: 20px;
                right: 20px;
                background-color: #10B981;
                color: white;
                padding: 1rem 1.5rem;
                border-radius: 0.5rem;
                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-               transform: translateY(100px);
+               transform: translateY(-100px);
                opacity: 0;
                transition: all 0.3s ease;
                z-index: 1000;
@@ -1171,87 +1174,87 @@
           }
 
           .calendar-container .flatpickr-day {
-          min-width: 30px !important;
-          height: 30px !important;
-          line-height: 30px !important;
-          margin: 2px !important;
-          font-size: 12px !important;
+               min-width: 30px !important;
+               height: 30px !important;
+               line-height: 30px !important;
+               margin: 2px !important;
+               font-size: 12px !important;
           }
 
           /* Mobile-specific calendar styles */
           @media (max-width: 480px) {
-          .calendar-container .flatpickr-calendar {
-               font-size: 12px !important;
-          }
-          
-          .calendar-container .flatpickr-day {
-               min-width: 28px !important;
-               height: 28px !important;
-               line-height: 28px !important;
-               margin: 1px !important;
-               font-size: 11px !important;
-          }
-          
-          .calendar-container .flatpickr-weekdays {
-               height: 25px !important;
-          }
-          
-          .calendar-container .flatpickr-weekday {
-               font-size: 10px !important;
-          }
-          
-          .calendar-container .flatpickr-current-month {
-               font-size: 14px !important;
-               padding: 4px 0 !important;
-          }
-          
-          .calendar-container .flatpickr-months .flatpickr-month,
-          .calendar-container .flatpickr-months .flatpickr-next-month,
-          .calendar-container .flatpickr-months .flatpickr-prev-month {
-               height: 35px !important;
-               padding: 5px 0 !important;
-          }
+               .calendar-container .flatpickr-calendar {
+                    font-size: 12px !important;
+               }
+
+               .calendar-container .flatpickr-day {
+                    min-width: 28px !important;
+                    height: 28px !important;
+                    line-height: 28px !important;
+                    margin: 1px !important;
+                    font-size: 11px !important;
+               }
+
+               .calendar-container .flatpickr-weekdays {
+                    height: 25px !important;
+               }
+
+               .calendar-container .flatpickr-weekday {
+                    font-size: 10px !important;
+               }
+
+               .calendar-container .flatpickr-current-month {
+                    font-size: 14px !important;
+                    padding: 4px 0 !important;
+               }
+
+               .calendar-container .flatpickr-months .flatpickr-month,
+               .calendar-container .flatpickr-months .flatpickr-next-month,
+               .calendar-container .flatpickr-months .flatpickr-prev-month {
+                    height: 35px !important;
+                    padding: 5px 0 !important;
+               }
           }
 
           /* Very small screens */
           @media (max-width: 360px) {
-          .calendar-container .flatpickr-day {
-               min-width: 24px !important;
-               height: 24px !important;
-               line-height: 24px !important;
-               margin: 1px !important;
-               font-size: 10px !important;
-          }
-          
-          .calendar-container .flatpickr-weekdays {
-               height: 22px !important;
-          }
-          
-          .calendar-container .flatpickr-weekday {
-               font-size: 9px !important;
-          }
+               .calendar-container .flatpickr-day {
+                    min-width: 24px !important;
+                    height: 24px !important;
+                    line-height: 24px !important;
+                    margin: 1px !important;
+                    font-size: 10px !important;
+               }
+
+               .calendar-container .flatpickr-weekdays {
+                    height: 22px !important;
+               }
+
+               .calendar-container .flatpickr-weekday {
+                    font-size: 9px !important;
+               }
           }
 
           .unavailable-dates-content {
-          max-height: none !important;
-          overflow: visible !important;
+               max-height: none !important;
+               overflow: visible !important;
           }
 
           .unavailable-dates-content:not(.hidden) {
-          display: block;
-          padding: 1rem 0;
+               display: block;
+               padding: 1rem 0;
           }
 
           /* Ensure room card doesn't interfere */
           .room-card {
-          overflow: visible !important;
-          z-index: auto !important;
+               overflow: visible !important;
+               z-index: auto !important;
           }
 
           /* When calendar is open, ensure proper stacking */
           .unavailable-dates-content:not(.hidden) .calendar-container {
-          z-index: 100;
-          position: relative;
+               z-index: 100;
+               position: relative;
           }
 
           .unavailable-dates-content {
@@ -1439,8 +1442,8 @@
                                    // Group facilities by category
                                    $groupedFacilities = $facilities->groupBy('category');
                                    echo "<script>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             </script>";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   </script>";
                               @endphp
 
                               @foreach($groupedFacilities as $category => $facilitiesInCategory)
@@ -1551,7 +1554,7 @@
                                                                                                                              <i class="fas fa-bed feature-icon"></i>
                                                                                                                              <span>{{ $facility->bed_number }} bed{{
                                                                                 $facility->bed_number != 1 ? 's' : ''
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }}</span>
                                                                                                                         </div>
                                                                            @endif
                                                                            <div class="feature-item">
@@ -1564,7 +1567,8 @@
                                                                            <button
                                                                                 class="toggle-unavailable-dates text-sm text-primary font-medium flex items-center">
                                                                                 <i class="fas fa-calendar mr-2"></i>
-                                                                                <a class="text-[10px] md:text-sm lg:text-md">View Calendar</a>
+                                                                                <a class="text-[10px] md:text-sm lg:text-md">View
+                                                                                     Calendar</a>
                                                                                 <i
                                                                                      class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200"></i>
                                                                            </button>
@@ -1631,7 +1635,7 @@
                                                                                                : $activeDiscount->discount_value
                                                                                           )
                                                                                      )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }}
                                                                                                                                        </div>
 
                                                                                                                                        <!-- Discount icon + text -->
@@ -1715,22 +1719,31 @@
                               Select Your Dates
                          </h2>
 
-                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                              <!-- Check-in -->
                               <div>
-                                   <label for="checkin" class="block text-sm md:text-lg font-medium text-gray-700 mb-2">
-                                        Check-in Date (12NN)
+                                   <label for="checkin"
+                                        class="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
+                                        Check-in Date
+                                        <span class="text-xs text-gray-500 font-normal">(12NN)</span>
                                    </label>
                                    <input type="text" id="checkin" placeholder="Select date"
-                                        class="w-full px-4 py-3 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
+                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
                               </div>
+
+                              <!-- Check-out -->
                               <div>
-                                   <label for="checkout" class="block text-sm md:text-lg font-medium text-gray-700 mb-2">
-                                        Check-out Date (10AM)
+                                   <label for="checkout"
+                                        class="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
+                                        Check-out Date
+                                        <span class="text-xs text-gray-500 font-normal">(10AM)</span>
                                    </label>
                                    <input type="text" id="checkout" placeholder="Select date"
-                                        class="w-full px-4 py-3 border border-darkgray rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
+                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
                               </div>
                          </div>
+
+
 
                          <!-- Info Section -->
                          <div class="mt-4 space-y-3">
@@ -1752,7 +1765,8 @@
                                         <div class="flex items-center justify-between">
                                              <div>
                                                   <h3 class="text-sm md:text-lg font-medium text-gray-800">Add Breakfast for your stay</h3>
-                                                  <p class="text-xs md:text-sm text-gray-600">Enjoy a delicious breakfast each morning for just ₱{{
+                                                  <p class="text-xs md:text-sm text-gray-600">Enjoy a delicious breakfast each morning for
+                                                       just ₱{{
                               number_format($breakfast_price->price) }} per room per night</p>
                                              </div>
                                              <label class="relative inline-flex items-center cursor-pointer">
@@ -1803,7 +1817,8 @@
                          <div class="border-t border-gray-200 pt-4 mt-4">
                               <div class="flex justify-between items-center">
                                    <span class="text-lg font-bold text-gray-800">Total</span>
-                                   <span class="text-base sm:text-lg md:text-2xl font-bold text-primary" id="total-price">₱0.00</span>
+                                   <span class="text-base sm:text-lg md:text-2xl font-bold text-primary"
+                                        id="total-price">₱0.00</span>
                               </div>
                          </div>
 
@@ -1938,10 +1953,10 @@
                               try {
                                    // Show loading state
                                    amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                          <div class="col-span-3 py-8 flex flex-col items-center justify-center">
-                                                                                                                                                                                                                                                               <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                               <div class="text-lg">Loading amenities...</div>
-                                                                                                                                                                                                                                                          </div>`;
+                                                                                                                                                                                                                                                                    <div class="col-span-3 py-8 flex flex-col items-center justify-center">
+                                                                                                                                                                                                                                                                         <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
+                                                                                                                                                                                                                                                                         <div class="text-lg">Loading amenities...</div>
+                                                                                                                                                                                                                                                                    </div>`;
 
                                    modal.classList.remove('hidden');
                                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -1953,25 +1968,25 @@
                                    if (response.ok && data.success) {
                                         // Populate amenities list
                                         amenitiesList.innerHTML = data.amenities.map(amenity => `
-                                                                                                                                                                                                                                                                    <div class="amenity-item">
-                                                                                                                                                                                                                                                                         <div class="amenity-icon">
-                                                                                                                                                                                                                                                                              <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
-                                                                                                                                                                                                                                                                         </div>
-                                                                                                                                                                                                                                                                         <div class="amenity-name">${amenity.name}</div>
-                                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                               `).join('');
+                                                                                                                                                                                                                                                                              <div class="amenity-item">
+                                                                                                                                                                                                                                                                                   <div class="amenity-icon">
+                                                                                                                                                                                                                                                                                        <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
+                                                                                                                                                                                                                                                                                   </div>
+                                                                                                                                                                                                                                                                                   <div class="amenity-name">${amenity.name}</div>
+                                                                                                                                                                                                                                                                              </div>
+                                                                                                                                                                                                                                                                         `).join('');
                                    } else {
                                         throw new Error(data.message || 'Failed to load amenities');
                                    }
                               } catch (error) {
                                    console.error('Error loading amenities:', error);
                                    amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                          <div class="col-span-3 py-8 text-center">
-                                                                                                                                                                                                                                                               <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                               <div class="text-lg text-red-500">
-                                                                                                                                                                                                                                                                    ${error.message || 'Failed to load amenities'}
-                                                                                                                                                                                                                                                               </div>
-                                                                                                                                                                                                                                                          </div>`;
+                                                                                                                                                                                                                                                                    <div class="col-span-3 py-8 text-center">
+                                                                                                                                                                                                                                                                         <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
+                                                                                                                                                                                                                                                                         <div class="text-lg text-red-500">
+                                                                                                                                                                                                                                                                              ${error.message || 'Failed to load amenities'}
+                                                                                                                                                                                                                                                                         </div>
+                                                                                                                                                                                                                                                                    </div>`;
                               }
                          }
                     });
@@ -2118,40 +2133,40 @@
                // CSS styles as template
                getCalendarStyles() {
                     return `
-                                   /* Booked / unavailable days */
-                                   .flatpickr-day.unavailable {
-                                        background: #fee2e2 !important;
-                                        color: #dc2626 !important;
-                                        border-radius: 6px;
-                                   }
-                                   .flatpickr-day.unavailable:hover {
-                                        background: #fecaca !important;
-                                        color: #b91c1c !important;
-                                   }
+                                             /* Booked / unavailable days */
+                                             .flatpickr-day.unavailable {
+                                                  background: #fee2e2 !important;
+                                                  color: #dc2626 !important;
+                                                  border-radius: 6px;
+                                             }
+                                             .flatpickr-day.unavailable:hover {
+                                                  background: #fecaca !important;
+                                                  color: #b91c1c !important;
+                                             }
 
-                                   /* Available days */
-                                   .flatpickr-day.available {
-                                        background: #dcfce7 !important;
-                                        color: #16a34a !important;
-                                        border-radius: 6px;
-                                   }
-                                   .flatpickr-day.available:hover {
-                                        background: #bbf7d0 !important;
-                                        color: #15803d !important;
-                                   }
+                                             /* Available days */
+                                             .flatpickr-day.available {
+                                                  background: #dcfce7 !important;
+                                                  color: #16a34a !important;
+                                                  border-radius: 6px;
+                                             }
+                                             .flatpickr-day.available:hover {
+                                                  background: #bbf7d0 !important;
+                                                  color: #15803d !important;
+                                             }
 
-                                   /* Past days */
-                                   .flatpickr-day.past-day {
-                                        background: #f3f4f6 !important;
-                                        color: #9ca3af !important;
-                                        border-radius: 6px;
-                                   }
+                                             /* Past days */
+                                             .flatpickr-day.past-day {
+                                                  background: #f3f4f6 !important;
+                                                  color: #9ca3af !important;
+                                                  border-radius: 6px;
+                                             }
 
-                                   /* Disable interactions globally */
-                                   .calendar-container .flatpickr-day {
-                                        pointer-events: none !important;
-                                   }
-                              `;
+                                             /* Disable interactions globally */
+                                             .calendar-container .flatpickr-day {
+                                                  pointer-events: none !important;
+                                             }
+                                        `;
                }
 
                setupScrollArrows() {
@@ -2553,7 +2568,7 @@
                               }, 2000);
                          });
 
-                         showNotification(`${room.name} added to your booking`);
+                         showNotification(`${room.name} added to your summary`);
                     } catch (error) {
                          console.error('Error adding to cart:', error);
                          showNotification(error.message || 'Failed to add room to cart', true);
@@ -2683,22 +2698,22 @@
                          subtotal += itemTotal;
 
                          html += `
-                                                                                                                                                                                                                                                     <div class="flex justify-between items-start border-b border-gray-100 pb-4">
-                                                                                                                                                                                                                                                          <div class="flex items-start">
-                                                                                                                                                                                                                                                          <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
-                                                                                                                                                                                                                                                          <div>
-                                                                                                                                                                                                                                                               <h4 class="font-medium text-dark">${item.name}</h4>
-                                                                                                                                                                                                                                                               <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
-                                                                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                                                                          <div class="text-right">
-                                                                                                                                                                                                                                                          <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
-                                                                                                                                                                                                                                                          <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
-                                                                                                                                                                                                                                                               <i class="far fa-trash-alt mr-1"></i> Remove
-                                                                                                                                                                                                                                                          </button>
-                                                                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                                                                     </div>
-                                                                                                                                                                                                                                                `;
+                                                                                                                                                                                                                                                               <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                                                                                                                                                                                                                                                                    <div class="flex items-start">
+                                                                                                                                                                                                                                                                    <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
+                                                                                                                                                                                                                                                                    <div>
+                                                                                                                                                                                                                                                                         <h4 class="font-medium text-dark">${item.name}</h4>
+                                                                                                                                                                                                                                                                         <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                    <div class="text-right">
+                                                                                                                                                                                                                                                                    <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
+                                                                                                                                                                                                                                                                    <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
+                                                                                                                                                                                                                                                                         <i class="far fa-trash-alt mr-1"></i> Remove
+                                                                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                          `;
                     });
 
                     container.innerHTML = html;
@@ -2786,7 +2801,7 @@
                          this.checkoutPicker.set('disable', []);
                     }
 
-                    showNotification(`${room.name} removed from your booking`);
+                    showNotification(`${room.name} removed from your summary`);
                }
           }
 
