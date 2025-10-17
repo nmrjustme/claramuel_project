@@ -130,6 +130,51 @@
             right: 20px;
             z-index: 30;
         }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Wavy line styles */
+        .wavy-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+        }
+
+        .wavy-line-top {
+            top: 0;
+        }
+
+        .wavy-line-bottom {
+            bottom: 0;
+            transform: rotate(180deg);
+        }
+
+        .wavy-line svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 60px;
+        }
+
+        .wavy-line .shape-fill {
+            fill: #FFFFFF;
+        }
     </style>
 </head>
 
@@ -497,9 +542,9 @@
                                 Picnic areas with mountain views
                             </li>
                         </ul>
-                        <a href="{{ route('Pools_Park') }}"
+                        <a href="{{ route('dashboard.bookings') }}"
                             class="inline-flex items-center text-primary hover:text-secondary font-medium transition duration-300">
-                            Explore Activities
+                            Book Now
                             <i class="fas fa-arrow-right ml-2"></i>
                         </a>
                     </div>
@@ -539,12 +584,24 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
+    <!-- Main section with wavy lines -->
     <section class="relative py-20 md:py-80 text-white overflow-hidden">
+        <!-- Wavy line top -->
+        <div class="wavy-line wavy-line-top">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
+                preserveAspectRatio="none">
+                <path
+                    d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+                    class="shape-fill"></path>
+            </svg>
+        </div>
+
         <!-- Background Image with Overlay -->
         <div class="absolute inset-0 z-0">
+            <!-- Background image -->
             <div class="bg-[url('{{ url('imgs/contact_bg.jpg') }}')] bg-cover bg-center bg-no-repeat absolute inset-0">
             </div>
+            <!-- Dark overlay -->
             <div class="absolute inset-0 bg-gradient-to-r from-red-900/80 to-red-900/70"></div>
         </div>
 
@@ -554,10 +611,10 @@
             </h2>
             <p class="text-sm md:text-lg lg:text-xl mb-8 max-w-2xl mx-auto text-gray-100 animate-fadeInUp"
                 style="animation-delay: 0.2s;">
-                Book your stay or event today and discover the magic of Mt. ClaRamuel
+                Book your stay and discover the magic of Mt. ClaRamuel
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
-                <a href="{{ route('dashboard.bookings') }}"
+                <a href="#"
                     class="inline-block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8 py-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
                     Book Now
                 </a>
@@ -567,7 +624,18 @@
                 </a>
             </div>
         </div>
+
+        <!-- Wavy line bottom -->
+        <div class="wavy-line wavy-line-bottom">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
+                preserveAspectRatio="none">
+                <path
+                    d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+                    class="shape-fill"></path>
+            </svg>
+        </div>
     </section>
+
 
     <!-- Contact Section -->
     <section id="contact" class="py-20 bg-white">
@@ -604,7 +672,8 @@
                                     Contact</h3>
                                 <p class="text-gray-600 mb-1">
                                     <a href="tel:+639952901333"
-                                        class="hover:text-secondary transition text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">+63 995 290 1333</a>
+                                        class="hover:text-secondary transition text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">+63
+                                        995 290 1333</a>
                                 </p>
                                 <p class="text-gray-600">
                                     <a href="mailto:mtclaramuelresort@gmail.com"
@@ -620,7 +689,8 @@
                             <div>
                                 <h3 class="text-md sm:text-sm md:text-xl lg:text-2xl font-semibold text-gray-800 mb-1">
                                     Operating Hours</h3>
-                                <p class="text-gray-600 text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">
+                                <p
+                                    class="text-gray-600 text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed tracking-wide md:px-0">
                                     Daily: 8:00 AM - 10:00 PM
                                 </p>
                             </div>

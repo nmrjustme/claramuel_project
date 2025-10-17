@@ -3,18 +3,18 @@
 @section('bookings')
 <div class="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full bg-white rounded-lg border border-lightgray p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Verify Your Email</h2>
+        <h2 class="text-lg xs:text-xl sm:text-2xl font-bold text-gray-800 mb-3 xs:mb-4 text-center">Verify Your Email</h2>
 
-        <div class="text-red-500 mb-4 text-center">
-            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="text-red-500 mb-3 xs:mb-4 text-center">
+            <svg class="w-12 h-12 xs:w-16 xs:h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                 </path>
             </svg>
         </div>
 
-        <p class="text-gray-600 mb-6 text-center">
-            We've sent a 6-digit OTP to <strong id="user-email">{{ $email }}</strong>.
+        <p class="text-xs xs:text-sm text-gray-600 mb-4 xs:mb-6 text-center">
+            We've sent a 6-digit OTP to <strong id="user-email" class="text-xs xs:text-sm">{{ $email }}</strong>.
             Please enter it below to continue with your payment.
         </p>
 
@@ -23,49 +23,49 @@
             <input type="hidden" name="token" value="{{ $token }}">
             <input type="hidden" name="otp" id="full-otp">
 
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-3 text-center">Enter OTP Code</label>
-                <div class="flex justify-center space-x-2" id="otp-container">
-                    <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" data-index="1">
-                    <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" data-index="2">
-                    <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" data-index="3">
-                    <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" data-index="4">
-                    <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" data-index="5">
-                    <input type="text" maxlength="1" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" data-index="6">
+            <div class="mb-4 xs:mb-6">
+                <label class="block text-xs xs:text-sm font-medium text-gray-700 mb-2 xs:mb-3 text-center">Enter OTP Code</label>
+                <div class="flex justify-center space-x-1 xs:space-x-2" id="otp-container">
+                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="1">
+                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="2">
+                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="3">
+                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="4">
+                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="5">
+                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="6">
                 </div>
-                <div id="otp-error" class="text-red-500 text-sm mt-2 text-center hidden"></div>
+                <div id="otp-error" class="text-red-500 text-xs xs:text-sm mt-1 xs:mt-2 text-center hidden"></div>
             </div>
 
             <button type="submit"
-                class="w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 cursor-pointer">
+                class="w-full bg-red-500 text-white py-2 xs:py-3 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 cursor-pointer text-sm xs:text-base">
                 Verify OTP
             </button>
         </form>
 
-        <div class="mt-6 text-center">
-            <p class="text-sm text-gray-500">
+        <div class="mt-4 xs:mt-6 text-center">
+            <p class="text-xs xs:text-sm text-gray-500">
                 Didn't receive the OTP?
-                <a href="#" id="resend-otp" class="text-blue-500 hover:underline font-medium">Resend OTP</a>
-                <span id="resend-status" class="hidden text-sm ml-2"></span>
+                <a href="#" id="resend-otp" class="text-blue-500 hover:underline font-medium text-xs xs:text-sm">Resend OTP</a>
+                <span id="resend-status" class="hidden text-xs xs:text-sm ml-1 xs:ml-2"></span>
             </p>
         </div>
 
         <div id="success-message"
-            class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-4"
+            class="hidden bg-green-100 border border-green-400 text-green-700 px-3 xs:px-4 py-2 xs:py-3 rounded relative mt-3 xs:mt-4 text-xs xs:text-sm"
             role="alert">
             <strong class="font-bold">Success!</strong>
             <span class="block sm:inline"> OTP verified successfully!</span>
         </div>
 
         <div id="error-message"
-            class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4"
+            class="hidden bg-red-100 border border-red-400 text-red-700 px-3 xs:px-4 py-2 xs:py-3 rounded relative mt-3 xs:mt-4 text-xs xs:text-sm"
             role="alert">
             <strong class="font-bold">Error!</strong>
             <span class="block sm:inline" id="error-text"></span>
         </div>
 
-        <div class="bg-gray-100 p-4 rounded-lg mt-6">
-            <p class="text-sm text-gray-600 text-center">
+        <div class="bg-gray-100 p-3 xs:p-4 rounded-lg mt-4 xs:mt-6">
+            <p class="text-xs xs:text-sm text-gray-600 text-center">
                 The OTP will expire in 30 minutes.
             </p>
         </div>
@@ -74,16 +74,16 @@
 
 <!-- Modal for leaving confirmation -->
 <div id="leave-confirmation-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Site?</h3>
-        <p class="text-gray-600 mb-6">
+    <div class="bg-white rounded-lg p-4 xs:p-6 max-w-xs xs:max-w-md w-full mx-2 xs:mx-4">
+        <h3 class="text-lg xs:text-xl font-bold text-gray-800 mb-3 xs:mb-4">Leave Site?</h3>
+        <p class="text-xs xs:text-sm text-gray-600 mb-4 xs:mb-6">
             You're about to leave Mt.Claramuel website to pay. Are you sure you want to proceed?
         </p>
-        <div class="flex justify-end space-x-4">
-            <button id="cancel-leave" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition duration-200">
+        <div class="flex justify-end space-x-2 xs:space-x-4">
+            <button id="cancel-leave" class="px-3 xs:px-4 py-1 xs:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition duration-200 text-xs xs:text-sm">
                 Cancel
             </button>
-            <button id="proceed-leave" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200 cursor-pointer">
+            <button id="proceed-leave" class="px-3 xs:px-4 py-1 xs:py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200 cursor-pointer text-xs xs:text-sm">
                 Proceed
             </button>
         </div>
