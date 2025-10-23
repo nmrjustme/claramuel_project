@@ -24,7 +24,8 @@ class Facility extends Model
         'included',
         'rate_type',
         'price',
-        'quantity'
+        'quantity',
+        'type'
     ];
     
     public function summaries () 
