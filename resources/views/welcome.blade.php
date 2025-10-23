@@ -251,8 +251,7 @@
                     </h1>
                     <p class="text-xs sm:text-sm md:text-lg lg:text-xl mb-6 sm:mb-8 max-w-2xl md:max-w-3xl mx-auto leading-relaxed animate-fadeInUp"
                         style="animation-delay: 0.2s;">
-                        A premier destination offering luxury accommodations and exceptional event venues in the heart
-                        of Isabela's natural beauty.
+                        A premier staycation destination in Ilagan City, offering sophisticated accommodations, exceptional amenities, and an atmosphere of refined tranquility in the heart of Isabela.
                     </p>
                 </div>
 
