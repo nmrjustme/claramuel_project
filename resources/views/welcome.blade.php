@@ -736,8 +736,7 @@
                         <span class="text-xl font-bold">Mt. ClaRamuel Resort</span>
                     </div>
                     <p class="text-gray-400 mb-6 animate-fadeInUp text-sm" style="animation-delay: 0.2s;">
-                        A premier destination offering luxury accommodations and exceptional event venues in the heart
-                        of Isabela's natural beauty.
+                        Experience the Ultimate STAYCATION in Ilagan City — a premier destination in Isabela offering luxury accommodations, relaxing amenities, and exceptional event venues surrounded by breathtaking natural beauty.
                     </p>
                     <div class="flex gap-4 animate-fadeInUp" style="animation-delay: 0.3s;">
                         <a href="https://www.facebook.com/mtclaramuelresort" target="_blank"
