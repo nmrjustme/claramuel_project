@@ -30,18 +30,18 @@ class FacilitiesController extends Controller
     public function showData()
     {
         if (auth()->check() && auth()->user()->role === 'Admin') {
-            
+
             return redirect()->route('admin.dashboard');
-            
+
         }
-    
+
         return view('welcome', [
-                'facilities' => $this->facilities,
-                'roomFacilities' => $this->roomFacilities,
-                'privateVilla' => $this->privateVilla,
+            'facilities' => $this->facilities,
+            'roomFacilities' => $this->roomFacilities,
+            'privateVilla' => $this->privateVilla,
         ]);
     }
-    
+
     public function getAvailableRooms(Request $request)
     {
         try {
@@ -49,27 +49,27 @@ class FacilitiesController extends Controller
                 'check_in' => 'required|date',
                 'check_out' => 'required|date|after:check_in'
             ]);
-            
+
             // Get rooms that are not booked for the given dates
-            $bookedRoomIds = Facility::where(function($query) use ($validated) {
+            $bookedRoomIds = Facility::where(function ($query) use ($validated) {
                 $query->whereBetween('check_in', [$validated['check_in'], $validated['check_out']])
-                      ->orWhereBetween('check_out', [$validated['check_in'], $validated['check_out']])
-                      ->orWhere(function($q) use ($validated) {
-                          $q->where('check_in', '<=', $validated['check_in'])
+                    ->orWhereBetween('check_out', [$validated['check_in'], $validated['check_out']])
+                    ->orWhere(function ($q) use ($validated) {
+                        $q->where('check_in', '<=', $validated['check_in'])
                             ->where('check_out', '>=', $validated['check_out']);
-                      });
-                })
+                    });
+            })
                 ->pluck('room_id');
-            
+
             $availableRooms = Room::whereNotIn('id', $bookedRoomIds)
-                                ->where('status', 'available')
-                                ->get();
-            
+                ->where('status', 'available')
+                ->get();
+
             return response()->json([
                 'success' => true,
                 'data' => $availableRooms
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -77,17 +77,17 @@ class FacilitiesController extends Controller
             ], 500);
         }
     }
-    
+
     public function AdminIndex()
     {
         $facilities = Facility::with(['images', 'discounts'])
-        ->where('category', '!=', 'Cottage')
-        ->orderBy('id', 'desc')
-        ->get();
+            ->where('category', '!=', 'Cottage')
+            ->orderBy('id', 'desc')
+            ->get();
 
         return view('admin.facilities.index', ['facilities' => $facilities]);
     }
-    
+
     public function AdminStore(Request $request)
     {
         $validatedData = $request->validate([
@@ -101,22 +101,25 @@ class FacilitiesController extends Controller
             'included' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-    
-        // Create the facility excluding the images
+
+        // ✅ Manually add the type field
+        $validatedData['type'] = 'room';
+
+        // Create the facility excluding images
         $facility = Facility::create(collect($validatedData)->except('images')->toArray());
-    
+
         // If images are uploaded, process and store them
         if ($request->hasFile('images')) {
             $this->processImages($request->file('images'), $facility->id);
         }
-    
-        // Return success response with related images
+
         return response()->json([
             'success' => true,
             'message' => 'Facility created successfully',
             'facility' => $facility->load('images')
         ]);
     }
+
 
     public function UpdateFacility(Request $request, $id)
     {
@@ -137,15 +140,15 @@ class FacilitiesController extends Controller
                 response()->json(['errors' => $e->errors()], 422)
             );
         }
-    
+
         $facility = Facility::findOrFail($id);
-    
+
         $facility->update(collect($validatedData)->except('images')->toArray());
-    
+
         if ($request->hasFile('images')) {
             $this->processImages($request->file('images'), $facility->id);
         }
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Facility updated successfully',
@@ -156,7 +159,7 @@ class FacilitiesController extends Controller
     public function DeleteFacility($id)
     {
         $facility = Facility::findOrFail($id);
-        
+
         foreach ($facility->images as $image) {
             $imagePath = public_path('imgs/facility_img/' . $image->image);
             if (File::exists($imagePath)) {
@@ -164,22 +167,22 @@ class FacilitiesController extends Controller
             }
             $image->delete();
         }
-        
+
         $facility->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Facility deleted successfully'
         ]);
     }
-    
+
     public function deleteImage($id)
     {
         // Validate that the ID is a valid numeric value
         $validator = Validator::make(['id' => $id], [
             'id' => 'required|integer|exists:image_fac,id',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -187,28 +190,28 @@ class FacilitiesController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-    
+
         // Proceed with deletion
         $image = FacilityImage::findOrFail($id);
         $imagePath = public_path('imgs/facility_img/' . $image->image);
-    
+
         if (File::exists($imagePath)) {
             File::delete($imagePath);
         }
-    
+
         $image->delete();
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Image deleted successfully',
         ]);
     }
-    
+
     public function edit($id)
     {
         try {
             $facility = Facility::findOrFail($id);
-    
+
             return response()->json([
                 'success' => true,
                 'facility' => $facility
@@ -225,23 +228,23 @@ class FacilitiesController extends Controller
     {
         try {
             $facility = Facility::with('images')->find($id);
-            
+
             if (!$facility) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Facility not found'
                 ], 404);
             }
-    
+
             // Transform images collection
-            $transformedImages = $facility->images->map(function($image) {
+            $transformedImages = $facility->images->map(function ($image) {
                 return [
                     'id' => $image->id,
                     'url' => asset('imgs/facility_img/' . $image->image),
                     'image' => $image->image // include the original image filename
                 ];
             });
-    
+
             return response()->json([
                 'success' => true,
                 'facility' => [
@@ -250,7 +253,7 @@ class FacilitiesController extends Controller
                 ],
                 'images' => $transformedImages
             ]);
-    
+
         } catch (\Exception $e) {
             \Log::error('Failed to fetch facility images: ' . $e->getMessage());
             return response()->json([
@@ -259,14 +262,14 @@ class FacilitiesController extends Controller
             ], 500);
         }
     }
-    
+
     protected function processImages($images, $facilityId)
     {
         try {
             foreach ($images as $image) {
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('imgs/facility_img'), $imageName);
-                
+
                 FacilityImage::create([
                     'fac_id' => $facilityId,
                     'image' => $imageName,
@@ -277,15 +280,15 @@ class FacilitiesController extends Controller
             throw new \Exception("Failed to process images: " . $e->getMessage());
         }
     }
-        
+
     // Discounts
-    
+
     public function getDiscounts($facilityId)
     {
         $discounts = FacilityDiscount::where('facility_id', $facilityId)
             ->orderBy('created_at', 'desc')
             ->get();
-    
+
         return response()->json([
             'success' => true,
             'discounts' => $discounts
@@ -316,7 +319,7 @@ class FacilitiesController extends Controller
             ],
             'end_date' => 'required|date|after:start_date',
         ]);
-    
+
         $discount = FacilityDiscount::create([
             'facility_id' => $facilityId,
             'discount_type' => $validatedData['discount_type'],
@@ -324,23 +327,23 @@ class FacilitiesController extends Controller
             'start_date' => $validatedData['start_date'],
             'end_date' => $validatedData['end_date'],
         ]);
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Discount added successfully',
             'discount' => $discount
         ]);
     }
-    
+
     public function updateDiscount(Request $request, $discountId)
     {
         $discount = FacilityDiscount::findOrFail($discountId);
         $isCurrentlyActive = now()->between($discount->start_date, $discount->end_date);
-    
+
         $validatedData = $request->validate([
             // ... (existing validation rules)
         ]);
-    
+
         // Additional validation for active discounts
         if ($isCurrentlyActive) {
             // Prevent changing discount type for active discounts
@@ -350,7 +353,7 @@ class FacilitiesController extends Controller
                     'message' => 'Cannot change discount type while discount is active'
                 ], 422);
             }
-    
+
             // Prevent reducing discount value for active discounts
             if ($request->discount_value < $discount->discount_value) {
                 return response()->json([
@@ -359,20 +362,20 @@ class FacilitiesController extends Controller
                 ], 422);
             }
         }
-    
+
         $discount->update($validatedData);
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Discount updated successfully',
             'discount' => $discount
         ]);
     }
-    
+
     public function deleteDiscount($discountId)
     {
         $discount = FacilityDiscount::findOrFail($discountId);
-        
+
         // Check if discount is currently active
         $now = now();
         if ($now >= $discount->start_date && $now <= $discount->end_date) {
@@ -381,62 +384,62 @@ class FacilitiesController extends Controller
                 'message' => 'Cannot delete an active discount. Please wait until it expires or edit the dates first.'
             ], 422);
         }
-    
+
         $discount->delete();
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Discount deleted successfully'
         ]);
     }
-    
+
     /**
      * Helper method to validate discount dates against existing discounts
      */
     protected function validateDiscountDates($facilityId, $startDate, $endDate, $excludeDiscountId, $fail)
     {
         $query = FacilityDiscount::where('facility_id', $facilityId)
-            ->where(function($q) use ($startDate, $endDate) {
+            ->where(function ($q) use ($startDate, $endDate) {
                 // Check for overlapping date ranges
-                $q->where(function($q) use ($startDate, $endDate) {
+                $q->where(function ($q) use ($startDate, $endDate) {
                     $q->whereBetween('start_date', [$startDate, $endDate])
-                      ->orWhereBetween('end_date', [$startDate, $endDate]);
+                        ->orWhereBetween('end_date', [$startDate, $endDate]);
                 })
-                // Or check if existing range completely contains new range
-                ->orWhere(function($q) use ($startDate, $endDate) {
+                    // Or check if existing range completely contains new range
+                    ->orWhere(function ($q) use ($startDate, $endDate) {
                     $q->where('start_date', '<=', $startDate)
-                      ->where('end_date', '>=', $endDate);
+                        ->where('end_date', '>=', $endDate);
                 });
             });
-    
+
         if ($excludeDiscountId) {
             $query->where('id', '!=', $excludeDiscountId);
         }
-    
+
         if ($query->exists()) {
             $fail('This discount overlaps with an existing discount for this facility');
         }
     }
-    
+
     // Get all cottages with pagination and images
     public function getCottage(Request $request)
     {
         $perPage = $request->input('per_page', 10);
         $cottages = Facility::with('images')
-                    ->where('category', 'cottage')
-                    ->paginate($perPage);
-        
+            ->where('category', 'cottage')
+            ->paginate($perPage);
+
         // Transform the data to include full image URLs
-        $transformed = $cottages->getCollection()->map(function($cottage) {
-            $cottage->images->transform(function($image) {
+        $transformed = $cottages->getCollection()->map(function ($cottage) {
+            $cottage->images->transform(function ($image) {
                 $image->url = asset('imgs/facility_img/' . $image->image);
                 return $image;
             });
             return $cottage;
         });
-        
+
         $cottages->setCollection($transformed);
-        
+
         return response()->json([
             'success' => true,
             'data' => $cottages->items(),
@@ -446,7 +449,7 @@ class FacilitiesController extends Controller
             'per_page' => $cottages->perPage(),
         ]);
     }
-    
+
     // Store a new cottage with images
     public function storeCottage(Request $request)
     {
@@ -458,7 +461,7 @@ class FacilitiesController extends Controller
             'images' => 'array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-    
+
         // Create the cottage
         $cottage = Facility::create([
             'name' => $validatedData['name'],
@@ -467,13 +470,13 @@ class FacilitiesController extends Controller
             'description' => $validatedData['description'] ?? null,
             'category' => 'Cottage'
         ]);
-    
+
         // Process images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $imageName = time() . '_' . $image->getClientOriginalName();
                 $image->move(public_path('imgs/facility_img'), $imageName);
-                
+
                 FacilityImage::create([
                     'fac_id' => $cottage->id,
                     'image' => $imageName,
@@ -481,28 +484,30 @@ class FacilitiesController extends Controller
                 ]);
             }
         }
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Cottage created successfully',
             'cottage' => $cottage->load('images')
         ]);
     }
-    
+
     // Get a single cottage with images
     public function showCottage($id)
     {
         try {
-            $cottage = Facility::with(['images' => function($query) {
-                $query->orderBy('order', 'asc');
-            }])->findOrFail($id);
-    
+            $cottage = Facility::with([
+                'images' => function ($query) {
+                    $query->orderBy('order', 'asc');
+                }
+            ])->findOrFail($id);
+
             // Transform images to include URLs
-            $cottage->images->transform(function($image) {
+            $cottage->images->transform(function ($image) {
                 $image->url = asset('imgs/facility_img/' . $image->image);
                 return $image;
             });
-    
+
             return response()->json([
                 'success' => true,
                 'cottage' => $cottage
@@ -514,7 +519,7 @@ class FacilitiesController extends Controller
             ], 404);
         }
     }
-    
+
     // Update cottage details and images
     public function updateCottage(Request $request, $id)
     {
@@ -525,7 +530,7 @@ class FacilitiesController extends Controller
             'description' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-    
+
         $cottage = Facility::findOrFail($id);
         $cottage->update([
             'name' => $validatedData['name'],
@@ -533,24 +538,24 @@ class FacilitiesController extends Controller
             'price' => $validatedData['price'],
             'description' => $validatedData['description'] ?? null
         ]);
-    
+
         // Process new images
         if ($request->hasFile('images')) {
             $this->processImages($request->file('images'), $cottage->id);
         }
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Cottage updated successfully',
             'cottage' => $cottage->load('images')
         ]);
     }
-    
+
     // Delete a cottage and its images
     public function destroyCottage($id)
     {
         $cottage = Facility::findOrFail($id);
-        
+
         // Delete all associated images
         foreach ($cottage->images as $image) {
             $imagePath = public_path('imgs/facility_img/' . $image->image);
@@ -559,32 +564,34 @@ class FacilitiesController extends Controller
             }
             $image->delete();
         }
-        
+
         $cottage->delete();
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Cottage deleted successfully'
         ]);
     }
-    
+
     // Get a single cottage with images
     public function editCottage($id)
     {
         try {
-            $cottage = Facility::with(['images' => function($query) {
-                $query->orderBy('order', 'asc');
-            }])->findOrFail($id);
-    
+            $cottage = Facility::with([
+                'images' => function ($query) {
+                    $query->orderBy('order', 'asc');
+                }
+            ])->findOrFail($id);
+
             // Transform images to include URLs
-            $transformedImages = $cottage->images->map(function($image) {
+            $transformedImages = $cottage->images->map(function ($image) {
                 return [
                     'id' => $image->id,
                     'url' => asset('imgs/facility_img/' . $image->image),
                     'image' => $image->image
                 ];
             });
-    
+
             return response()->json([
                 'success' => true,
                 'cottage' => $cottage,
@@ -597,7 +604,7 @@ class FacilitiesController extends Controller
             ], 404);
         }
     }
-    
+
     // Delete cottage image
     public function deleteCottageImage($id)
     {
@@ -605,7 +612,7 @@ class FacilitiesController extends Controller
         $validator = Validator::make(['id' => $id], [
             'id' => 'required|integer|exists:image_fac,id',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -613,21 +620,21 @@ class FacilitiesController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-    
+
         // Proceed with deletion
         $image = FacilityImage::findOrFail($id);
         $imagePath = public_path('imgs/facility_img/' . $image->image);
-    
+
         if (File::exists($imagePath)) {
             File::delete($imagePath);
         }
-    
+
         $image->delete();
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Image deleted successfully',
         ]);
     }
-    
+
 }
