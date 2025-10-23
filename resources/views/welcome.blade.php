@@ -613,7 +613,7 @@
                 Book your stay and discover the magic of Mt. ClaRamuel
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fadeInUp" style="animation-delay: 0.4s;">
-                <a href="#"
+                <a href="{{ route('dashboard.bookings') }}"
                     class="inline-block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8 py-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
                     Book Now
                 </a>
