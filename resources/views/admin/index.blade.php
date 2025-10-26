@@ -701,7 +701,7 @@ $active = 'dashboard';
                     <div class="flex items-center">
                          <h2 class="text-base sm:text-lg md:text-xl font-semibold text-gray-800">Recent Inquiries</h2>
                          <span class="ml-2 bg-red-500 text-white 
-                                   text-[10px] sm:text-xs md:text-sm 
+                                   text-[10px] sm:text-xs md:text-sm
                                    font-bold 
                                    px-1.5 sm:px-2 md:px-3 
                                    py-0.5 sm:py-1 md:py-1.5 
@@ -713,7 +713,7 @@ $active = 'dashboard';
 
                     <!-- Actions -->
                     <div class="flex flex-wrap gap-2 sm:gap-3">
-                         <a href="{{ route('admin.inquiries') }}" class="text-xs sm:text-sm text-red-600 hover:text-red-800">View
+                         <a href="{{ route('admin.bookings') }}" class="text-xs sm:text-sm text-red-600 hover:text-red-800">View
                               All</a>
                     </div>
                </div>

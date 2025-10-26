@@ -129,7 +129,6 @@
 
         .section-title i {
             color: #DC2626;
-            font-size: 1.1em;
         }
 
         .guest-section {
@@ -139,8 +138,6 @@
         }
 
         .guest-section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
             margin-bottom: 1rem;
             color: #1f2937;
             display: flex;
@@ -567,19 +564,26 @@
         }
 
         .page-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
             color: #1F2937;
             padding-left: 0;
             position: relative;
             display: inline-block;
+
+            font-size: clamp(1.25rem, 4vw, 1.75rem);
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.125rem;
+                /* Smaller category titles */
+                margin-bottom: 0.5rem;
+            }
         }
 
         .page-title:after {
             content: '';
             position: absolute;
-            bottom: -0.5rem;
+            bottom: -0.25rem;
             left: 0;
             width: 100%;
             height: 4px;
@@ -649,123 +653,147 @@
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- Left Column - Customer Information -->
             <div class="lg:w-2/3 space-y-6">
-                <h3 class="page-title font-semibold text-dark mb-2">Request To Book</h3>
+                <h3 class="page-title font-bold text-dark text-lg sm:text-xl md:text-2xl">Request To Book</h3>
 
-                <div class="rounded-lg p-8 mb-6 border border-lightgray">
+                <div class="rounded-lg p-8 mb-6 mt-4 border border-lightgray">
                     <h2 class="section-title">
-                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-user-circle font-bold text-dark text-md md:text-xl"></i>
                         Personal Information
                     </h2>
 
                     <form id="customer-info-form">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- First Name with Floating Label -->
-                            <div class="floating-label-group">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- First Name -->
+                            <div class="flex flex-col">
+                                <label for="firstname" class="text-sm font-medium text-gray-700 mb-1">
+                                    First Name <span class="text-red-500">*</span>
+                                </label>
                                 <input type="text" id="firstname" name="firstname"
-                                    class="form-input border border-darkgray uppercase-input floating-input" required
-                                    placeholder=" " oninput="this.value = this.value.toUpperCase()">
-                                <label class="floating-label">First Name <span class="text-red-500">*</span></label>
-                                <div id="firstname-error" class="error-message">Please enter your first name</div>
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none uppercase"
+                                    required placeholder="Enter first name" oninput="this.value = this.value.toUpperCase()">
+                                <p id="firstname-error" class="text-red-500 text-xs mt-1 hidden">Please enter your first
+                                    name</p>
                             </div>
 
-                            <!-- Last Name with Floating Label -->
-                            <div class="floating-label-group">
+                            <!-- Last Name -->
+                            <div class="flex flex-col">
+                                <label for="lastname" class="text-sm font-medium text-gray-700 mb-1">
+                                    Last Name <span class="text-red-500">*</span>
+                                </label>
                                 <input type="text" id="lastname" name="lastname"
-                                    class="form-input border border-darkgray uppercase-input floating-input" required
-                                    placeholder=" " oninput="this.value = this.value.toUpperCase()">
-                                <label class="floating-label">Last Name <span class="text-red-500">*</span></label>
-                                <div id="lastname-error" class="error-message">Please enter your last name</div>
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none uppercase"
+                                    required placeholder="Enter last name" oninput="this.value = this.value.toUpperCase()">
+                                <p id="lastname-error" class="text-red-500 text-xs mt-1 hidden">Please enter your last name
+                                </p>
                             </div>
 
-                            <!-- Email with Icon -->
-                            <div class="input-group">
-                                <label for="email">Email Address <span class="text-red-500">*</span></label>
+                            <!-- Email -->
+                            <div class="flex flex-col sm:col-span-1 md:col-span-2">
+                                <label for="email" class="text-sm font-medium text-gray-700 mb-1">
+                                    Email Address <span class="text-red-500">*</span>
+                                </label>
                                 <div class="relative">
                                     <input type="email" id="email" name="email"
-                                        class="form-input border border-darkgray input-with-icon" required
-                                        placeholder="john.doe@example.com">
-                                    <i class="fas fa-envelope input-icon"></i>
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                        required placeholder="john.doe@example.com">
+                                    <i class="fas fa-envelope absolute right-3 top-3 text-gray-400"></i>
                                 </div>
-                                <div id="email-error" class="error-message">Please enter a valid email address</div>
-                                <p class="input-hint">Your booking confirmation will be sent to this email</p>
+                                <p id="email-error" class="text-red-500 text-xs mt-1 hidden">Please enter a valid email
+                                    address</p>
+                                <p class="text-gray-500 text-xs mt-1">Your booking confirmation will be sent to this email
+                                </p>
                             </div>
 
-                            <!-- Phone with Icon and Formatting -->
-                            <div class="input-group">
-                                <label for="phone">Phone Number <span class="text-red-500">*</span></label>
+                            <!-- Phone -->
+                            <div class="flex flex-col sm:col-span-1 md:col-span-2">
+                                <label for="phone" class="text-sm font-medium text-gray-700 mb-1">
+                                    Phone Number <span class="text-red-500">*</span>
+                                </label>
                                 <div class="relative">
                                     <input type="tel" id="phone" name="phone"
-                                        class="form-input border border-darkgray input-with-icon" maxlength="12"
-                                        placeholder="9123 456 789" oninput="formatPhone(this)" onblur="validatePhone(this)">
-                                    <i class="fas fa-phone input-icon"></i>
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                        maxlength="12" placeholder="9123 456 789" oninput="formatPhone(this)"
+                                        onblur="validatePhone(this)">
+                                    <i class="fas fa-phone absolute right-3 top-3 text-gray-400"></i>
                                 </div>
-                                <div id="phone-error" class="error-message">Please enter a valid 10-digit phone number
-                                    starting with 9</div>
-                                <p class="input-hint">We'll contact you if needed regarding your booking</p>
+                                <p id="phone-error" class="text-red-500 text-xs mt-1 hidden">
+                                    Please enter a valid 10-digit phone number starting with 9
+                                </p>
+                                <p class="text-gray-500 text-xs mt-1">We'll contact you if needed regarding your booking</p>
                             </div>
                         </div>
 
-                        <!-- Guest Details Section - Enhanced -->
-                        <div class="guest-section">
-                            <h3 class="guest-section-title">
-                                <i class="fas fa-users"></i>
+                        <!-- Guest Section -->
+                        <div class="mt-8">
+                            <h3 class="flex items-center text-lg font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-users mr-2 text-blue-600"></i>
                                 Guest Details
                             </h3>
-                            <p class="input-hint mb-4">Please specify the number of guests for each room type</p>
+                            <p class="text-gray-500 text-sm mb-4">
+                                Please specify the number of guests for each room type
+                            </p>
 
-                            <div id="guest-selection-container">
-                                <!-- This will be populated with guest selection fields for each room -->
+                            <div id="guest-selection-container" class="space-y-3">
+                                <!-- Guest fields will be dynamically added here -->
                             </div>
-
                         </div>
                     </form>
+
                 </div>
 
                 <div class="rounded-xl mb-8 p-8 border border-gray-200 bg-white">
-                    <h3 class="text-xl font-bold text-gray-800 mb-8 text-center">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-6 sm:mb-8 text-center">
                         Accepted Payment Methods
                     </h3>
 
                     <!-- E-Wallets -->
-                    <div class="rounded-lg p-5 mb-2">
-                        <div class="flex flex-wrap justify-center gap-5">
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 cursor-default">
-                                <img src="{{ asset('imgs/banks/Maya_logo.svg') }}" alt="Maya" class="h-6">
+                    <div class="rounded-lg p-4 sm:p-5 mb-4">
+                        <h4 class="text-center text-gray-700 font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
+                            E-Wallets
+                        </h4>
+                        <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+                            <div class="bg-white p-2 rounded-lg border border-gray-200">
+                                <img src="{{ asset('imgs/banks/Maya_logo.svg') }}" alt="Maya" class="h-4 sm:h-5">
                             </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 cursor-default">
-                                <img src="{{ asset('imgs/banks/gcash_wallet_Logo.svg') }}" alt="GCash" class="h-6">
+                            <div class="bg-white p-2 rounded-lg border border-gray-200">
+                                <img src="{{ asset('imgs/banks/gcash_wallet_Logo.svg') }}" alt="GCash" class="h-4 sm:h-5">
                             </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 cursor-default">
-                                <img src="{{ asset('imgs/banks/QR_Ph_Logo.svg.png') }}" alt="QR Ph" class="h-6">
+                            <div class="bg-white p-2 rounded-lg border border-gray-200">
+                                <img src="{{ asset('imgs/banks/QR_Ph_Logo.svg.png') }}" alt="QR Ph" class="h-4 sm:h-5">
                             </div>
                         </div>
                     </div>
 
                     <!-- Debit / Credit Cards -->
-                    <div class="rounded-lg p-5 mb-2">
-                        <div class="flex flex-wrap justify-center gap-5">
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 cursor-default">
-                                <img src="{{ asset('imgs/banks/960px-Visa_Inc._logo.svg.png') }}" alt="Visa" class="h-6">
+                    <div class="rounded-lg p-4 sm:p-5 mb-4">
+                        <h4 class="text-center text-gray-700 font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
+                            Debit / Credit Cards
+                        </h4>
+                        <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+                            <div class="bg-white p-2 rounded-lg border border-gray-200">
+                                <img src="{{ asset('imgs/banks/960px-Visa_Inc._logo.svg.png') }}" alt="Visa"
+                                    class="h-4 sm:h-5">
                             </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 cursor-default">
-                                <img src="{{ asset('imgs/banks/Mastercard_2019_logo.svg') }}" alt="Mastercard" class="h-6">
+                            <div class="bg-white p-2 rounded-lg border border-gray-200">
+                                <img src="{{ asset('imgs/banks/Mastercard_2019_logo.svg') }}" alt="Mastercard"
+                                    class="h-4 sm:h-5">
                             </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 cursor-default">
-                                <img src="{{ asset('imgs/banks/JCB_logo.svg') }}" alt="JCB" class="h-6">
+                            <div class="bg-white p-2 rounded-lg border border-gray-200">
+                                <img src="{{ asset('imgs/banks/JCB_logo.svg') }}" alt="JCB" class="h-4 sm:h-5">
                             </div>
                         </div>
                     </div>
 
                     <!-- Cash -->
-                    <div class="rounded-lg p-5">
+                    <div class="rounded-lg p-4 sm:p-5">
                         <div class="flex justify-center">
-                            <span class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 text-sm font-medium rounded-md border border-green-200 cursor-default">
+                            <span
+                                class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 text-green-700 text-xs sm:text-sm font-medium rounded-md border border-green-200 cursor-default">
                                 Cash Payment
                             </span>
                         </div>
                     </div>
                 </div>
-
 
 
                 <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp"
@@ -835,7 +863,10 @@
                         <div class="total-section">
                             <div class="total-row">
                                 <span class="total-label">Total Amount</span>
-                                <span class="total-amount" id="summary-total">₱0.00</span>
+                                <span class="text-base sm:text-lg md:text-2xl font-bold text-primary" id="summary-total">
+                                    ₱0.00
+                                </span>
+
                             </div>
                         </div>
 
@@ -1032,39 +1063,39 @@
                         roomDiv.className = 'guest-type-container';
 
                         roomDiv.innerHTML = `
-                                    <div class="guest-type-header">
-                                        <h4 class="guest-type-title">${room.name}</h4>
-                                        <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
-                                    </div>
-                                    <div class="guest-type-grid" id="guest-selection-room-${index}">
-                                        ${uniqueTypes.map(type => `
-                                        <div class="guest-type-group">
-                                            <label for="guest-type-${index}-${type.id}" class="guest-type-label">
-                                                ${type.type}
-                                            </label>
-                                            <div class="counter-container">
-                                                <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
-                                                <input type="number"
-                                                    id="guest-type-${index}-${type.id}"
-                                                    name="guest_types[${room.facility_id}][${type.id}]"
-                                                    class="counter-value form-input"
-                                                    min="0"
-                                                    max="${room.pax}"
-                                                    value="0"
-                                                    data-room-index="${index}"
-                                                    data-room-id="${room.facility_id}"
-                                                    data-room-pax="${room.pax}"
-                                                    data-guest-type-id="${type.id}">
-                                                <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        `).join('')}
-                                    </div>
-                                `;
+                                                    <div class="guest-type-header">
+                                                        <h4 class="guest-type-title">${room.name}</h4>
+                                                        <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
+                                                    </div>
+                                                    <div class="guest-type-grid" id="guest-selection-room-${index}">
+                                                        ${uniqueTypes.map(type => `
+                                                        <div class="guest-type-group">
+                                                            <label for="guest-type-${index}-${type.id}" class="guest-type-label">
+                                                                ${type.type}
+                                                            </label>
+                                                            <div class="counter-container">
+                                                                <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
+                                                                    <i class="fas fa-minus"></i>
+                                                                </button>
+                                                                <input type="number"
+                                                                    id="guest-type-${index}-${type.id}"
+                                                                    name="guest_types[${room.facility_id}][${type.id}]"
+                                                                    class="counter-value form-input"
+                                                                    min="0"
+                                                                    max="${room.pax}"
+                                                                    value="0"
+                                                                    data-room-index="${index}"
+                                                                    data-room-id="${room.facility_id}"
+                                                                    data-room-pax="${room.pax}"
+                                                                    data-guest-type-id="${type.id}">
+                                                                <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
+                                                                    <i class="fas fa-plus"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        `).join('')}
+                                                    </div>
+                                                `;
 
                         container.appendChild(roomDiv);
                     });
@@ -1099,24 +1130,24 @@
                 .catch(error => {
                     console.error('Error loading guest types:', error);
                     container.innerHTML = `
-                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                                    <div class="flex">
-                                        <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                        </svg>
-                                        </div>
-                                        <div class="ml-3">
-                                        <p class="text-sm text-yellow-700">
-                                            Could not load guest types. ${error.message}
-                                            <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
-                                                Try Again
-                                            </button>
-                                        </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
+                                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                                    <div class="flex">
+                                                        <div class="flex-shrink-0">
+                                                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                        <p class="text-sm text-yellow-700">
+                                                            Could not load guest types. ${error.message}
+                                                            <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
+                                                                Try Again
+                                                            </button>
+                                                        </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `;
                 });
         }
 
@@ -1170,14 +1201,14 @@
                     const roomElement = document.createElement('div');
                     roomElement.className = 'room-item';
                     roomElement.innerHTML = `
-                                    <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
-                                    <div class="room-details">
-                                        <div class="room-name">${room.name}</div>
-                                        <div class="room-type">${room.category}</div>
-                                        <div class="room-price">${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                        <div class="room-price">₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                    </div>
-                                `;
+                                                    <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
+                                                    <div class="room-details">
+                                                        <div class="room-name">${room.name}</div>
+                                                        <div class="room-type">${room.category}</div>
+                                                        <div class="room-price">${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                                        <div class="room-price">₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                                    </div>
+                                                `;
                     roomsList.appendChild(roomElement);
                 });
             }

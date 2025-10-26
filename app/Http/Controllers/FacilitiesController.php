@@ -82,6 +82,7 @@ class FacilitiesController extends Controller
     {
         $facilities = Facility::with(['images', 'discounts'])
         ->where('category', '!=', 'Cottage')
+        ->where('type', '=', 'room')
         ->orderBy('id', 'desc')
         ->get();
 

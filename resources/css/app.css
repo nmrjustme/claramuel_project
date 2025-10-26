@@ -5,7 +5,7 @@
 @source '../**/*.js';
 
 @theme {
-     --color-lightgray: oklch(0.9031 0 0);
+     --color-lightgray: oklch(0.868 0 0);
      --color-darkgray: oklch(0.7021 0 0);
      --color-backgroundcolor: oklch(0.9603 0 129.63);
      --color-primary: #DC2626;
