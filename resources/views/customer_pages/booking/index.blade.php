@@ -1260,9 +1260,11 @@
           /* Add this CSS to fix the calendar display issue */
           .calendar-container {
                position: relative;
-               width: 100%;
-               max-width: 360px;
-               margin: 0 auto;
+               z-index: 10;
+               background: white;
+               border-radius: 8px;
+               padding: 10px;
+               margin-top: 10px;
           }
 
           @media (max-width: 480px) {
@@ -1370,14 +1372,16 @@
           }
 
           .unavailable-dates-content:not(.hidden) {
-               display: block;
-               padding: 1rem 0;
+               position: relative;
+               z-index: 100;
+               margin-bottom: 20px;
           }
 
           /* Ensure room card doesn't interfere */
           .room-card {
                overflow: visible !important;
-               z-index: auto !important;
+               position: relative;
+               z-index: 1;
           }
 
           /* When calendar is open, ensure proper stacking */
@@ -1391,12 +1395,6 @@
                /* Remove height restriction */
                overflow: visible !important;
                /* Allow calendar to expand fully */
-          }
-
-          /* Ensure the calendar is properly visible when expanded */
-          .unavailable-dates-content:not(.hidden) {
-               display: block;
-               padding: 1rem 0;
           }
 
           /* Make sure the calendar container doesn't get cut off */
@@ -1571,8 +1569,8 @@
                                    // Group facilities by category
                                    $groupedFacilities = $facilities->groupBy('category');
                                    echo "<script>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </script>";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           </script>";
                               @endphp
 
                               @foreach($groupedFacilities as $category => $facilitiesInCategory)
@@ -1683,7 +1681,7 @@
                                                                                                                              <i class="fas fa-bed feature-icon"></i>
                                                                                                                              <span>{{ $facility->bed_number }} bed{{
                                                                                 $facility->bed_number != 1 ? 's' : ''
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }}</span>
                                                                                                                         </div>
                                                                            @endif
                                                                            <div class="feature-item">
@@ -1764,7 +1762,7 @@
                                                                                                : $activeDiscount->discount_value
                                                                                           )
                                                                                      )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       }}
                                                                                                                                        </div>
 
                                                                                                                                        <!-- Discount icon + text -->
@@ -2082,10 +2080,10 @@
                               try {
                                    // Show loading state
                                    amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                                                                  <div class="col-span-3 py-8 flex flex-col items-center justify-center">
-                                                                                                                                                                                                                                                                                                       <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                                                                       <div class="text-lg">Loading amenities...</div>
-                                                                                                                                                                                                                                                                                                  </div>`;
+                                                                                                                                                                                                                                                                                                            <div class="col-span-3 py-8 flex flex-col items-center justify-center">
+                                                                                                                                                                                                                                                                                                                 <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
+                                                                                                                                                                                                                                                                                                                 <div class="text-lg">Loading amenities...</div>
+                                                                                                                                                                                                                                                                                                            </div>`;
 
                                    modal.classList.remove('hidden');
                                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -2097,25 +2095,25 @@
                                    if (response.ok && data.success) {
                                         // Populate amenities list
                                         amenitiesList.innerHTML = data.amenities.map(amenity => `
-                                                                                                                                                                                                                                                                                                            <div class="amenity-item">
-                                                                                                                                                                                                                                                                                                                 <div class="amenity-icon">
-                                                                                                                                                                                                                                                                                                                      <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
-                                                                                                                                                                                                                                                                                                                 </div>
-                                                                                                                                                                                                                                                                                                                 <div class="amenity-name">${amenity.name}</div>
-                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                       `).join('');
+                                                                                                                                                                                                                                                                                                                      <div class="amenity-item">
+                                                                                                                                                                                                                                                                                                                           <div class="amenity-icon">
+                                                                                                                                                                                                                                                                                                                                <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
+                                                                                                                                                                                                                                                                                                                           </div>
+                                                                                                                                                                                                                                                                                                                           <div class="amenity-name">${amenity.name}</div>
+                                                                                                                                                                                                                                                                                                                      </div>
+                                                                                                                                                                                                                                                                                                                 `).join('');
                                    } else {
                                         throw new Error(data.message || 'Failed to load amenities');
                                    }
                               } catch (error) {
                                    console.error('Error loading amenities:', error);
                                    amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                                                                  <div class="col-span-3 py-8 text-center">
-                                                                                                                                                                                                                                                                                                       <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                                                                       <div class="text-lg text-red-500">
-                                                                                                                                                                                                                                                                                                            ${error.message || 'Failed to load amenities'}
-                                                                                                                                                                                                                                                                                                       </div>
-                                                                                                                                                                                                                                                                                                  </div>`;
+                                                                                                                                                                                                                                                                                                            <div class="col-span-3 py-8 text-center">
+                                                                                                                                                                                                                                                                                                                 <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
+                                                                                                                                                                                                                                                                                                                 <div class="text-lg text-red-500">
+                                                                                                                                                                                                                                                                                                                      ${error.message || 'Failed to load amenities'}
+                                                                                                                                                                                                                                                                                                                 </div>
+                                                                                                                                                                                                                                                                                                            </div>`;
                               }
                          }
                     });
@@ -2196,7 +2194,15 @@
                // Helper method for calendar initialization
                initializeCalendarIfNeeded(content) {
                     const calendarEl = content.querySelector('.calendar-container');
-                    if (!calendarEl || calendarEl.dataset.initialized) return;
+                    if (!calendarEl) return;
+
+                    // Destroy existing instance if any
+                    if (calendarEl._flatpickr) {
+                         calendarEl._flatpickr.destroy();
+                    }
+
+                    // Clear the container
+                    calendarEl.innerHTML = '';
 
                     this.initializeFlatpickr(calendarEl);
                     this.addCalendarStyles();
@@ -2206,11 +2212,18 @@
                }
 
                // Flatpickr initialization
+               // Flatpickr initialization
                initializeFlatpickr(calendarEl) {
                     let bookedDates = JSON.parse(calendarEl.dataset.booked || "[]");
                     const today = new Date().setHours(0, 0, 0, 0);
 
-                    flatpickr(calendarEl, {
+                    // Clear any existing calendar first
+                    if (calendarEl._flatpickr) {
+                         calendarEl._flatpickr.destroy();
+                    }
+
+                    // Create the calendar
+                    const fp = flatpickr(calendarEl, {
                          inline: true,
                          dateFormat: "Y-m-d",
                          disable: [
@@ -2226,7 +2239,7 @@
                               dayElem.style.pointerEvents = 'none';
                               dayElem.style.cursor = 'default';
 
-                              const dateObj = dayElem.dateObj.setHours(0, 0, 0, 0);
+                              const dateObj = new Date(dayElem.dateObj).setHours(0, 0, 0, 0);
 
                               if (dayElem.classList.contains('flatpickr-disabled')) {
                                    this.styleDisabledDay(dayElem, dateObj, today);
@@ -2236,6 +2249,11 @@
                               }
                          }
                     });
+
+                    // Force calendar to render
+                    setTimeout(() => {
+                         fp.redraw();
+                    }, 100);
                }
 
                // Style disabled days based on type
@@ -2260,89 +2278,123 @@
                }
 
                // CSS styles as template
+               // CSS styles as template
                getCalendarStyles() {
                     return `
-                                   /* Base Styles */
+                         /* Base Calendar Container */
+                         .calendar-container {
+                              width: 100% !important;
+                              max-width: 100% !important;
+                         }
 
-                                   /* Booked / unavailable days */
-                                   .flatpickr-day.unavailable {
-                                   background: #fee2e2 !important;
-                                   color: #dc2626 !important;
-                                   border-radius: 6px;
-                                   }
-                                   .flatpickr-day.unavailable:hover {
-                                   background: #fecaca !important;
-                                   color: #b91c1c !important;
-                                   }
+                         .calendar-container .flatpickr-calendar {
+                              position: relative !important;
+                              width: 100% !important;
+                              max-width: 100% !important;
+                              left: 0 !important;
+                              top: 0 !important;
+                              opacity: 1 !important;
+                              visibility: visible !important;
+                              transform: none !important;
+                              box-shadow: none !important;
+                              margin: 0 auto !important;
+                         }
 
-                                   /* Available days */
-                                   .flatpickr-day.available {
-                                   background: #dcfce7 !important;
-                                   color: #16a34a !important;
-                                   border-radius: 6px;
-                                   }
-                                   .flatpickr-day.available:hover {
-                                   background: #bbf7d0 !important;
-                                   color: #15803d !important;
-                                   }
+                         .calendar-container .flatpickr-days {
+                              width: 100% !important;
+                         }
 
-                                   /* Past days */
-                                   .flatpickr-day.past-day {
-                                   background: #f3f4f6 !important;
-                                   color: #9ca3af !important;
-                                   border-radius: 6px;
-                                   }
+                         .calendar-container .dayContainer {
+                              width: 100% !important;
+                              min-width: 100% !important;
+                              max-width: 100% !important;
+                              padding: 5px !important;
+                         }
 
-                                   /* Disable interactions globally */
-                                   .calendar-container .flatpickr-day {
-                                   pointer-events: none !important;
-                                   }
+                         .calendar-container .flatpickr-day {
+                              min-width: 30px !important;
+                              height: 30px !important;
+                              line-height: 30px !important;
+                              margin: 2px !important;
+                              font-size: 12px !important;
+                         }
 
-                                   /* ---------------------------------- */
-                                   /* RESPONSIVE ADJUSTMENTS */
-                                   /* ---------------------------------- */
+                         /* Booked / unavailable days */
+                         .flatpickr-day.unavailable {
+                              background: #fee2e2 !important;
+                              color: #dc2626 !important;
+                              border-radius: 6px;
+                         }
+                         .flatpickr-day.unavailable:hover {
+                              background: #fecaca !important;
+                              color: #b91c1c !important;
+                         }
 
-                                   /* Small screens (phones) */
-                                   @media (max-width: 640px) {
-                                        .flatpickr-day {
-                                             width: 30px !important;
-                                             height: 30px !important;
-                                             font-size: 0.75rem !important; /* smaller text */
-                                             margin: 1px !important;
-                                        }
+                         /* Available days */
+                         .flatpickr-day.available {
+                              background: #dcfce7 !important;
+                              color: #16a34a !important;
+                              border-radius: 6px;
+                         }
+                         .flatpickr-day.available:hover {
+                              background: #bbf7d0 !important;
+                              color: #15803d !important;
+                         }
 
-                                        .flatpickr-calendar {
-                                             font-family: 'Inter', sans-serif;
-                                             border: 1px solid #e5e7eb;
-                                             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                                             border-radius: 0.75rem;
-                                        }
-                                   }
+                         /* Past days */
+                         .flatpickr-day.past-day {
+                              background: #f3f4f6 !important;
+                              color: #9ca3af !important;
+                              border-radius: 6px;
+                         }
 
-                                   /* Medium screens (tablets) */
-                                   @media (min-width: 641px) and (max-width: 1024px) {
-                                        .flatpickr-day {
-                                             width: 36px !important;
-                                             height: 36px !important;
-                                             font-size: 0.9rem !important;
-                                        }
+                         /* Disable interactions globally */
+                         .calendar-container .flatpickr-day {
+                              pointer-events: none !important;
+                         }
 
-                                        .flatpickr-calendar {
-                                             font-size: 0.9rem !important;
-                                             padding: 0.75rem !important;
-                                        }
-                                   }
+                         /* RESPONSIVE ADJUSTMENTS */
 
-                                   /* Large screens (desktops) */
-                                   @media (min-width: 1025px) {
-                                        .flatpickr-day {
-                                        width: 40px !important;
-                                        height: 40px !important;
-                                        font-size: 1rem !important;
-                                        }
-                                   }
+                         /* Small screens (phones) */
+                         @media (max-width: 640px) {
+                              .flatpickr-day {
+                                   width: 30px !important;
+                                   height: 30px !important;
+                                   font-size: 0.75rem !important;
+                                   margin: 1px !important;
+                              }
 
-                              `;
+                              .flatpickr-calendar {
+                                   font-family: 'Inter', sans-serif;
+                                   border: 1px solid #e5e7eb;
+                                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                                   border-radius: 0.75rem;
+                              }
+                         }
+
+                         /* Medium screens (tablets) */
+                         @media (min-width: 641px) and (max-width: 1024px) {
+                              .flatpickr-day {
+                                   width: 36px !important;
+                                   height: 36px !important;
+                                   font-size: 0.9rem !important;
+                              }
+
+                              .flatpickr-calendar {
+                                   font-size: 0.9rem !important;
+                                   padding: 0.75rem !important;
+                              }
+                         }
+
+                         /* Large screens (desktops) */
+                         @media (min-width: 1025px) {
+                              .flatpickr-day {
+                                   width: 40px !important;
+                                   height: 40px !important;
+                                   font-size: 1rem !important;
+                              }
+                         }
+                    `;
                }
 
                setupScrollArrows() {
@@ -2874,22 +2926,22 @@
                          subtotal += itemTotal;
 
                          html += `
-                                                                                                                                                                                                                                                                                             <div class="flex justify-between items-start border-b border-gray-100 pb-4">
-                                                                                                                                                                                                                                                                                                  <div class="flex items-start">
-                                                                                                                                                                                                                                                                                                  <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
-                                                                                                                                                                                                                                                                                                  <div>
-                                                                                                                                                                                                                                                                                                       <h4 class="font-medium text-dark">${item.name}</h4>
-                                                                                                                                                                                                                                                                                                       <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
-                                                                                                                                                                                                                                                                                                  </div>
-                                                                                                                                                                                                                                                                                                  </div>
-                                                                                                                                                                                                                                                                                                  <div class="text-right">
-                                                                                                                                                                                                                                                                                                  <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
-                                                                                                                                                                                                                                                                                                  <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
-                                                                                                                                                                                                                                                                                                       <i class="far fa-trash-alt mr-1"></i> Remove
-                                                                                                                                                                                                                                                                                                  </button>
-                                                                                                                                                                                                                                                                                                  </div>
-                                                                                                                                                                                                                                                                                             </div>
-                                                                                                                                                                                                                                                                                        `;
+                                                                                                                                                                                                                                                                                                       <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                                                                                                                                                                                                                                                                                                            <div class="flex items-start">
+                                                                                                                                                                                                                                                                                                            <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
+                                                                                                                                                                                                                                                                                                            <div>
+                                                                                                                                                                                                                                                                                                                 <h4 class="font-medium text-dark">${item.name}</h4>
+                                                                                                                                                                                                                                                                                                                 <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
+                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                            <div class="text-right">
+                                                                                                                                                                                                                                                                                                            <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
+                                                                                                                                                                                                                                                                                                            <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
+                                                                                                                                                                                                                                                                                                                 <i class="far fa-trash-alt mr-1"></i> Remove
+                                                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                       </div>
+                                                                                                                                                                                                                                                                                                  `;
                     });
 
                     container.innerHTML = html;

@@ -9,24 +9,35 @@
         body {
             font-family: 'DejaVu Sans', 'Arial', sans-serif;
             font-size: 12px;
-            line-height: 1.3; /* Tightened */
+            line-height: 1.3;
             color: #333;
             margin: 0;
-            padding: 25px; /* Added padding for better "print" margins */
+            padding: 25px;
             background: #fff;
         }
 
         /* Header Styles */
         .invoice-header {
-            text-align: center;
-            margin-bottom: 20px; /* Reduced */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
             border-bottom: 2px solid #333;
-            padding-bottom: 15px; /* Reduced */
+            padding-bottom: 15px;
+        }
+
+        .logo-container {
+            flex: 1;
+        }
+
+        .invoice-info {
+            flex: 1;
+            text-align: right;
         }
 
         /* Section Styles */
         .section {
-            margin-bottom: 20px; /* Reduced */
+            margin-bottom: 20px;
         }
         
         /* Flex container for Resort/Guest Info */
@@ -34,29 +45,37 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 30px; /* Added gap for better spacing */
         }
 
         .section-title {
             font-size: 14px;
             font-weight: bold;
-            margin-bottom: 8px; /* Reduced */
+            margin-bottom: 8px;
             color: #555;
             border-bottom: 1px solid #eee;
-            padding-bottom: 4px; /* Reduced */
+            padding-bottom: 4px;
         }
 
         /* Resort & Guest Info */
         .resort-info,
         .guest-info {
-            width: 48%;
-            /* Removed inline-block, vertical-align, and float properties */
-            /* They are now controlled by the flex container */
+            flex: 1;
+            min-width: 0; /* Prevent flex items from overflowing */
+        }
+        
+        .resort-info {
+            padding-right: 15px;
+        }
+        
+        .guest-info {
+            padding-left: 15px;
         }
         
         /* Billed To Info */
         .billed-to strong {
             display: inline-block;
-            min-width: 70px; /* Aligns labels */
+            min-width: 70px;
         }
 
         /* Table Styles */
@@ -70,12 +89,12 @@
             background-color: #f5f5f5;
             font-weight: bold;
             text-align: left;
-            padding: 10px 8px; /* Reduced */
+            padding: 10px 8px;
             border: 1px solid #ddd;
         }
 
         .details-table td {
-            padding: 8px; /* Reduced */
+            padding: 8px;
             border: 1px solid #ddd;
             vertical-align: top;
         }
@@ -90,27 +109,27 @@
 
         /* Totals Section */
         .totals-section {
-            margin-top: 15px; /* Reduced */
+            margin-top: 15px;
             text-align: right;
             width: 300px;
             float: right;
         }
 
         .total-row {
-            margin: 5px 0; /* Reduced */
+            margin: 5px 0;
             display: flex;
             justify-content: space-between;
         }
 
         .total-label {
             font-weight: bold;
-            min-width: 140px; /* Adjusted */
+            min-width: 140px;
             text-align: right;
             padding-right: 10px;
         }
 
         .total-value {
-            min-width: 110px; /* Adjusted */
+            min-width: 110px;
             text-align: right;
         }
 
@@ -118,41 +137,41 @@
             font-size: 14px;
             font-weight: bold;
             border-top: 2px solid #333;
-            padding-top: 8px; /* Reduced */
-            margin-top: 8px; /* Reduced */
+            padding-top: 8px;
+            margin-top: 8px;
         }
 
         /* Payment Information */
         .payment-info {
-            margin-top: 25px; /* Reduced */
-            padding: 12px; /* Reduced */
+            margin-top: 25px;
+            padding: 12px;
             background-color: #f9f9f9;
             border-radius: 5px;
             clear: both;
         }
 
         .payment-details {
-            margin-top: 8px; /* Reduced */
+            margin-top: 8px;
         }
 
         .payment-row {
             display: flex;
-            margin-bottom: 4px; /* Reduced */
+            margin-bottom: 4px;
         }
 
         .payment-label {
             font-weight: bold;
-            min-width: 110px; /* Adjusted */
+            min-width: 110px;
         }
 
         /* Thank You Message */
         .thank-you {
             text-align: center;
-            margin-top: 25px; /* Reduced */
+            margin-top: 25px;
             font-style: italic;
             color: #666;
             border-top: 1px solid #eee;
-            padding-top: 15px; /* Reduced */
+            padding-top: 15px;
         }
 
         /* Utility Classes */
@@ -174,22 +193,26 @@
             text-align: center;
         }
 
-        .logo-container {
-            text-align: center;
-            margin-bottom: 0; /* Removed margin */
-        }
-
         .logo-fallback {
             display: inline-block;
-            padding: 15px 25px;
+            padding: 20px 30px;
             border: 2px solid #333;
             font-weight: bold;
             text-align: center;
             background: #f5f5f5;
+            font-size: 16px;
         }
         .resort-logo {
-            max-height: 80px;
-            max-width: 200px;
+            max-height: 120px; /* Increased from 80px */
+            max-width: 280px; /* Increased from 200px */
+        }
+        
+        /* Visual separator between resort and guest info */
+        .info-separator {
+            width: 1px;
+            background-color: #eee;
+            align-self: stretch;
+            margin: 0 15px;
         }
     </style>
 </head>
@@ -206,6 +229,12 @@
             @endif
         </div>
 
+        <div class="invoice-info">
+            <div class="section-title">INVOICE</div>
+            <strong>Invoice No.:</strong> {{ $invoiceNumber }}<br>
+            <strong>Issue Date:</strong> {{ $issueDate }}<br>
+            <strong>Due Date:</strong> {{ $dueDate }}
+        </div>
     </div>
 
     <div class="section clearfix">
@@ -219,19 +248,14 @@
             Email: mtclaramuelresort@gmail.com
         </div>
 
-        <div class="guest-info">
-            <div class="section-title">INVOICE</div>
-            <strong>Invoice No.:</strong> {{ $invoiceNumber }}<br>
-            <strong>Issue Date:</strong> {{ $issueDate }}<br>
-            <strong>Due Date:</strong> {{ $dueDate }}
-        </div>
-    </div>
+        <div class="info-separator"></div>
 
-    <div class="section billed-to">
-        <div class="section-title">Billed To (Guest Information)</div>
-        <strong>Name:</strong> {{ $booking->user->firstname }} {{ $booking->user->lastname }}<br>
-        <strong>Email:</strong> {{ $booking->user->email }}<br>
-        <strong>Phone:</strong> {{ $booking->user->phone }}
+        <div class="guest-info">
+            <div class="section-title">Guest Information</div>
+            <strong>Name:</strong> {{ $booking->user->firstname }} {{ $booking->user->lastname }}<br>
+            <strong>Email:</strong> {{ $booking->user->email }}<br>
+            <strong>Phone:</strong> {{ $booking->user->phone }}
+        </div>
     </div>
 
     <div class="section">

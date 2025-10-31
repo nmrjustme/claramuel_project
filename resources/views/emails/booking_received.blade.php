@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,20 +14,24 @@
             margin: 0 auto;
             padding: 20px;
         }
+
         .header {
             text-align: center;
             padding: 20px 0;
             border-bottom: 1px solid #eeeeee;
         }
+
         .content {
             padding: 20px 0;
         }
+
         .receipt {
             background: #f9f9f9;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
         }
+
         .qr-code {
             text-align: center;
             margin: 25px 0;
@@ -35,48 +40,59 @@
             border-radius: 8px;
             border: 1px solid #e0e0e0;
         }
+
         .qr-code img {
             width: 200px;
             height: 200px;
             display: block;
             margin: 0 auto 15px;
         }
+
         .detail-row {
             display: flex;
             margin-bottom: 10px;
         }
+
         .detail-label {
             font-weight: bold;
             width: 120px;
         }
+
         .detail-value {
             flex: 1;
         }
+
         .resort-info {
             margin-top: 15px;
             font-style: italic;
         }
+
         .contact-info {
             margin-top: 10px;
         }
 
         .custom-message {
-            background: #fff9e6;
-            border: 1px solid #f0e6b5;
-            border-left: 6px solid #f4c542;
+            background: #e6f0ff;
+            /* light blue background */
+            border: 1px solid #b5d0f0;
+            /* soft blue border */
+            border-left: 6px solid #4287f4;
+            /* bold blue accent */
             padding: 25px;
             border-radius: 8px;
             margin: 20px 0;
-            color: #7a5c00;
+            color: #003c7a;
+            /* dark blue text */
             position: relative;
             overflow: hidden;
         }
+
 
         .custom-message p {
             margin: 0 0 15px 0;
             line-height: 1.6;
         }
-        
+
         .custom-message:before {
             content: "";
             position: absolute;
@@ -89,7 +105,7 @@
             opacity: 0.2;
             transform: translate(30px, -30px);
         }
-        
+
         .confirmation-title {
             font-size: 22px;
             font-weight: bold;
@@ -98,7 +114,7 @@
             display: flex;
             align-items: center;
         }
-        
+
         .confirmation-title:before {
             content: "✓";
             display: inline-block;
@@ -112,7 +128,7 @@
             margin-right: 10px;
             font-size: 16px;
         }
-        
+
         .footer {
             text-align: center;
             padding: 20px 0;
@@ -120,20 +136,20 @@
             font-size: 14px;
             color: #777777;
         }
-        
+
         .pdf-notice {
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
             color: #0d47a1;
         }
-        
+
         .pdf-notice h3 {
             margin-top: 0;
             display: flex;
             align-items: center;
         }
-        
+
         .pdf-notice h3:before {
             content: "📄";
             margin-right: 10px;
@@ -141,25 +157,30 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="custom-message">
             <p>Dear {{ $booking->user->firstname }},</p>
-            
-            <p>Your reservation request has been <strong>successfully received</strong>. We’re pleased to inform you that a confirmation will be sent shortly to your <strong>registered email address</strong> and <strong>mobile number</strong>.</p>            
+
+            <p>Your reservation request has been <strong>successfully received</strong>. We’re pleased to inform you
+                that a confirmation will be sent shortly to your <strong>registered email address</strong> and
+                <strong>mobile number</strong>.</p>
             <div class="resort-info">
                 <p><strong>Resort Location:</strong><br>
-                Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines</p>
+                    Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines</p>
             </div>
-            
+
             <div class="contact-info">
                 <p><strong>Contact Information:</strong><br>
-                Phone: +63 995 290 1333<br>
-                Email: mtclaramuelresort@gmail.com</p>
+                    Phone: +63 995 290 1333<br>
+                    Email: mtclaramuelresort@gmail.com</p>
             </div>
-            
-            <p>If you have any questions, special requests, or need further assistance, please don’t hesitate to contact us. We want your stay with us to be both <strong>memorable</strong> and <strong>comfortable</strong>.</p>
-            
+
+            <p>If you have any questions, special requests, or need further assistance, please don’t hesitate to contact
+                us. We want your stay with us to be both <strong>memorable</strong> and <strong>comfortable</strong>.
+            </p>
+
             <p>Thank you for choosing <strong>Mt. ClaRamuel Resort</strong></p>
         </div>
 
@@ -170,10 +191,11 @@
             <p><strong>File Name:</strong> invoice_{{ $booking->code }}.pdf</p>
             <p>Please keep this invoice for your records and present it during check-in if requested.</p>
         </div>
-        
+
         <div class="footer">
             <p>Thank you for choosing Mt. ClaRamuel Resort!</p>
         </div>
     </div>
 </body>
+
 </html>

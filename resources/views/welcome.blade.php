@@ -461,7 +461,7 @@
                                 Panoramic mountain views
                             </li>
                         </ul>
-                        <a href="{{ route('customer_bookings') }}"
+                        <a href="{{ route('dashboard.bookings') }}"
                             class="inline-flex items-center text-primary hover:text-secondary font-medium transition duration-300">
                             View Accommodations
                             <i class="fas fa-arrow-right ml-2"></i>

@@ -741,7 +741,7 @@
 
                 </div>
 
-                <div class="rounded-xl mb-8 p-8 border border-gray-200 bg-white">
+                <div class="rounded-xl mb-8 p-8 border border-lightgray bg-white">
                     <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-6 sm:mb-8 text-center">
                         Accepted Payment Methods
                     </h3>
