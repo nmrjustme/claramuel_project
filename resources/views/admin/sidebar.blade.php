@@ -259,6 +259,20 @@
                     </a>
                 </li>
 
+                <!-- Gallery Management -->
+                <li>
+                    <a href="{{ route('admin.galleries.index') }}"
+                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'gallery' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="{{ $active === 'gallery' ? '2' : '1.5' }}"
+                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3h-1a2 2 0 00-2 2v1m-4 0H7a2 2 0 00-2 2v1m0 4v1a2 2 0 002 2h1m4 0h1a2 2 0 002-2v-1m0-4V7a2 2 0 00-2-2h-1m-4 0V5a2 2 0 012-2h1m4 0h1a2 2 0 012 2v1" />
+                        </svg>
+                        <span>Gallery Management</span>
+                    </a>
+                </li>
+                
             </ul>
         </nav>
 
