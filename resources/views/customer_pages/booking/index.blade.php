@@ -1852,7 +1852,6 @@
                                    <label for="checkin"
                                         class="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                         Check-in Date
-                                        <span class="text-xs text-gray-500 font-normal">(12NN)</span>
                                    </label>
                                    <input type="text" id="checkin" placeholder="Select date"
                                         class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
@@ -1863,7 +1862,6 @@
                                    <label for="checkout"
                                         class="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                         Check-out Date
-                                        <span class="text-xs text-gray-500 font-normal">(10AM)</span>
                                    </label>
                                    <input type="text" id="checkout" placeholder="Select date"
                                         class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent datepicker form-input">
@@ -2705,7 +2703,7 @@
                     this.nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
                     document.getElementById('nights-display').textContent =
-                         `${this.nights} night${this.nights !== 1 ? 's' : ''} selected (${this.formatDisplayDate(checkinDate)} - ${this.formatDisplayDate(checkoutDate)})`;
+                         `${this.nights} night${this.nights !== 1 ? 's' : ''} selected (${this.formatDisplayDate(checkinDate)} - ${this.formatDisplayDate(checkoutDate)}) | 12NN to 10AM`;
 
                     if (this.cart.length > 0) {
                          this.updateCartDisplay();
