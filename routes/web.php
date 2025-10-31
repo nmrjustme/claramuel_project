@@ -43,6 +43,7 @@ use App\Http\Controllers\RoomBookReportController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\DayTourEarningsController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\GalleryController;  // ← Correct import
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
 use App\Models\FacilityBookingLog;
 use App\Services\InvoiceService; // adjust namespace if different
@@ -427,7 +428,61 @@ Route::redirect('/dashboard/revenue', '/admin/dashboard/revenue');
 
     // soon
 
+    // =======================
+    // Dynamic Gallery Routes
+    // =======================
 
+// ==================== GALLERY MANAGEMENT ROUTES ====================
+
+// In your web.php routes file
+Route::prefix('admin/galleries')->name('admin.galleries.')->group(function () {
+    // Gallery routes
+    Route::get('/', [GalleryController::class, 'index'])->name('index');
+    Route::get('/create', [GalleryController::class, 'create'])->name('create');
+    Route::post('/', [GalleryController::class, 'store'])->name('store');
+    Route::get('/{gallery}', [GalleryController::class, 'show'])->name('show');
+    Route::get('/{gallery}/edit', [GalleryController::class, 'edit'])->name('edit');
+    Route::put('/{gallery}', [GalleryController::class, 'update'])->name('update');
+    Route::delete('/{gallery}', [GalleryController::class, 'destroy'])->name('destroy');
+    
+    // Image management routes
+    Route::post('/upload', [GalleryController::class, 'uploadImages'])->name('upload');
+    
+    // Image routes - CORRECTED VERSION
+    Route::get('/images/all', [GalleryController::class, 'getAllImages'])->name('images.all');
+    Route::get('/images/{image}', [GalleryController::class, 'getImage'])->name('images.get');
+    Route::get('/images/{image}/edit', [GalleryController::class, 'editImage'])->name('images.edit');
+    Route::put('/images/{image}', [GalleryController::class, 'updateImage'])->name('images.update');
+    Route::delete('/images/{image}', [GalleryController::class, 'deleteImage'])->name('images.delete');
+    Route::post('/images/{image}/set-featured', [GalleryController::class, 'setFeatured'])->name('images.set-featured');
+    Route::post('/images/{image}/remove-featured', [GalleryController::class, 'removeFeatured'])->name('images.remove-featured');
+    Route::post('/bulk-operations', [GalleryController::class, 'bulkImageOperations'])->name('bulk-operations');
+    
+    // FIXED: Remove the duplicate /admin/galleries prefix
+    Route::post('/images/bulk-delete', [GalleryController::class, 'bulkDelete'])->name('images.bulk-delete');
+    Route::post('/images/reorder', [GalleryController::class, 'reorder'])->name('images.reorder');
+});
+
+
+// In routes/web.php
+Route::get('/admin/galleries/images/all', [GalleryController::class, 'getAllImages'])
+    ->name('admin.galleries.images.all');
+
+// Or if you're using API routes:
+Route::get('/api/admin/galleries/images/all', [GalleryController::class, 'getAllImages']);
+
+// Public Gallery Routes
+Route::get('/gallery', [GalleryController::class, 'publicGallery'])->name('public.gallery');
+Route::get('/gallery/{id}', [GalleryController::class, 'showGallery'])->name('public.gallery.show');
+
+
+// API Routes (for AJAX calls)
+Route::prefix('api')->group(function () {
+    Route::get('/gallery/statistics', [GalleryController::class, 'getStatistics']);
+    Route::get('/gallery/categories', [GalleryController::class, 'getGalleryCategories']);
+    Route::get('/gallery/images/all', [GalleryController::class, 'getAllImages']);
+    // ... keep your existing API routes
+});
     // =======================
     // Facility Crud
     // =======================

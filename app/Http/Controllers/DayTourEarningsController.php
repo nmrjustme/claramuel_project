@@ -11,10 +11,10 @@ class DayTourEarningsController extends Controller
 {
     public function index()
 {
-    // Get actual facility names from the database
+    // Get actual facility names from the database for both Cottage and Villa
     $facilities = DB::table('facilities')
         ->where('type', 'day-tour')
-        ->where('category', 'Cottage')
+        ->whereIn('category', ['Cottage', 'Villa']) // Add Villa here
         ->pluck('name')
         ->toArray();
     
