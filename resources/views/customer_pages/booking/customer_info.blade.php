@@ -756,7 +756,7 @@
                                 <img src="{{ asset('imgs/banks/Maya_logo.svg') }}" alt="Maya" class="h-4 sm:h-5">
                             </div>
                             <div class="bg-white p-2 rounded-lg border border-gray-200">
-                                <img src="{{ asset('imgs/banks/gcash_wallet_Logo.png') }}" alt="GCash" class="h-4 sm:h-5">
+                                <img src="{{ asset('imgs/banks/gcash_wallet_logo.png') }}" alt="GCash" class="h-4 sm:h-5">
                             </div>
                             <div class="bg-white p-2 rounded-lg border border-gray-200">
                                 <img src="{{ asset('imgs/banks/QR_Ph_Logo.svg.png') }}" alt="QR Ph" class="h-4 sm:h-5">
