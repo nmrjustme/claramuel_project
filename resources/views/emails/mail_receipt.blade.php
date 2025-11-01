@@ -173,6 +173,16 @@
             text-align: center;
             padding: 10px;
         }
+
+        .computer-generated {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #eeeeee;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -421,6 +431,11 @@
         <div class="footer">
             <p>Thank you for choosing our services!</p>
         </div>
+
+        <div class="computer-generated">
+            <p>This is a computer-generated email. Please do not reply to this message.</p>
+        </div>
+
     </div>
 </body>
 </html>

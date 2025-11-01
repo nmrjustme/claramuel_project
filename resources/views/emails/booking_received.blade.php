@@ -155,6 +155,16 @@
             margin-right: 10px;
             font-size: 20px;
         }
+
+        .computer-generated {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #eeeeee;
+            font-style: italic;
+        }
     </style>
 </head>
 
@@ -165,7 +175,8 @@
 
             <p>Your reservation request has been <strong>successfully received</strong>. We’re pleased to inform you
                 that a confirmation will be sent shortly to your <strong>registered email address</strong> and
-                <strong>mobile number</strong>.</p>
+                <strong>mobile number</strong>.
+            </p>
             <div class="resort-info">
                 <p><strong>Resort Location:</strong><br>
                     Narra Street, Brgy. Marana 3rd, Ilagan, 3300 Isabela, Philippines</p>
@@ -194,6 +205,9 @@
 
         <div class="footer">
             <p>Thank you for choosing Mt. ClaRamuel Resort!</p>
+        </div>
+        <div class="computer-generated">
+            <p>This is a computer-generated email. Please do not reply to this message.</p>
         </div>
     </div>
 </body>
