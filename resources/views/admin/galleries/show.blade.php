@@ -1807,8 +1807,10 @@ getReorderRoute() {
     return '/admin/galleries/images/reorder';
 },
 
+// Update these route methods in your GalleryManager
 getEditImageRoute(imageId) {
-    return `/admin/galleries/images/${imageId}/edit`;
+    // Use the same endpoint as your index page
+    return `/admin/galleries/images/${imageId}`;
 },
 
 getUpdateImageRoute(imageId) {
@@ -2053,178 +2055,242 @@ getUploadRoute() {
     // In the editImage method:
 async editImage(imageId) {
     try {
-        const response = await fetch(this.getEditImageRoute(imageId));
+        console.log('Editing image ID:', imageId);
+        
+        // Show loading state in modal
+        this.showImageEditModal('Loading Image', '<div class="loading"><div class="spinner"></div><p class="mt-2 text-gray-500">Loading image data...</p></div>');
+        
+        // Use the same endpoint as your index page
+        const response = await fetch(`/admin/galleries/images/${imageId}`);
+        
+        console.log('Response status:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: Failed to load image data`);
+            const errorText = await response.text();
+            console.error('Server response:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        this.showImageEditModal(data);
+        console.log('Image data loaded:', data);
+        
+        if (!data.image) {
+            throw new Error('Image data not found in response');
+        }
+        
+        const image = data.image;
+        this.showImageEditModal(`Edit Image: ${image.title || 'Untitled'}`, this.createImageEditForm(image));
         
     } catch (error) {
         console.error('Error loading image:', error);
-        this.showNotification('Error loading image data', 'error');
+        this.showNotification(`Error loading image data: ${error.message}`, 'error');
+        this.hideImageEditModal();
     }
 },
 
-    showImageEditModal(image) {
-        const modalContainer = document.getElementById('image-edit-modal');
-        if (!modalContainer) return;
-
-        const modalHtml = `
-            <div class="modal-content animate-slide-up">
-                <div class="modal-header">
-                    <h3 class="modal-title">Edit Image</h3>
-                    <button class="modal-close" id="close-edit-modal">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+// Create edit form - FIXED VERSION
+createImageEditForm(image) {
+    return `
+        <form id="image-edit-form" class="space-y-6">
+            <input type="hidden" name="id" value="${image.id}">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-image-title">Title</label>
+                        <input type="text" id="edit-image-title" name="title" class="form-input" 
+                               value="${this.escapeHtml(image.title || '')}" placeholder="Image title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-image-alt">Alt Text</label>
+                        <input type="text" id="edit-image-alt" name="image_alt" class="form-input" 
+                               value="${this.escapeHtml(image.image_alt || '')}" placeholder="Description for accessibility">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-image-caption">Caption</label>
+                        <textarea id="edit-image-caption" name="caption" class="form-input form-textarea" 
+                                  placeholder="Image caption" rows="3">${this.escapeHtml(image.caption || '')}</textarea>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <form id="image-edit-form">
-                        <input type="hidden" name="_method" value="PUT">
-                        <input type="hidden" name="id" value="${image.id}">
-                        
-                        <div class="form-grid">
-                            <div class="space-y-4">
-                                <div class="form-group">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Title</label>
-                                    <input type="text" name="title" value="${this.escapeHtml(image.title || '')}" class="form-input" placeholder="Image title">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Alt Text</label>
-                                    <input type="text" name="image_alt" value="${this.escapeHtml(image.image_alt || '')}" class="form-input" placeholder="Description for accessibility">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Caption</label>
-                                    <textarea name="caption" class="form-input form-textarea" placeholder="Image caption" rows="3">${this.escapeHtml(image.caption || '')}</textarea>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <div class="form-group">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Category</label>
-                                    <input type="text" name="category" value="${this.escapeHtml(image.category || '')}" class="form-input" placeholder="any">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Sort Order</label>
-                                    <input type="number" name="sort_order" value="${image.sort_order || 0}" class="form-input">
-                                </div>
-                                
-                                <div class="space-y-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                    <div class="checkbox-group">
-                                        <input type="checkbox" name="is_featured" ${image.is_featured ? 'checked' : ''} class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
-                                        <label class="ml-2 block text-sm font-medium text-gray-900">Featured Image</label>
-                                    </div>
-                                    
-                                    <div class="checkbox-group">
-                                        <input type="checkbox" name="is_active" ${image.is_active ? 'checked' : ''} class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
-                                        <label class="ml-2 block text-sm font-medium text-gray-900">Active</label>
-                                    </div>
-                                </div>
-                            </div>
+                
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-image-category">Category</label>
+                        <input type="text" id="edit-image-category" name="category" class="form-input" 
+                               value="${this.escapeHtml(image.category || '')}" placeholder="Any">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-image-sort-order">Sort Order</label>
+                        <input type="number" id="edit-image-sort-order" name="sort_order" class="form-input" 
+                               value="${image.sort_order || 0}">
+                    </div>
+                    
+                    <div class="space-y-3 p-4 bg-gray-50 rounded-lg">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="edit-image-featured" name="is_featured" 
+                                   class="form-checkbox" ${image.is_featured ? 'checked' : ''}>
+                            <label class="form-label" for="edit-image-featured">Featured Image</label>
                         </div>
                         
-                        <div class="image-preview-container mt-4">
-                            <label class="block text-sm font-semibold text-gray-900 mb-3">Current Image</label>
-                            <img src="${image.image_path ? '/storage/' + image.image_path : '/images/default-image.jpg'}" 
-                                 alt="${this.escapeHtml(image.image_alt || image.title || 'Gallery Image')}" 
-                                 class="max-w-full h-auto max-h-40 sm:max-h-48 mx-auto rounded-lg shadow-sm"
-                                 onerror="this.src='/images/default-image.jpg'">
-                            <p class="text-xs text-gray-500 text-center mt-2 truncate">${image.image_path || 'No image'}</p>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="edit-image-active" name="is_active" 
+                                   class="form-checkbox" ${image.is_active ? 'checked' : ''}>
+                            <label class="form-label" for="edit-image-active">Active</label>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <div class="button-group">
-                        <button type="button" id="cancel-edit-btn" class="btn btn-outline">
-                            Cancel
-                        </button>
-                        <button type="button" id="save-edit-btn" class="btn btn-primary">
-                            Save Changes
-                        </button>
                     </div>
                 </div>
             </div>
-        `;
-        
-        modalContainer.innerHTML = modalHtml;
-        modalContainer.classList.add('show');
-        
-        // Add event listeners for edit modal
+            
+            <div class="form-group">
+                <label class="form-label">Current Image</label>
+                <div class="mt-2 border rounded-lg p-4 bg-gray-50">
+                    <img src="/storage/${image.image_path}" 
+                         alt="${image.image_alt || image.title}" 
+                         class="max-w-full h-auto max-h-40 mx-auto rounded-lg shadow-sm"
+                         onerror="this.src='/images/default-image.jpg'">
+                    <p class="text-xs text-gray-500 text-center mt-2">${image.image_path}</p>
+                </div>
+            </div>
+        </form>
+    `;
+},
+
+   // Show edit modal - FIXED VERSION
+showImageEditModal(title, content) {
+    const modalHtml = `
+        <div id="image-edit-modal" class="modal-backdrop show">
+            <div class="modal-content animate-slide-up" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">${title}</h3>
+                    <button class="modal-close" id="close-edit-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    ${content}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancel-edit-btn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-edit-btn">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('image-edit-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add new modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Add event listeners for the new modal
+    setTimeout(() => {
         document.getElementById('close-edit-modal')?.addEventListener('click', () => this.hideImageEditModal());
         document.getElementById('cancel-edit-btn')?.addEventListener('click', () => this.hideImageEditModal());
-        document.getElementById('save-edit-btn')?.addEventListener('click', () => this.saveImageChanges(image.id));
-    },
+        document.getElementById('save-edit-btn')?.addEventListener('click', () => this.saveImageChanges());
+    }, 100);
+},
 
-    hideImageEditModal() {
-        const modal = document.getElementById('image-edit-modal');
-        if (modal) {
-            modal.classList.remove('show');
+// Hide edit modal
+hideImageEditModal() {
+    const modal = document.getElementById('image-edit-modal');
+    if (modal) {
+        modal.remove();
+    }
+},
+
+    async saveImageChanges() {
+    const form = document.getElementById('image-edit-form');
+    if (!form) {
+        this.showNotification('Edit form not found', 'error');
+        return;
+    }
+
+    const formData = new FormData(form);
+    const imageId = formData.get('id');
+    
+    if (!imageId) {
+        this.showNotification('Image ID not found', 'error');
+        return;
+    }
+
+    try {
+        // Get form values directly from inputs
+        const titleInput = form.querySelector('input[name="title"]');
+        const altInput = form.querySelector('input[name="image_alt"]');
+        const captionInput = form.querySelector('textarea[name="caption"]');
+        const categoryInput = form.querySelector('input[name="category"]');
+        const sortOrderInput = form.querySelector('input[name="sort_order"]');
+        const featuredCheckbox = form.querySelector('input[name="is_featured"]');
+        const activeCheckbox = form.querySelector('input[name="is_active"]');
+
+        const data = {
+            title: titleInput?.value || '',
+            image_alt: altInput?.value || '',
+            caption: captionInput?.value || '',
+            category: categoryInput?.value || '',
+            sort_order: parseInt(sortOrderInput?.value) || 0,
+            is_featured: featuredCheckbox?.checked ? true : false,
+            is_active: activeCheckbox?.checked ? true : false
+        };
+
+        console.log('Saving image data:', data);
+
+        const saveButton = document.querySelector('#image-edit-modal .btn-primary');
+        if (saveButton) {
+            const originalText = saveButton.innerHTML;
+            saveButton.innerHTML = '<div class="spinner"></div> Saving...';
+            saveButton.disabled = true;
         }
-    },
 
-    async saveImageChanges(imageId) {
-        const form = document.getElementById('image-edit-form');
-        if (!form) return;
+        // Use the same endpoint as your index page
+        const response = await fetch(`/admin/galleries/images/${imageId}`, {
+            method: 'PUT',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
 
-        try {
-            const formData = new FormData(form);
-            const data = {
-                title: formData.get('title') || '',
-                image_alt: formData.get('image_alt') || '',
-                caption: formData.get('caption') || '',
-                category: formData.get('category') || 'any',
-                sort_order: parseInt(formData.get('sort_order')) || 0,
-                is_featured: formData.get('is_featured') === 'on',
-                is_active: formData.get('is_active') === 'on'
-            };
+        console.log('Save response status:', response.status);
 
-            const saveButton = document.getElementById('save-edit-btn');
-            if (saveButton) {
-                const originalText = saveButton.innerHTML;
-                saveButton.innerHTML = '<div class="spinner"></div> Saving...';
-                saveButton.disabled = true;
-            }
-
-            const response = await fetch(this.getUpdateImageRoute(imageId), {
-                method: 'PUT',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                this.showNotification('Image updated successfully', 'success');
-                this.hideImageEditModal();
-                
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-                
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update image');
-            }
-        } catch (error) {
-            console.error('Error updating image:', error);
-            this.showNotification('Error updating image: ' + error.message, 'error');
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Save response data:', result);
             
-            const saveButton = document.getElementById('save-edit-btn');
-            if (saveButton) {
-                saveButton.innerHTML = 'Save Changes';
-                saveButton.disabled = false;
-            }
+            this.showNotification('Image updated successfully', 'success');
+            this.hideImageEditModal();
+            
+            // Reload the page to reflect changes
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            
+        } else {
+            const errorText = await response.text();
+            console.error('Save error response:', errorText);
+            throw new Error(`Failed to update image: ${response.status}`);
         }
-    },
+        
+    } catch (error) {
+        console.error('Error updating image:', error);
+        this.showNotification('Error updating image: ' + error.message, 'error');
+        
+        const saveButton = document.querySelector('#image-edit-modal .btn-primary');
+        if (saveButton) {
+            saveButton.innerHTML = 'Save Changes';
+            saveButton.disabled = false;
+        }
+    }
+},
 
     // Featured image functions
     async setFeaturedImage(imageId) {
