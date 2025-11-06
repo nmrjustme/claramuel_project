@@ -212,7 +212,6 @@ class BookingController extends Controller
     {
         // Get all admin users who are active
         $admins = User::where('role', 'Admin')
-            ->where('is_active', true)
             ->whereNotNull('email')
             ->get();
 
