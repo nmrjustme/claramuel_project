@@ -789,7 +789,7 @@
                         <div class="flex justify-center">
                             <span
                                 class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 text-green-700 text-xs sm:text-sm font-medium rounded-md border border-green-200 cursor-default">
-                                Cash Payment
+                                Cash Payment Upon Check-in
                             </span>
                         </div>
                     </div>
