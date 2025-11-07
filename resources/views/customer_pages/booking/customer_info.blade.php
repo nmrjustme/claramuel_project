@@ -836,6 +836,13 @@
                                 and Check-out time is <span class="font-medium text-gray-900">10:00 AM</span> only.
                             </p>
                         </div>
+
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm mt-3">
+                            <p class="text-sm font-semibold text-gray-800">Notice</p>
+                            <p class="text-sm text-gray-600 mt-1 leading-relaxed">
+                                Cancellation is <span class="font-medium text-gray-900">not available for now</span>.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Rooms Summary Card - Enhanced -->
@@ -1063,39 +1070,39 @@
                         roomDiv.className = 'guest-type-container';
 
                         roomDiv.innerHTML = `
-                                                    <div class="guest-type-header">
-                                                        <h4 class="guest-type-title">${room.name}</h4>
-                                                        <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
-                                                    </div>
-                                                    <div class="guest-type-grid" id="guest-selection-room-${index}">
-                                                        ${uniqueTypes.map(type => `
-                                                        <div class="guest-type-group">
-                                                            <label for="guest-type-${index}-${type.id}" class="guest-type-label">
-                                                                ${type.type}
-                                                            </label>
-                                                            <div class="counter-container">
-                                                                <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
-                                                                    <i class="fas fa-minus"></i>
-                                                                </button>
-                                                                <input type="number"
-                                                                    id="guest-type-${index}-${type.id}"
-                                                                    name="guest_types[${room.facility_id}][${type.id}]"
-                                                                    class="counter-value form-input"
-                                                                    min="0"
-                                                                    max="${room.pax}"
-                                                                    value="0"
-                                                                    data-room-index="${index}"
-                                                                    data-room-id="${room.facility_id}"
-                                                                    data-room-pax="${room.pax}"
-                                                                    data-guest-type-id="${type.id}">
-                                                                <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
-                                                                    <i class="fas fa-plus"></i>
-                                                                </button>
-                                                            </div>
+                                                        <div class="guest-type-header">
+                                                            <h4 class="guest-type-title">${room.name}</h4>
+                                                            <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
                                                         </div>
-                                                        `).join('')}
-                                                    </div>
-                                                `;
+                                                        <div class="guest-type-grid" id="guest-selection-room-${index}">
+                                                            ${uniqueTypes.map(type => `
+                                                            <div class="guest-type-group">
+                                                                <label for="guest-type-${index}-${type.id}" class="guest-type-label">
+                                                                    ${type.type}
+                                                                </label>
+                                                                <div class="counter-container">
+                                                                    <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
+                                                                        <i class="fas fa-minus"></i>
+                                                                    </button>
+                                                                    <input type="number"
+                                                                        id="guest-type-${index}-${type.id}"
+                                                                        name="guest_types[${room.facility_id}][${type.id}]"
+                                                                        class="counter-value form-input"
+                                                                        min="0"
+                                                                        max="${room.pax}"
+                                                                        value="0"
+                                                                        data-room-index="${index}"
+                                                                        data-room-id="${room.facility_id}"
+                                                                        data-room-pax="${room.pax}"
+                                                                        data-guest-type-id="${type.id}">
+                                                                    <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
+                                                                        <i class="fas fa-plus"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            `).join('')}
+                                                        </div>
+                                                    `;
 
                         container.appendChild(roomDiv);
                     });
@@ -1130,24 +1137,24 @@
                 .catch(error => {
                     console.error('Error loading guest types:', error);
                     container.innerHTML = `
-                                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                                                    <div class="flex">
-                                                        <div class="flex-shrink-0">
-                                                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        </div>
-                                                        <div class="ml-3">
-                                                        <p class="text-sm text-yellow-700">
-                                                            Could not load guest types. ${error.message}
-                                                            <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
-                                                                Try Again
-                                                            </button>
-                                                        </p>
+                                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                                        <div class="flex">
+                                                            <div class="flex-shrink-0">
+                                                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            </div>
+                                                            <div class="ml-3">
+                                                            <p class="text-sm text-yellow-700">
+                                                                Could not load guest types. ${error.message}
+                                                                <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
+                                                                    Try Again
+                                                                </button>
+                                                            </p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            `;
+                                                `;
                 });
         }
 
@@ -1201,14 +1208,14 @@
                     const roomElement = document.createElement('div');
                     roomElement.className = 'room-item';
                     roomElement.innerHTML = `
-                                                    <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
-                                                    <div class="room-details">
-                                                        <div class="room-name">${room.name}</div>
-                                                        <div class="room-type">${room.category}</div>
-                                                        <div class="room-price">${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                                        <div class="room-price">₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                                    </div>
-                                                `;
+                                                        <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
+                                                        <div class="room-details">
+                                                            <div class="room-name">${room.name}</div>
+                                                            <div class="room-type">${room.category}</div>
+                                                            <div class="room-price">${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                                            <div class="room-price">₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                                        </div>
+                                                    `;
                     roomsList.appendChild(roomElement);
                 });
             }
