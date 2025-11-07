@@ -36,7 +36,7 @@ class AdminlistUser extends Controller
         $validator = Validator::make($request->all(), [
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email',
             'phone' => 'nullable|string|max:20',
             'temp_password' => 'required|string|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d).{8,}$/',
         ], [

@@ -403,6 +403,108 @@
             break-inside: avoid;
             margin-bottom: 1rem;
         }
+
+        /* Hide back to top button when lightbox is open */
+body.lightbox-open #back-to-top {
+    display: none !important;
+}
+
+/* Zoom Controls - Move further right in portrait */
+.zoom-controls {
+    position: fixed;
+    bottom: 16px;
+    right: 24px !important; /* Move further right */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+}
+
+/* Mobile adjustments for zoom controls */
+@media (max-width: 768px) {
+    .zoom-controls {
+        bottom: 100px;
+        right: 20px !important; /* Move further right on mobile */
+    }
+}
+
+@media (max-width: 640px) {
+    .zoom-controls {
+        bottom: 90px;
+        right: 16px !important;
+    }
+}
+
+/* Landscape orientation fixes - prevent zoom controls from blocking navigation */
+@media (max-height: 500px) and (orientation: landscape) {
+    #lightbox {
+        padding: 10px !important;
+    }
+    
+    #lightbox-container {
+        max-height: 90vh !important;
+        padding: 0 !important;
+    }
+    
+    .lightbox-image-mobile {
+        max-height: 85vh !important;
+    }
+    
+    /* Move zoom controls further right in landscape */
+    .zoom-controls {
+        bottom: 60px !important;
+        right: 80px !important; /* Move further right */
+    }
+    
+    /* Adjust navigation buttons for landscape */
+    #lightbox-prev {
+        left: 20px !important;
+    }
+    
+    #lightbox-next {
+        right: 20px !important;
+    }
+    
+    /* Adjust caption panel for landscape */
+    .lightbox-caption-mobile {
+        bottom: 10px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        min-width: 300px !important;
+        max-width: 80vw !important;
+    }
+    
+    /* Adjust top buttons for landscape */
+    #lightbox-close {
+        top: 10px !important;
+        right: 10px !important;
+    }
+    
+    #toggle-caption {
+        top: 10px !important;
+        left: 10px !important;
+    }
+}
+
+/* Extra small landscape */
+@media (max-height: 400px) and (orientation: landscape) {
+    .zoom-controls {
+        bottom: 50px !important;
+        right: 70px !important; /* Further right */
+        transform: scale(0.9);
+    }
+    
+    #lightbox-prev,
+    #lightbox-next {
+        transform: translateY(-50%) scale(0.9);
+    }
+    
+    .lightbox-caption-mobile {
+        padding: 8px !important;
+        font-size: 0.7rem !important;
+    }
+}
     </style>
 </head>
 
@@ -683,8 +785,8 @@
                 </div>
             </div>
 
-            <!-- Zoom Controls -->
-            <div class="fixed bottom-16 sm:bottom-24 right-4 sm:right-6 flex flex-col space-y-1 sm:space-y-2 z-50">
+            <!-- Zoom Controls - Make sure they have the zoom-controls class -->
+            <div class="fixed bottom-16 sm:bottom-24 right-4 sm:right-6 flex flex-col space-y-1 sm:space-y-2 z-50 zoom-controls">
                 <button id="zoom-in" onclick="zoomImage(0.1)"
                         class="lightbox-control text-white rounded-full p-2 sm:p-3 lightbox-control-mobile"
                         title="Zoom In (+)">
@@ -834,50 +936,53 @@
         }
 
         function openLightbox(src, title, caption, clickedIndex) {
-            // Always reinitialize to get current visible images
-            initLightbox();
-            
-            // Find the clicked image in the current visible images
-            currentIndex = currentImages.findIndex(img => img.src === src);
-            
-            // Fallback: if not found, use the first image
-            if (currentIndex === -1) {
-                currentIndex = 0;
-            }
-            
-            const image = currentImages[currentIndex];
-            
-            if (!image) {
-                console.error('No image found to display');
-                return;
-            }
-            
-            resetZoom();
-            showCaption();
-            
-            isLoading = true;
-            document.getElementById('lightbox-loading').classList.remove('hidden');
-            
-            document.getElementById('lightbox-title').textContent = image.title;
-            document.getElementById('lightbox-caption').textContent = image.caption || 'No description available';
-            document.getElementById('image-index').textContent = `${currentIndex + 1} of ${currentImages.length}`;
-            
-            document.getElementById('lightbox').classList.remove('hidden');
-            document.getElementById('lightbox').classList.add('flex');
-            document.body.style.overflow = 'hidden';
-            
-            // Auto-hide caption after 3 seconds
-            clearTimeout(captionTimeout);
-            captionTimeout = setTimeout(() => {
-                if (isCaptionVisible) {
-                    hideCaption();
-                }
-            }, 3000);
-            
-            const lightboxImage = document.getElementById('lightbox-image');
-            lightboxImage.src = image.src;
-            lightboxImage.alt = image.title;
+    // Always reinitialize to get current visible images
+    initLightbox();
+    
+    // Find the clicked image in the current visible images
+    currentIndex = currentImages.findIndex(img => img.src === src);
+    
+    // Fallback: if not found, use the first image
+    if (currentIndex === -1) {
+        currentIndex = 0;
+    }
+    
+    const image = currentImages[currentIndex];
+    
+    if (!image) {
+        console.error('No image found to display');
+        return;
+    }
+    
+    resetZoom();
+    showCaption();
+    
+    isLoading = true;
+    document.getElementById('lightbox-loading').classList.remove('hidden');
+    
+    document.getElementById('lightbox-title').textContent = image.title;
+    document.getElementById('lightbox-caption').textContent = image.caption || 'No description available';
+    document.getElementById('image-index').textContent = `${currentIndex + 1} of ${currentImages.length}`;
+    
+    document.getElementById('lightbox').classList.remove('hidden');
+    document.getElementById('lightbox').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    
+    // Hide back to top button when lightbox is open
+    document.body.classList.add('lightbox-open');
+    
+    // Auto-hide caption after 3 seconds
+    clearTimeout(captionTimeout);
+    captionTimeout = setTimeout(() => {
+        if (isCaptionVisible) {
+            hideCaption();
         }
+    }, 3000);
+    
+    const lightboxImage = document.getElementById('lightbox-image');
+    lightboxImage.src = image.src;
+    lightboxImage.alt = image.title;
+}
 
         function handleImageLoad(img) {
             isLoading = false;
@@ -1013,14 +1118,18 @@
         }
 
         function closeLightbox() {
-            document.getElementById('lightbox').classList.add('hidden');
-            document.getElementById('lightbox').classList.remove('flex');
-            document.body.style.overflow = 'auto';
-            isLoading = false;
-            resetZoom();
-            clearTimeout(captionTimeout);
-            
-            showCaption();
+    document.getElementById('lightbox').classList.add('hidden');
+    document.getElementById('lightbox').classList.remove('flex');
+    document.body.style.overflow = 'auto';
+    isLoading = false;
+    resetZoom();
+    clearTimeout(captionTimeout);
+    
+    // Show back to top button again
+    document.body.classList.remove('lightbox-open');
+    
+    showCaption();
+        
         }
 
         // Event listeners for lightbox
