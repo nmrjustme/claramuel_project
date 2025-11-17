@@ -100,7 +100,7 @@ class FacilitiesController extends Controller
             'bed_number' => 'nullable|integer|min:1',
             'room_number' => 'nullable|integer|min:1',
             'included' => 'nullable|string',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         // Create the facility excluding the images
@@ -131,7 +131,7 @@ class FacilitiesController extends Controller
                 'bed_number' => 'nullable|integer|min:1',
                 'room_number' => 'nullable|integer|min:1',
                 'included' => 'nullable|string',
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw new HttpResponseException(
