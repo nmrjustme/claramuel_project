@@ -231,18 +231,62 @@
                     </a>
                 </li>
 
-                <!-- Facilities -->
+                <!-- Facilities Management Dropdown -->
                 <li>
-                    <a href="{{ route('admin.facilities.index') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'facilities' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="{{ $active === 'facilities' ? '2' : '1.5' }}"
-                                d="M3 10h18M3 6h18M3 14h18M3 18h18" />
-                        </svg>
-                        <span>Facilities</span>
-                    </a>
+                    <div class="relative">
+                        <button
+                            class="flex items-center justify-between w-full py-3 px-4 rounded-lg transition-all duration-200 {{ in_array($active, ['facilities', 'day-tour facilities']) ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}"
+                            id="facilities-management-dropdown" aria-expanded="false">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="{{ in_array($active, ['facilities', 'day-tour facilities']) ? '2' : '1.5' }}"
+                                        d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+                                </svg>
+                                <span>Facilities Management</span>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="mt-1 ml-4 overflow-hidden transition-all duration-300 ease-in-out max-h-0"
+                            id="facilities-management-menu">
+                            <ul class="space-y-1">
+                                <!-- Room Facilities -->
+                                <li>
+                                    <a href="{{ route('admin.facilities.index') }}"
+                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'facilities' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="{{ $active === 'facilities' ? '2' : '1.5' }}"
+                                                d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+                                        </svg>
+                                        <span>Room Facilities</span>
+                                    </a>
+                                </li>
+
+                                <!-- Day-Tour Facilities -->
+                                <li>
+                                    <a href="{{ route('admin.day-tour-facilities.index') }}"
+                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'day-tour facilities' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="{{ $active === 'day-tour facilities' ? '2' : '1.5' }}"
+                                                d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+                                        </svg>
+                                        <span>Day Tour Facilities</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </li>
 
                 <!-- Admin -->
@@ -326,6 +370,10 @@
         const accountingDropdownButton = document.getElementById('accounting-analytics-dropdown');
         const accountingDropdownMenu = document.getElementById('accounting-analytics-menu');
 
+        // Facilities Management Dropdown
+        const facilitiesDropdownButton = document.getElementById('facilities-management-dropdown');
+        const facilitiesDropdownMenu = document.getElementById('facilities-management-menu');
+
         // Function to handle dropdown toggle
         function setupDropdown(dropdownButton, dropdownMenu) {
             dropdownButton.addEventListener('click', function () {
@@ -352,15 +400,17 @@
             }
         }
 
-        // Initialize both dropdowns
+        // Initialize all dropdowns
         setupDropdown(bookingsDropdownButton, bookingsDropdownMenu);
         setupDropdown(accountingDropdownButton, accountingDropdownMenu);
+        setupDropdown(facilitiesDropdownButton, facilitiesDropdownMenu);
 
         // Close other dropdown when one is opened
         function closeOtherDropdowns(currentDropdown) {
             const allDropdowns = [
                 { button: bookingsDropdownButton, menu: bookingsDropdownMenu },
-                { button: accountingDropdownButton, menu: accountingDropdownMenu }
+                { button: accountingDropdownButton, menu: accountingDropdownMenu },
+                { button: facilitiesDropdownButton, menu: facilitiesDropdownMenu }
             ];
 
             allDropdowns.forEach(dropdown => {
@@ -375,5 +425,6 @@
         // Add click listeners to close other dropdowns
         bookingsDropdownButton.addEventListener('click', () => closeOtherDropdowns(bookingsDropdownButton));
         accountingDropdownButton.addEventListener('click', () => closeOtherDropdowns(accountingDropdownButton));
+        facilitiesDropdownButton.addEventListener('click', () => closeOtherDropdowns(facilitiesDropdownButton));
     });
 </script>

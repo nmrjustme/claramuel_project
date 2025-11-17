@@ -203,7 +203,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         @php
-    $serviceType = 'Unknown';
+    $serviceType = 'Pool';
     
     // Use filter() instead of whereHas() for collections
     $poolGuests = $log->bookingGuestDetails

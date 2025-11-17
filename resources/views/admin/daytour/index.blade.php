@@ -255,63 +255,151 @@
             </div>
         </div>
 
-        <!-- Accommodations Section -->
-        <div id="accommodationSection" class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="p-3 bg-amber-100 rounded-xl shadow-sm">
-                    <i class="fas fa-home text-amber-500 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-800">Accommodations</h3>
+<!-- Accommodations Section -->
+<div id="accommodationSection" class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="p-3 bg-amber-100 rounded-xl shadow-sm">
+                <i class="fas fa-home text-amber-500 text-xl"></i>
             </div>
+            <h3 class="text-xl font-semibold text-gray-800">Accommodations</h3>
+        </div>
+        <!-- Validation Indicator -->
+        <div id="accommodationValidation" class="hidden flex items-center space-x-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+            <i class="fas fa-exclamation-circle text-red-500"></i>
+            <span class="text-sm text-red-700 font-medium">Please select at least one accommodation</span>
+        </div>
+    </div>
 
-            <!-- Cottages -->
-            <div class="mb-8">
-                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-umbrella-beach text-amber-500 mr-2"></i>
-                    Cottages
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($cottages as $cottage)
-                        <div class="flex items-center justify-between p-5 bg-gray-50 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
-                            <div class="flex flex-col">
-                                <span class="font-semibold text-gray-800">{{ $cottage->name }}</span>
+    <!-- Cottages -->
+    <div class="mb-8">
+        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-umbrella-beach text-amber-500 mr-2"></i>
+            Cottages
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach($cottages as $cottage)
+                <div class="accommodation-item flex items-center justify-between p-5 bg-gray-50 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex flex-col">
+                        <span class="font-semibold text-gray-800">{{ $cottage->name }}</span>
+                        <div class="price-display" data-id="{{ $cottage->id }}">
+                            @if($cottage->has_discount)
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-400 line-through">₱{{ number_format($cottage->original_price, 2) }}</span>
+                                    <span class="text-sm text-green-600 font-semibold">₱{{ number_format($cottage->price, 2) }}</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                        Save ₱{{ number_format($cottage->discount_amount, 2) }}
+                                    </span>
+                                </div>
+                            @else
                                 <span class="text-sm text-gray-600">₱{{ number_format($cottage->price, 2) }}</span>
-                                <div class="availability-text text-xs text-gray-500" data-id="{{ $cottage->id }}">
-                                    Availability: Loading...
-                                </div>
-                            </div>
-                            <input type="number" name="accommodations[{{ $cottage->id }}]" min="0" value="0"
-                                data-price="{{ $cottage->price }}" 
-                                class="accommodation-input w-20 px-3 py-2 text-center rounded-lg border-2 border-gray-100 focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all duration-200">
+                            @endif
                         </div>
-                    @endforeach
+                        <div class="availability-text text-xs text-gray-500" data-id="{{ $cottage->id }}">
+                            Availability: Loading...
+                        </div>
+                    </div>
+                    <input type="number" name="accommodations[{{ $cottage->id }}]" min="0" value="0"
+                        data-original-price="{{ $cottage->original_price }}"
+                        data-price="{{ $cottage->price }}"
+                        data-has-discount="{{ $cottage->has_discount ? 'true' : 'false' }}"
+                        class="accommodation-input w-20 px-3 py-2 text-center rounded-lg border-2 border-gray-100 focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all duration-200">
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Villas -->
+    <div>
+        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-crown text-purple-500 mr-2"></i>
+            Private Villas
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach($villas as $villa)
+                <div class="accommodation-item flex items-center justify-between p-5 bg-gray-50 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex flex-col">
+                        <span class="font-semibold text-gray-800">{{ $villa->name }}</span>
+                        <div class="price-display" data-id="{{ $villa->id }}">
+                            @if($villa->has_discount)
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-400 line-through">₱{{ number_format($villa->original_price, 2) }}</span>
+                                    <span class="text-sm text-green-600 font-semibold">₱{{ number_format($villa->price, 2) }}</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                        Save ₱{{ number_format($villa->discount_amount, 2) }}
+                                    </span>
+                                </div>
+                            @else
+                                <span class="text-sm text-gray-600">₱{{ number_format($villa->price, 2) }}</span>
+                            @endif
+                        </div>
+                        <div class="availability-text text-xs text-gray-500" data-id="{{ $villa->id }}">
+                            Availability: Loading...
+                        </div>
+                    </div>
+                    <input type="number" name="accommodations[{{ $villa->id }}]" min="0" value="0"
+                        data-original-price="{{ $villa->original_price }}"
+                        data-price="{{ $villa->price }}"
+                        data-has-discount="{{ $villa->has_discount ? 'true' : 'false' }}"
+                        class="accommodation-input w-20 px-3 py-2 text-center rounded-lg border-2 border-gray-100 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200">
+                </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+<!-- Manual Discount Section -->
+<div class="bg-yellow-50 rounded-2xl border border-yellow-100 shadow-lg p-6">
+    <div class="flex items-center space-x-3 mb-6">
+        <div class="p-3 bg-yellow-100 rounded-xl shadow-sm">
+            <i class="fas fa-tag text-yellow-500 text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800">Manual Discount</h3>
+    </div>
+    
+    <div class="space-y-4">
+        <div class="flex items-center space-x-4">
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="applyManualDiscount" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                <span class="text-sm font-medium text-gray-700">Apply manual discount</span>
+            </label>
+        </div>
+
+        <div id="manualDiscountFields" class="hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="discountType" class="block text-sm font-medium text-gray-700 mb-2">Discount Type</label>
+                    <select id="discountType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-red-400 focus:ring-2 focus:ring-red-100">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (₱)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="discountValue" class="block text-sm font-medium text-gray-700 mb-2">Discount Value</label>
+                    <input type="number" id="discountValue" min="0" step="0.01" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                           placeholder="0.00">
                 </div>
             </div>
-
-            <!-- Villas -->
+            
             <div>
-                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-crown text-purple-500 mr-2"></i>
-                    Private Villas
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($villas as $villa)
-                        <div class="flex items-center justify-between p-5 bg-gray-50 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
-                            <div class="flex flex-col">
-                                <span class="font-semibold text-gray-800">{{ $villa->name }}</span>
-                                <span class="text-sm text-gray-600">₱{{ number_format($villa->price, 2) }}</span>
-                                <div class="availability-text text-xs text-gray-500" data-id="{{ $villa->id }}">
-                                    Availability: Loading...
-                                </div>
-                            </div>
-                            <input type="number" name="accommodations[{{ $villa->id }}]" min="0" value="0"
-                                data-price="{{ $villa->price }}" 
-                                class="accommodation-input w-20 px-3 py-2 text-center rounded-lg border-2 border-gray-100 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200">
-                        </div>
-                    @endforeach
+                <label for="discountReason" class="block text-sm font-medium text-gray-700 mb-2">Reason for Discount</label>
+                <input type="text" id="discountReason" name="manual_discount_reason"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                       placeholder="e.g., Special promotion, Staff discount, etc.">
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg border border-yellow-200">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">Manual Discount Applied:</span>
+                    <span id="manualDiscountAmount" class="text-lg font-bold text-red-600">₱0.00</span>
                 </div>
+                <div id="discountBreakdown" class="text-xs text-gray-500 mt-1"></div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Total Cost Section -->
         <div class="bg-red-50 rounded-2xl border border-red-100 shadow-lg p-6">
@@ -330,6 +418,11 @@
                 <div id="costBreakdown" class="text-sm text-gray-600 space-y-2 mt-4"></div>
             </div>
         </div>
+
+        <!-- Hidden fields for manual discount -->
+        <input type="hidden" id="manualDiscountType" name="manual_discount_type" value="">
+        <input type="hidden" id="manualDiscountValue" name="manual_discount_value" value="0">
+        <input type="hidden" id="manualDiscountAmountField" name="manual_discount_amount" value="0">
 
         <!-- Submit Button -->
         <div class="flex justify-end">
@@ -424,6 +517,15 @@ const guestRates = {
     }
 };
 
+// Manual discount state
+let manualDiscount = {
+    enabled: false,
+    type: 'percentage',
+    value: 0,
+    amount: 0,
+    reason: ''
+};
+
 /* =====================
    Calendar functionality
    ===================== */
@@ -492,7 +594,7 @@ function selectDate(date) {
     document.getElementById('walkinDateInput').value = formatDateDisplay(date);
     document.getElementById('date_tour').value = formatDateForInput(date);
 
-    updateAvailability();
+    updateAvailabilityAndPrices();
     renderCalendar();
     setTimeout(() => document.getElementById('datePicker').classList.add('hidden'), 300);
 }
@@ -504,14 +606,88 @@ document.addEventListener('click', e => {
 });
 
 /* =====================
-   Availability checker
+   Manual Discount Functions
    ===================== */
-async function updateAvailability() {
+function toggleManualDiscount() {
+    const discountCheckbox = document.getElementById('applyManualDiscount');
+    const discountFields = document.getElementById('manualDiscountFields');
+    
+    manualDiscount.enabled = discountCheckbox.checked;
+    
+    if (manualDiscount.enabled) {
+        discountFields.classList.remove('hidden');
+        // Set default values
+        manualDiscount.type = document.getElementById('discountType').value;
+        manualDiscount.value = parseFloat(document.getElementById('discountValue').value) || 0;
+        manualDiscount.reason = document.getElementById('discountReason').value;
+    } else {
+        discountFields.classList.add('hidden');
+        manualDiscount.amount = 0;
+        // Clear hidden fields
+        document.getElementById('manualDiscountType').value = '';
+        document.getElementById('manualDiscountValue').value = '0';
+        document.getElementById('manualDiscountAmountField').value = '0';
+    }
+    
+    calculateTotal();
+}
+
+function updateManualDiscount() {
+    if (!manualDiscount.enabled) return;
+    
+    manualDiscount.type = document.getElementById('discountType').value;
+    manualDiscount.value = parseFloat(document.getElementById('discountValue').value) || 0;
+    manualDiscount.reason = document.getElementById('discountReason').value;
+    
+    // Update hidden fields
+    document.getElementById('manualDiscountType').value = manualDiscount.type;
+    document.getElementById('manualDiscountValue').value = manualDiscount.value;
+    
+    calculateTotal();
+}
+
+function calculateManualDiscount(subtotal) {
+    if (!manualDiscount.enabled || manualDiscount.value <= 0) {
+        return 0;
+    }
+    
+    let discountAmount = 0;
+    
+    if (manualDiscount.type === 'percentage') {
+        // Cap percentage at 100%
+        const percentage = Math.min(manualDiscount.value, 100);
+        discountAmount = (subtotal * percentage) / 100;
+    } else {
+        // Fixed amount - cap at subtotal
+        discountAmount = Math.min(manualDiscount.value, subtotal);
+    }
+    
+    manualDiscount.amount = discountAmount;
+    
+    // Update display
+    document.getElementById('manualDiscountAmount').textContent = `₱${discountAmount.toFixed(2)}`;
+    document.getElementById('manualDiscountAmountField').value = discountAmount.toFixed(2);
+    
+    // Update breakdown
+    const breakdownElement = document.getElementById('discountBreakdown');
+    if (manualDiscount.type === 'percentage') {
+        breakdownElement.textContent = `${manualDiscount.value}% of ₱${subtotal.toFixed(2)}`;
+    } else {
+        breakdownElement.textContent = `Fixed amount discount`;
+    }
+    
+    return discountAmount;
+}
+
+/* =====================
+   Availability & Price checker
+   ===================== */
+async function updateAvailabilityAndPrices() {
     const dateInput = document.getElementById('date_tour');
     const date = dateInput?.value;
     if (!date) return;
 
-    // show loading
+    // Show loading for availability
     document.querySelectorAll('.availability-text').forEach(el => {
         el.textContent = 'Availability: Checking…';
         el.classList.remove('text-green-600','text-red-500');
@@ -519,11 +695,20 @@ async function updateAvailability() {
     });
 
     try {
-        const res = await fetch(`/daytour/check-availability?date=${encodeURIComponent(date)}`, {cache:'no-store'});
-        if (!res.ok) throw new Error(res.statusText);
-        const data = await res.json();
+        // Fetch both availability and prices in parallel
+        const [availabilityRes, pricesRes] = await Promise.all([
+            fetch(`/daytour/check-availability?date=${encodeURIComponent(date)}`, {cache:'no-store'}),
+            fetch(`/daytour/check-prices?date=${encodeURIComponent(date)}`, {cache:'no-store'})
+        ]);
 
-        data.forEach(item => {
+        if (!availabilityRes.ok) throw new Error('Failed to fetch availability');
+        if (!pricesRes.ok) throw new Error('Failed to fetch prices');
+
+        const availabilityData = await availabilityRes.json();
+        const priceData = await pricesRes.json();
+
+        // Update availability
+        availabilityData.forEach(item => {
             const available = Number(item.available ?? 0);
 
             const el = document.querySelector(`.availability-text[data-id="${item.id}"]`);
@@ -540,8 +725,40 @@ async function updateAvailability() {
                 if (parseInt(input.value) > available) input.value = available;
             }
         });
+
+        // Update prices with discounts
+        priceData.forEach(item => {
+            const input = document.querySelector(`input[name="accommodations[${item.id}]"]`);
+            const priceDisplay = document.querySelector(`.price-display[data-id="${item.id}"]`);
+            
+            if (input && priceDisplay) {
+                // Update input data with current prices
+                input.dataset.originalPrice = item.price;
+                input.dataset.price = item.discounted_price;
+                input.dataset.hasDiscount = item.has_discount.toString();
+                
+                // Update the displayed price
+                if (item.has_discount) {
+                    priceDisplay.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-400 line-through">₱${parseFloat(item.price).toFixed(2)}</span>
+                            <span class="text-sm text-green-600 font-semibold">₱${parseFloat(item.discounted_price).toFixed(2)}</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                Save ₱${parseFloat(item.discount_amount).toFixed(2)}
+                            </span>
+                        </div>
+                    `;
+                } else {
+                    priceDisplay.innerHTML = `<span class="text-sm text-gray-600">₱${parseFloat(item.price).toFixed(2)}</span>`;
+                }
+            }
+        });
+
+        // Recalculate total with updated prices
+        calculateTotal();
+        
     } catch(err) {
-        console.error("Error fetching availability:", err);
+        console.error("Error fetching data:", err);
         document.querySelectorAll('.availability-text').forEach(el => {
             el.textContent = 'Availability: Error';
             el.classList.add('text-red-500');
@@ -549,76 +766,149 @@ async function updateAvailability() {
     }
 }
 
+// Keep original function for backward compatibility
+async function updateAvailability() {
+    await updateAvailabilityAndPrices();
+}
+
 // Run on page load
 document.addEventListener('DOMContentLoaded', () => {
-    updateAvailability();
+    updateAvailabilityAndPrices();
 });
 
 // Run when date changes
-document.getElementById('date_tour')?.addEventListener('change', updateAvailability);
-
-// Checkout button handler
-document.querySelectorAll('.checkout-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        try {
-            const res = await fetch(`/daytour/check-out/${id}`, { 
-                method: 'POST',
-                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
-            });
-            const data = await res.json();
-            alert(data.message);
-
-            // refresh availability after checkout
-            updateAvailability();
-        } catch(err) {
-            console.error(err);
-            alert('Error checking out!');
-        }
-    });
-});
-
+document.getElementById('date_tour')?.addEventListener('change', updateAvailabilityAndPrices);
 
 /* =====================
-   Total calculation
+   Total calculation with discounts
    ===================== */
 function calculateTotal() {
-    let total = 0;
+    let subtotal = 0;
+    let originalTotal = 0;
     let breakdown = [];
     const serviceType = document.querySelector('input[name="service_type"]:checked').value;
 
-    // Pool
+    // Pool guests (no discounts for guest types)
     if (serviceType==='pool' || serviceType==='both') {
         const adults = parseInt(document.querySelector('input[name="pool_adult"]').value)||0;
         const kids = parseInt(document.querySelector('input[name="pool_kids"]').value)||0;
         const seniors = parseInt(document.querySelector('input[name="pool_seniors"]').value)||0;
-        if (adults>0){const amt=adults*guestRates.pool.adult; total+=amt; breakdown.push(`Pool Adults: ${adults} × ₱${guestRates.pool.adult} = ₱${amt.toFixed(2)}`);}
-        if (kids>0){const amt=kids*guestRates.pool.kids; total+=amt; breakdown.push(`Pool Kids: ${kids} × ₱${guestRates.pool.kids} = ₱${amt.toFixed(2)}`);}
-        if (seniors>0){const amt=seniors*guestRates.pool.seniors; total+=amt; breakdown.push(`Pool Seniors: ${seniors} × ₱${guestRates.pool.seniors} = ₱${amt.toFixed(2)}`);}
+        
+        if (adults>0){
+            const amt = adults * guestRates.pool.adult; 
+            subtotal += amt;
+            originalTotal += amt;
+            breakdown.push(`Pool Adults: ${adults} × ₱${guestRates.pool.adult} = ₱${amt.toFixed(2)}`);
+        }
+        if (kids>0){
+            const amt = kids * guestRates.pool.kids; 
+            subtotal += amt;
+            originalTotal += amt;
+            breakdown.push(`Pool Kids: ${kids} × ₱${guestRates.pool.kids} = ₱${amt.toFixed(2)}`);
+        }
+        if (seniors>0){
+            const amt = seniors * guestRates.pool.seniors; 
+            subtotal += amt;
+            originalTotal += amt;
+            breakdown.push(`Pool Seniors: ${seniors} × ₱${guestRates.pool.seniors} = ₱${amt.toFixed(2)}`);
+        }
     }
-    // Park
+
+    // Park guests (no discounts for guest types)
     if (serviceType==='themed_park' || serviceType==='both') {
         const adults = parseInt(document.querySelector('input[name="park_adult"]').value)||0;
         const kids = parseInt(document.querySelector('input[name="park_kids"]').value)||0;
         const seniors = parseInt(document.querySelector('input[name="park_seniors"]').value)||0;
-        if (adults>0){const amt=adults*guestRates.park.adult; total+=amt; breakdown.push(`Park Adults: ${adults} × ₱${guestRates.park.adult} = ₱${amt.toFixed(2)}`);}
-        if (kids>0){const amt=kids*guestRates.park.kids; total+=amt; breakdown.push(`Park Kids: ${kids} × ₱${guestRates.park.kids} = ₱${amt.toFixed(2)}`);}
-        if (seniors>0){const amt=seniors*guestRates.park.seniors; total+=amt; breakdown.push(`Park Seniors: ${seniors} × ₱${guestRates.park.seniors} = ₱${amt.toFixed(2)}`);}
+        
+        if (adults>0){
+            const amt = adults * guestRates.park.adult; 
+            subtotal += amt;
+            originalTotal += amt;
+            breakdown.push(`Park Adults: ${adults} × ₱${guestRates.park.adult} = ₱${amt.toFixed(2)}`);
+        }
+        if (kids>0){
+            const amt = kids * guestRates.park.kids; 
+            subtotal += amt;
+            originalTotal += amt;
+            breakdown.push(`Park Kids: ${kids} × ₱${guestRates.park.kids} = ₱${amt.toFixed(2)}`);
+        }
+        if (seniors>0){
+            const amt = seniors * guestRates.park.seniors; 
+            subtotal += amt;
+            originalTotal += amt;
+            breakdown.push(`Park Seniors: ${seniors} × ₱${guestRates.park.seniors} = ₱${amt.toFixed(2)}`);
+        }
     }
-    // Accommodations
+
+    // Accommodations (with discounts applied)
     if (serviceType!=='themed_park') {
         document.querySelectorAll('.accommodation-input').forEach(input => {
             const qty = parseInt(input.value)||0;
-            const price = parseFloat(input.dataset.price);
+            const discountedPrice = parseFloat(input.dataset.price);
+            const originalPrice = parseFloat(input.dataset.originalPrice);
+            const hasDiscount = input.dataset.hasDiscount === 'true';
             const name = input.closest('div').querySelector('.font-semibold').textContent;
-            if (qty>0){const cost=qty*price; total+=cost; breakdown.push(`${name}: ${qty} × ₱${price.toFixed(2)} = ₱${cost.toFixed(2)}`);}
+            
+            if (qty>0){
+                const cost = qty * discountedPrice;
+                const originalCost = qty * originalPrice;
+                subtotal += cost;
+                originalTotal += originalCost;
+                
+                if (hasDiscount) {
+                    breakdown.push(`${name}: ${qty} × ₱${discountedPrice.toFixed(2)} <span class="text-green-600">(Discounted)</span> = ₱${cost.toFixed(2)}`);
+                } else {
+                    breakdown.push(`${name}: ${qty} × ₱${discountedPrice.toFixed(2)} = ₱${cost.toFixed(2)}`);
+                }
+            }
         });
     }
+
+    // Calculate manual discount
+    const manualDiscountAmount = calculateManualDiscount(subtotal);
+    const total = subtotal - manualDiscountAmount;
+
+    // Update total display
     document.getElementById('totalAmount').textContent = total.toFixed(2);
-    document.getElementById('costBreakdown').innerHTML = breakdown.map(i=>{
-        const [left,right]=i.split('=');
-        return `<div class="flex justify-between py-1 border-b border-gray-100 last:border-0"><span>${left}</span><span>${right}</span></div>`;
+    
+    // Build breakdown HTML
+    let breakdownHTML = breakdown.map(item => {
+        return `<div class="flex justify-between py-1 border-b border-gray-100 last:border-0">${item}</div>`;
     }).join('');
+
+    // Show automatic savings if there are facility discounts
+    if (originalTotal > subtotal) {
+        const automaticSavings = originalTotal - subtotal;
+        breakdownHTML += `
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-green-600">Automatic Discounts:</span>
+                <span class="text-green-600">-₱${automaticSavings.toFixed(2)}</span>
+            </div>
+        `;
+    }
+
+    // Show manual discount if applied
+    if (manualDiscountAmount > 0) {
+        breakdownHTML += `
+            <div class="flex justify-between py-1 border-b border-gray-100">
+                <span class="text-red-600">Manual Discount:</span>
+                <span class="text-red-600">-₱${manualDiscountAmount.toFixed(2)}</span>
+            </div>
+        `;
+    }
+
+    // Show total savings
+    const totalSavings = (originalTotal - subtotal) + manualDiscountAmount;
+    if (totalSavings > 0) {
+        breakdownHTML += `
+            <div class="flex justify-between py-2 border-t border-gray-200 mt-2">
+                <span class="font-semibold text-green-600">Total Savings:</span>
+                <span class="font-semibold text-green-600">₱${totalSavings.toFixed(2)}</span>
+            </div>
+        `;
+    }
+
+    document.getElementById('costBreakdown').innerHTML = breakdownHTML;
 }
 
 /* =====================
@@ -628,8 +918,11 @@ function updateServiceSelection() {
     const selectedValue = document.querySelector('input[name="service_type"]:checked').value;
     document.querySelectorAll('.service-option').forEach(opt=>{
         const label = opt.querySelector('.service-label');
-        if (opt.dataset.value===selectedValue){label.classList.add('border-red-500','bg-red-50');}
-        else {label.classList.remove('border-red-500','bg-red-50');}
+        if (opt.dataset.value===selectedValue){
+            label.classList.add('border-red-500','bg-red-50');
+        } else {
+            label.classList.remove('border-red-500','bg-red-50');
+        }
     });
     document.getElementById('poolAccessFields').classList.toggle('hidden', selectedValue==='themed_park');
     document.getElementById('themedParkFields').classList.toggle('hidden', selectedValue==='pool');
@@ -638,32 +931,48 @@ function updateServiceSelection() {
 }
 
 /* =====================
-   Init
+   Initialize everything
    ===================== */
 document.addEventListener('DOMContentLoaded', function() {
+    // Calendar event listeners
     document.getElementById('datePicker').addEventListener('click', e=>{
         if (e.target.closest('[data-action="prev-month"]')) changeMonth(-1);
         if (e.target.closest('[data-action="next-month"]')) changeMonth(1);
     });
+
+    // Manual discount event listeners
+    document.getElementById('applyManualDiscount').addEventListener('change', toggleManualDiscount);
+    document.getElementById('discountType').addEventListener('change', updateManualDiscount);
+    document.getElementById('discountValue').addEventListener('input', updateManualDiscount);
+    document.getElementById('discountReason').addEventListener('input', updateManualDiscount);
+
+    // Form event listeners
     document.querySelectorAll('input[name="service_type"]').forEach(r=>r.addEventListener('change', updateServiceSelection));
     document.querySelectorAll('.guest-counter, .accommodation-input').forEach(i=>i.addEventListener('input', calculateTotal));
-    document.getElementById('date_tour').addEventListener('change', updateAvailability);
+    document.getElementById('date_tour').addEventListener('change', updateAvailabilityAndPrices);
 
-    selectedDate=new Date();
+    // Set initial date
+    selectedDate = new Date();
     document.getElementById('walkinDateInput').value = formatDateDisplay(selectedDate);
     document.getElementById('date_tour').value = formatDateForInput(selectedDate);
 
+    // Initialize components
     renderCalendar();
     updateServiceSelection();
     calculateTotal();
-    updateAvailability();
+    updateAvailabilityAndPrices();
 
+    // Handle flash messages
     const flash = document.getElementById('flash-message');
     if (flash) {
-        setTimeout(()=>{flash.classList.add('opacity-0','translate-y-2'); setTimeout(()=>flash.remove(),500);},3000);
+        setTimeout(()=>{
+            flash.classList.add('opacity-0','translate-y-2'); 
+            setTimeout(()=>flash.remove(),500);
+        },3000);
     }
 });
 
+// Form validation
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("form");
 
@@ -694,6 +1003,64 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
-</script>
 
+
+// Add this to your existing JavaScript
+function validateAccommodations() {
+    const serviceType = document.querySelector('input[name="service_type"]:checked').value;
+    const validationElement = document.getElementById('accommodationValidation');
+    
+    // Skip validation for themed_park only
+    if (serviceType === 'themed_park') {
+        validationElement.classList.add('hidden');
+        return true;
+    }
+    
+    const accommodationInputs = document.querySelectorAll('.accommodation-input');
+    let hasAccommodation = false;
+    
+    accommodationInputs.forEach(input => {
+        if (parseInt(input.value) > 0) {
+            hasAccommodation = true;
+        }
+    });
+    
+    if (!hasAccommodation) {
+        validationElement.classList.remove('hidden');
+        // Highlight accommodation section
+        document.getElementById('accommodationSection').classList.add('border-red-300', 'bg-red-50');
+    } else {
+        validationElement.classList.add('hidden');
+        document.getElementById('accommodationSection').classList.remove('border-red-300', 'bg-red-50');
+    }
+    
+    return hasAccommodation;
+}
+
+// Add event listeners for accommodation inputs
+document.querySelectorAll('.accommodation-input').forEach(input => {
+    input.addEventListener('input', validateAccommodations);
+});
+
+// Add to service type change
+document.querySelectorAll('input[name="service_type"]').forEach(radio => {
+    radio.addEventListener('change', validateAccommodations);
+});
+
+// Update form submission
+document.getElementById('dayTourForm').addEventListener('submit', function(e) {
+    const serviceType = document.querySelector('input[name="service_type"]:checked').value;
+    
+    if (serviceType !== 'themed_park' && !validateAccommodations()) {
+        e.preventDefault();
+        // Scroll to accommodations section
+        document.getElementById('accommodationSection').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+        return false;
+    }
+});
+
+</script>
 @endsection

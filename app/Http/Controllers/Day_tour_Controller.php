@@ -11,26 +11,73 @@ use App\Models\User;
 use App\Models\FacilityBookingDetails;
 use App\Models\FacilityBookingLog;
 use App\Models\FacilitySummary;
+use App\Models\FacilityDiscount;
 use Illuminate\Support\Facades\Log; // Added for logging 
 
 class Day_tour_Controller extends Controller
 {
     // Display the day tour registration form
-    public function index(Request $request)
-    {
-        $date = $request->date ?? now()->toDateString();
+public function index(Request $request)
+{
+    $date = $request->date ?? now()->toDateString();
 
-        // Get all facilities
-        $facilities = Facility::all();
+    // Get all facilities
+    $facilities = Facility::all();
+    
+    // Calculate availability for each facility using BookingGuestDetails
+    $cottages = $facilities->where('category', 'Cottage')
+        ->map(function($cottage) use ($date) {
+            return $this->applyFacilityDiscount($cottage, $date);
+        });
         
-        // Calculate availability for each facility using BookingGuestDetails
-         $cottages = $facilities->where('category', 'Cottage');
-         $villas   = $facilities->where('category', 'Villa');
+    $villas = $facilities->where('category', 'Villa')
+        ->map(function($villa) use ($date) {
+            return $this->applyFacilityDiscount($villa, $date);
+        });
 
-        $guestTypes = GuestType::all();
+    $guestTypes = GuestType::all();
 
-        return view('admin.daytour.index', compact('facilities','cottages', 'villas', 'guestTypes', 'date'));
+    return view('admin.daytour.index', compact('facilities','cottages', 'villas', 'guestTypes', 'date'));
+}
+
+// Helper method to apply discounts to facilities
+private function applyFacilityDiscount($facility, $date)
+{
+    $discountedPrice = $this->calculateDiscountedPrice($facility, $date);
+    
+    return (object)[
+        'id' => $facility->id,
+        'name' => $facility->name,
+        'category' => $facility->category,
+        'quantity' => $facility->quantity,
+        'original_price' => $facility->price,
+        'price' => $discountedPrice,
+        'has_discount' => $discountedPrice < $facility->price,
+        'discount_amount' => $facility->price - $discountedPrice,
+        'discount_percentage' => $facility->price > 0 ? round((($facility->price - $discountedPrice) / $facility->price) * 100) : 0
+    ];
+}
+
+// Calculate discounted price based on active discounts
+private function calculateDiscountedPrice($facility, $date)
+{
+    $activeDiscount = FacilityDiscount::where('facility_id', $facility->id)
+        ->where('start_date', '<=', $date)
+        ->where('end_date', '>=', $date)
+        ->first();
+
+    if (!$activeDiscount) {
+        return $facility->price;
     }
+
+    if ($activeDiscount->discount_type === 'percent') {
+        $discountAmount = $facility->price * ($activeDiscount->discount_value / 100);
+        return $facility->price - $discountAmount;
+    } else {
+        // fixed discount
+        return max(0, $facility->price - $activeDiscount->discount_value);
+    }
+}
 
 
 // Add this helper method to your controller
@@ -506,16 +553,21 @@ public function store(Request $request)
         'reservation_status'=> 'required|string|in:pending,paid,approved',
         'status'=> 'nullable|string|in:pending,paid,approved,reserved',
         'service_type' => 'required|string|in:pool,themed_park,both',
+        'manual_discount_type' => 'nullable|string|in:percentage,fixed',
+        'manual_discount_value' => 'nullable|numeric|min:0',
+        'manual_discount_amount' => 'nullable|numeric|min:0',
+        'manual_discount_reason' => 'nullable|string|max:255',
     ]);
 
     $serviceType = $request->service_type;
+    $dateTour = $request->date_tour;
 
     // 2️⃣ Count guests per category
     $totalPool = ($request->pool_adult ?? 0) + ($request->pool_kids ?? 0) + ($request->pool_seniors ?? 0);
     $totalPark = ($request->park_adult ?? 0) + ($request->park_kids ?? 0) + ($request->park_seniors ?? 0);
 
     // 3️⃣ Validate before touching DB
-    if ($serviceType === 'pool' && $totalPool < 1) {
+    if ($serviceType === 'pool' && $totalPool = 0) {
         return back()->with('error', 'Please add at least 1 Pool guest.')->withInput();
     }
 
@@ -526,6 +578,23 @@ public function store(Request $request)
     if ($serviceType === 'both' && ($totalPool < 1 || $totalPark < 1)) {
         return back()->with('error', 'Please add at least 1 guest for both Pool and Park.')->withInput();
     }
+    
+    // Server-side accommodation validation
+    if ($serviceType !== 'themed_park') {
+        $accommodations = $request->accommodations ?? [];
+        $hasAccommodation = false;
+        
+        foreach ($accommodations as $qty) {
+            if ($qty > 0) {
+                $hasAccommodation = true;
+                break;
+            }
+        }
+        
+        if (!$hasAccommodation) {
+            return back()->with('error', 'Please select at least one accommodation (cottage or villa) for your booking.')->withInput();
+        }
+    }
 
     DB::beginTransaction();
 
@@ -535,39 +604,40 @@ public function store(Request $request)
             'firstname' => $request->first_name,
             'lastname'  => $request->last_name,
             'phone'     => $request->phone,
+            'email'     => $request->email, // Added email field
         ]);
 
-        // 2️⃣ Create Day Tour Log
+        // 2️⃣ Create Day Tour Log - total_price will be calculated with discounts
         $dayTourLog = DayTourLogDetails::create([
             'user_id'     => $user->id,
-            'date_tour'   => $request->date_tour,
+            'date_tour'   => $dateTour,
             'approved_by' => auth()->id(),
             'reservation_status'=> $request->reservation_status,
-            'total_price' => 0,
+            'total_price' => 0, // Will be updated after calculation
             'status' => match ($request->reservation_status) {
-            'paid', 'approved' => \Carbon\Carbon::parse($request->date_tour)->isToday()
-                                ? 'Checked_in'
-                                : 'Reserved',
-        'pending'  => 'Pending Payment',
-        'rejected' => 'Rejected',
-        default    => 'Pending Payment',
-    },
+                'paid', 'approved' => \Carbon\Carbon::parse($dateTour)->isToday()
+                                    ? 'Checked_in'
+                                    : 'Reserved',
+                'pending'  => 'Pending Payment',
+                'rejected' => 'Rejected',
+                default    => 'Pending Payment',
+            },
         ]);
 
         // ✅ Auto check-in ONLY if paid or approved AND today
-if (
-    in_array($request->reservation_status, ['paid', 'approved']) &&
-    \Carbon\Carbon::parse($request->date_tour)->isToday()
-) {
-    $dayTourLog->update([
-        'checked_in_at' => now(),
-        'status' => 'Checked_in',
-    ]);
-}
-        $totalPrice  = 0;
-        $serviceType = $request->service_type;
+        if (
+            in_array($request->reservation_status, ['paid', 'approved']) &&
+            \Carbon\Carbon::parse($dateTour)->isToday()
+        ) {
+            $dayTourLog->update([
+                'checked_in_at' => now(),
+                'status' => 'Checked_in',
+            ]);
+        }
 
-        // 3️⃣ Save Pool Guest Types
+        $totalPrice = 0;
+
+        // 3️⃣ Save Pool Guest Types (no discounts for guest types)
         if (in_array($serviceType, ['pool', 'both'])) {
             $poolGuests = [
                 'pool_adult'   => $request->pool_adult ?? 0,
@@ -597,7 +667,7 @@ if (
             }
         }
 
-        // 4️⃣ Save Park Guest Types
+        // 4️⃣ Save Park Guest Types (no discounts for guest types)
         if (in_array($serviceType, ['themed_park', 'both'])) {
             $parkGuests = [
                 'park_adult'   => $request->park_adult ?? 0,
@@ -627,50 +697,92 @@ if (
             }
         }
 
-        // 5️⃣ Accommodations handling (cottages/villas)
+        // 5️⃣ Accommodations handling (cottages/villas) WITH DISCOUNTS APPLIED
         $accommodationInputs = $request->accommodations ?? [];
 
-foreach ($accommodationInputs as $facilityId => $qty) {
-    if ($qty <= 0) continue;
+        foreach ($accommodationInputs as $facilityId => $qty) {
+            if ($qty <= 0) continue;
 
-    $availability = $this->calculateFacilityAvailability($facilityId, $request->date_tour);
+            $availability = $this->calculateFacilityAvailability($facilityId, $dateTour);
 
-    if ($availability['available'] < $qty) {
-        DB::rollBack();
-        return redirect()->back()
-            ->with('error', "Sorry, only {$availability['available']} unit(s) available for {$availability['name']} on {$request->date_tour}")
-            ->withInput();
-    }
+            if ($availability['available'] < $qty) {
+                DB::rollBack();
+                return redirect()->back()
+                    ->with('error', "Sorry, only {$availability['available']} unit(s) available for {$availability['name']} on {$dateTour}")
+                    ->withInput();
+            }
 
-    // Book the available units
-    $facility   = Facility::find($facilityId);
-    $qtyToBook  = min($qty, $availability['available']);
+            // Book the available units
+            $facility = Facility::find($facilityId);
+            $qtyToBook = min($qty, $availability['available']);
+            
+            // Calculate discounted price - THIS IS WHERE DISCOUNTS ARE APPLIED
+            $discountedPrice = $this->calculateDiscountedPrice($facility, $dateTour);
+            
+            $defaultGuestType = GuestType::where('type', 'Adult')
+                ->where('location', 'Pool')
+                ->first() ?? GuestType::first();
 
-    $defaultGuestType = GuestType::where('type', 'Adult')
-        ->where('location', 'Pool')
-        ->first() ?? GuestType::first();
+            BookingGuestDetails::create([
+                'day_tour_log_details_id' => $dayTourLog->id,
+                'facility_id'             => $facilityId,
+                'facility_quantity'       => $qtyToBook,
+                'quantity'                => 0,
+                'guest_type_id'           => $defaultGuestType->id,
+                'facility_booking_log_id' => null,
+            ]);
 
-    BookingGuestDetails::create([
-        'day_tour_log_details_id' => $dayTourLog->id,
-        'facility_id'             => $facilityId,
-        'facility_quantity'       => $qtyToBook,
-        'quantity'                => 0,
-        'guest_type_id'           => $defaultGuestType->id,
-        'facility_booking_log_id' => null,
-    ]);
+            // Use discounted price for total calculation
+            $totalPrice += $discountedPrice * $qtyToBook;
+        }
 
-    $totalPrice += $facility->price * $qtyToBook;
-}
+        // 6️⃣ Apply manual discount if any
+        $manualDiscountAmount = $request->manual_discount_amount ?? 0;
+        $manualDiscountType = $request->manual_discount_type;
+        $manualDiscountValue = $request->manual_discount_value ?? 0;
+        $manualDiscountReason = $request->manual_discount_reason;
 
+        $finalPrice = $totalPrice;
 
-        // 6️⃣ Update total price
-        $dayTourLog->update(['total_price' => $totalPrice]);
+        // Apply manual discount to final price (only if all values are valid)
+        if ($manualDiscountAmount > 0 && $manualDiscountType && $manualDiscountValue > 0) {
+            $finalPrice = max(0, $totalPrice - $manualDiscountAmount);
+        } else {
+            // Reset discount values if discount is not properly applied
+            $manualDiscountAmount = 0;
+            $manualDiscountType = null;
+            $manualDiscountValue = 0;
+            $manualDiscountReason = null;
+        }
+
+        // 7️⃣ Update total price with all discounts applied
+        $dayTourLog->update([
+            'total_price' => $finalPrice,
+            'manual_discount_amount' => $manualDiscountAmount,
+            'manual_discount_type' => $manualDiscountType,
+            'manual_discount_value' => $manualDiscountValue,
+            'manual_discount_reason' => $manualDiscountReason,
+        ]);
 
         DB::commit();
-        return redirect()->back()->with('success', 'Day Tour registered successfully!');
+        
+        // Show success message with discount information if applicable
+        $successMessage = 'Day Tour registered successfully!';
+        if ($manualDiscountAmount > 0) {
+            $discountType = $manualDiscountType === 'percentage' ? "{$manualDiscountValue}%" : "₱{$manualDiscountValue}";
+            $successMessage .= " Manual discount applied: {$discountType} (₱{$manualDiscountAmount})";
+            
+            // Add reason if provided
+            if ($manualDiscountReason) {
+                $successMessage .= " - {$manualDiscountReason}";
+            }
+        }
+        
+        return redirect()->back()->with('success', $successMessage);
     } catch (\Exception $e) {
         DB::rollBack();
-        return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        \Log::error('Day Tour Registration Error: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Error: ' . $e->getMessage())->withInput();
     }
 }
 
@@ -716,7 +828,6 @@ public function checkAvailability(Request $request)
     $facilities = Facility::whereIn('category', ['Cottage', 'Villa'])->get();
 
     $availability = $facilities->map(function ($facility) use ($date) {
-
         // Count only confirmed bookings that are currently occupying or will occupy the facility
         $alreadyBooked = BookingGuestDetails::where('facility_id', $facility->id)
             ->whereHas('dayTourLog', function ($q) use ($date) {
@@ -730,12 +841,19 @@ public function checkAvailability(Request $request)
             ->sum('facility_quantity');
 
         $available = max(0, $facility->quantity - $alreadyBooked);
+        
+        // Calculate discounted price for display
+        $discountedPrice = $this->calculateDiscountedPrice($facility, $date);
+        $hasDiscount = $discountedPrice < $facility->price;
 
         return [
             'id'        => $facility->id,
             'name'      => $facility->name,
             'category'  => $facility->category,
             'price'     => $facility->price,
+            'discounted_price' => $discountedPrice,
+            'has_discount' => $hasDiscount,
+            'discount_amount' => $facility->price - $discountedPrice,
             'total'     => $facility->quantity,
             'available' => $available,
             'status'    => $available > 0 ? 'Available' : 'Occupied',
@@ -743,6 +861,30 @@ public function checkAvailability(Request $request)
     });
 
     return response()->json($availability);
+}
+
+// Add this method to your controller
+public function checkPrices(Request $request)
+{
+    $date = $request->input('date', now()->format('Y-m-d'));
+
+    $facilities = Facility::whereIn('category', ['Cottage', 'Villa'])->get();
+
+    $prices = $facilities->map(function ($facility) use ($date) {
+        $discountedPrice = $this->calculateDiscountedPrice($facility, $date);
+        $hasDiscount = $discountedPrice < $facility->price;
+
+        return [
+            'id' => $facility->id,
+            'name' => $facility->name,
+            'price' => $facility->price,
+            'discounted_price' => $discountedPrice,
+            'has_discount' => $hasDiscount,
+            'discount_amount' => $facility->price - $discountedPrice,
+        ];
+    });
+
+    return response()->json($prices);
 }
 
 

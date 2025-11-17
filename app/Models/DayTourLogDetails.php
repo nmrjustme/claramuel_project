@@ -19,12 +19,19 @@ class DayTourLogDetails extends Model
         'total_price',
         'checked_in_at',
         'checked_out_at',
+        'manual_discount_amount',
+        'manual_discount_type',
+        'manual_discount_value',
+        'manual_discount_reason',
     ];
 
     // 👇 this is where casting goes
     protected $casts = [
         'checked_in_at' => 'datetime',
         'checked_out_at' => 'datetime',
+        'manual_discount_amount' => 'decimal:2',
+        'manual_discount_value' => 'decimal:2',
+        'total_price' => 'decimal:2',
     ];
 
     public function user(): BelongsTo

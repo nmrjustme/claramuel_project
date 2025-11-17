@@ -45,6 +45,7 @@ use App\Http\Controllers\DayTourEarningsController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\GalleryController;  // ← Correct import
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
+use App\Http\Controllers\DayTourFacilitiesController;
 use App\Models\FacilityBookingLog;
 use App\Services\InvoiceService; // adjust namespace if different
 
@@ -192,6 +193,7 @@ Route::get('/env-test', function () {
 
 Route::get('/daytour/check-availability', [Day_tour_Controller::class, 'checkAvailability'])->name('daytour.checkAvailability');
 Route::get('/cottages/{date}', [Day_tour_Controller::class, 'getCottages'])->name('cottages.availability');
+Route::get('/daytour/check-prices', [Day_tour_Controller::class, 'checkPrices']);
 
 // Day Tour Earnings Routes
 Route::get('/day-tour-earnings', [DayTourEarningsController::class, 'index'])->name('day_tour.earnings');
@@ -509,6 +511,31 @@ Route::prefix('api')->group(function () {
     // Facility Images Routes
     Route::get('/facilities/{id}/images', [FacilitiesController::class, 'getImages']);
     Route::delete('/admin/facilities/images/{image}', [FacilitiesController::class, 'deleteImage']);
+
+    // =======================
+    // Day-Tour Facilities Crud
+    // =======================
+
+// Day-tour Facilities Routes
+Route::prefix('admin/day-tour-facilities')->group(function () {
+    Route::get('/api', [DayTourFacilitiesController::class, 'index'])->name('admin.day-tour-facilities.api');
+    Route::get('/', [DayTourFacilitiesController::class, 'daytourindex'])->name('admin.day-tour-facilities.index');
+    Route::post('/store', [DayTourFacilitiesController::class, 'store'])->name('admin.day-tour-facilities.store');
+    Route::get('/{id}', [DayTourFacilitiesController::class, 'show'])->name('admin.day-tour-facilities.show');
+    Route::get('/{id}/edit', [DayTourFacilitiesController::class, 'edit'])->name('admin.day-tour-facilities.edit');
+    Route::put('/{id}', [DayTourFacilitiesController::class, 'update'])->name('admin.day-tour-facilities.update');
+    Route::delete('/{id}', [DayTourFacilitiesController::class, 'destroy'])->name('admin.day-tour-facilities.destroy');
+    Route::get('/{id}/images', [DayTourFacilitiesController::class, 'getImages'])->name('admin.day-tour-facilities.images');
+    Route::delete('/images/{id}', [DayTourFacilitiesController::class, 'deleteImage'])->name('admin.day-tour-facilities.images.delete');
+    Route::post('/update-image-order', [DayTourFacilitiesController::class, 'updateImageOrder'])->name('admin.day-tour-facilities.images.order');
+    
+    // Discount routes
+    Route::get('/{facilityId}/discounts', [DayTourFacilitiesController::class, 'getDiscounts'])->name('admin.day-tour-facilities.discounts');
+    Route::post('/{facilityId}/discounts', [DayTourFacilitiesController::class, 'addDiscount'])->name('admin.day-tour-facilities.discounts.store');
+    Route::put('/discounts/{discountId}', [DayTourFacilitiesController::class, 'updateDiscount'])->name('admin.day-tour-facilities.discounts.update');
+    Route::delete('/discounts/{discountId}', [DayTourFacilitiesController::class, 'deleteDiscount'])->name('admin.day-tour-facilities.discounts.destroy');
+});
+
 
     // =======================
     // Calendar
