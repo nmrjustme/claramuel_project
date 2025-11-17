@@ -22,6 +22,7 @@ use App\Mail\ReservationReceived;
 use App\Mail\PaymentFailed;
 use Illuminate\Support\Facades\Log;
 use App\Services\InvoiceService;
+use App\Mail\AdminNotification;
 
 class MayaWebhookSetupController extends Controller
 {
@@ -246,7 +247,8 @@ class MayaWebhookSetupController extends Controller
             $pdf = $invoiceService->generateInvoice($bookingLog);
 
             event(new BookingNew($bookingLog)); // Event listener for new booking list
-
+            $this->sendEmailAdmin($bookingLog);
+            
             // Send email with PDF attachment
             Mail::to($bookingData['email'])->send(new ReservationReceived(
                 $bookingLog,
@@ -295,5 +297,37 @@ class MayaWebhookSetupController extends Controller
 
         // Ensure price doesn't go below zero
         return max($discountedPrice, 0);
+    }
+
+    public function sendEmailAdmin(FacilityBookingLog $booking)
+    {
+        // Get all admin users who are active
+        $admins = User::where('role', 'Admin')
+            ->whereNotNull('email')
+            ->get();
+
+        if ($admins->isEmpty()) {
+            Log::warning("No active admin with email found");
+            return;
+        }
+
+        foreach ($admins as $admin) {
+            try {
+                Mail::to($admin->email)->send(
+                    new AdminNotification($booking)
+                );
+
+                Log::info("Booking email sent to admin", [
+                    'booking_id' => $booking->id,
+                    'email' => $admin->email
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to send admin email", [
+                    'booking_id' => $booking->id,
+                    'email' => $admin->email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
     }
 }

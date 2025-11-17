@@ -93,6 +93,19 @@ Route::get('/maya/status/{referenceNumber}', [MayaCheckoutController::class, 'ch
 Route::post('/maya/payment/webhook', [MayaWebhookSetupController::class, 'handle'])->name('maya.webhook.succes');
 
 
+// In routes/web.php
+Route::get('/admin/galleries/images/all', [GalleryController::class, 'getAllImages'])
+    ->name('admin.galleries.images.all');
+
+// Or if you're using API routes:
+Route::get('/api/admin/galleries/images/all', [GalleryController::class, 'getAllImages']);
+
+// Public Gallery Routes
+Route::get('/gallery', [GalleryController::class, 'publicGallery'])->name('public.gallery');
+Route::get('/gallery/{id}', [GalleryController::class, 'showGallery'])->name('public.gallery.show');
+
+
+
 // =======================
 // Awaiting verification page 
 // =======================
@@ -464,18 +477,6 @@ Route::prefix('admin/galleries')->name('admin.galleries.')->group(function () {
     Route::post('/images/bulk-delete', [GalleryController::class, 'bulkDelete'])->name('images.bulk-delete');
     Route::post('/images/reorder', [GalleryController::class, 'reorder'])->name('images.reorder');
 });
-
-
-// In routes/web.php
-Route::get('/admin/galleries/images/all', [GalleryController::class, 'getAllImages'])
-    ->name('admin.galleries.images.all');
-
-// Or if you're using API routes:
-Route::get('/api/admin/galleries/images/all', [GalleryController::class, 'getAllImages']);
-
-// Public Gallery Routes
-Route::get('/gallery', [GalleryController::class, 'publicGallery'])->name('public.gallery');
-Route::get('/gallery/{id}', [GalleryController::class, 'showGallery'])->name('public.gallery.show');
 
 
 // API Routes (for AJAX calls)

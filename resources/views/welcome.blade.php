@@ -365,15 +365,20 @@ body.lightbox-open #back-to-top {
     display: none !important;
 }
 
-/* Loading animation */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+        /* Loading animation */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
 
-.animate-spin {
-    animation: spin 1s linear infinite;
-}
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
 
 /* Remove old lightbox styles that might conflict */
 #caption-hint,
@@ -443,11 +448,17 @@ body.lightbox-open #back-to-top {
     <div class="hero-container">
         <section id="home"
             class="pt-32 pb-20 relative h-full flex items-center justify-center text-center overflow-hidden">
-            <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+            <video id="hero-video" autoplay loop muted playsinline
+                class="absolute inset-0 w-full h-full object-cover z-0" poster="{{ url('imgs/video-backup.jpg') }}"
+                onerror="handleVideoError()" onloadstart="checkVideoLoad()">
                 <source src="{{ url('video/welcomeVideo.mp4') }}" type="video/mp4">
-                <img src="{{ url('imgs/video-backup.jpg') }}" alt="Mt. ClaRamuel Resort"
-                    class="absolute inset-0 w-full h-full object-cover z-0">
+                <source src="{{ url('video/welcomeVideo.webm') }}" type="video/webm">
+                Your browser does not support the video tag.
             </video>
+            <div id="video-fallback" class="absolute inset-0 w-full h-full z-0 hidden">
+                <img src="{{ url('imgs/video-backup.jpg') }}" alt="Mt. ClaRamuel Resort"
+                    class="w-full h-full object-cover">
+            </div>
             <div class="absolute inset-0 bg-black/40 z-10"></div>
             <div class="relative z-20 text-white px-6 max-w-6xl mx-auto">
                 <div class="text-center px-4 sm:px-6 md:px-12">
@@ -457,7 +468,8 @@ body.lightbox-open #back-to-top {
                     </h1>
                     <p class="text-xs sm:text-sm md:text-lg lg:text-xl mb-6 sm:mb-8 max-w-2xl md:max-w-3xl mx-auto leading-relaxed animate-fadeInUp"
                         style="animation-delay: 0.2s;">
-                        A premier staycation destination in Ilagan City, offering sophisticated accommodations, exceptional amenities, and an atmosphere of refined tranquility in the heart of Isabela.
+                        A premier staycation destination in Ilagan City, offering sophisticated accommodations,
+                        exceptional amenities, and an atmosphere of refined tranquility in the heart of Isabela.
                     </p>
                 </div>
 
@@ -667,7 +679,7 @@ body.lightbox-open #back-to-top {
                                 Panoramic mountain views
                             </li>
                         </ul>
-                        <a href="{{ route('customer_bookings') }}"
+                        <a href="{{ route('dashboard.bookings') }}"
                             class="inline-flex items-center text-primary hover:text-secondary font-medium transition duration-300">
                             View Accommodations
                             <i class="fas fa-arrow-right ml-2"></i>
@@ -758,350 +770,414 @@ body.lightbox-open #back-to-top {
         </div>
     </section>
 
- <!-- Symmetrical Gallery Section -->
-<section id="gallery" class="py-20 bg-white">
-    <div class="container mx-auto px-6">
-        <!-- Section Header -->
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-5xl text-darkAccent mb-6 font-serif font-light">
-                𝔼𝕩𝕡𝕖𝕣𝕚𝕖𝕟𝕔𝕖 𝕆𝕦𝕣 𝕎𝕠𝕣𝕝𝕕
-            </h2>
-            <p class="text-gray-600 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-                Immerse yourself in the beauty and luxury of our resort through these captivating glimpses 
-                of our exquisite facilities and breathtaking surroundings
-            </p>
-        </div>
+    <!-- Symmetrical Gallery Section -->
+    <section id="gallery" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl text-darkAccent mb-6 font-serif font-light">
+                    𝔼𝕩𝕡𝕖𝕣𝕚𝕖𝕟𝕔𝕖 𝕆𝕦𝕣 𝕎𝕠𝕣𝕝𝕕
+                </h2>
+                <p class="text-gray-600 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
+                    Immerse yourself in the beauty and luxury of our resort through these captivating glimpses
+                    of our exquisite facilities and breathtaking surroundings
+                </p>
+            </div>
 
-        @php
-            // Get featured images for the landing page
-            $featuredImages = \App\Models\GalleryImage::with('gallery')
-                ->where('is_active', true)
-                ->where('is_featured', true)
-                ->orderBy('sort_order')
-                ->limit(8)
-                ->get();
-                
-            // Check if we have enough images for the symmetrical layout
-            $hasEnoughImages = $featuredImages->count() >= 8;
-        @endphp
+            @php
+                // Get featured images for the landing page
+                $featuredImages = \App\Models\GalleryImage::with('gallery')
+                    ->where('is_active', true)
+                    ->where('is_featured', true)
+                    ->orderBy('sort_order')
+                    ->limit(8)
+                    ->get();
 
-        @if($featuredImages->count() > 0)
-            <!-- Perfectly Symmetrical Grid (only if we have 8+ images) -->
-            @if($hasEnoughImages)
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <!-- Row 1: 2 large images -->
-                @if(isset($featuredImages[0]))
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('{{ asset('storage/' . $featuredImages[0]->image_path) }}', '{{ addslashes($featuredImages[0]->title) }}', '{{ addslashes($featuredImages[0]->caption ?? '') }}', 0)">
-                    <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                        <img src="{{ asset('storage/' . $featuredImages[0]->image_path) }}" 
-                             alt="{{ $featuredImages[0]->image_alt ?? $featuredImages[0]->title }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $featuredImages[0]->title }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
+                // Check if we have enough images for the symmetrical layout
+                $hasEnoughImages = $featuredImages->count() >= 8;
+            @endphp
+
+            @if($featuredImages->count() > 0)
+                <!-- Perfectly Symmetrical Grid (only if we have 8+ images) -->
+                @if($hasEnoughImages)
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                        <!-- Row 1: 2 large images -->
+                        @if(isset($featuredImages[0]))
+                            <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
+                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[0]->image_path) }}', '{{ addslashes($featuredImages[0]->title) }}', '{{ addslashes($featuredImages[0]->caption ?? '') }}', 0)">
+                                <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-100">
+                                    <img src="{{ asset('storage/' . $featuredImages[0]->image_path) }}"
+                                        alt="{{ $featuredImages[0]->image_alt ?? $featuredImages[0]->title }}"
+                                        class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                                </div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                                    <div
+                                        class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                        <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                            {{ $featuredImages[0]->title }}
+                                        </h3>
+                                        <div class="flex items-center text-white/80 text-xs">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View full size
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
+                        @endif
 
-                @if(isset($featuredImages[1]))
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('{{ asset('storage/' . $featuredImages[1]->image_path) }}', '{{ addslashes($featuredImages[1]->title) }}', '{{ addslashes($featuredImages[1]->caption ?? '') }}', 1)">
-                    <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                        <img src="{{ asset('storage/' . $featuredImages[1]->image_path) }}" 
-                             alt="{{ $featuredImages[1]->image_alt ?? $featuredImages[1]->title }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $featuredImages[1]->title }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
+                        @if(isset($featuredImages[1]))
+                            <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
+                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[1]->image_path) }}', '{{ addslashes($featuredImages[1]->title) }}', '{{ addslashes($featuredImages[1]->caption ?? '') }}', 1)">
+                                <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-100">
+                                    <img src="{{ asset('storage/' . $featuredImages[1]->image_path) }}"
+                                        alt="{{ $featuredImages[1]->image_alt ?? $featuredImages[1]->title }}"
+                                        class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                                </div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                                    <div
+                                        class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                        <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                            {{ $featuredImages[1]->title }}
+                                        </h3>
+                                        <div class="flex items-center text-white/80 text-xs">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View full size
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
+                        @endif
 
-                <!-- Row 2: 4 square images -->
-                @for($i = 2; $i < 6; $i++)
-                    @if(isset($featuredImages[$i]))
-                    <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
-                         onclick="openLightbox('{{ asset('storage/' . $featuredImages[$i]->image_path) }}', '{{ addslashes($featuredImages[$i]->title) }}', '{{ addslashes($featuredImages[$i]->caption ?? '') }}', {{ $i }})">
-                        <div class="aspect-square w-full overflow-hidden bg-gray-100">
-                            <img src="{{ asset('storage/' . $featuredImages[$i]->image_path) }}" 
-                                 alt="{{ $featuredImages[$i]->image_alt ?? $featuredImages[$i]->title }}"
-                                 class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                        <!-- Row 2: 4 square images -->
+                        @for($i = 2; $i < 6; $i++)
+                            @if(isset($featuredImages[$i]))
+                                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
+                                    onclick="openLightbox('{{ asset('storage/' . $featuredImages[$i]->image_path) }}', '{{ addslashes($featuredImages[$i]->title) }}', '{{ addslashes($featuredImages[$i]->caption ?? '') }}', {{ $i }})">
+                                    <div class="aspect-square w-full overflow-hidden bg-gray-100">
+                                        <img src="{{ asset('storage/' . $featuredImages[$i]->image_path) }}"
+                                            alt="{{ $featuredImages[$i]->image_alt ?? $featuredImages[$i]->title }}"
+                                            class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                                    </div>
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                                        <div
+                                            class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                                {{ $featuredImages[$i]->title }}
+                                            </h3>
+                                            <div class="flex items-center text-white/80 text-xs">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                View full size
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endfor
+
+                        <!-- Row 3: 2 wide images -->
+                        @if(isset($featuredImages[6]))
+                            <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
+                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[6]->image_path) }}', '{{ addslashes($featuredImages[6]->title) }}', '{{ addslashes($featuredImages[6]->caption ?? '') }}', 6)">
+                                <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
+                                    <img src="{{ asset('storage/' . $featuredImages[6]->image_path) }}"
+                                        alt="{{ $featuredImages[6]->image_alt ?? $featuredImages[6]->title }}"
+                                        class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                                </div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                                    <div
+                                        class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                        <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                            {{ $featuredImages[6]->title }}
+                                        </h3>
+                                        <div class="flex items-center text-white/80 text-xs">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View full size
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(isset($featuredImages[7]))
+                            <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
+                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[7]->image_path) }}', '{{ addslashes($featuredImages[7]->title) }}', '{{ addslashes($featuredImages[7]->caption ?? '') }}', 7)">
+                                <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
+                                    <img src="{{ asset('storage/' . $featuredImages[7]->image_path) }}"
+                                        alt="{{ $featuredImages[7]->image_alt ?? $featuredImages[7]->title }}"
+                                        class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                                </div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                                    <div
+                                        class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                        <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                            {{ $featuredImages[7]->title }}
+                                        </h3>
+                                        <div class="flex items-center text-white/80 text-xs">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View full size
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @else
+                    <!-- Responsive Grid for fewer than 8 images -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        @foreach($featuredImages as $index => $image)
+                            <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
+                                onclick="openLightbox('{{ asset('storage/' . $image->image_path) }}', '{{ addslashes($image->title) }}', '{{ addslashes($image->caption ?? '') }}', {{ $index }})">
+                                <div class="aspect-square w-full overflow-hidden bg-gray-100">
+                                    <img src="{{ asset('storage/' . $image->image_path) }}"
+                                        alt="{{ $image->image_alt ?? $image->title }}"
+                                        class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                                </div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                                    <div
+                                        class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                        <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                            {{ $image->title }}
+                                        </h3>
+                                        <div class="flex items-center text-white/80 text-xs">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View full size
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            @else
+                <!-- Symmetrical Fallback Layout -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    @php
+                        $fallbackImages = [
+                            ['title' => 'Luxury Suite', 'img' => 1],
+                            ['title' => 'Infinity Pool', 'img' => 2],
+                            ['title' => 'Spa & Wellness', 'img' => 3],
+                            ['title' => 'Ocean View', 'img' => 4],
+                            ['title' => 'Private Beach', 'img' => 5],
+                            ['title' => 'Sunset Lounge', 'img' => 6],
+                            ['title' => 'Gourmet Dining', 'img' => 7],
+                            ['title' => 'Executive Lounge', 'img' => 8],
+                        ];
+                    @endphp
+
+                    <!-- Row 1: 2 large images -->
+                    <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
+                        onclick="openLightbox('/imgs/gallery/1.jpg', '{{ $fallbackImages[0]['title'] }}', 'Experience luxury accommodation', 0)">
+                        <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-200">
+                            <img src="/imgs/gallery/1.jpg" alt="{{ $fallbackImages[0]['title'] }}"
+                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                         </div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                                <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $featuredImages[$i]->title }}</h3>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                            <div
+                                class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                    {{ $fallbackImages[0]['title'] }}
+                                </h3>
                                 <div class="flex items-center text-white/80 text-xs">
                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
                                     View full size
                                 </div>
                             </div>
                         </div>
                     </div>
-                    @endif
-                @endfor
 
-                <!-- Row 3: 2 wide images -->
-                @if(isset($featuredImages[6]))
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('{{ asset('storage/' . $featuredImages[6]->image_path) }}', '{{ addslashes($featuredImages[6]->title) }}', '{{ addslashes($featuredImages[6]->caption ?? '') }}', 6)">
-                    <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                        <img src="{{ asset('storage/' . $featuredImages[6]->image_path) }}" 
-                             alt="{{ $featuredImages[6]->image_alt ?? $featuredImages[6]->title }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $featuredImages[6]->title }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
+                    <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
+                        onclick="openLightbox('/imgs/gallery/2.jpg', '{{ $fallbackImages[1]['title'] }}', 'Infinity pool with ocean view', 1)">
+                        <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-200">
+                            <img src="/imgs/gallery/2.jpg" alt="{{ $fallbackImages[1]['title'] }}"
+                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                            <div
+                                class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                    {{ $fallbackImages[1]['title'] }}
+                                </h3>
+                                <div class="flex items-center text-white/80 text-xs">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    View full size
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                @endif
 
-                @if(isset($featuredImages[7]))
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('{{ asset('storage/' . $featuredImages[7]->image_path) }}', '{{ addslashes($featuredImages[7]->title) }}', '{{ addslashes($featuredImages[7]->caption ?? '') }}', 7)">
-                    <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                        <img src="{{ asset('storage/' . $featuredImages[7]->image_path) }}" 
-                             alt="{{ $featuredImages[7]->image_alt ?? $featuredImages[7]->title }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                    <!-- Row 2: 4 square images -->
+                    @for($i = 2; $i < 6; $i++)
+                        <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
+                            onclick="openLightbox('/imgs/gallery/{{ $fallbackImages[$i]['img'] }}.jpg', '{{ $fallbackImages[$i]['title'] }}', 'Luxury experience', {{ $i }})">
+                            <div class="aspect-square w-full overflow-hidden bg-gray-200">
+                                <img src="/imgs/gallery/{{ $fallbackImages[$i]['img'] }}.jpg"
+                                    alt="{{ $fallbackImages[$i]['title'] }}"
+                                    class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                            </div>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                                <div
+                                    class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                    <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                        {{ $fallbackImages[$i]['title'] }}
+                                    </h3>
+                                    <div class="flex items-center text-white/80 text-xs">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        View full size
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endfor
+
+                    <!-- Row 3: 2 wide images -->
+                    <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
+                        onclick="openLightbox('/imgs/gallery/7.jpg', '{{ $fallbackImages[6]['title'] }}', 'Fine dining experience', 6)">
+                        <div class="aspect-[2/1] w-full overflow-hidden bg-gray-200">
+                            <img src="/imgs/gallery/7.jpg" alt="{{ $fallbackImages[6]['title'] }}"
+                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                            <div
+                                class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                    {{ $fallbackImages[6]['title'] }}
+                                </h3>
+                                <div class="flex items-center text-white/80 text-xs">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    View full size
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $featuredImages[7]->title }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
+
+                    <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
+                        onclick="openLightbox('/imgs/gallery/8.jpg', '{{ $fallbackImages[7]['title'] }}', 'Executive lounge area', 7)">
+                        <div class="aspect-[2/1] w-full overflow-hidden bg-gray-200">
+                            <img src="/imgs/gallery/8.jpg" alt="{{ $fallbackImages[7]['title'] }}"
+                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
+                            <div
+                                class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                                <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">
+                                    {{ $fallbackImages[7]['title'] }}
+                                </h3>
+                                <div class="flex items-center text-white/80 text-xs">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    View full size
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                @endif
-            </div>
-            @else
-            <!-- Responsive Grid for fewer than 8 images -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                @foreach($featuredImages as $index => $image)
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
-                     onclick="openLightbox('{{ asset('storage/' . $image->image_path) }}', '{{ addslashes($image->title) }}', '{{ addslashes($image->caption ?? '') }}', {{ $index }})">
-                    <div class="aspect-square w-full overflow-hidden bg-gray-100">
-                        <img src="{{ asset('storage/' . $image->image_path) }}" 
-                             alt="{{ $image->image_alt ?? $image->title }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $image->title }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
             @endif
-        @else
-            <!-- Symmetrical Fallback Layout -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+
+            <!-- Stats Section -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-12 border-t border-gray-200">
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">50+</div>
+                    <div class="text-gray-600 text-sm uppercase tracking-wider">Stunning Views</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">12</div>
+                    <div class="text-gray-600 text-sm uppercase tracking-wider">Luxury Facilities</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">24/7</div>
+                    <div class="text-gray-600 text-sm uppercase tracking-wider">Photo Ready</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">100%</div>
+                    <div class="text-gray-600 text-sm uppercase tracking-wider">Memorable Moments</div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="text-center mt-12">
+                <a href="{{ route('public.gallery') }}"
+                    class="inline-flex items-center px-8 py-4 bg-darkAccent text-white rounded-full hover:bg-opacity-90 transform hover:scale-105 transition-all duration-300 font-medium text-lg shadow-xl group">
+                    <span>Explore Complete Gallery</span>
+                    <svg class="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
                 @php
-                    $fallbackImages = [
-                        ['title' => 'Luxury Suite', 'img' => 1],
-                        ['title' => 'Infinity Pool', 'img' => 2],
-                        ['title' => 'Spa & Wellness', 'img' => 3],
-                        ['title' => 'Ocean View', 'img' => 4],
-                        ['title' => 'Private Beach', 'img' => 5],
-                        ['title' => 'Sunset Lounge', 'img' => 6],
-                        ['title' => 'Gourmet Dining', 'img' => 7],
-                        ['title' => 'Executive Lounge', 'img' => 8],
-                    ];
+                    $totalImages = \App\Models\GalleryImage::where('is_active', true)->count();
                 @endphp
-                
-                <!-- Row 1: 2 large images -->
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('/imgs/gallery/1.jpg', '{{ $fallbackImages[0]['title'] }}', 'Experience luxury accommodation', 0)">
-                    <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-200">
-                        <img src="/imgs/gallery/1.jpg" 
-                             alt="{{ $fallbackImages[0]['title'] }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $fallbackImages[0]['title'] }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('/imgs/gallery/2.jpg', '{{ $fallbackImages[1]['title'] }}', 'Infinity pool with ocean view', 1)">
-                    <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-200">
-                        <img src="/imgs/gallery/2.jpg" 
-                             alt="{{ $fallbackImages[1]['title'] }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $fallbackImages[1]['title'] }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Row 2: 4 square images -->
-                @for($i = 2; $i < 6; $i++)
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
-                     onclick="openLightbox('/imgs/gallery/{{ $fallbackImages[$i]['img'] }}.jpg', '{{ $fallbackImages[$i]['title'] }}', 'Luxury experience', {{ $i }})">
-                    <div class="aspect-square w-full overflow-hidden bg-gray-200">
-                        <img src="/imgs/gallery/{{ $fallbackImages[$i]['img'] }}.jpg" 
-                             alt="{{ $fallbackImages[$i]['title'] }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $fallbackImages[$i]['title'] }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endfor
-
-                <!-- Row 3: 2 wide images -->
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('/imgs/gallery/7.jpg', '{{ $fallbackImages[6]['title'] }}', 'Fine dining experience', 6)">
-                    <div class="aspect-[2/1] w-full overflow-hidden bg-gray-200">
-                        <img src="/imgs/gallery/7.jpg" 
-                             alt="{{ $fallbackImages[6]['title'] }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $fallbackImages[6]['title'] }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
-                     onclick="openLightbox('/imgs/gallery/8.jpg', '{{ $fallbackImages[7]['title'] }}', 'Executive lounge area', 7)">
-                    <div class="aspect-[2/1] w-full overflow-hidden bg-gray-200">
-                        <img src="/imgs/gallery/8.jpg" 
-                             alt="{{ $fallbackImages[7]['title'] }}"
-                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
-                        <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                            <h3 class="text-white font-semibold text-sm md:text-base mb-1 drop-shadow-2xl truncate">{{ $fallbackImages[7]['title'] }}</h3>
-                            <div class="flex items-center text-white/80 text-xs">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                View full size
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <!-- Stats Section -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-12 border-t border-gray-200">
-            <div class="text-center">
-                <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">50+</div>
-                <div class="text-gray-600 text-sm uppercase tracking-wider">Stunning Views</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">12</div>
-                <div class="text-gray-600 text-sm uppercase tracking-wider">Luxury Facilities</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">24/7</div>
-                <div class="text-gray-600 text-sm uppercase tracking-wider">Photo Ready</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">100%</div>
-                <div class="text-gray-600 text-sm uppercase tracking-wider">Memorable Moments</div>
+                <p class="text-gray-500 text-sm mt-4">
+                    Discover all {{ $totalImages > 0 ? $totalImages : '50+' }} breathtaking images
+                </p>
             </div>
         </div>
-
-        <!-- Call to Action -->
-        <div class="text-center mt-12">
-            <a href="{{ route('public.gallery') }}" 
-               class="inline-flex items-center px-8 py-4 bg-darkAccent text-white rounded-full hover:bg-opacity-90 transform hover:scale-105 transition-all duration-300 font-medium text-lg shadow-xl group">
-                <span>Explore Complete Gallery</span>
-                <svg class="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                </svg>
-            </a>
-            @php
-                $totalImages = \App\Models\GalleryImage::where('is_active', true)->count();
-            @endphp
-            <p class="text-gray-500 text-sm mt-4">
-                Discover all {{ $totalImages > 0 ? $totalImages : '50+' }} breathtaking images
-            </p>
-        </div>
-    </div>
-</section>
+    </section>
 
 <!-- Enhanced Lightbox - Consistent with Gallery Page -->
 <div id="lightbox" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
@@ -1361,7 +1437,9 @@ body.lightbox-open #back-to-top {
                         <span class="text-xl font-bold">Mt. ClaRamuel Resort</span>
                     </div>
                     <p class="text-gray-400 mb-6 animate-fadeInUp text-sm" style="animation-delay: 0.2s;">
-                        Experience the Ultimate STAYCATION in Ilagan City — a premier destination in Isabela offering luxury accommodations, relaxing amenities, and exceptional event venues surrounded by breathtaking natural beauty.
+                        Experience the Ultimate STAYCATION in Ilagan City — a premier destination in Isabela offering
+                        luxury accommodations, relaxing amenities, and exceptional event venues surrounded by
+                        breathtaking natural beauty.
                     </p>
                     <div class="flex gap-4 animate-fadeInUp" style="animation-delay: 0.3s;">
                         <a href="https://www.facebook.com/mtclaramuelresort" target="_blank"
@@ -1582,32 +1660,32 @@ body.lightbox-open #back-to-top {
         window.addEventListener('scroll', animateOnScroll);
     </script>
 
-<script>
-let currentImages = [];
-let currentIndex = 0;
-let isLoading = false;
-let currentScale = 1;
-let isCaptionVisible = true;
-let captionTimeout = null;
-let hintTimeout = null;
+    <script>
+        let currentImages = [];
+        let currentIndex = 0;
+        let isLoading = false;
+        let currentScale = 1;
+        let isCaptionVisible = true;
+        let captionTimeout = null;
+        let hintTimeout = null;
 
-// Initialize lightbox with all gallery images
-function initLightbox() {
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    currentImages = Array.from(galleryItems).map(item => {
-        const onclick = item.getAttribute('onclick');
-        const match = onclick.match(/openLightbox\('([^']+)', '([^']+)', '([^']*)', (\d+)\)/);
-        if (match) {
-            return {
-                src: match[1],
-                title: match[2].replace(/\\'/g, "'"),
-                caption: match[3].replace(/\\'/g, "'"),
-                index: parseInt(match[4])
-            };
+        // Initialize lightbox with all gallery images
+        function initLightbox() {
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            currentImages = Array.from(galleryItems).map(item => {
+                const onclick = item.getAttribute('onclick');
+                const match = onclick.match(/openLightbox\('([^']+)', '([^']+)', '([^']*)', (\d+)\)/);
+                if (match) {
+                    return {
+                        src: match[1],
+                        title: match[2].replace(/\\'/g, "'"),
+                        caption: match[3].replace(/\\'/g, "'"),
+                        index: parseInt(match[4])
+                    };
+                }
+                return null;
+            }).filter(item => item !== null);
         }
-        return null;
-    }).filter(item => item !== null);
-}
 
 function openLightbox(src, title, caption, clickedIndex) {
     // Always reinitialize to get current visible images
@@ -1658,123 +1736,123 @@ function openLightbox(src, title, caption, clickedIndex) {
     lightboxImage.alt = image.title;
 }
 
-function handleImageLoad(img) {
-    isLoading = false;
-    document.getElementById('lightbox-loading').classList.add('hidden');
-    
-    const naturalWidth = img.naturalWidth;
-    const naturalHeight = img.naturalHeight;
-    const orientation = naturalHeight > naturalWidth ? 'portrait' : 'landscape';
-    
-    document.getElementById('dimension-text').textContent = `${naturalWidth} × ${naturalHeight}`;
-    document.getElementById('image-orientation').textContent = orientation;
-    
-    optimizeImageSize(img, orientation);
-}
+        function handleImageLoad(img) {
+            isLoading = false;
+            document.getElementById('lightbox-loading').classList.add('hidden');
 
-function handleImageError(img) {
-    isLoading = false;
-    document.getElementById('lightbox-loading').classList.add('hidden');
-    document.getElementById('dimension-text').textContent = 'Dimensions unavailable';
-    document.getElementById('image-orientation').textContent = 'unknown';
-}
+            const naturalWidth = img.naturalWidth;
+            const naturalHeight = img.naturalHeight;
+            const orientation = naturalHeight > naturalWidth ? 'portrait' : 'landscape';
 
-function optimizeImageSize(img, orientation) {
-    const viewportWidth = window.innerWidth * 0.85;
-    const viewportHeight = window.innerHeight * 0.80;
-    
-    let optimalWidth, optimalHeight;
-    
-    if (orientation === 'portrait') {
-        optimalHeight = Math.min(viewportHeight, img.naturalHeight);
-        optimalWidth = (optimalHeight / img.naturalHeight) * img.naturalWidth;
-        
-        if (optimalWidth > viewportWidth) {
-            optimalWidth = viewportWidth;
-            optimalHeight = (optimalWidth / img.naturalWidth) * img.naturalHeight;
+            document.getElementById('dimension-text').textContent = `${naturalWidth} × ${naturalHeight}`;
+            document.getElementById('image-orientation').textContent = orientation;
+
+            optimizeImageSize(img, orientation);
         }
-    } else {
-        optimalWidth = Math.min(viewportWidth, img.naturalWidth);
-        optimalHeight = (optimalWidth / img.naturalWidth) * img.naturalHeight;
-        
-        if (optimalHeight > viewportHeight) {
-            optimalHeight = viewportHeight;
-            optimalWidth = (optimalHeight / img.naturalHeight) * img.naturalWidth;
+
+        function handleImageError(img) {
+            isLoading = false;
+            document.getElementById('lightbox-loading').classList.add('hidden');
+            document.getElementById('dimension-text').textContent = 'Dimensions unavailable';
+            document.getElementById('image-orientation').textContent = 'unknown';
         }
-    }
-    
-    img.style.width = optimalWidth + 'px';
-    img.style.height = optimalHeight + 'px';
-    img.style.maxWidth = 'none';
-    img.style.maxHeight = 'none';
-}
 
-function toggleCaption() {
-    if (isCaptionVisible) {
-        hideCaption();
-    } else {
-        showCaption();
-        
-        clearTimeout(captionTimeout);
-        captionTimeout = setTimeout(() => {
-            hideCaption();
-        }, 5000);
-    }
-}
+        function optimizeImageSize(img, orientation) {
+            const viewportWidth = window.innerWidth * 0.85;
+            const viewportHeight = window.innerHeight * 0.80;
 
-function showCaption() {
-    isCaptionVisible = true;
-    const panel = document.getElementById('lightbox-caption-panel');
-    panel.classList.remove('opacity-0', 'translate-y-8');
-    panel.classList.add('opacity-100');
-    document.getElementById('caption-show-icon').classList.add('hidden');
-    document.getElementById('caption-hide-icon').classList.remove('hidden');
-}
+            let optimalWidth, optimalHeight;
 
-function hideCaption() {
-    isCaptionVisible = false;
-    const panel = document.getElementById('lightbox-caption-panel');
-    panel.classList.remove('opacity-100');
-    panel.classList.add('opacity-0', 'translate-y-8');
-    document.getElementById('caption-show-icon').classList.remove('hidden');
-    document.getElementById('caption-hide-icon').classList.add('hidden');
-}
+            if (orientation === 'portrait') {
+                optimalHeight = Math.min(viewportHeight, img.naturalHeight);
+                optimalWidth = (optimalHeight / img.naturalHeight) * img.naturalWidth;
 
-function zoomImage(zoomFactor) {
-    const img = document.getElementById('lightbox-image');
-    currentScale += zoomFactor;
-    
-    currentScale = Math.max(0.5, Math.min(3, currentScale));
-    
-    img.style.transform = `scale(${currentScale})`;
-    img.style.cursor = currentScale > 1 ? 'grab' : 'zoom-in';
-    
-    if (currentScale > 1 && isCaptionVisible) {
-        hideCaption();
-    }
-}
+                if (optimalWidth > viewportWidth) {
+                    optimalWidth = viewportWidth;
+                    optimalHeight = (optimalWidth / img.naturalWidth) * img.naturalHeight;
+                }
+            } else {
+                optimalWidth = Math.min(viewportWidth, img.naturalWidth);
+                optimalHeight = (optimalWidth / img.naturalWidth) * img.naturalHeight;
 
-function resetZoom() {
-    currentScale = 1;
-    const img = document.getElementById('lightbox-image');
-    img.style.transform = 'scale(1)';
-    img.style.cursor = 'zoom-in';
-}
+                if (optimalHeight > viewportHeight) {
+                    optimalHeight = viewportHeight;
+                    optimalWidth = (optimalHeight / img.naturalHeight) * img.naturalWidth;
+                }
+            }
 
-function navigateLightbox(direction) {
-    if (isLoading) return;
-    
-    currentIndex += direction;
-    
-    if (currentIndex < 0) {
-        currentIndex = currentImages.length - 1;
-    } else if (currentIndex >= currentImages.length) {
-        currentIndex = 0;
-    }
-    
-    const image = currentImages[currentIndex];
-    openLightbox(image.src, image.title, image.caption, currentIndex);
-}
+            img.style.width = optimalWidth + 'px';
+            img.style.height = optimalHeight + 'px';
+            img.style.maxWidth = 'none';
+            img.style.maxHeight = 'none';
+        }
+
+        function toggleCaption() {
+            if (isCaptionVisible) {
+                hideCaption();
+            } else {
+                showCaption();
+
+                clearTimeout(captionTimeout);
+                captionTimeout = setTimeout(() => {
+                    hideCaption();
+                }, 5000);
+            }
+        }
+
+        function showCaption() {
+            isCaptionVisible = true;
+            const panel = document.getElementById('lightbox-caption-panel');
+            panel.classList.remove('opacity-0', 'translate-y-8');
+            panel.classList.add('opacity-100');
+            document.getElementById('caption-show-icon').classList.add('hidden');
+            document.getElementById('caption-hide-icon').classList.remove('hidden');
+        }
+
+        function hideCaption() {
+            isCaptionVisible = false;
+            const panel = document.getElementById('lightbox-caption-panel');
+            panel.classList.remove('opacity-100');
+            panel.classList.add('opacity-0', 'translate-y-8');
+            document.getElementById('caption-show-icon').classList.remove('hidden');
+            document.getElementById('caption-hide-icon').classList.add('hidden');
+        }
+
+        function zoomImage(zoomFactor) {
+            const img = document.getElementById('lightbox-image');
+            currentScale += zoomFactor;
+
+            currentScale = Math.max(0.5, Math.min(3, currentScale));
+
+            img.style.transform = `scale(${currentScale})`;
+            img.style.cursor = currentScale > 1 ? 'grab' : 'zoom-in';
+
+            if (currentScale > 1 && isCaptionVisible) {
+                hideCaption();
+            }
+        }
+
+        function resetZoom() {
+            currentScale = 1;
+            const img = document.getElementById('lightbox-image');
+            img.style.transform = 'scale(1)';
+            img.style.cursor = 'zoom-in';
+        }
+
+        function navigateLightbox(direction) {
+            if (isLoading) return;
+
+            currentIndex += direction;
+
+            if (currentIndex < 0) {
+                currentIndex = currentImages.length - 1;
+            } else if (currentIndex >= currentImages.length) {
+                currentIndex = 0;
+            }
+
+            const image = currentImages[currentIndex];
+            openLightbox(image.src, image.title, image.caption, currentIndex);
+        }
 
 function closeLightbox() {
     document.getElementById('lightbox').classList.add('hidden');
@@ -1790,86 +1868,86 @@ function closeLightbox() {
     showCaption();
 }
 
-// Event listeners
-document.addEventListener('keydown', function(e) {
-    if (!document.getElementById('lightbox').classList.contains('hidden')) {
-        switch(e.key) {
-            case 'Escape':
-                closeLightbox();
-                break;
-            case 'ArrowLeft':
-                navigateLightbox(-1);
-                break;
-            case 'ArrowRight':
-                navigateLightbox(1);
-                break;
-            case '+':
-            case '=':
-                e.preventDefault();
-                zoomImage(0.1);
-                break;
-            case '-':
-                e.preventDefault();
-                zoomImage(-0.1);
-                break;
-            case '0':
-                resetZoom();
-                break;
-            case 'c':
-            case 'C':
-                e.preventDefault();
-                toggleCaption();
-                break;
-        }
-    }
-});
-
-document.getElementById('lightbox').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeLightbox();
-    }
-});
-
-// Show caption when hovering near bottom
-document.getElementById('lightbox').addEventListener('mousemove', function(e) {
-    const viewportHeight = window.innerHeight;
-    const mouseY = e.clientY;
-    
-    if (mouseY > viewportHeight * 0.8 && !isCaptionVisible) {
-        showCaption();
-        
-        clearTimeout(captionTimeout);
-        captionTimeout = setTimeout(() => {
-            if (isCaptionVisible && currentScale <= 1) {
-                hideCaption();
+        // Event listeners
+        document.addEventListener('keydown', function (e) {
+            if (!document.getElementById('lightbox').classList.contains('hidden')) {
+                switch (e.key) {
+                    case 'Escape':
+                        closeLightbox();
+                        break;
+                    case 'ArrowLeft':
+                        navigateLightbox(-1);
+                        break;
+                    case 'ArrowRight':
+                        navigateLightbox(1);
+                        break;
+                    case '+':
+                    case '=':
+                        e.preventDefault();
+                        zoomImage(0.1);
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        zoomImage(-0.1);
+                        break;
+                    case '0':
+                        resetZoom();
+                        break;
+                    case 'c':
+                    case 'C':
+                        e.preventDefault();
+                        toggleCaption();
+                        break;
+                }
             }
-        }, 3000);
-    }
-});
+        });
 
-// Mouse wheel zoom
-document.getElementById('lightbox-image').addEventListener('wheel', function(e) {
-    e.preventDefault();
-    const zoomDirection = e.deltaY > 0 ? -0.1 : 0.1;
-    zoomImage(zoomDirection);
-});
+        document.getElementById('lightbox').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
 
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    initLightbox();
-});
+        // Show caption when hovering near bottom
+        document.getElementById('lightbox').addEventListener('mousemove', function (e) {
+            const viewportHeight = window.innerHeight;
+            const mouseY = e.clientY;
 
-// Handle window resize
-window.addEventListener('resize', function() {
-    if (!document.getElementById('lightbox').classList.contains('hidden')) {
-        const img = document.getElementById('lightbox-image');
-        if (img.complete && img.naturalWidth !== 0) {
-            const orientation = img.naturalHeight > img.naturalWidth ? 'portrait' : 'landscape';
-            optimizeImageSize(img, orientation);
-        }
-    }
-});
-</script>
+            if (mouseY > viewportHeight * 0.8 && !isCaptionVisible) {
+                showCaption();
+
+                clearTimeout(captionTimeout);
+                captionTimeout = setTimeout(() => {
+                    if (isCaptionVisible && currentScale <= 1) {
+                        hideCaption();
+                    }
+                }, 3000);
+            }
+        });
+
+        // Mouse wheel zoom
+        document.getElementById('lightbox-image').addEventListener('wheel', function (e) {
+            e.preventDefault();
+            const zoomDirection = e.deltaY > 0 ? -0.1 : 0.1;
+            zoomImage(zoomDirection);
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            initLightbox();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            if (!document.getElementById('lightbox').classList.contains('hidden')) {
+                const img = document.getElementById('lightbox-image');
+                if (img.complete && img.naturalWidth !== 0) {
+                    const orientation = img.naturalHeight > img.naturalWidth ? 'portrait' : 'landscape';
+                    optimizeImageSize(img, orientation);
+                }
+            }
+        });
+    </script>
 
 </body>
 
