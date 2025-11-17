@@ -244,7 +244,7 @@
                                         stroke-width="{{ in_array($active, ['facilities', 'day-tour facilities']) ? '2' : '1.5' }}"
                                         d="M3 10h18M3 6h18M3 14h18M3 18h18" />
                                 </svg>
-                                <span>Facilities Management</span>
+                                <span>Facility Mgmt</span>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200"
                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
