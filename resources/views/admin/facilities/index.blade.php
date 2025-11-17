@@ -365,7 +365,7 @@
 </div>
 
 <!-- Image Gallery Modal -->
-<div id="imageGalleryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+<div id="imageGalleryModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
