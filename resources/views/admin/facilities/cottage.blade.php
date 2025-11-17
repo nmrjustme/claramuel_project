@@ -58,7 +58,6 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Images</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -211,7 +210,7 @@
 </div>
 
 <!-- Edit Facility Modal -->
-<div id="editFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+<div id="editFacilityModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
@@ -343,7 +342,7 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+<div id="deleteFacilityModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
@@ -394,7 +393,7 @@
 </div>
 
 <!-- Discount Management Modal -->
-<div id="discountModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+<div id="discountModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
@@ -604,32 +603,6 @@ function renderFacilitiesTable(facilities) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 ${statusBadge}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex -space-x-2">
-                    ${facility.images && facility.images.slice(0, 3).map(image => `
-                        <img 
-                            class="h-10 w-10 rounded-full border-2 border-white object-cover cursor-pointer hover:scale-110 transition-transform" 
-                            src="${image.url}" 
-                            alt="Facility image"
-                            title="View all images"
-                            onclick="openFacilityImageModal('${facility.id}')"
-                        >
-                    `).join('')}
-                    ${facility.images && facility.images.length > 3 ? `
-                        <span 
-                            class="h-10 w-10 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600 cursor-pointer hover:bg-gray-200"
-                            onclick="openFacilityImageModal('${facility.id}')"
-                        >
-                            +${facility.images.length - 3}
-                        </span>
-                    ` : ''}
-                    ${!facility.images || facility.images.length === 0 ? `
-                        <span class="h-10 w-10 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-400">
-                            No images
-                        </span>
-                    ` : ''}
-                </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap flex items-center space-x-2">
                 <!-- Edit Button -->

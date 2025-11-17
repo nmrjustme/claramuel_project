@@ -1,5 +1,5 @@
 <aside
-    class="fixed inset-y-0 left-0 z-40 w-64 text-white shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out bg-gradient-to-b from-red-800 to-red-800"
+    class="fixed inset-y-0 left-0 z-40 w-64 text-white shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out bg-gradient-to-b from-red-900 to-red-800"
     id="sidebar">
     <div class="relative flex flex-col h-full">
         <!-- Close button (mobile only) -->
@@ -321,7 +321,7 @@
         </nav>
 
         <!-- User Section -->
-        <div class="p-4 border-t border-red-700 bg-red-700/30">
+        <div class="p-4 border-t border-red-900 bg-red-900/30">
             <div class="flex items-center space-x-3">
                 <div
                     class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border border-white/20">
