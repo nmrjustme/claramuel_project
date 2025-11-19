@@ -281,6 +281,35 @@
             font-size: 0.875rem;
             color: #6b7280;
             transition: all 0.3s ease;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+        }
+
+        .guest-count.not-full {
+            color: #059669;
+            /* Green text */
+            background-color: #ECFDF5;
+            /* Light green background */
+            border: 1px solid #D1FAE5;
+        }
+
+        .guest-count.full {
+            color: #DC2626;
+            /* Red text */
+            background-color: #FEF2F2;
+            /* Light red background */
+            border: 1px solid #FECACA;
+            font-weight: 600;
+        }
+
+        .guest-count.warning {
+            color: #D97706;
+            /* Amber text */
+            background-color: #FFFBEB;
+            /* Light amber background */
+            border: 1px solid #FED7AA;
+            font-weight: 500;
         }
 
         .guest-type-grid {
@@ -741,60 +770,36 @@
 
                 </div>
 
-                <div class="rounded-xl mb-8 p-8 border border-lightgray bg-white">
+                <div class="rounded-lg mb-6 p-8 border border-lightgray bg-white">
                     <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-6 sm:mb-8 text-center">
                         Accepted Payment Methods
                     </h3>
 
-                    <!-- E-Wallets -->
-                    <div class="rounded-lg p-4 sm:p-5 mb-4">
-                        <h4 class="text-center text-gray-700 font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
-                            E-Wallets
-                        </h4>
-                        <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
-                            <div class="bg-white p-2 rounded-lg border border-gray-200">
-                                <img src="{{ asset('imgs/banks/Maya_logo.svg') }}" alt="Maya" class="h-4 sm:h-5">
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-gray-200">
-                                <img src="{{ asset('imgs/banks/gcash_wallet_logo.png') }}" alt="GCash" class="h-4 sm:h-5">
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-gray-200">
-                                <img src="{{ asset('imgs/banks/QR_Ph_Logo.svg.png') }}" alt="QR Ph" class="h-4 sm:h-5">
-                            </div>
-                        </div>
-                    </div>
+                    <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
 
-                    <!-- Debit / Credit Cards -->
-                    <div class="rounded-lg p-4 sm:p-5 mb-4">
-                        <h4 class="text-center text-gray-700 font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
-                            Debit / Credit Cards
-                        </h4>
-                        <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
-                            <div class="bg-white p-2 rounded-lg border border-gray-200">
-                                <img src="{{ asset('imgs/banks/960px-Visa_Inc._logo.svg.png') }}" alt="Visa"
-                                    class="h-4 sm:h-5">
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-gray-200">
-                                <img src="{{ asset('imgs/banks/Mastercard_2019_logo.svg') }}" alt="Mastercard"
-                                    class="h-4 sm:h-5">
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-gray-200">
-                                <img src="{{ asset('imgs/banks/JCB_logo.svg') }}" alt="JCB" class="h-4 sm:h-5">
-                            </div>
+                        <!-- E-Wallets -->
+                        <div class="p-2 rounded-lg select-none pointer-events-none cursor-default">
+                            <img src="{{ asset('imgs/banks/Maya_logo.svg') }}" class="h-3 sm:h-4">
                         </div>
-                    </div>
+                        <div class="p-2 rounded-lg select-none pointer-events-none cursor-default">
+                            <img src="{{ asset('imgs/banks/gcash_wallet_logo.png') }}" class="h-3 sm:h-4">
+                        </div>
+                        <div class="p-2 rounded-lg select-none pointer-events-none cursor-default">
+                            <img src="{{ asset('imgs/banks/QR_Ph_Logo.svg.png') }}" class="h-3 sm:h-4">
+                        </div>
 
-                    <!-- Cash -->
-                    <div class="rounded-lg p-4 sm:p-5">
-                        <div class="flex justify-center">
-                            <span
-                                class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 text-green-700 text-xs sm:text-sm font-medium rounded-md border border-green-200 cursor-default">
-                                Cash Payment Upon Check-in
-                            </span>
+                        <!-- Cards -->
+                        <div class="p-2 rounded-lg select-none pointer-events-none cursor-default">
+                            <img src="{{ asset('imgs/banks/960px-Visa_Inc._logo.svg.png') }}" class="h-3 sm:h-4">
+                        </div>
+                        <div class="p-2 rounded-lg select-none pointer-events-none cursor-default">
+                            <img src="{{ asset('imgs/banks/Mastercard_2019_logo.svg') }}" class="h-3 sm:h-4">
+                        </div>
+                        <div class="p-2 rounded-lg select-none pointer-events-none cursor-default">
+                            <img src="{{ asset('imgs/banks/JCB_logo.svg') }}" class="h-3 sm:h-4">
                         </div>
                     </div>
                 </div>
-
 
                 <div class="w-full h-96 rounded-lg overflow-hidden border border-gray-200 animate-fadeInUp"
                     style="animation-delay: 0.6s;">
@@ -809,7 +814,7 @@
                 <div class="sticky top-4 space-y-6">
                     <!-- Date Summary Card -->
                     <div class="border border-lightgray rounded-lg p-6">
-                        <h3 class="booking-summary-title mb-4">
+                        <h3 class="booking-summary-title">
                             Booking Summary
                         </h3>
 
@@ -844,6 +849,7 @@
                             </p>
                         </div>
                     </div>
+
 
                     <!-- Rooms Summary Card - Enhanced -->
                     <div class="rounded-lg p-8 mb-6 border border-lightgray">
@@ -906,15 +912,14 @@
                         </div>
                     </div>
 
-
                     <!-- Payment CTA Card - Enhanced -->
                     <div class="rounded-lg p-6 border border-lightgray">
                         <div class="checkbox-container">
                             <input type="checkbox" id="terms-checkbox"
                                 class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary mt-0.5">
                             <label for="terms-checkbox">
-                                I agree to the <a href="#" class="text-primary hover:underline">terms and conditions</a> and
-                                <a href="#" class="text-primary hover:underline">privacy policy</a>
+                                I agree to the <a href="#" class="text-primary hover:underline">terms and conditions</a>
+                                <!-- <a href="#" class="text-primary hover:underline">privacy policy</a> -->
                             </label>
                         </div>
                         <div id="terms-error" class="error-message hidden text-sm text-red-500 mb-4">
@@ -931,10 +936,7 @@
                         <div class="mt-6 flex flex-col items-center justify-center gap-2 text-sm text-gray-500">
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-lock text-green-600"></i>
-                                <span class="font-medium">Secure Payment Processing</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-gray-600">Powered by Maya Checkout</span>
+                                <span class="font-medium">Powered by Maya Checkout</span>
                             </div>
                         </div>
 
@@ -1070,41 +1072,47 @@
                         roomDiv.className = 'guest-type-container';
 
                         roomDiv.innerHTML = `
-                                                        <div class="guest-type-header">
-                                                            <h4 class="guest-type-title">${room.name}</h4>
-                                                            <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
-                                                        </div>
-                                                        <div class="guest-type-grid" id="guest-selection-room-${index}">
-                                                            ${uniqueTypes.map(type => `
-                                                            <div class="guest-type-group">
-                                                                <label for="guest-type-${index}-${type.id}" class="guest-type-label">
-                                                                    ${type.type}
-                                                                </label>
-                                                                <div class="counter-container">
-                                                                    <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
-                                                                        <i class="fas fa-minus"></i>
-                                                                    </button>
-                                                                    <input type="number"
-                                                                        id="guest-type-${index}-${type.id}"
-                                                                        name="guest_types[${room.facility_id}][${type.id}]"
-                                                                        class="counter-value form-input"
-                                                                        min="0"
-                                                                        max="${room.pax}"
-                                                                        value="0"
-                                                                        data-room-index="${index}"
-                                                                        data-room-id="${room.facility_id}"
-                                                                        data-room-pax="${room.pax}"
-                                                                        data-guest-type-id="${type.id}">
-                                                                    <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
-                                                                        <i class="fas fa-plus"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            `).join('')}
-                                                        </div>
-                                                    `;
+                    <div class="guest-type-header">
+                        <h4 class="guest-type-title">${room.name}</h4>
+                        <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
+                    </div>
+                    <div class="guest-type-grid" id="guest-selection-room-${index}">
+                        ${uniqueTypes.map(type => `
+                        <div class="guest-type-group">
+                            <label for="guest-type-${index}-${type.id}" class="guest-type-label">
+                                ${type.type}
+                            </label>
+                            <div class="counter-container">
+                                <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number"
+                                    id="guest-type-${index}-${type.id}"
+                                    name="guest_types[${room.facility_id}][${type.id}]"
+                                    class="counter-value form-input"
+                                    min="0"
+                                    max="${room.pax}"
+                                    value="0"
+                                    data-room-index="${index}"
+                                    data-room-id="${room.facility_id}"
+                                    data-room-pax="${room.pax}"
+                                    data-guest-type-id="${type.id}">
+                                <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        `).join('')}
+                    </div>
+                `;
 
                         container.appendChild(roomDiv);
+                    });
+
+                    // Initialize colors for all guest counts (all start at 0)
+                    bookingData.facilities.forEach((room, index) => {
+                        const guestCountElement = document.getElementById(`guest-count-${index}`);
+                        updateGuestCountColor(guestCountElement, 0, room.pax);
                     });
 
                     // Attach change listeners to guest quantity inputs
@@ -1137,24 +1145,24 @@
                 .catch(error => {
                     console.error('Error loading guest types:', error);
                     container.innerHTML = `
-                                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                                                        <div class="flex">
-                                                            <div class="flex-shrink-0">
-                                                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                            </svg>
-                                                            </div>
-                                                            <div class="ml-3">
-                                                            <p class="text-sm text-yellow-700">
-                                                                Could not load guest types. ${error.message}
-                                                                <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
-                                                                    Try Again
-                                                                </button>
-                                                            </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                `;
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        </div>
+                        <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            Could not load guest types. ${error.message}
+                            <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
+                                Try Again
+                            </button>
+                        </p>
+                        </div>
+                    </div>
+                </div>
+            `;
                 });
         }
 
@@ -1184,9 +1192,31 @@
                 });
             }
 
-            // Update the display
-            document.getElementById(`guest-count-${roomIndex}`).textContent =
-                `${totalGuests} / ${roomPax} guests`;
+            // Update the display and color
+            const guestCountElement = document.getElementById(`guest-count-${roomIndex}`);
+            guestCountElement.textContent = `${totalGuests} / ${roomPax} guests`;
+
+            // Update the color based on guest count
+            updateGuestCountColor(guestCountElement, totalGuests, roomPax);
+        }
+
+        function updateGuestCountColor(element, currentGuests, maxGuests) {
+            // Remove all color classes
+            element.classList.remove('not-full', 'full', 'warning');
+
+            if (currentGuests === 0) {
+                // No guests selected - neutral/gray
+                element.classList.remove('not-full', 'full', 'warning');
+            } else if (currentGuests < maxGuests) {
+                // Not full yet - green
+                element.classList.add('not-full');
+            } else if (currentGuests === maxGuests) {
+                // Exactly full - amber/orange as warning
+                element.classList.add('warning');
+            } else {
+                // Over capacity (shouldn't happen due to validation) - red
+                element.classList.add('full');
+            }
         }
 
         function displayBookingSummary(bookingData) {
@@ -1208,14 +1238,25 @@
                     const roomElement = document.createElement('div');
                     roomElement.className = 'room-item';
                     roomElement.innerHTML = `
-                                                        <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
-                                                        <div class="room-details">
-                                                            <div class="room-name">${room.name}</div>
-                                                            <div class="room-type">${room.category}</div>
-                                                            <div class="room-price">${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                                            <div class="room-price">₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                                        </div>
-                                                    `;
+                                        <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
+                                        <div class="room-details">
+                                                <!-- Room Name & Type -->
+                                                <div class="flex flex-col">
+                                                    <div class="room-name text-gray-800 font-semibold text-base sm:text-lg">${room.name}</div>
+                                                    <div class="room-type text-gray-500 text-sm sm:text-base">${room.category}</div>
+                                                </div>
+
+                                                <!-- Price per Night -->
+                                                <div class="room-price text-gray-700 text-sm sm:text-base mt-1 sm:mt-0">
+                                                    ${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </div>
+
+                                                <!-- Total Price -->
+                                                <div class="room-total text-gray-900 font-semibold text-sm sm:text-base mt-1 sm:mt-0">
+                                                    ₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </div>
+                                        </div>
+                                    `;
                     roomsList.appendChild(roomElement);
                 });
             }
@@ -1483,10 +1524,16 @@
             return true;
         }
 
-        // Phone number formatting
         function formatPhone(input) {
+            // Remove all non-digit characters
             let phone = input.value.replace(/\D/g, '');
 
+            // Remove leading 0 if it exists
+            if (phone.startsWith('0')) {
+                phone = phone.substring(1);
+            }
+
+            // Add spaces for formatting
             if (phone.length > 4) {
                 phone = phone.substring(0, 4) + ' ' + phone.substring(4);
             }
@@ -1494,6 +1541,7 @@
                 phone = phone.substring(0, 8) + ' ' + phone.substring(8);
             }
 
+            // Limit to 12 characters (formatted)
             input.value = phone.substring(0, 12);
         }
     </script>
