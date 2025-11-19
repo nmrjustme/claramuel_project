@@ -26,12 +26,12 @@
             <div class="mb-4 xs:mb-6">
                 <label class="block text-xs xs:text-sm font-medium text-gray-700 mb-2 xs:mb-3 text-center">Enter OTP Code</label>
                 <div class="flex justify-center space-x-1 xs:space-x-2" id="otp-container">
-                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="1">
-                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="2">
-                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="3">
-                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="4">
-                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="5">
-                    <input type="text" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="6">
+                    <input type="number" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="1">
+                    <input type="number" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="2">
+                    <input type="number" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="3">
+                    <input type="number" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="4">
+                    <input type="number" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="5">
+                    <input type="number" maxlength="1" class="otp-input w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-base xs:text-lg sm:text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center" data-index="6">
                 </div>
                 <div id="otp-error" class="text-red-500 text-xs xs:text-sm mt-1 xs:mt-2 text-center hidden"></div>
             </div>
