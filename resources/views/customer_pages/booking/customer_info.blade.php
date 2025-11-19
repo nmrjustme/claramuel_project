@@ -1089,7 +1089,7 @@
                                 <input type="number"
                                     id="guest-type-${index}-${type.id}"
                                     name="guest_types[${room.facility_id}][${type.id}]"
-                                    class="counter-value form-input"
+                                    class="counter-value form-input cursor-not-allowed"
                                     min="0"
                                     max="${room.pax}"
                                     value="0"
