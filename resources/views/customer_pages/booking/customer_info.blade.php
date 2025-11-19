@@ -1073,7 +1073,7 @@
 
                         roomDiv.innerHTML = `
                     <div class="guest-type-header">
-                        <h4 class="guest-type-title">${room.name}</h4>
+                        <h4 class="guest-type-title text-sm sm:text-base">${room.name}</h4>
                         <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
                     </div>
                     <div class="guest-type-grid" id="guest-selection-room-${index}">
