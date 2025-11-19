@@ -1096,7 +1096,8 @@
                                     data-room-index="${index}"
                                     data-room-id="${room.facility_id}"
                                     data-room-pax="${room.pax}"
-                                    data-guest-type-id="${type.id}">
+                                    data-guest-type-id="${type.id}"
+                                    readonly>
                                 <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
                                     <i class="fas fa-plus"></i>
                                 </button>
