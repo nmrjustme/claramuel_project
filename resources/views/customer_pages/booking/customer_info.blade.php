@@ -1074,7 +1074,7 @@
                         roomDiv.innerHTML = `
                     <div class="guest-type-header">
                         <h4 class="guest-type-title text-sm sm:text-base">${room.name}</h4>
-                        <span class="guest-count" id="guest-count-${index}">0 / ${room.pax} guests</span>
+                        <span class="guest-count" id="guest-count-${index}">0 / ${room.pax}</span>
                     </div>
                     <div class="guest-type-grid" id="guest-selection-room-${index}">
                         ${uniqueTypes.map(type => `
@@ -1194,7 +1194,7 @@
 
             // Update the display and color
             const guestCountElement = document.getElementById(`guest-count-${roomIndex}`);
-            guestCountElement.textContent = `${totalGuests} / ${roomPax} guests`;
+            guestCountElement.textContent = `${totalGuests} / ${roomPax}`;
 
             // Update the color based on guest count
             updateGuestCountColor(guestCountElement, totalGuests, roomPax);
