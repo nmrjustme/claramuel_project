@@ -971,7 +971,7 @@
             <!-- Modal Header -->
             <div class="bg-red-600 text-white p-4 flex justify-between items-center">
                 <h3 class="text-xl font-bold">Terms and Conditions</h3>
-                <button id="close-terms-modal" class="text-white hover:text-gray-200 text-2xl">
+                <button id="close-terms-modal" class="text-white hover:text-gray-200 text-2xl cursor-pointer">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -987,7 +987,7 @@
                             <li>Payment guarantee will serve as acknowledgement on the Terms and conditions stipulated
                                 below.</li>
 
-                            <li>Check in time is at 10:00am and check out time is at 12:00nn. Early check in and Late
+                            <li>Check in time is at 12:00 nn and check out time is at 10:00 am. Early check in and Late
                                 Checkout incurs additional charges.</li>
 
                             <li>Total Room Rate is inclusive of service charge and current applicable government taxes.</li>
@@ -1057,7 +1057,7 @@
             <!-- Modal Footer -->
             <div class="bg-gray-100 p-4 flex justify-end">
                 <button id="accept-terms"
-                    class="bg-red-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors">
+                    class="bg-red-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors cursor-pointer">
                     I Understand and Accept
                 </button>
             </div>
