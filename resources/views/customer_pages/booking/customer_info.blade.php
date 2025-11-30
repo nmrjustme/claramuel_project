@@ -678,7 +678,6 @@
             ['label' => 'Completed']
         ]" />
 
-
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- Left Column - Customer Information -->
             <div class="lg:w-2/3 space-y-6">
@@ -918,7 +917,7 @@
                             <input type="checkbox" id="terms-checkbox"
                                 class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary mt-0.5">
                             <label for="terms-checkbox">
-                                I agree to the <a href="#" class="text-primary hover:underline">terms and conditions</a>
+                                I agree to the <a href="#" id="terms-link" class="text-primary hover:underline">terms and conditions</a>
                                 <!-- <a href="#" class="text-primary hover:underline">privacy policy</a> -->
                             </label>
                         </div>
@@ -966,8 +965,225 @@
         <span id="notification-message"></span>
     </div>
 
+    <!-- Add this modal HTML before the closing </body> tag or at the end of your content -->
+    <div id="terms-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-red-600 text-white p-4 flex justify-between items-center">
+                <h3 class="text-xl font-bold">Terms and Conditions</h3>
+                <button id="close-terms-modal" class="text-white hover:text-gray-200 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto max-h-[70vh]">
+                <div class="space-y-6">
+
+                    <!-- General Terms -->
+                    <div class="space-y-4">
+
+                        <ol class="list-decimal pl-5 space-y-4 text-gray-700">
+                            <li>Payment guarantee will serve as acknowledgement on the Terms and conditions stipulated
+                                below.</li>
+
+                            <li>Check in time is at 10:00am and check out time is at 12:00nn. Early check in and Late
+                                Checkout incurs additional charges.</li>
+
+                            <li>Total Room Rate is inclusive of service charge and current applicable government taxes.</li>
+
+                            <li>In excess of room capacity, extra person charges are applied.</li>
+
+                            <li>To avail Corporate or Senior Citizen discount:
+                                <ul class="list-disc pl-5 mt-2">
+                                    <li>The card holder must be present and provide a government issued ID and either their
+                                        Senior or Corporate ID.</li>
+                                    <li>For Room reservation or charges, guest must inform and present ID upon making
+                                        reservation or upon check in only.</li>
+                                    <li>For other outlets (Restaurant, Spa and Kahuna stores), IDs must be presented every
+                                        time Senior Citizen guests avails products and services.</li>
+                                </ul>
+                            </li>
+
+                            <li>In case of cancellation of guaranteed reservation, the hotel should receive a written notice
+                                and cancellation will be subjected to hotel cancellation policy.
+                                <ul class="list-disc pl-5 mt-2">
+                                    <li>Cancellation and reservation amendments made 7 days and above prior to arrival shall
+                                        incur no charges.</li>
+                                    <li>Cancellation and reservation amendments made between 5-6 days prior to arrival shall
+                                        be billed 25% of the total room charges.</li>
+                                    <li>Cancellation and reservation amendments made between 3-4 days prior to arrival shall
+                                        be billed 50% of the total room charges.</li>
+                                    <li>Cancellation and reservation amendments made 1-2 days prior to arrival or on the day
+                                        of arrival shall be billed 100% of the total room charges.</li>
+                                    <li>For Holidays and December 1 to January15, guaranteed reservations are non-
+                                        refundable (cancelled or shortened). Decreasing the number of rooms or room nights,
+                                        rebooking and reservation amendments made after 48 hours upon reservation shall be
+                                        charged 100% of the total room reservation.</li>
+                                    <li>Early departure will be charged 100% of the total room charges.</li>
+                                    <li>A NO SHOW charge equivalent to the total room rate for the entire booking period
+                                        will be billed to the booking party.</li>
+                                </ul>
+                            </li>
+
+                            <li>The resort strictly observes a "No Pets" policy.</li>
+
+                            <li>Spa Therapists not employed by Kahuna Resort are strictly prohibited inside the resort.</li>
+
+                            <li>Bringing in of food and beverage is allowed however may only be consumed inside the rooms.
+                                If consumed outside the vicinity of the rooms, "Corkage Fee" shall apply.</li>
+
+                            <li>One (1) valid ID's (Driver's License, Passport, or any Government Issued I.D's) must be
+                                presented upon check-in.</li>
+
+                            <li>Please be reminded that any damages, lost or broken items incurred within guest stay will be
+                                charged accordingly. Lost keys will be charged P2,000.00. Smoking inside the room is
+                                prohibited and will be charged a P20,000.00 penalty.</li>
+
+                            <li>Management is not liable for any loss of valuables. You can use our in-room safety deposit
+                                box for your security.</li>
+
+                            <li>For Room rates quoted in Philippine Peso by the resort, payment should be made in PHP. If US
+                                Dollar is used for payment, the resort's prevailing foreign exchange rate of the day shall
+                                be applied.</li>
+
+                            <li>The room posting rate and foreign exchange rate are subject to change without prior notice.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-gray-100 p-4 flex justify-end">
+                <button id="accept-terms"
+                    class="bg-red-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors">
+                    I Understand and Accept
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Animation */
+        #terms-modal {
+            transition: opacity 0.3s ease;
+        }
+
+        #terms-modal:not(.hidden) {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Scrollbar Styling */
+        #terms-modal .overflow-y-auto::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #terms-modal .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #terms-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        #terms-modal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
+            const termsLink = document.querySelector('a[href="#"]');
+            const termsModal = document.getElementById('terms-modal');
+            const closeModalBtn = document.getElementById('close-terms-modal');
+            const acceptTermsBtn = document.getElementById('accept-terms');
+            const termsCheckbox = document.getElementById('terms-checkbox');
+
+            // Open modal when terms link is clicked
+            if (termsLink) {
+                termsLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    termsModal.classList.remove('hidden');
+                });
+            }
+
+            // Close modal when close button is clicked
+            closeModalBtn.addEventListener('click', function () {
+                termsModal.classList.add('hidden');
+            });
+
+            // Close modal when clicking outside the modal content
+            termsModal.addEventListener('click', function (e) {
+                if (e.target === termsModal) {
+                    termsModal.classList.add('hidden');
+                }
+            });
+
+            // Accept terms and close modal
+            acceptTermsBtn.addEventListener('click', function () {
+                termsCheckbox.checked = true;
+                termsModal.classList.add('hidden');
+
+                // Trigger change event to update form validation
+                const event = new Event('change');
+                termsCheckbox.dispatchEvent(event);
+
+                // Show confirmation
+                showNotification('Terms and conditions accepted successfully!');
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !termsModal.classList.contains('hidden')) {
+                    termsModal.classList.add('hidden');
+                }
+            });
+
+            // Helper function to show notifications
+            function showNotification(message, isError = false) {
+                const notification = document.getElementById('notification');
+                const notificationMessage = document.getElementById('notification-message');
+
+                notification.className = 'notification hidden'; // Reset classes
+                notificationMessage.textContent = message;
+
+                if (isError) {
+                    notification.classList.add('error');
+                    notification.querySelector('i').className = 'fas fa-exclamation-circle';
+                } else {
+                    notification.querySelector('i').className = 'fas fa-check-circle';
+                }
+
+                notification.classList.remove('hidden');
+                notification.classList.add('show');
+
+                // Clear any existing timeout to prevent hiding a new notification prematurely
+                if (notification.timeoutId) {
+                    clearTimeout(notification.timeoutId);
+                }
+
+                notification.timeoutId = setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.classList.add('hidden');
+                    }, 300);
+                }, 3000);
+            }
             // Retrieve booking data from sessionStorage
             const bookingData = JSON.parse(sessionStorage.getItem('bookingData'));
 
@@ -1072,40 +1288,40 @@
                         roomDiv.className = 'guest-type-container';
 
                         roomDiv.innerHTML = `
-                    <div class="guest-type-header">
-                        <h4 class="guest-type-title text-sm sm:text-base">${room.name}</h4>
-                        <span class="guest-count" id="guest-count-${index}">0 / ${room.pax}</span>
-                    </div>
-                    <div class="guest-type-grid" id="guest-selection-room-${index}">
-                        ${uniqueTypes.map(type => `
-                        <div class="guest-type-group">
-                            <label for="guest-type-${index}-${type.id}" class="guest-type-label">
-                                ${type.type}
-                            </label>
-                            <div class="counter-container">
-                                <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <input type="number"
-                                    id="guest-type-${index}-${type.id}"
-                                    name="guest_types[${room.facility_id}][${type.id}]"
-                                    class="counter-value form-input cursor-not-allowed"
-                                    min="0"
-                                    max="${room.pax}"
-                                    value="0"
-                                    data-room-index="${index}"
-                                    data-room-id="${room.facility_id}"
-                                    data-room-pax="${room.pax}"
-                                    data-guest-type-id="${type.id}"
-                                    readonly>
-                                <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                            <div class="guest-type-header">
+                                <h4 class="guest-type-title text-sm sm:text-base">${room.name}</h4>
+                                <span class="guest-count" id="guest-count-${index}">0 / ${room.pax}</span>
                             </div>
-                        </div>
-                        `).join('')}
-                    </div>
-                `;
+                            <div class="guest-type-grid" id="guest-selection-room-${index}">
+                                ${uniqueTypes.map(type => `
+                                <div class="guest-type-group">
+                                    <label for="guest-type-${index}-${type.id}" class="guest-type-label">
+                                        ${type.type}
+                                    </label>
+                                    <div class="counter-container">
+                                        <button class="counter-btn decrement" type="button" data-for="guest-type-${index}-${type.id}">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number"
+                                            id="guest-type-${index}-${type.id}"
+                                            name="guest_types[${room.facility_id}][${type.id}]"
+                                            class="counter-value form-input cursor-not-allowed"
+                                            min="0"
+                                            max="${room.pax}"
+                                            value="0"
+                                            data-room-index="${index}"
+                                            data-room-id="${room.facility_id}"
+                                            data-room-pax="${room.pax}"
+                                            data-guest-type-id="${type.id}"
+                                            readonly>
+                                        <button class="counter-btn increment" type="button" data-for="guest-type-${index}-${type.id}">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                `).join('')}
+                            </div>
+                        `;
 
                         container.appendChild(roomDiv);
                     });
@@ -1146,24 +1362,24 @@
                 .catch(error => {
                     console.error('Error loading guest types:', error);
                     container.innerHTML = `
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                        </svg>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                </div>
+                                <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    Could not load guest types. ${error.message}
+                                    <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
+                                        Try Again
+                                    </button>
+                                </p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-3">
-                        <p class="text-sm text-yellow-700">
-                            Could not load guest types. ${error.message}
-                            <button onclick="window.location.reload()" class="mt-2 text-yellow-600 hover:text-yellow-500 font-medium">
-                                Try Again
-                            </button>
-                        </p>
-                        </div>
-                    </div>
-                </div>
-            `;
+                    `;
                 });
         }
 
@@ -1239,25 +1455,25 @@
                     const roomElement = document.createElement('div');
                     roomElement.className = 'room-item';
                     roomElement.innerHTML = `
-                                        <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
-                                        <div class="room-details">
-                                                <!-- Room Name & Type -->
-                                                <div class="flex flex-col">
-                                                    <div class="room-name text-gray-800 font-semibold text-base sm:text-lg">${room.name}</div>
-                                                    <div class="room-type text-gray-500 text-sm sm:text-base">${room.category}</div>
-                                                </div>
+                                                <img src="${room.mainImage}" alt="${room.name}" class="room-image" onerror="this.src='https://via.placeholder.com/500x300?text=Room+Image'">
+                                                <div class="room-details">
+                                                        <!-- Room Name & Type -->
+                                                        <div class="flex flex-col">
+                                                            <div class="room-name text-gray-800 font-semibold text-base sm:text-lg">${room.name}</div>
+                                                            <div class="room-type text-gray-500 text-sm sm:text-base">${room.category}</div>
+                                                        </div>
 
-                                                <!-- Price per Night -->
-                                                <div class="room-price text-gray-700 text-sm sm:text-base mt-1 sm:mt-0">
-                                                    ${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </div>
+                                                        <!-- Price per Night -->
+                                                        <div class="room-price text-gray-700 text-sm sm:text-base mt-1 sm:mt-0">
+                                                            ${nights} night${nights !== 1 ? 's' : ''} × ₱${room.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </div>
 
-                                                <!-- Total Price -->
-                                                <div class="room-total text-gray-900 font-semibold text-sm sm:text-base mt-1 sm:mt-0">
-                                                    ₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        <!-- Total Price -->
+                                                        <div class="room-total text-gray-900 font-semibold text-sm sm:text-base mt-1 sm:mt-0">
+                                                            ₱${(room.price * nights).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </div>
                                                 </div>
-                                        </div>
-                                    `;
+                                            `;
                     roomsList.appendChild(roomElement);
                 });
             }
