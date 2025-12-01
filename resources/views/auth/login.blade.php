@@ -9,7 +9,7 @@
         </div>
         
         <!-- Reminder for customers -->
-        <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+        <div class="mb-6 p-4 dark:bg-blue-900 rounded-lg">
             <p class="text-blue-800 dark:text-blue-200">
                 <strong>Note:</strong> This login is for authorized users only. 
                 If you're a customer looking to book our services, 

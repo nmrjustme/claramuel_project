@@ -96,7 +96,7 @@ $active = 'arrivals';
             todayContainer.innerHTML = loader("Today's check-ins...");
             futureContainer.innerHTML = loader("Upcoming check-ins...");
             
-            fetch('{{ route("checkins.data") }}')
+            fetch(`/next/check-in/list/data`)
                 .then(res => res.json())
                 .then(data => {
                     renderCheckins(data);

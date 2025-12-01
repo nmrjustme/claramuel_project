@@ -770,11 +770,15 @@
                 </div>
 
                 <div class="rounded-lg mb-6 p-8 border border-lightgray bg-white">
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-6 sm:mb-8 text-center">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 text-center">
                         Accepted Payment Methods
                     </h3>
 
-                    <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+                    <p class="text-center text-gray-500 text-sm mb-6">
+                        These are the payment methods we currently accept. Icons are not clickable.
+                    </p>
+
+                    <div class="flex flex-wrap justify-center gap-1.5 sm:gap-2">
 
                         <!-- E-Wallets -->
                         <div class="p-2 rounded-lg select-none pointer-events-none cursor-default">
