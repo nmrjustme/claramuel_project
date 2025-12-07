@@ -57,7 +57,7 @@ class RoomHoldController extends Controller
                 ->where('session_id', '!=', $currentSessionId)
                 ->where(function ($query) use ($dateFrom, $dateTo) {
                     $query->where('date_from', '<', $dateTo)
-                          ->where('date_to', '>', $dateFrom);
+                        ->where('date_to', '>', $dateFrom);
                 })
                 ->first();
 
@@ -66,6 +66,8 @@ class RoomHoldController extends Controller
                 'existing_hold' => $existingHold ? $existingHold->toArray() : null
             ]);
 
+            // In RoomHoldController.php -> createHold()
+
             if ($existingHold) {
                 \Log::warning('Room already on hold:', [
                     'room_id' => $roomId,
@@ -73,9 +75,24 @@ class RoomHoldController extends Controller
                     'current_session' => $currentSessionId
                 ]);
 
+                // --- UPDATED LOGIC START ---
+                $startDate = $existingHold->date_from;
+                $lastNight = Carbon::parse($existingHold->date_to)->subDay();
+
+                // Check if it's a single night (start date is same as last night)
+                if ($startDate->format('Y-m-d') === $lastNight->format('Y-m-d')) {
+                    // Output: "Dec 14"
+                    $dateRange = $startDate->format('M d');
+                } else {
+                    // Output: "Dec 14 - Dec 15"
+                    $dateRange = $startDate->format('M d') . ' - ' . $lastNight->format('M d');
+                }
+                // --- UPDATED LOGIC END ---
+
                 return response()->json([
                     'success' => false,
-                    'message' => "This room is temporarily on hold from {$existingHold->date_from->format('M d')} to {$existingHold->date_to->format('M d')} for 5–10 minutes. Someone else is currently booking it. Please try again later or choose another date."
+                    'message' => "This room is temporarily on hold.",
+                    'conflict_dates' => $dateRange
                 ], 409);
             }
 
@@ -152,31 +169,33 @@ class RoomHoldController extends Controller
             'hold_ids' => 'required|array',
             'hold_ids.*' => 'exists:room_holds,id'
         ]);
-        
+
         $validHolds = [];
         $invalidHolds = [];
-        
+
         foreach ($request->hold_ids as $holdId) {
             $hold = RoomHold::find($holdId);
-            
-            if ($hold && 
-                $hold->session_id === session()->getId() && 
+
+            if (
+                $hold &&
+                $hold->session_id === session()->getId() &&
                 $hold->status === 'pending' &&
-                $hold->expires_at > now()) {
+                $hold->expires_at > now()
+            ) {
                 $validHolds[] = $holdId;
             } else {
                 $invalidHolds[] = $holdId;
             }
         }
-        
+
         return response()->json([
             'success' => count($invalidHolds) === 0,
             'valid' => count($invalidHolds) === 0,
             'valid_count' => count($validHolds),
             'invalid_count' => count($invalidHolds),
             'invalid_holds' => $invalidHolds,
-            'message' => count($invalidHolds) === 0 
-                ? 'All holds are valid' 
+            'message' => count($invalidHolds) === 0
+                ? 'All holds are valid'
                 : 'Some holds are no longer valid'
         ]);
     }
@@ -222,7 +241,7 @@ class RoomHoldController extends Controller
                 ->where('session_id', '!=', session()->getId())
                 ->where(function ($query) use ($request) {
                     $query->where('date_from', '<', $request->date_to)
-                          ->where('date_to', '>', $request->date_from);
+                        ->where('date_to', '>', $request->date_from);
                 })
                 ->first();
 
