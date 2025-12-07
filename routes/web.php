@@ -49,6 +49,7 @@ use App\Http\Controllers\DayTourFacilitiesController;
 use App\Models\FacilityBookingLog;
 use App\Services\InvoiceService; // adjust namespace if different
 
+use App\Http\Controllers\RoomHoldController;
 
 Route::get('/test-invoice/{id}', function ($id) {
     $booking = FacilityBookingLog::findOrFail($id);
@@ -72,6 +73,29 @@ Route::get('/customer/guest-types', [GuestTypeController::class, 'index'])->name
 
 Route::get('/dashboard/checkin_page/{id}', [CustomerBookingPageController::class, 'Data'])->name('facility.deal');
 
+Route::post('/room-hold/create', [RoomHoldController::class, 'createHold'])->name('room.hold.create');
+Route::post('/room-hold/check', [RoomHoldController::class, 'checkAvailability'])->name('room.hold.check');
+Route::delete('/room-hold/release/{id}', [RoomHoldController::class, 'releaseHold'])->name('room.hold.release');
+Route::delete('/room-hold/release-all', [RoomHoldController::class, 'releaseAllHolds'])->name('room.hold.release.all');
+
+Route::post('/store-booking-session', function (Request $request) {
+    session()->put('booking_data', $request->all());
+    return response()->json(['success' => true]);
+});
+
+Route::post('/room-hold/verify', [RoomHoldController::class, 'verifyHolds'])->name('room.hold.verify');
+Route::post('/room-hold/check-active-holds', [RoomHoldController::class, 'checkActiveHolds'])->name('room.hold.check.active');
+// Add this route
+Route::post('/booking-session', [BookingsController::class, 'storeBookingSession'])->name('bookings.store.session');
+// Add this to routes/web.php
+Route::get('/debug-session', function () {
+    return response()->json([
+        'session_id' => session()->getId(),
+        'session_data' => session()->all(),
+        'csrf_token' => csrf_token(),
+        'session_status' => session()->isStarted() ? 'started' : 'not started'
+    ]);
+});
 
 // =======================
 // Maya Payment Routes
@@ -611,7 +635,7 @@ Route::prefix('admin/day-tour-facilities')->group(function () {
 // =======================
 Route::post('/submit/booking/{token}', [PaymentsController::class, 'submitBooking'])->name('payments.booking.submit');
 
-Route::get('/booked_date', [BookingsController::class, 'getUnavailableDates']);
+Route::get('/booked_date', [BookingsController::class, 'getUnavailableDates'])->name('booked.dates');
 
 Route::post('/confirm-booking/{id}', [InquirerController::class, 'confirmBooking'])->name('booking.confirm');
 Route::post('/reject-booking/{id}', [InquirerController::class, 'rejectBooking'])->name('booking.reject');

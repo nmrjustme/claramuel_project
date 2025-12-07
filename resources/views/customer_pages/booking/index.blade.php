@@ -1263,8 +1263,11 @@
                z-index: 10;
                background: white;
                border-radius: 8px;
-               padding: 10px;
+               padding: 0;
+               /* Let flatpickr handle padding */
                margin-top: 10px;
+               width: 100%;
+               overflow: hidden;
           }
 
           @media (max-width: 480px) {
@@ -1277,19 +1280,16 @@
           }
 
           .calendar-container .flatpickr-calendar {
-               position: relative !important;
                width: 100% !important;
                max-width: 100% !important;
-               left: 0 !important;
-               top: 0 !important;
-               opacity: 1 !important;
-               visibility: visible !important;
-               transform: none !important;
                box-shadow: none !important;
+               margin: 0 !important;
+               padding: 0 !important;
           }
 
           .calendar-container .flatpickr-days {
                width: 100% !important;
+               border: none !important;
           }
 
           .calendar-container .dayContainer {
@@ -1439,6 +1439,91 @@
                     /* Optional: restore normal link look */
                }
           }
+
+          /* In-button-area notification styles */
+          .button-notification {
+               position: relative;
+               width: 100%;
+          }
+
+          .notification-box {
+               position: absolute;
+               bottom: 100%;
+               left: 0;
+               right: 0;
+               background-color: #10B981;
+               color: white;
+               padding: 0.875rem 1rem;
+               border-radius: 0.5rem;
+               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+               margin-bottom: 0.75rem;
+               transform: translateY(10px);
+               opacity: 0;
+               visibility: hidden;
+               transition: all 0.3s ease;
+               z-index: 10;
+          }
+
+          .notification-box.show {
+               transform: translateY(0);
+               opacity: 1;
+               visibility: visible;
+          }
+
+          .notification-box.error {
+               background-color: #DC2626;
+          }
+
+          .notification-box.warning {
+               background-color: #F59E0B;
+          }
+
+          .notification-box-content {
+               display: flex;
+               align-items: flex-start;
+               gap: 0.5rem;
+          }
+
+          .notification-box-content i {
+               margin-top: 0.125rem;
+               flex-shrink: 0;
+          }
+
+          .notification-box-message {
+               font-size: 0.875rem;
+               line-height: 1.4;
+               flex-grow: 1;
+          }
+
+          .notification-box-close {
+               background: none;
+               border: none;
+               color: white;
+               cursor: pointer;
+               padding: 0.125rem;
+               margin-left: 0.5rem;
+               flex-shrink: 0;
+          }
+
+          /* Adjust button container to accommodate notification */
+          #checkout-btn-container {
+               position: relative;
+               margin-top: 2rem;
+          }
+
+          #hold-status-message {
+               transition: all 0.3s ease;
+               max-height: 0;
+               overflow: hidden;
+               opacity: 0;
+          }
+
+          #hold-status-message.active {
+               max-height: 100px;
+               opacity: 1;
+               margin-bottom: 1rem;
+               padding: 0.75rem;
+          }
      </style>
 
      <x-header />
@@ -1566,13 +1651,12 @@
                          <!-- Group rooms by category with Netflix-style horizontal scrolling -->
                          <div id="facilities-container" class="space-y-8">
                               @php
-                                   // Group facilities by category
                                    $groupedFacilities = $facilities->groupBy('category');
-                                   echo "<script>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                console.log('Unavailable Dates Data:', " . json_encode($unavailable_dates) . ");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           </script>";
                               @endphp
 
+                              <script>
+                                   console.log('Unavailable Dates Data:', @json($unavailable_dates));
+                              </script>
                               @foreach($groupedFacilities as $category => $facilitiesInCategory)
                                    <div class="category-container">
                                         <h3 class="category-title font-bold text-dark text-lg sm:text-xl md:text-2xl">
@@ -1680,8 +1764,7 @@
                                                                                                                         <div class="feature-item">
                                                                                                                              <i class="fas fa-bed feature-icon"></i>
                                                                                                                              <span>{{ $facility->bed_number }} bed{{
-                                                                                $facility->bed_number != 1 ? 's' : ''
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }}</span>
+                                                                                $facility->bed_number != 1 ? 's' : ''}}</span>
                                                                                                                         </div>
                                                                            @endif
                                                                            <div class="feature-item">
@@ -1762,7 +1845,7 @@
                                                                                                : $activeDiscount->discount_value
                                                                                           )
                                                                                      )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }}
                                                                                                                                        </div>
 
                                                                                                                                        <!-- Discount icon + text -->
@@ -1908,15 +1991,26 @@
                          @endif
                     </div>
 
+          
+
                     <!-- Booking Summary Card -->
+
                     <div id='booking-summary' class="bg-white rounded-xl p-8 border border-lightgray">
                          <h2 class="text-md md:text-xl font-bold text-gray-800 mb-5 flex items-center">
                               <i class="fas fa-receipt text-primary mr-3 text-xl"></i>
                               Booking Summary
                          </h2>
 
+                         <div id="cart-hold-warning" class="mb-4 p-4 bg-orange-50 border border-orange-400 rounded-lg flex items-start gap-3 hidden">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0">
+                                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                              </svg>
+                              <p class="text-xs md:text-sm text-orange-800">
+                                   If a room is on hold, please <b>choose another date</b>, <b>select a different room</b>, <b>or wait 5–10 minutes</b>.
+                              </p>
+                         </div>
+
                          <div id="cart-items" class="space-y-4 min-h-[120px]">
-                              <!-- Empty cart state -->
                               <div class="text-gray-400 text-center py-6">
                                    <i class="fas fa-shopping-cart text-xs md:text-3xl mb-3 opacity-50"></i>
                                    <p>Your list is empty</p>
@@ -1924,21 +2018,33 @@
                          </div>
 
                          @if($breakfast_price->status == 'Active')
-                                        <div id="breakfast-summary" class="hidden border-t border-gray-200 pt-4">
-                                             <div class="flex justify-between items-center">
-                                                  <div>
-                                                       <h4 class="font-medium text-dark">Breakfast Package</h4>
-                                                       <div class="text-sm text-gray-600" id="breakfast-nights">1 night × 1 room</div>
+                              <div id="breakfast-summary"
+                                   class="hidden border-b border-gray-100 pb-4 mt-4 transition-all duration-300 ease-in-out">
+                                   <div class="flex justify-between items-start">
+                                        <div class="flex items-start">
+                                             <div class="bg-red-50 p-3 rounded-xl mr-3 flex-shrink-0">
+                                                  <i class="fas fa-utensils text-red-600 text-lg"></i>
+                                             </div>
+                                             <div>
+                                                  <h4 class="font-bold text-gray-800 text-sm md:text-base">Daily Breakfast</h4>
+                                                  <div class="text-xs text-gray-500 mt-1" id="breakfast-nights">
+                                                       1 night × 1 room
                                                   </div>
-                                                  <div class="text-right">
-                                                       <div class="font-medium" id="breakfast-price">₱{{
-                              number_format($breakfast_price->price, 2) }}</div>
-                                                  </div>
+                                                  <span
+                                                       class="inline-block mt-1 text-[10px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                                                       Add-on
+                                                  </span>
                                              </div>
                                         </div>
+                                        <div class="text-right">
+                                             <div class="font-bold text-gray-800" id="breakfast-price">
+                                                  ₱{{ number_format($breakfast_price->price, 2) }}
+                                             </div>
+                                        </div>
+                                   </div>
+                              </div>
                          @endif
 
-                         <!-- Simplified total section -->
                          <div class="border-t border-gray-200 pt-4 mt-4">
                               <div class="flex justify-between items-center">
                                    <span class="text-lg font-bold text-gray-800">Total</span>
@@ -1947,1117 +2053,1087 @@
                               </div>
                          </div>
 
+                         <div id="hold-status-message" class="rounded-lg text-sm flex items-center gap-2 mt-4 hidden">
+                              <i class="fas fa-info-circle"></i>
+                              <span class="msg-text"></span>
+                         </div>
+
                          <button id="checkout-btn"
-                              class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-70 disabled:transform-none hover:-translate-y-0.5 active:translate-y-0 btn-primary"
+                              class="w-full mt-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-70 disabled:transform-none hover:-translate-y-0.5 active:translate-y-0 btn-primary"
                               disabled>
                               <span id="button-text">Proceed to Your Details</span>
-                              <div id="button-spinner" class="loading-spinner hidden"></div>
+                              <!-- <div id="button-spinner" class="loading-spinner hidden"></div> -->
                          </button>
                     </div>
+
                </div>
           </div>
-     </div>
 
 
 
 
-     <!-- Notification element -->
-     <div id="notification" class="notification hidden">
-          <i class="fas fa-check-circle mr-2"></i>
-          <span id="notification-message"></span>
-     </div>
+          <!-- Notification element -->
+          <div id="notification" class="notification hidden">
+               <i class="fas fa-check-circle mr-2"></i>
+               <span id="notification-message"></span>
+          </div>
 
-     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-     <script>
-          class BookingSystem {
+          <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+          <script>
+               class BookingSystem {
 
-               constructor() {
-                    this.cart = [];
-                    this.nights = 1;
-                    this.roomsData = {};
-                    this.bookedDates = {};
-                    this.datePicker = null;
-                    this.breakfastIncluded = false;
-                    this.breakfastPrice = {{ $breakfast_price->status == 'Active' ? $breakfast_price->price : 0 }};
-                    this.isSubmitting = false;
-                    this.validDates = false;
-
-                    // Load cart from storage
-                    this.cart = [];
-
-                    // Load breakfast state
-                    const savedBreakfast = sessionStorage.getItem('breakfastIncluded');
-                    this.breakfastIncluded = savedBreakfast === 'true';
-
-                    this.initializeRoomsData();
-                    this.init();
-               }
-
-               saveCartToStorage() {
-                    sessionStorage.setItem('bookingCart', JSON.stringify(this.cart));
-                    //localStorage.setItem('bookingCart', JSON.stringify(this.cart));
-                    sessionStorage.setItem('breakfastIncluded', this.breakfastIncluded);
-               }
-
-               initializeRoomsData() {
-                    document.querySelectorAll('.room-card').forEach(card => {
-                         const roomId = card.dataset.roomId;
-                         const images = JSON.parse(card.dataset.images);
-
-                         let bookedDates = [];
-                         try {
-                              bookedDates = JSON.parse(card.dataset.bookedDates || '[]');
-                              if (!Array.isArray(bookedDates)) {
-                                   bookedDates = [];
-                              }
-                         } catch (e) {
-                              console.error('Error parsing booked dates:', e);
-                              bookedDates = [];
-                         }
-
-                         this.bookedDates[roomId] = bookedDates;
-                         const discountedPriceElement = card.querySelector('.night-price.text-red-600');
-                         const price = discountedPriceElement
-                              ? parseFloat(discountedPriceElement.textContent.replace(/[^\d.]/g, ''))
-                              : parseFloat(card.dataset.price);
-
-                         this.roomsData[roomId] = {
-                              name: card.querySelector('h3').textContent.trim(),
-                              price: price,
-                              originalPrice: parseFloat(card.dataset.price),
-                              images: images,
-                              mainImage: images[0] || 'https://via.placeholder.com/500x300?text=No+Image',
-                              id: roomId,
-                              facilityId: roomId.replace('facility-', '')
-                         };
-
-                         this.bookedDates[roomId] = bookedDates;
-                    });
-               }
-
-               init() {
-                    this.setupEventListeners();
-                    this.initDatePickers();
-                    this.setDefaultDates();
-                    this.setupScrollArrows();
-                    this.setupUnavailableDatesToggle();
-                    // this.setupAmenitiesModal();
-                    this.initializeCart();
-               }
-
-               setupAmenitiesModal() {
-                    const modal = document.getElementById('amenities-modal');
-                    const closeBtn = document.getElementById('close-amenities-modal');
-                    const amenitiesList = document.getElementById('amenities-list');
-
-                    // Close handlers
-                    const closeModal = () => {
-                         modal.classList.add('hidden');
-                         document.body.style.overflow = 'auto'; // Re-enable scrolling
-                    };
-
-                    closeBtn.addEventListener('click', closeModal);
-
-                    modal.addEventListener('click', (e) => {
-                         if (e.target === modal) closeModal();
-                    });
-
-                    // Escape key to close
-                    document.addEventListener('keydown', (e) => {
-                         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                              closeModal();
-                         }
-                    });
-
-                    // View amenities button handler
-                    document.addEventListener('click', async (e) => {
-                         if (e.target.closest('.view-amenities-btn')) {
-                              const button = e.target.closest('.view-amenities-btn');
-                              const facilityId = button.dataset.roomId;
-
-                              try {
-                                   // Show loading state
-                                   amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                                                                            <div class="col-span-3 py-8 flex flex-col items-center justify-center">
-                                                                                                                                                                                                                                                                                                                 <i class="fas fa-spinner fa-spin text-primary text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                                                                                 <div class="text-lg">Loading amenities...</div>
-                                                                                                                                                                                                                                                                                                            </div>`;
-
-                                   modal.classList.remove('hidden');
-                                   document.body.style.overflow = 'hidden'; // Prevent background scrolling
-
-                                   // Fetch amenities via API
-                                   const response = await fetch(`/api/facilities/${facilityId}/amenities`);
-                                   const data = await response.json();
-
-                                   if (response.ok && data.success) {
-                                        // Populate amenities list
-                                        amenitiesList.innerHTML = data.amenities.map(amenity => `
-                                                                                                                                                                                                                                                                                                                      <div class="amenity-item">
-                                                                                                                                                                                                                                                                                                                           <div class="amenity-icon">
-                                                                                                                                                                                                                                                                                                                                <i class="${amenity.icon || this.getAmenityIcon(amenity.name)}"></i>
-                                                                                                                                                                                                                                                                                                                           </div>
-                                                                                                                                                                                                                                                                                                                           <div class="amenity-name">${amenity.name}</div>
-                                                                                                                                                                                                                                                                                                                      </div>
-                                                                                                                                                                                                                                                                                                                 `).join('');
-                                   } else {
-                                        throw new Error(data.message || 'Failed to load amenities');
-                                   }
-                              } catch (error) {
-                                   console.error('Error loading amenities:', error);
-                                   amenitiesList.innerHTML = `
-                                                                                                                                                                                                                                                                                                            <div class="col-span-3 py-8 text-center">
-                                                                                                                                                                                                                                                                                                                 <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-4"></i>
-                                                                                                                                                                                                                                                                                                                 <div class="text-lg text-red-500">
-                                                                                                                                                                                                                                                                                                                      ${error.message || 'Failed to load amenities'}
-                                                                                                                                                                                                                                                                                                                 </div>
-                                                                                                                                                                                                                                                                                                            </div>`;
-                              }
-                         }
-                    });
-               }
-
-               getAmenityIcon(amenityName) {
-                    const iconMap = {
-                         'wifi': 'fas fa-wifi',
-                         'tv': 'fas fa-tv',
-                         'air conditioning': 'fas fa-snowflake',
-                         'kitchen': 'fas fa-utensils',
-                         'parking': 'fas fa-parking',
-                         'pool': 'fas fa-swimming-pool',
-                         'breakfast': 'fas fa-coffee',
-                         'gym': 'fas fa-dumbbell',
-                         'bathroom': 'fas fa-bath',
-                         'shower': 'fas fa-shower',
-                         'bed': 'fas fa-bed',
-                         'hot tub': 'fas fa-hot-tub',
-                         'fireplace': 'fas fa-fire',
-                         'washing machine': 'fas fa-soap',
-                         'dryer': 'fas fa-wind',
-                         'heating': 'fas fa-temperature-high',
-                         'balcony': 'fas fa-door-open',
-                         'garden': 'fas fa-seedling',
-                         'terrace': 'fas fa-umbrella-beach',
-                         'view': 'fas fa-mountain',
-                         'security': 'fas fa-shield-alt',
-                         'accessible': 'fas fa-wheelchair',
-                         'pet friendly': 'fas fa-paw',
-                         'smoke free': 'fas fa-smoking-ban',
-                         'family friendly': 'fas fa-child',
-                         'workspace': 'fas fa-laptop',
-                         'iron': 'fas fa-tshirt',
-                         'hair dryer': 'fas fa-wind',
-                         'essentials': 'fas fa-soap',
-                         'hot water': 'fas fa-faucet',
-                         // Add more mappings as needed
-                    };
-
-                    const lowerName = amenityName.toLowerCase();
-                    return iconMap[lowerName] || 'fas fa-check-circle';
-               }
-
-               setupUnavailableDatesToggle() {
-                    // Cache styles to avoid duplication
-                    const STYLES_ADDED = Symbol('stylesAdded');
-
-                    document.addEventListener('click', (e) => {
-                         const toggleBtn = e.target.closest('.toggle-unavailable-dates');
-                         if (!toggleBtn) return;
-
-                         const content = toggleBtn.nextElementSibling;
-                         const isOpening = content.classList.contains('hidden');
-
-                         // Toggle visibility
-                         toggleBtn.classList.toggle('active');
-                         content.classList.toggle('hidden');
-
-                         // Rotate chevron icon
-                         this.rotateChevronIcon(toggleBtn, isOpening);
-
-                         // Initialize calendar if opening
-                         if (isOpening) {
-                              this.initializeCalendarIfNeeded(content);
-                         }
-                    });
-               }
-
-               // Helper method for icon rotation
-               rotateChevronIcon(toggleBtn, isOpening) {
-                    const icon = toggleBtn.querySelector('i:last-child');
-                    if (icon) {
-                         icon.style.transform = isOpening ? 'rotate(180deg)' : 'rotate(0deg)';
-                    }
-               }
-
-               // Helper method for calendar initialization
-               initializeCalendarIfNeeded(content) {
-                    const calendarEl = content.querySelector('.calendar-container');
-                    if (!calendarEl) return;
-
-                    // Destroy existing instance if any
-                    if (calendarEl._flatpickr) {
-                         calendarEl._flatpickr.destroy();
-                    }
-
-                    // Clear the container
-                    calendarEl.innerHTML = '';
-
-                    this.initializeFlatpickr(calendarEl);
-                    this.addCalendarStyles();
-
-                    // Mark as initialized
-                    calendarEl.dataset.initialized = "true";
-               }
-
-               // Flatpickr initialization
-               // Flatpickr initialization
-               initializeFlatpickr(calendarEl) {
-                    let bookedDates = JSON.parse(calendarEl.dataset.booked || "[]");
-                    const today = new Date().setHours(0, 0, 0, 0);
-
-                    // Clear any existing calendar first
-                    if (calendarEl._flatpickr) {
-                         calendarEl._flatpickr.destroy();
-                    }
-
-                    // Create the calendar
-                    const fp = flatpickr(calendarEl, {
-                         inline: true,
-                         dateFormat: "Y-m-d",
-                         disable: [
-                              ...bookedDates,
-                              (date) => date < today // disable past dates
-                         ],
-                         locale: { firstDayOfWeek: 0 },
-                         clickOpens: false,
-                         onChange: () => { }, // No-op function
-
-                         onDayCreate: (dObj, dStr, fp, dayElem) => {
-                              // Disable interactions
-                              dayElem.style.pointerEvents = 'none';
-                              dayElem.style.cursor = 'default';
-
-                              const dateObj = new Date(dayElem.dateObj).setHours(0, 0, 0, 0);
-
-                              if (dayElem.classList.contains('flatpickr-disabled')) {
-                                   this.styleDisabledDay(dayElem, dateObj, today);
-                              } else {
-                                   // Style available dates
-                                   dayElem.classList.add('available');
-                              }
-                         }
-                    });
-
-                    // Force calendar to render
-                    setTimeout(() => {
-                         fp.redraw();
-                    }, 100);
-               }
-
-               // Style disabled days based on type
-               styleDisabledDay(dayElem, dateObj, today) {
-                    if (dateObj < today) {
-                         // Past dates
-                         dayElem.classList.add('past-day');
-                    } else {
-                         // Booked/unavailable dates
-                         dayElem.classList.add('unavailable');
-                    }
-               }
-
-               // Add calendar styles (only once)
-               addCalendarStyles() {
-                    if (document.head.querySelector('[data-calendar-styles]')) return;
-
-                    const style = document.createElement('style');
-                    style.setAttribute('data-calendar-styles', 'true');
-                    style.textContent = this.getCalendarStyles();
-                    document.head.appendChild(style);
-               }
-
-               // CSS styles as template
-               // CSS styles as template
-               getCalendarStyles() {
-                    return `
-                         /* Base Calendar Container */
-                         .calendar-container {
-                              width: 100% !important;
-                              max-width: 100% !important;
-                         }
-
-                         .calendar-container .flatpickr-calendar {
-                              position: relative !important;
-                              width: 100% !important;
-                              max-width: 100% !important;
-                              left: 0 !important;
-                              top: 0 !important;
-                              opacity: 1 !important;
-                              visibility: visible !important;
-                              transform: none !important;
-                              box-shadow: none !important;
-                              margin: 0 auto !important;
-                         }
-
-                         .calendar-container .flatpickr-days {
-                              width: 100% !important;
-                         }
-
-                         .calendar-container .dayContainer {
-                              width: 100% !important;
-                              min-width: 100% !important;
-                              max-width: 100% !important;
-                              padding: 5px !important;
-                         }
-
-                         .calendar-container .flatpickr-day {
-                              min-width: 30px !important;
-                              height: 30px !important;
-                              line-height: 30px !important;
-                              margin: 2px !important;
-                              font-size: 12px !important;
-                         }
-
-                         /* Booked / unavailable days */
-                         .flatpickr-day.unavailable {
-                              background: #fee2e2 !important;
-                              color: #dc2626 !important;
-                              border-radius: 6px;
-                         }
-                         .flatpickr-day.unavailable:hover {
-                              background: #fecaca !important;
-                              color: #b91c1c !important;
-                         }
-
-                         /* Available days */
-                         .flatpickr-day.available {
-                              background: #dcfce7 !important;
-                              color: #16a34a !important;
-                              border-radius: 6px;
-                         }
-                         .flatpickr-day.available:hover {
-                              background: #bbf7d0 !important;
-                              color: #15803d !important;
-                         }
-
-                         /* Past days */
-                         .flatpickr-day.past-day {
-                              background: #f3f4f6 !important;
-                              color: #9ca3af !important;
-                              border-radius: 6px;
-                         }
-
-                         /* Disable interactions globally */
-                         .calendar-container .flatpickr-day {
-                              pointer-events: none !important;
-                         }
-
-                         /* RESPONSIVE ADJUSTMENTS */
-
-                         /* Small screens (phones) */
-                         @media (max-width: 640px) {
-                              .flatpickr-day {
-                                   width: 30px !important;
-                                   height: 30px !important;
-                                   font-size: 0.75rem !important;
-                                   margin: 1px !important;
-                              }
-
-                              .flatpickr-calendar {
-                                   font-family: 'Inter', sans-serif;
-                                   border: 1px solid #e5e7eb;
-                                   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                                   border-radius: 0.75rem;
-                              }
-                         }
-
-                         /* Medium screens (tablets) */
-                         @media (min-width: 641px) and (max-width: 1024px) {
-                              .flatpickr-day {
-                                   width: 36px !important;
-                                   height: 36px !important;
-                                   font-size: 0.9rem !important;
-                              }
-
-                              .flatpickr-calendar {
-                                   font-size: 0.9rem !important;
-                                   padding: 0.75rem !important;
-                              }
-                         }
-
-                         /* Large screens (desktops) */
-                         @media (min-width: 1025px) {
-                              .flatpickr-day {
-                                   width: 40px !important;
-                                   height: 40px !important;
-                                   font-size: 1rem !important;
-                              }
-                         }
-                    `;
-               }
-
-               setupScrollArrows() {
-                    const categoryContainers = document.querySelectorAll('.category-container');
-
-                    categoryContainers.forEach(container => {
-                         const scrollContainer = container.querySelector('.rooms-scroll-container');
-                         const leftArrow = container.querySelector('.scroll-left');
-                         const rightArrow = container.querySelector('.scroll-right');
-
-                         const updateArrows = () => {
-                              const scrollLeft = scrollContainer.scrollLeft;
-                              const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-
-                              if (scrollLeft <= 10) {
-                                   leftArrow.style.opacity = '0';
-                                   leftArrow.style.pointerEvents = 'none';
-                              } else {
-                                   leftArrow.style.opacity = '1';
-                                   leftArrow.style.pointerEvents = 'auto';
-                              }
-
-                              // This part hides the right arrow when at the end
-                              if (scrollLeft >= maxScroll - 10) {
-                                   rightArrow.style.opacity = '0';
-                                   rightArrow.style.pointerEvents = 'none';
-                              } else {
-                                   rightArrow.style.opacity = '1';
-                                   rightArrow.style.pointerEvents = 'auto';
-                              }
-                         };
-
-                         updateArrows();
-
-                         leftArrow.addEventListener('click', () => {
-                              const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
-                              scrollContainer.scrollBy({
-                                   left: -cardWidth * 2,
-                                   behavior: 'smooth'
-                              });
-                         });
-
-                         rightArrow.addEventListener('click', () => {
-                              const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
-                              scrollContainer.scrollBy({
-                                   left: cardWidth * 2,
-                                   behavior: 'smooth'
-                              });
-                         });
-
-                         scrollContainer.addEventListener('scroll', updateArrows);
-                         window.addEventListener('resize', updateArrows);
-                    });
-               }
-
-               initDatePickers() {
-                    const self = this;
-
-                    this.checkinPicker = flatpickr("#checkin", {
-                         minDate: "today",
-                         dateFormat: "Y-m-d",
-                         onChange: function (selectedDates, dateStr) {
-                              self.handleDateChange();
-                              if (selectedDates.length > 0) {
-                                   const nextDay = new Date(selectedDates[0]);
-                                   nextDay.setDate(nextDay.getDate() + 1);
-                                   self.checkoutPicker.set('minDate', nextDay);
-
-                                   if (self.cart.length > 0) {
-                                        self.updateDatePickerDisabledDates(self.cart[0].id);
-                                   }
-                              }
-                         },
-                         onDayCreate: function (dObj, dStr, fp, dayElem) {
-                              if (dayElem.classList.contains('flatpickr-disabled')) {
-                                   dayElem.classList.add('unavailable');
-                              }
-                         }
-                    });
-
-                    this.checkoutPicker = flatpickr("#checkout", {
-                         minDate: new Date(Date.now() + 86400000), // Tomorrow
-                         dateFormat: "Y-m-d",
-                         onChange: function (selectedDates, dateStr) {
-                              self.handleDateChange();
-                         },
-                         onDayCreate: function (dObj, dStr, fp, dayElem) {
-                              if (dayElem.classList.contains('flatpickr-disabled')) {
-                                   dayElem.classList.add('unavailable');
-                              }
-                         }
-                    });
-               }
-
-               updateDatePickerDisabledDates(roomId) {
-                    if (!roomId) return;
-
-                    const bookedDates = this.bookedDates[roomId] || [];
-
-                    // Convert booked dates to Date objects
-                    const disabledDates = bookedDates.map(dateStr => {
-                         const [year, month, day] = dateStr.split('-').map(Number);
-                         return new Date(year, month - 1, day);
-                    });
-
-                    // Flatpickr disable function
-                    const disableFunction = (date) => {
-                         // Check if date is in disabledDates array
-                         return disabledDates.some(disabledDate =>
-                              date.getFullYear() === disabledDate.getFullYear() &&
-                              date.getMonth() === disabledDate.getMonth() &&
-                              date.getDate() === disabledDate.getDate()
-                         );
-                    };
-
-                    // Update both datepickers
-                    this.checkinPicker.set('disable', [disableFunction]);
-                    this.checkoutPicker.set('disable', [disableFunction]);
-
-                    // Force redraw of the calendar
-                    this.checkinPicker.redraw();
-                    this.checkoutPicker.redraw();
-               }
-
-               setDefaultDates() {
-                    const today = new Date();
-                    const tomorrow = new Date(today);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-
-                    this.checkinPicker.setDate(today);
-                    this.checkoutPicker.setDate(tomorrow);
-
-                    this.calculateNightsAndPrices();
-               }
-
-               setupEventListeners() {
-                    document.addEventListener('click', (e) => {
-                         if (e.target.closest('.add-to-cart-btn')) {
-                              const button = e.target.closest('.add-to-cart-btn');
-                              this.addToCart(button.dataset.room);
-                         }
-
-                         if (e.target.closest('.remove-btn')) {
-                              const button = e.target.closest('.remove-btn');
-                              this.removeFromCart(button.dataset.room);
-                         }
-                    });
-
-                    document.getElementById('breakfast-toggle')?.addEventListener('change', (e) => {
-                         this.breakfastIncluded = e.target.checked;
-                         this.updateCartDisplay();
-                    });
-
-                    document.getElementById('checkout-btn').addEventListener('click', () => this.handleCheckout());
-
-               }
-
-               validateCheckoutButton() {
-                    const checkoutBtn = document.getElementById('checkout-btn');
-                    checkoutBtn.disabled = this.cart.length === 0;
-               }
-
-               formatDate(date) {
-                    if (!date) return '';
-
-                    // Handle both string dates and Date objects
-                    const d = new Date(date);
-                    if (isNaN(d.getTime())) return ''; // Invalid date
-
-                    // Use local date components (not UTC)
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-
-                    return `${year}-${month}-${day}`;
-               }
-
-               async handleCheckout() {
-                    if (this.cart.length === 0 || this.isSubmitting) return;
-
-                    const button = document.getElementById('checkout-btn');
-                    const buttonText = document.getElementById('button-text');
-                    const spinner = document.getElementById('button-spinner');
-
-                    try {
-                         // Show loading state
-                         button.disabled = true;
-                         this.isSubmitting = true;
-                         spinner.classList.add('hidden');
-                         buttonText.textContent = 'Processing...';
-
-                         // Get pax information from each room card
-                         const bookingData = {
-                              checkin_date: this.formatForBackend(this.checkinPicker.selectedDates[0]),
-                              checkout_date: this.formatForBackend(this.checkoutPicker.selectedDates[0]),
-                              facilities: this.cart.map(item => {
-                                   // Find the room card element to get pax info
-                                   const roomCard = document.querySelector(`.room-card[data-room-id="${item.id}"]`);
-                                   const pax = roomCard ? parseInt(roomCard.querySelector('.feature-item:last-child span').textContent.match(/\d+/)[0]) : 1;
-                                   const categoryContainer = roomCard.closest('.category-container');
-                                   const category = categoryContainer ? categoryContainer.querySelector('.category-title').textContent.trim() : 'Standard';
-
-                                   return {
-                                        facility_id: item.facilityId,
-                                        name: item.name,
-                                        price: item.price,
-                                        nights: this.nights,
-                                        total_price: item.price * this.nights,
-                                        mainImage: item.mainImage,
-                                        pax: pax, // Add pax information here
-                                        category: category
-                                   };
-                              }),
-                              breakfast_included: this.breakfastIncluded,
-                              breakfast_price: this.breakfastIncluded ? this.breakfastPrice * this.nights * this.cart.length : 0,
-                              total_price: this.calculateTotalPrice(),
-                         };
-
-                         // Store booking data in sessionStorage to pass to next page
-                         sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-                         //localStorage.setItem('bookingCart', JSON.stringify(this.cart));
-
-                         // Redirect to customer information page
-                         window.location.href = '/bookings/customer-info';
-
-                    } catch (error) {
-                         console.error('Checkout error:', error);
-                         showNotification('Failed to proceed to checkout. Please try again.', true);
-
-                         button.textContent = 'Proceed to Customer Information';
-                         spinner.classList.remove('hidden');
-                         button.disabled = this.cart.length === 0;
-                    } finally {
+                    constructor() {
+                         this.cart = [];
+                         this.nights = 1;
+                         this.roomsData = {};
+                         this.bookedDates = {};
+                         this.datePicker = null;
+                         this.breakfastIncluded = false;
+                         // Blade syntax for breakfast price
+                         this.breakfastPrice = {{ $breakfast_price->status == 'Active' ? $breakfast_price->price : 0 }};
                          this.isSubmitting = false;
-                         spinner.classList.remove('hidden');
-                    }
-               }
+                         this.validDates = false;
+                         this.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-               formatForBackend(date) {
-                    if (!date) return null;
+                         // Load breakfast state
+                         const savedBreakfast = sessionStorage.getItem('breakfastIncluded');
+                         this.breakfastIncluded = savedBreakfast === 'true';
 
-                    // Create a new date object to avoid modifying the original
-                    const d = new Date(date);
-
-                    // Use local date components
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-
-                    return `${year}-${month}-${day}`;
-               }
-
-               calculateTotalPrice() {
-                    const roomsTotal = this.cart.reduce((sum, item) => sum + (item.price * this.nights), 0);
-                    const breakfastTotal = this.breakfastIncluded ? this.breakfastPrice * this.nights * this.cart.length : 0;
-                    return roomsTotal + breakfastTotal;
-               }
-
-               handleDateChange() {
-                    const checkinDate = this.checkinPicker.selectedDates[0];
-                    const checkoutDate = this.checkoutPicker.selectedDates[0];
-                    this.validDates = !!checkinDate && !!checkoutDate && checkinDate < checkoutDate;
-                    if (!checkinDate || !checkoutDate) return;
-
-                    if (checkinDate >= checkoutDate) {
-                         const newCheckout = new Date(checkinDate);
-                         newCheckout.setDate(newCheckout.getDate() + 1);
-                         this.checkoutPicker.setDate(newCheckout);
-                         return;
+                         this.initializeRoomsData();
+                         this.init();
                     }
 
-                    if (this.cart.length > 0) {
-                         const roomId = this.cart[0].id;
-                         const checkin = this.formatDate(checkinDate);
-                         const checkout = this.formatDate(checkoutDate);
+                    saveCartToStorage() {
+                         sessionStorage.setItem('bookingCart', JSON.stringify(this.cart));
+                         sessionStorage.setItem('breakfastIncluded', this.breakfastIncluded);
+                    }
 
-                         if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
-                              const roomName = this.roomsData[roomId]?.name || 'This room';
-                              const formattedCheckin = this.formatDisplayDate(checkinDate);
-                              const formattedCheckout = this.formatDisplayDate(checkoutDate);
-                              const nextAvailable = this.findNextAvailableDates(roomId, checkinDate);
+                    initializeRoomsData() {
+                         document.querySelectorAll('.room-card').forEach(card => {
+                              const roomId = card.dataset.roomId;
+                              const images = JSON.parse(card.dataset.images);
 
-                              let message = `${roomName} is not available on the selected dates. Please try different dates.`;
+                              // Initial load from DOM (fallback)
+                              let bookedDates = [];
+                              try {
+                                   bookedDates = JSON.parse(card.dataset.bookedDates || '[]');
+                              } catch (e) { bookedDates = []; }
 
-                              showNotification(message, true);
-                              this.checkoutPicker.setDate(null);
-                              return;
+                              if (!this.bookedDates[roomId]) {
+                                   this.bookedDates[roomId] = bookedDates;
+                              }
+
+                              const discountedPriceElement = card.querySelector('.night-price.text-red-600');
+                              const price = discountedPriceElement
+                                   ? parseFloat(discountedPriceElement.textContent.replace(/[^\d.]/g, ''))
+                                   : parseFloat(card.dataset.price);
+
+                              this.roomsData[roomId] = {
+                                   name: card.querySelector('h3').textContent.trim(),
+                                   price: price,
+                                   originalPrice: parseFloat(card.dataset.price),
+                                   images: images,
+                                   mainImage: images[0] || 'https://via.placeholder.com/500x300?text=No+Image',
+                                   id: roomId,
+                                   facilityId: roomId.replace('facility-', '')
+                              };
+                         });
+                    }
+
+                    async init() {
+
+                         this.initializeRoomsData();
+
+                         this.setupEventListeners();
+                         this.initDatePickers();
+                         this.setDefaultDates();
+                         this.setupScrollArrows();
+                         this.setupUnavailableDatesToggle();
+                         this.initializeCart();
+
+
+                         await this.fetchRealTimeAvailability();
+
+                         // 4. Start Polling (Real-time updates every 10 seconds)
+                         setInterval(() => this.fetchRealTimeAvailability(), 10000);
+                    }
+
+                    async fetchRealTimeAvailability() {
+                         try {
+                              const response = await fetch("{{ route('booked.dates') }}");
+                              if (!response.ok) throw new Error('Network response was not ok');
+                              
+                              const data = await response.json();
+                              this.processUnavailableDates(data);
+                              this.refreshCalendars();
+                              
+                              // If we have a selected room in the cart, re-validate availability
+                              if(this.cart.length > 0) {
+                                   this.validateCartAvailability();
+                              }
+
+                         } catch (error) {
+                              console.error('Error fetching real-time availability:', error);
                          }
                     }
 
-                    this.calculateNightsAndPrices();
-               }
+                    processUnavailableDates(data) {
+                         // Data structure is { facility_id: [ {checkin_date, checkout_date}, ... ] }
+                         const processed = {};
 
-               formatDisplayDate(date) {
-                    if (typeof date === 'string') {
-                         date = new Date(date);
+                         Object.keys(data).forEach(facilityId => {
+                              const ranges = data[facilityId];
+                              let datesArray = [];
+
+                              ranges.forEach(range => {
+                                   // Convert range to individual dates
+                                   const start = new Date(range.checkin_date);
+                                   const end = new Date(range.checkout_date);
+                                   
+                                   // Logic: exclude checkout date from being "unavailable" for checkin
+                                   // But include it for the visual calendar
+                                   // Adjust based on your specific business logic (nightly vs daily)
+                                   // Here we loop from start up to (but not including) end for booking logic
+                                   // But usually, we block the specific nights.
+                                   
+                                   let loopDate = new Date(start);
+                                   // We subtract 1 day from end because checkout day is usually available for new checkin
+                                   const lastNight = new Date(end); 
+                                   lastNight.setDate(lastNight.getDate() - 1); 
+
+                                   while (loopDate <= lastNight) {
+                                   datesArray.push(this.formatDate(loopDate));
+                                   loopDate.setDate(loopDate.getDate() + 1);
+                                   }
+                              });
+
+                              // Remove duplicates and store
+                              processed[`facility-${facilityId}`] = [...new Set(datesArray)];
+                         });
+
+                         // Update local state
+                         this.bookedDates = { ...this.bookedDates, ...processed };
                     }
-                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-               }
 
-               calculateNightsAndPrices() {
-                    const checkinDate = this.checkinPicker.selectedDates[0];
-                    const checkoutDate = this.checkoutPicker.selectedDates[0];
+                    refreshCalendars() {
+                         // 1. Refresh individual room calendars
+                         document.querySelectorAll('.calendar-container').forEach(el => {
+                              const fp = el._flatpickr;
+                              const roomId = el.closest('.room-card').dataset.roomId;
+                              
+                              if (fp && this.bookedDates[roomId]) {
+                                   // Update the disable configuration
+                                   fp.set('disable', [
+                                   (date) => {
+                                        const dateStr = this.formatDate(date);
+                                        return this.bookedDates[roomId].includes(dateStr);
+                                   },
+                                   (date) => date < new Date().setHours(0,0,0,0)
+                                   ]);
+                                   fp.redraw();
+                              }
+                         });
 
-                    if (!checkinDate || !checkoutDate) return;
-
-                    const timeDiff = checkoutDate.getTime() - checkinDate.getTime();
-                    this.nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-                    document.getElementById('nights-display').textContent =
-                         `${this.nights} night${this.nights !== 1 ? 's' : ''} selected (${this.formatDisplayDate(checkinDate)} - ${this.formatDisplayDate(checkoutDate)}) | 12NN to 10AM`;
-
-                    if (this.cart.length > 0) {
-                         this.updateCartDisplay();
+                         // 2. Refresh main Datepickers if necessary
+                         // Note: Main datepickers usually only disable dates if a specific room is contextually selected
+                         // OR if you want to disable dates where ALL rooms are booked (complex logic).
+                         // Currently keeping main pickers open, but validation happens on "Select Room".
                     }
-               }
 
-               addToCart(roomId) {
-                    this.saveCartToStorage();
-                    try {
-                         if (!this.roomsData[roomId]) {
-                              throw new Error('Room not found');
+                    validateCartAvailability() {
+                         let hasConflict = false;
+                         
+                         this.cart.forEach(item => {
+                              const roomDates = this.bookedDates[item.id] || [];
+                              
+                              // Simple intersection check
+                              const isStillAvailable = this.isDateRangeAvailable(item.id, item.checkin, item.checkout);
+                              
+                              if (!isStillAvailable) {
+                                   hasConflict = true;
+                                   // Visual indicator logic here (optional)
+                              }
+                         });
+
+                         if(hasConflict) {
+                              this.updateHoldStatus('Attention: One of your selected rooms has just been booked by another user.', 'error');
+                         }
+                    }
+
+                    setupScrollArrows() {
+                         const categoryContainers = document.querySelectorAll('.category-container');
+                         categoryContainers.forEach(container => {
+                              const scrollContainer = container.querySelector('.rooms-scroll-container');
+                              const leftArrow = container.querySelector('.scroll-left');
+                              const rightArrow = container.querySelector('.scroll-right');
+
+                              const updateArrows = () => {
+                                   const scrollLeft = scrollContainer.scrollLeft;
+                                   const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+
+                                   if (scrollLeft <= 10) {
+                                        leftArrow.style.opacity = '0';
+                                        leftArrow.style.pointerEvents = 'none';
+                                   } else {
+                                        leftArrow.style.opacity = '1';
+                                        leftArrow.style.pointerEvents = 'auto';
+                                   }
+
+                                   if (scrollLeft >= maxScroll - 10) {
+                                        rightArrow.style.opacity = '0';
+                                        rightArrow.style.pointerEvents = 'none';
+                                   } else {
+                                        rightArrow.style.opacity = '1';
+                                        rightArrow.style.pointerEvents = 'auto';
+                                   }
+                              };
+
+                              updateArrows();
+
+                              leftArrow.addEventListener('click', () => {
+                                   const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
+                                   scrollContainer.scrollBy({
+                                        left: -cardWidth * 2,
+                                        behavior: 'smooth'
+                                   });
+                              });
+
+                              rightArrow.addEventListener('click', () => {
+                                   const cardWidth = scrollContainer.querySelector('.room-card').offsetWidth;
+                                   scrollContainer.scrollBy({
+                                        left: cardWidth * 2,
+                                        behavior: 'smooth'
+                                   });
+                              });
+
+                              scrollContainer.addEventListener('scroll', updateArrows);
+                              window.addEventListener('resize', updateArrows);
+                         });
+                    }
+
+                    initDatePickers() {
+                         const self = this;
+
+                         this.checkinPicker = flatpickr("#checkin", {
+                              minDate: "today",
+                              dateFormat: "Y-m-d",
+                              onChange: function (selectedDates, dateStr) {
+                                   self.handleDateChange();
+                                   if (selectedDates.length > 0) {
+                                        const nextDay = new Date(selectedDates[0]);
+                                        nextDay.setDate(nextDay.getDate() + 1);
+                                        self.checkoutPicker.set('minDate', nextDay);
+
+                                        // If checkout date is now invalid (before or same as new checkin), clear it
+                                        if (self.checkoutPicker.selectedDates[0] <= selectedDates[0]) {
+                                             self.checkoutPicker.clear();
+                                        }
+                                   }
+                              },
+                              onDayCreate: function (dObj, dStr, fp, dayElem) {
+                                   if (dayElem.classList.contains('flatpickr-disabled')) {
+                                        dayElem.classList.add('unavailable');
+                                   }
+                              }
+                         });
+
+                         this.checkoutPicker = flatpickr("#checkout", {
+                              minDate: new Date(Date.now() + 86400000),
+                              dateFormat: "Y-m-d",
+                              onChange: function (selectedDates, dateStr) {
+                                   self.handleDateChange();
+                              },
+                              onDayCreate: function (dObj, dStr, fp, dayElem) {
+                                   if (dayElem.classList.contains('flatpickr-disabled')) {
+                                        dayElem.classList.add('unavailable');
+                                   }
+                              }
+                         });
+                    }
+
+                    updateDatePickerDisabledDates(roomId) {
+                         if (!roomId) return;
+
+                         const bookedDates = this.bookedDates[roomId] || [];
+                         const disabledDates = bookedDates.map(dateStr => {
+                              const [year, month, day] = dateStr.split('-').map(Number);
+                              return new Date(year, month - 1, day);
+                         });
+
+                         const disableFunction = (date) => {
+                              return disabledDates.some(disabledDate =>
+                                   date.getFullYear() === disabledDate.getFullYear() &&
+                                   date.getMonth() === disabledDate.getMonth() &&
+                                   date.getDate() === disabledDate.getDate()
+                              );
+                         };
+
+                         this.checkinPicker.set('disable', [disableFunction]);
+                         this.checkoutPicker.set('disable', [disableFunction]);
+                    }
+
+                    setDefaultDates() {
+                         const today = new Date();
+                         const tomorrow = new Date(today);
+                         tomorrow.setDate(tomorrow.getDate() + 1);
+
+                         // Only set defaults if inputs are empty
+                         if (!document.getElementById('checkin').value) {
+                              this.checkinPicker.setDate(today);
+                         }
+                         if (!document.getElementById('checkout').value) {
+                              this.checkoutPicker.setDate(tomorrow);
                          }
 
-                         // Check if already in cart
-                         if (this.cart.some(item => item.id === roomId)) {
-                              showNotification('This room is already in your cart', true);
-                              return;
-                         }
+                         this.calculateNightsAndPrices();
+                    }
 
-                         // Validate dates
+                    // ==========================================
+                    //  THE FIX IS HERE
+                    // ==========================================
+                    handleDateChange() {
+                         // 1. Calculate the visual text for nights
+                         this.calculateNightsAndPrices();
+
+                         // 2. Get the newly selected dates
                          const checkinDate = this.checkinPicker.selectedDates[0];
                          const checkoutDate = this.checkoutPicker.selectedDates[0];
 
-                         if (!checkinDate || !checkoutDate) {
-                              showNotification('Please select both check-in and check-out dates', true);
+                         if (checkinDate && checkoutDate) {
+                              const newCheckin = this.formatDate(checkinDate);
+                              const newCheckout = this.formatDate(checkoutDate);
+
+                              // 3. Update EVERY item currently in the cart with the new dates
+                              if (this.cart.length > 0) {
+                                   let hasUnavailable = false;
+
+                                   this.cart.forEach(item => {
+                                        item.checkin = newCheckin;
+                                        item.checkout = newCheckout;
+                                        item.nights = this.nights;
+
+                                        // Check if item is available for new dates
+                                        if (!this.isDateRangeAvailable(item.id, newCheckin, newCheckout)) {
+                                             hasUnavailable = true;
+                                             // You might want to highlight this issue visually
+                                        }
+                                   });
+
+                                   // Warn user if new dates cause conflicts
+                                   if (hasUnavailable) {
+                                        showNotification("Warning: Some rooms in your cart are unavailable for the selected dates.", true);
+                                   }
+
+                                   // 4. Save and Update Display
+                                   this.saveCartToStorage();
+                                   this.updateCartDisplay();
+                              }
+                         }
+                    }
+
+                    setupEventListeners() {
+                         document.addEventListener('click', (e) => {
+                              if (e.target.closest('.add-to-cart-btn')) {
+                                   const button = e.target.closest('.add-to-cart-btn');
+                                   this.addToCart(button.dataset.room);
+                              }
+                              if (e.target.closest('.remove-btn')) {
+                                   const button = e.target.closest('.remove-btn');
+                                   this.removeFromCart(button.dataset.room);
+                              }
+                         });
+
+                         const breakfastToggle = document.getElementById('breakfast-toggle');
+                         if(breakfastToggle) {
+                              breakfastToggle.addEventListener('change', (e) => {
+                                   this.breakfastIncluded = e.target.checked;
+                                   this.updateCartDisplay();
+                              });
+                         }
+
+                         document.getElementById('checkout-btn').addEventListener('click', () => this.handleCheckout());
+                    }
+
+                    setupUnavailableDatesToggle() {
+                         document.addEventListener('click', (e) => {
+                              const toggleBtn = e.target.closest('.toggle-unavailable-dates');
+                              if (!toggleBtn) return;
+
+                              const content = toggleBtn.nextElementSibling;
+                              const roomCard = toggleBtn.closest('.room-card');
+                              const icon = toggleBtn.querySelector('i:last-child');
+                              const isOpening = content.classList.contains('hidden');
+
+                              toggleBtn.classList.toggle('active');
+                              content.classList.toggle('hidden');
+
+                              if (icon) {
+                                   icon.style.transform = isOpening ? 'rotate(180deg)' : 'rotate(0deg)';
+                              }
+
+                              if (isOpening) {
+                                   if (roomCard) roomCard.style.zIndex = "50";
+                                   setTimeout(() => {
+                                   this.initializeCalendarIfNeeded(content);
+                                   }, 10);
+                              } else {
+                                   if (roomCard) setTimeout(() => roomCard.style.zIndex = "1", 300);
+                              }
+                         });
+                    }
+
+                    initializeCalendarIfNeeded(content) {
+                         const calendarEl = content.querySelector('.calendar-container');
+                         if (!calendarEl) return;
+
+                         // If exists, just force redraw to ensure sizing
+                         if (calendarEl._flatpickr) {
+                              calendarEl._flatpickr.redraw();
                               return;
                          }
 
-                         // Convert to YYYY-MM-DD format for consistency
-                         const checkin = this.formatDate(checkinDate);
-                         const checkout = this.formatDate(checkoutDate);
+                         calendarEl.innerHTML = '';
+                         this.initializeFlatpickr(calendarEl);
+                         this.addCalendarStyles();
+                    }
 
-                         // Additional validation
-                         if (new Date(checkin) >= new Date(checkout)) {
-                              showNotification('Check-out date must be after check-in date', true);
-                              return;
+                    initializeFlatpickr(calendarEl) {
+                         const roomId = calendarEl.closest('.room-card').dataset.roomId;
+                         const today = new Date().setHours(0, 0, 0, 0);
+
+                         const fp = flatpickr(calendarEl, {
+                              inline: true,
+                              dateFormat: "Y-m-d",
+                              minDate: "today",
+                              disable: [
+                                   (date) => {
+                                   const dateStr = this.formatDate(date);
+                                   const dates = this.bookedDates[roomId] || [];
+                                   return dates.includes(dateStr);
+                                   },
+                                   (date) => date < today
+                              ],
+                              locale: { firstDayOfWeek: 1 },
+                              clickOpens: false,
+                              allowInput: false,
+                              enableTime: false,
+                              static: true, // Optimizes for mobile
+                              
+                              // Completely disable interaction
+                              onOpen: (selectedDates, dateStr, instance) => {
+                                   instance.isOpen = false;
+                                   instance._input.disabled = true;
+                              },
+                              onDayCreate: (dObj, dStr, fp, dayElem) => {
+                                   dayElem.style.pointerEvents = 'none'; 
+                                   dayElem.style.cursor = 'default';
+                                   dayElem.tabIndex = -1;
+
+                                   const dateObj = new Date(dayElem.dateObj).setHours(0, 0, 0, 0);
+                                   
+                                   // Visual Classes
+                                   if (dayElem.classList.contains('flatpickr-disabled')) {
+                                   if (dateObj < today) {
+                                        dayElem.classList.add('past-day');
+                                   } else {
+                                        dayElem.classList.add('unavailable');
+                                   }
+                                   } else {
+                                   dayElem.classList.add('available');
+                                   }
+                              },
+                              onReady: (d,s,instance) => {
+                                   // Mobile width fix
+                                   setTimeout(() => instance.redraw(), 50); 
+                              }
+                         });
+
+                         calendarEl._flatpickr = fp;
+                    }
+
+                    addCalendarStyles() {
+                         if (document.head.querySelector('[data-calendar-styles]')) return;
+                         const style = document.createElement('style');
+                         style.setAttribute('data-calendar-styles', 'true');
+                         style.textContent = this.getCalendarStyles();
+                         document.head.appendChild(style);
+                    }
+
+                    getCalendarStyles() {
+                         return `
+                              .flatpickr-day.unavailable {
+                              background: #fee2e2 !important;
+                              color: #dc2626 !important;
+                              border-color: #fecaca !important;
+                              text-decoration: line-through;
+                              }
+                              .flatpickr-day.past-day {
+                              background: #f3f4f6 !important;
+                              color: #9ca3af !important;
+                              }
+                              .flatpickr-day.available {
+                              background: #dcfce7 !important;
+                              color: #16a34a !important;
+                              border-color: #bbf7d0 !important;
+                              }
+                              .flatpickr-calendar {
+                              box-shadow: none !important;
+                              width: 100% !important;
+                              }
+                              .flatpickr-days {
+                              width: 100% !important;
+                              }
+                              .dayContainer {
+                              width: 100% !important;
+                              min-width: 100% !important;
+                              max-width: 100% !important;
+                              }
+                         `;
+                    }
+
+                    validateCheckoutButton() {
+                         const checkoutBtn = document.getElementById('checkout-btn');
+                         checkoutBtn.disabled = this.cart.length === 0;
+                    }
+
+                    formatDate(date) {
+                         if (!date) return '';
+                         const d = new Date(date);
+                         if (isNaN(d.getTime())) return '';
+                         const year = d.getFullYear();
+                         const month = String(d.getMonth() + 1).padStart(2, '0');
+                         const day = String(d.getDate()).padStart(2, '0');
+                         return `${year}-${month}-${day}`;
+                    }
+
+                    formatDisplayDate(date) {
+                         if (typeof date === 'string') date = new Date(date);
+                         return date.toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric'
+                         });
+                    }
+
+                    calculateNightsAndPrices() {
+                         const checkinDate = this.checkinPicker.selectedDates[0];
+                         const checkoutDate = this.checkoutPicker.selectedDates[0];
+
+                         if (!checkinDate || !checkoutDate) return;
+
+                         const timeDiff = checkoutDate.getTime() - checkinDate.getTime();
+                         this.nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                         // Prevent 0 or negative nights
+                         if (this.nights < 1) this.nights = 1;
+
+                         document.getElementById('nights-display').textContent =
+                              `${this.nights} night${this.nights !== 1 ? 's' : ''} selected (${this.formatDisplayDate(checkinDate)} - ${this.formatDisplayDate(checkoutDate)}) | 12NN to 10AM`;
+
+                         if (this.cart.length > 0) {
+                              this.updateCartDisplay();
                          }
+                    }
 
-                         // Check availability
-                         if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
-                              const roomName = this.roomsData[roomId].name;
-                              const formattedCheckin = this.formatDisplayDate(checkinDate);
-                              const formattedCheckout = this.formatDisplayDate(checkoutDate);
+                    isDateRangeAvailable(roomId, checkin, checkout) {
+                         if (!roomId || !checkin || !checkout) return false;
 
-                              // Find next available dates for better UX
-                              const nextAvailable = this.findNextAvailableDates(roomId, checkinDate);
-                              let message = `${roomName} is not available on the selected dates. Please try different dates.`;
+                         const parseLocalDate = (dateStr) => {
+                              if (dateStr instanceof Date) return new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
+                              const [year, month, day] = dateStr.split('-').map(Number);
+                              return new Date(year, month - 1, day);
+                         };
 
+                         const checkinDate = parseLocalDate(checkin);
+                         const checkoutDate = parseLocalDate(checkout);
 
-                              showNotification(message, true);
-                              return;
+                         if (checkinDate >= checkoutDate) return false;
+
+                         const bookedDates = Array.isArray(this.bookedDates[roomId]) ? this.bookedDates[roomId] : [];
+
+                         for (const dateStr of bookedDates) {
+                              try {
+                                   const bookedDate = parseLocalDate(dateStr);
+                                   // Check intersection
+                                   if (bookedDate >= checkinDate && bookedDate < checkoutDate) {
+                                        return false;
+                                   }
+                              } catch (e) {
+                                   continue;
+                              }
                          }
+                         return true;
+                    }
 
-                         // Add to cart
+                    findNextAvailableDates(roomId, afterDate) {
+                         try {
+                              const bookedDates = this.bookedDates[roomId] || [];
+                              // Sort dates chronologically
+                              const unavailableDates = bookedDates
+                                   .map(dateStr => new Date(dateStr))
+                                   .sort((a, b) => a - b);
+
+                              let currentDate = new Date(afterDate);
+                              currentDate.setDate(currentDate.getDate() + 1);
+
+                              // Simple algorithm: find first gap
+                              // Real implementation might need to check contiguous blocks if stay > 1 night
+                              for (const bookedDate of unavailableDates) {
+                                   if (currentDate < bookedDate) {
+                                        // Found a gap
+                                        return {
+                                             checkin: this.formatDisplayDate(currentDate),
+                                             checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000))
+                                        };
+                                   }
+                                   if (currentDate <= bookedDate) {
+                                        currentDate = new Date(bookedDate);
+                                        currentDate.setDate(currentDate.getDate() + 1);
+                                   }
+                              }
+
+                              // If no more booked dates, return the next day
+                              return {
+                                   checkin: this.formatDisplayDate(currentDate),
+                                   checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000))
+                              };
+                         } catch (error) {
+                              return null;
+                         }
+                    }
+
+                    addToCart(roomId) {
+                         try {
+                              if (!this.roomsData[roomId]) throw new Error('Room not found');
+
+                              // Check if already in cart
+                              if (this.cart.some(item => item.id === roomId)) {
+                                   showNotification('This room is already in your cart', true);
+                                   return;
+                              }
+
+                              const checkinDate = this.checkinPicker.selectedDates[0];
+                              const checkoutDate = this.checkoutPicker.selectedDates[0];
+
+                              if (!checkinDate || !checkoutDate) {
+                                   showNotification('Please select both check-in and check-out dates', true);
+                                   return;
+                              }
+
+                              const checkin = this.formatDate(checkinDate);
+                              const checkout = this.formatDate(checkoutDate);
+
+                              if (new Date(checkin) >= new Date(checkout)) {
+                                   showNotification('Check-out date must be after check-in date', true);
+                                   return;
+                              }
+
+                              if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
+                                   const roomName = this.roomsData[roomId].name;
+                                   showNotification(`${roomName} is not available on the selected dates.`, true);
+                                   return;
+                              }
+
+                              const room = this.roomsData[roomId];
+
+                              this.cart.push({
+                                   id: roomId,
+                                   name: room.name,
+                                   price: room.price,
+                                   images: room.images,
+                                   mainImage: room.mainImage,
+                                   nights: this.nights,
+                                   facilityId: room.facilityId,
+                                   checkin: checkin,
+                                   checkout: checkout
+                              });
+
+                              this.saveCartToStorage();
+                              this.updateCartDisplay();
+                              this.updateDatePickerDisabledDates(roomId);
+                              this.validateCheckoutButton();
+
+                              // UI Feedback
+                              document.querySelectorAll('.room-card').forEach(card => {
+                                   card.classList.toggle('selected', card.dataset.roomId === roomId);
+                              });
+
+                              const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
+                              buttons.forEach(button => {
+                                   const originalHTML = button.innerHTML;
+                                   button.innerHTML = '<i class="fas fa-check mr-2"></i> Added!';
+                                   button.classList.replace('bg-primary', 'bg-green-500');
+                                   setTimeout(() => {
+                                        button.innerHTML = originalHTML;
+                                        button.classList.replace('bg-green-500', 'bg-primary');
+                                   }, 2000);
+                              });
+
+                              showNotification(`${room.name} added to your summary`);
+
+                         } catch (error) {
+                              showNotification(error.message || 'Failed to add room to cart', true);
+                         }
+                    }
+
+                    removeFromCart(roomId) {
                          const room = this.roomsData[roomId];
-                         this.cart.push({
-                              id: roomId,
-                              name: room.name,
-                              price: room.price,
-                              images: room.images,
-                              mainImage: room.mainImage,
-                              nights: this.nights,
-                              facilityId: room.facilityId,
-                              checkin: checkin,
-                              checkout: checkout
-                         });
+                         this.cart = this.cart.filter(item => item.id !== roomId);
 
-                         // Update UI
+                         this.saveCartToStorage();
                          this.updateCartDisplay();
-                         this.updateDatePickerDisabledDates(roomId);
-                         this.validateCheckoutButton();
 
-                         // Highlight selected room
                          document.querySelectorAll('.room-card').forEach(card => {
-                              card.classList.toggle('selected', card.dataset.roomId === roomId);
+                              if (card.dataset.roomId === roomId) card.classList.remove('selected');
                          });
 
-                         // Show success feedback
                          const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
                          buttons.forEach(button => {
-                              const originalHTML = button.innerHTML;
-                              button.innerHTML = '<i class="fas fa-check mr-2"></i> Added!';
-                              button.classList.replace('bg-primary', 'bg-green-500');
-
-                              setTimeout(() => {
-                                   button.innerHTML = originalHTML;
-                                   button.classList.replace('bg-green-500', 'bg-primary');
-                              }, 2000);
+                              button.innerHTML = `
+                                                  <span class="flex items-center justify-center">
+                                                      Select Room 
+                                                      <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                      </svg>
+                                                  </span>`;
+                              button.classList.remove('bg-green-500', 'bg-primary');
+                              button.classList.add('bg-primary');
+                              button.disabled = false;
                          });
 
-                         showNotification(`${room.name} added to your summary`);
-                    } catch (error) {
-                         console.error('Error adding to cart:', error);
-                         showNotification(error.message || 'Failed to add room to cart', true);
-                    }
-               }
-
-               isDateRangeAvailable(roomId, checkin, checkout) {
-                    console.groupCollapsed(`Checking availability for room ${roomId} from ${checkin} to ${checkout}`);
-                    console.log("Input Dates:", { checkin, checkout }); // Check if dates match datepicker
-                    console.log("Booked Dates:", this.bookedDates[roomId]); // Verify stored booked dates
-
-                    if (!roomId || !checkin || !checkout) {
-                         return false;
-                    }
-
-                    // Parse dates as local dates (no timezone conversion)
-                    const parseLocalDate = (dateStr) => {
-                         if (dateStr instanceof Date) {
-                              // Return a new date with just the date components (no time)
-                              return new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
-                         }
-                         const [year, month, day] = dateStr.split('-').map(Number);
-                         return new Date(year, month - 1, day);
-                    };
-
-                    const checkinDate = parseLocalDate(checkin);
-                    const checkoutDate = parseLocalDate(checkout);
-
-                    // Basic validation
-                    if (checkinDate >= checkoutDate) {
-                         return false;
-                    }
-
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    if (checkinDate < today) {
-                         return false;
-                    }
-
-                    // Ensure bookedDates is always an array
-                    const bookedDates = Array.isArray(this.bookedDates[roomId])
-                         ? this.bookedDates[roomId]
-                         : [];
-
-                    // Check against individual booked dates
-                    for (const dateStr of bookedDates) {
-                         try {
-                              const bookedDate = parseLocalDate(dateStr);
-
-                              if (bookedDate >= checkinDate && bookedDate < checkoutDate) {
-
-                                   return false;
-                              }
-                         } catch (e) {
-                              console.error('Error parsing booked date:', dateStr, e);
-                              continue;
-                         }
-                    }
-
-                    return true;
-               }
-
-               findNextAvailableDates(roomId, afterDate) {
-                    try {
-                         const bookedDates = this.bookedDates[roomId] || [];
-
-                         // Convert booked dates to Date objects and sort
-                         const unavailableDates = bookedDates
-                              .map(dateStr => new Date(dateStr))
-                              .sort((a, b) => a - b);
-
-                         // Start checking from the day after the requested date
-                         let currentDate = new Date(afterDate);
-                         currentDate.setDate(currentDate.getDate() + 1);
-
-                         // Find the first available date
-                         for (const bookedDate of unavailableDates) {
-                              // If current date is before this booked date, we found availability
-                              if (currentDate < bookedDate) {
-                                   return {
-                                        checkin: this.formatDisplayDate(currentDate),
-                                        checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000)) // Suggest 1 night
-                                   };
-                              }
-
-                              // If current date is on or after this booked date, move to next day
-                              if (currentDate <= bookedDate) {
-                                   currentDate = new Date(bookedDate);
-                                   currentDate.setDate(currentDate.getDate() + 1);
-                              }
+                         if (this.cart.length === 0) {
+                              this.checkinPicker.set('disable', []);
+                              this.checkoutPicker.set('disable', []);
                          }
 
-                         // If we get here, all dates after currentDate are available
-                         return {
-                              checkin: this.formatDisplayDate(currentDate),
-                              checkout: this.formatDisplayDate(new Date(currentDate.getTime() + 86400000)) // Suggest 1 night
-                         };
-                    } catch (error) {
-                         console.error('Error finding next available dates:', error);
-                         return null;
-                    }
-               }
-
-               updateCartDisplay() {
-                    const container = document.getElementById('cart-items');
-                    const checkoutBtn = document.getElementById('checkout-btn');
-                    const totalElement = document.getElementById('total-price');
-                    const breakfastSummary = document.getElementById('breakfast-summary');
-                    const breakfastNights = document.getElementById('breakfast-nights');
-                    const breakfastPrice = document.getElementById('breakfast-price');
-
-                    if (this.cart.length === 0) {
-                         container.innerHTML = '<div class="text-gray-400 text-center py-6"><i class="fas fa-shopping-cart text-3xl mb-3 opacity-50"></i><p>Your list is empty</p></div>';
-                         totalElement.textContent = '₱0.00';
-                         checkoutBtn.disabled = true;
-                         breakfastSummary?.classList.add('hidden');
-                         return;
-                    }
-
-                    checkoutBtn.disabled = false;
-
-                    let subtotal = 0;
-                    let html = '';
-
-                    this.cart.forEach(item => {
-                         const itemTotal = item.price * this.nights;
-                         subtotal += itemTotal;
-
-                         html += `
-                                                                                                                                                                                                                                                                                                       <div class="flex justify-between items-start border-b border-gray-100 pb-4">
-                                                                                                                                                                                                                                                                                                            <div class="flex items-start">
-                                                                                                                                                                                                                                                                                                            <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
-                                                                                                                                                                                                                                                                                                            <div>
-                                                                                                                                                                                                                                                                                                                 <h4 class="font-medium text-dark">${item.name}</h4>
-                                                                                                                                                                                                                                                                                                                 <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toFixed(2)}</div>
-                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                            <div class="text-right">
-                                                                                                                                                                                                                                                                                                            <div class="font-medium">₱${itemTotal.toFixed(2)}</div>
-                                                                                                                                                                                                                                                                                                            <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
-                                                                                                                                                                                                                                                                                                                 <i class="far fa-trash-alt mr-1"></i> Remove
-                                                                                                                                                                                                                                                                                                            </button>
-                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                       </div>
-                                                                                                                                                                                                                                                                                                  `;
-                    });
-
-                    container.innerHTML = html;
-
-                    if (this.breakfastIncluded && breakfastSummary) {
-                         const breakfastTotal = this.breakfastPrice * this.nights * this.cart.length;
-                         breakfastNights.textContent = `${this.nights} night${this.nights !== 1 ? 's' : ''} × ${this.cart.length} room${this.cart.length !== 1 ? 's' : ''}`;
-                         breakfastPrice.textContent = `₱${breakfastTotal.toFixed(2)}`;
-                         breakfastSummary.classList.remove('hidden');
-                         subtotal += breakfastTotal;
-                    } else if (breakfastSummary) {
-                         breakfastSummary.classList.add('hidden');
-                    }
-
-                    totalElement.textContent = `₱${subtotal.toFixed(2)}`;
-               }
-
-               // Add this method to BookingSystem class
-               setupBreakfastToggle() {
-                    const breakfastToggle = document.getElementById('breakfast-toggle');
-                    if (!breakfastToggle) return;
-
-                    // Set initial state
-                    breakfastToggle.checked = this.breakfastIncluded;
-
-                    // Update event listener to handle state properly
-                    breakfastToggle.addEventListener('change', (e) => {
-                         this.breakfastIncluded = e.target.checked;
-                         this.updateCartDisplay();
-                         this.saveCartToStorage();
-                    });
-               }
-
-               initializeCart() {
-                    this.cart = [];
-                    this.setupBreakfastToggle();
-                    this.updateCartDisplay();
-                    this.validateCheckoutButton();
-                    if (this.cart.length > 0) {
-                         // Restore selected state for rooms in cart
-                         this.cart.forEach(item => {
-                              document.querySelectorAll(`.room-card[data-room-id="${item.id}"]`)
-                                   .forEach(card => card.classList.add('selected'));
-                         });
-                         this.updateCartDisplay();
                          this.validateCheckoutButton();
+                         showNotification(`${room.name} removed from your summary`);
+                    }
 
-                         // Restore date pickers if we have checkin/checkout dates
-                         if (this.cart[0].checkin && this.cart[0].checkout) {
-                              this.checkinPicker.setDate(this.cart[0].checkin, true);
-                              this.checkoutPicker.setDate(this.cart[0].checkout, true);
+                    updateCartDisplay() {
+                         const container = document.getElementById('cart-items');
+                         const checkoutBtn = document.getElementById('checkout-btn');
+                         const totalElement = document.getElementById('total-price');
+                         const breakfastSummary = document.getElementById('breakfast-summary');
+                         const breakfastNights = document.getElementById('breakfast-nights');
+                         const breakfastPrice = document.getElementById('breakfast-price');
 
-                              // Force date validation
-                              setTimeout(() => {
-                                   this.handleDateChange();
+                         // NEW: Get the warning element
+                         const warningMsg = document.getElementById('cart-hold-warning');
+
+                         if (this.cart.length === 0) {
+                              container.innerHTML = '<div class="text-gray-400 text-center py-6"><i class="fas fa-shopping-cart text-3xl mb-3 opacity-50"></i><p>Your list is empty</p></div>';
+                              totalElement.textContent = '₱0.00';
+                              checkoutBtn.disabled = true;
+                              if (breakfastSummary) breakfastSummary.classList.add('hidden');
+                              // NEW: Hide the warning when cart is empty
+                              if(warningMsg) warningMsg.classList.add('hidden');
+                              return;
+                         }
+
+                         // NEW: Show the warning when cart has items
+                         if(warningMsg) warningMsg.classList.remove('hidden');
+
+                         checkoutBtn.disabled = false;
+                         let subtotal = 0;
+                         let html = '';
+
+                         this.cart.forEach(item => {
+                              const itemTotal = item.price * this.nights;
+                              subtotal += itemTotal;
+                              html += `
+                                                  <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                                                      <div class="flex items-start">
+                                                          <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
+                                                          <div>
+                                                              <h4 class="font-medium text-dark">${item.name}</h4>
+                                                              <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toLocaleString()}</div>
+                                                              <div class="text-xs text-gray-400 mt-1">${item.checkin} to ${item.checkout}</div>
+                                                          </div>
+                                                      </div>
+                                                      <div class="text-right">
+                                                          <div class="font-medium">₱${itemTotal.toLocaleString()}</div>
+                                                          <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
+                                                              <i class="far fa-trash-alt mr-1"></i> Remove
+                                                          </button>
+                                                      </div>
+                                                  </div>
+                                              `;
+                         });
+
+                         container.innerHTML = html;
+
+                         if (this.breakfastIncluded && breakfastSummary) {
+                              const breakfastTotal = this.breakfastPrice * this.nights * this.cart.length;
+                              if (breakfastNights) breakfastNights.textContent = `${this.nights} night${this.nights !== 1 ? 's' : ''} × ${this.cart.length} room${this.cart.length !== 1 ? 's' : ''}`;
+                              if (breakfastPrice) breakfastPrice.textContent = `₱${breakfastTotal.toLocaleString()}`;
+                              breakfastSummary.classList.remove('hidden');
+                              subtotal += breakfastTotal;
+                         } else if (breakfastSummary) {
+                              breakfastSummary.classList.add('hidden');
+                         }
+
+                         totalElement.textContent = `₱${subtotal.toLocaleString()}`;
+                    }
+
+                    setupBreakfastToggle() {
+                         const breakfastToggle = document.getElementById('breakfast-toggle');
+                         if (!breakfastToggle) return;
+                         breakfastToggle.checked = this.breakfastIncluded;
+                         breakfastToggle.addEventListener('change', (e) => {
+                              this.breakfastIncluded = e.target.checked;
+                              this.updateCartDisplay();
+                              this.saveCartToStorage();
+                         });
+                    }
+
+                    initializeCart() {
+                         // Cart loading is handled in constructor
+
+                         // If we have items in cart, re-apply UI state
+                         if (this.cart.length > 0) {
+                              this.cart.forEach(item => {
+                                   document.querySelectorAll(`.room-card[data-room-id="${item.id}"]`).forEach(card => {
+                                        card.classList.add('selected');
+                                   });
+                              });
+
+                              this.updateCartDisplay();
+                              this.validateCheckoutButton();
+
+                              // If cart has dates, set the pickers to match the first item
+                              if (this.cart[0].checkin && this.cart[0].checkout) {
+                                   this.checkinPicker.setDate(this.cart[0].checkin, false);
+                                   this.checkoutPicker.setDate(this.cart[0].checkout, false);
                                    this.updateDatePickerDisabledDates(this.cart[0].id);
-                              }, 100);
+                              }
+                         }
+                    }
+
+                    calculateTotalPrice() {
+                         const roomsTotal = this.cart.reduce((sum, item) => sum + (item.price * this.nights), 0);
+                         const breakfastTotal = this.breakfastIncluded ? (this.breakfastPrice * this.nights * this.cart.length) : 0;
+                         return roomsTotal + breakfastTotal;
+                    }
+
+                    formatForBackend(date) {
+                         if (!date) return null;
+                         const d = new Date(date);
+                         const year = d.getFullYear();
+                         const month = String(d.getMonth() + 1).padStart(2, '0');
+                         const day = String(d.getDate()).padStart(2, '0');
+                         return `${year}-${month}-${day}`;
+                    }
+
+                    updateHoldStatus(message, type = 'info') {
+                         const statusDiv = document.getElementById('hold-status-message');
+                         const msgSpan = statusDiv.querySelector('.msg-text');
+                         const icon = statusDiv.querySelector('i');
+
+                         msgSpan.textContent = message;
+                         statusDiv.classList.remove('hidden', 'bg-blue-50', 'text-blue-700', 'bg-red-50', 'text-red-700', 'bg-green-50', 'text-green-700');
+
+                         if (type === 'error') {
+                              statusDiv.classList.add('bg-red-50', 'text-red-700', 'active');
+                              icon.className = 'fas fa-exclamation-circle';
+                         } else if (type === 'success') {
+                              statusDiv.classList.add('bg-green-50', 'text-green-700', 'active');
+                              icon.className = 'fas fa-check-circle';
+                         } else {
+                              statusDiv.classList.add('bg-blue-50', 'text-blue-700', 'active');
+                              icon.className = 'fas fa-spinner fa-spin';
+                         }
+                    }
+
+                    async createRoomHolds() {
+                         const holdPromises = this.cart.map(item => {
+                              return fetch("{{ route('room.hold.create') }}", {
+                                   method: 'POST',
+                                   headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': this.csrfToken
+                                   },
+                                   body: JSON.stringify({
+                                        room_id: item.facilityId,
+                                        date_from: item.checkin,
+                                        date_to: item.checkout
+                                   })
+                              }).then(async response => {
+                                   const data = await response.json();
+                                   if (!response.ok) {
+                                        return {
+                                             success: false,
+                                             roomId: item.id,
+                                             name: item.name,
+                                             message: data.message || 'Room unavailable'
+                                        };
+                                   }
+                                   return { success: true, roomId: item.id, holdId: data.hold_id };
+                              });
+                         });
+
+                         return Promise.all(holdPromises);
+                    }
+
+                    async releaseSessionHolds() {
+                         try {
+                              await fetch("{{ route('room.hold.release.all') }}", {
+                                   method: 'DELETE',
+                                   headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': this.csrfToken
+                                   }
+                              });
+                         } catch (e) {
+                              console.error("Failed to rollback holds", e);
+                         }
+                    }
+
+                    async handleCheckout() {
+                         if (this.cart.length === 0 || this.isSubmitting) return;
+
+                         const button = document.getElementById('checkout-btn');
+                         const buttonText = document.getElementById('button-text');
+                         // const spinner = document.getElementById('button-spinner');
+
+                         try {
+                              // 1. UI Loading State
+                              this.isSubmitting = true;
+                              button.disabled = true;
+                              // spinner.classList.remove('hidden');
+                              buttonText.textContent = 'Checking availability...';
+                              this.updateHoldStatus('Securing your rooms for the selected dates...', 'loading');
+
+                              // 2. Attempt to Hold Rooms
+                              const results = await this.createRoomHolds();
+                              const failedHolds = results.filter(r => !r.success);
+
+                              // 3. Handle Failures
+                              if (failedHolds.length > 0) {
+                                   await this.releaseSessionHolds();
+                                   const roomNames = failedHolds.map(f => f.name).join(', ');
+                                   this.updateHoldStatus(`Availability changed! ${roomNames} has been placed on hold for a minute by another guest.`, 'error');
+
+                                   button.disabled = false;
+                                   this.isSubmitting = false;
+                                   // spinner.classList.add('hidden');
+                                   buttonText.textContent = 'Proceed to Your Details';
+                                   return;
+                              }
+
+                              // 4. Success: All rooms held
+                              this.updateHoldStatus('Rooms successfully secured!', 'success');
+
+                              // 5. Prepare and Save Booking Data
+                              const bookingData = {
+                                   checkin_date: this.formatForBackend(this.checkinPicker.selectedDates[0]),
+                                   checkout_date: this.formatForBackend(this.checkoutPicker.selectedDates[0]),
+                                   facilities: this.cart.map(item => {
+                                        const roomCard = document.querySelector(`.room-card[data-room-id="${item.id}"]`);
+                                        const pax = roomCard ? parseInt(roomCard.querySelector('.feature-item:last-child span').textContent.match(/\d+/)[0]) : 1;
+                                        const categoryContainer = roomCard ? roomCard.closest('.category-container') : null;
+                                        const category = categoryContainer ? categoryContainer.querySelector('.category-title').textContent.trim() : 'Standard';
+
+                                        return {
+                                             facility_id: item.facilityId,
+                                             name: item.name,
+                                             price: item.price,
+                                             nights: this.nights,
+                                             total_price: item.price * this.nights,
+                                             mainImage: item.mainImage,
+                                             pax: pax,
+                                             category: category
+                                        };
+                                   }),
+                                   breakfast_included: this.breakfastIncluded,
+                                   breakfast_price: this.breakfastIncluded ? this.breakfastPrice * this.nights * this.cart.length : 0,
+                                   total_price: this.calculateTotalPrice(),
+                              };
+
+                              // 6. Store booking data via AJAX call
+                              buttonText.textContent = 'Saving booking...';
+
+                              const saveResponse = await fetch("{{ route('bookings.store.session') }}", {
+                                   method: 'POST',
+                                   headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': this.csrfToken,
+                                        'Accept': 'application/json'
+                                   },
+                                   body: JSON.stringify(bookingData)
+                              });
+
+                              const saveResult = await saveResponse.json();
+
+                              if (!saveResult.success) {
+                                   throw new Error(saveResult.message || 'Failed to save booking data');
+                              }
+
+                              // 7. Store booking data in sessionStorage as backup
+                              sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+
+                              // 8. Redirect to customer info page
+                              buttonText.textContent = 'Redirecting...';
+
+                              // Add a small delay to ensure session is saved
+                              setTimeout(() => {
+                                   window.location.href = "{{ route('bookings.customer-info') }}";
+                              }, 500);
+
+                         } catch (error) {
+                              console.error('Checkout error:', error);
+
+                              // Rollback holds if error occurs
+                              await this.releaseSessionHolds();
+
+                              this.updateHoldStatus(error.message || 'System error. Please try again.', 'error');
+                              showNotification('Failed to process request. Please try again.', true);
+
+                              buttonText.textContent = 'Proceed to Your Details';
+                              // spinner.classList.add('hidden');
+                              button.disabled = false;
+                              this.isSubmitting = false;
                          }
                     }
                }
 
-               removeFromCart(roomId) {
-                    this.saveCartToStorage();
-                    const room = this.roomsData[roomId];
-                    this.cart = this.cart.filter(item => item.id !== roomId);
-                    this.updateCartDisplay();
-                    this.saveCartToStorage();
+               document.addEventListener('DOMContentLoaded', () => {
+                    window.bookingSystem = new BookingSystem();
 
-                    document.querySelectorAll('.room-card').forEach(card => {
-                         if (card.dataset.roomId === roomId) {
-                              card.classList.remove('selected');
+                    window.addEventListener('beforeunload', () => {
+                         if (window.bookingSystem?.cart?.length > 0) {
+                              sessionStorage.setItem('bookingCart', JSON.stringify(window.bookingSystem.cart));
+                              sessionStorage.setItem('breakfastIncluded', window.bookingSystem.breakfastIncluded);
                          }
                     });
-
-                    const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
-                    buttons.forEach(button => {
-                         button.innerHTML = 'Select Room';
-                         button.classList.remove('bg-green-500', 'bg-primary');
-                         button.classList.add('bg-primary');
-                         button.disabled = false;
-                    });
-
-                    if (this.cart.length === 0) {
-                         this.checkinPicker.set('disable', []);
-                         this.checkoutPicker.set('disable', []);
-                    }
-
-                    showNotification(`${room.name} removed from your summary`);
-               }
-          }
-
-          document.addEventListener('DOMContentLoaded', () => {
-               window.bookingSystem = new BookingSystem();
-
-               window.addEventListener('beforeunload', () => {
-                    if (window.bookingSystem?.cart?.length > 0) {
-                         sessionStorage.setItem('bookingCart', JSON.stringify(window.bookingSystem.cart));
-                         sessionStorage.setItem('breakfastIncluded', window.bookingSystem.breakfastIncluded);
-                    }
                });
-          });
 
-          // Helper function to show notifications
-          function showNotification(message, isError = false) {
-               const notification = document.getElementById('notification');
-               const notificationMessage = document.getElementById('notification-message');
+               // Helper function to show notifications
+               function showNotification(message, isError = false) {
+                    const notification = document.getElementById('notification');
+                    const notificationMessage = document.getElementById('notification-message');
 
-               notificationMessage.textContent = message;
-               notification.className = isError ? 'notification error show' : 'notification show';
+                    if (!notification || !notificationMessage) return;
 
-               // Clear any existing timeout to prevent hiding a new notification prematurely
-               if (notification.timeoutId) {
-                    clearTimeout(notification.timeoutId);
+                    notificationMessage.textContent = message;
+                    if (isError) {
+                         notification.classList.add('error');
+                    } else {
+                         notification.classList.remove('error');
+                    }
+
+                    notification.classList.add('show');
+                    notification.classList.remove('hidden');
+
+                    if (notification.timeoutId) {
+                         clearTimeout(notification.timeoutId);
+                    }
+
+                    notification.timeoutId = setTimeout(() => {
+                         notification.classList.remove('show');
+                         setTimeout(() => {
+                              notification.classList.add('hidden');
+                         }, 300); 
+                    }, 5000);
                }
-
-               notification.timeoutId = setTimeout(() => {
-                    notification.className = notification.className.replace('show', '');
-               }, 5000);
-          }
-     </script>
+          </script>
 @endsection

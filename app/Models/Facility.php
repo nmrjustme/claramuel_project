@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Facility extends Model
 {
     use HasFactory;
-    
-    protected $table = 'facilities'; 
-    
+
+    protected $table = 'facilities';
+
     protected $fillable = [
         'name',
         'category',
@@ -27,17 +27,17 @@ class Facility extends Model
         'quantity',
         'type'
     ];
-    
-    public function summaries () 
+
+    public function summaries()
     {
         return $this->hasMany(FacilitySummary::class, 'facility_id');
     }
 
-    public function images () 
+    public function images()
     {
         return $this->hasMany(FacilityImage::class, 'fac_id');
     }
-    
+
     public function bookings()
     {
         return $this->hasMany(FacilityBookingDetails::class, 'facility_id');
@@ -47,12 +47,12 @@ class Facility extends Model
     {
         return $this->hasMany(Breakfast::class);
     }
-    
+
     public function facility()
     {
         return $this->belongsTo(Facility::class);
     }
-    
+
     public function discounts()
     {
         return $this->hasMany(FacilityDiscount::class, 'facility_id');
@@ -68,6 +68,11 @@ class Facility extends Model
     {
         return $this->hasMany(BookingGuestDetails::class, 'facility_id');
     }
-    
+
+    public function roomHolds()
+    {
+        return $this->hasMany(RoomHold::class, 'room_id');
+    }
+
 }
 

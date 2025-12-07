@@ -570,7 +570,6 @@ class BookingController extends Controller
         ]);
     }
 
-
     /**
      * Check-in booking
      */
@@ -600,7 +599,6 @@ class BookingController extends Controller
             'booking_id' => $booking->id
         ]);
     }
-
 
     // In your Laravel controller
     public function processPayment(Request $request, $bookingId)
@@ -1054,7 +1052,6 @@ class BookingController extends Controller
         }
     }
 
-
     private function sendCancellationNotification($booking, $refundAmount, $reason)
     {
         // Implement your notification logic here
@@ -1075,7 +1072,5 @@ class BookingController extends Controller
             'reason' => $reason
         ]);
     }
-
-
 
 }

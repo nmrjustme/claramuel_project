@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\CleanupRoomHolds;
+use Illuminate\Console\Scheduling\Schedule;
+use App\Models\RoomHold;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,8 +15,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->append(CleanupRoomHolds::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // Clean up expired room holds every minute
+        $schedule->call(function () {
+            RoomHold::where('expires_at', '<', now())
+                ->orWhere('status', 'expired')
+                ->delete();
+        })->everyMinute();
+    })
+    ->create();
