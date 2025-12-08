@@ -10,7 +10,7 @@
         
         <!-- Reminder for customers -->
         <div class="mb-6 p-4 bg-blue-900 rounded-lg">
-            <p class="text-blue-800 text-blue-200">
+            <p class="text-blue-200">
                 <strong>Note:</strong> This login is for authorized users only. 
                 If you're a customer looking to book our services, 
                 <a href="{{ route('dashboard.bookings') }}" class="text-blue-600 dark:text-blue-300 font-semibold underline">click here to book directly</a>.

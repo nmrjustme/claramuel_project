@@ -288,7 +288,7 @@
 
           .scroll-arrows {
                position: absolute;
-               top: -20px;
+               top: -10px;
                transform: translateY(-20%);
                left: 0;
                right: 0;
@@ -977,7 +977,7 @@
                display: none;
           }
 
-          .unavailable-dates-container {
+          .unavailable-dates-calendar-container {
                border-top: 1px dashed #e5e7eb;
           }
 
@@ -1020,18 +1020,17 @@
                padding: 0.25rem 0.5rem;
           }
 
-          .toggle-unavailable-dates:hover {
-               color: #B91C1C;
-          }
-
           .toggle-unavailable-dates.active i:last-child {
                transform: rotate(180deg);
           }
 
-          .unavailable-dates-content {
-               max-height: 150px;
-               overflow-y: auto;
-               padding-right: 0.5rem;
+          .calendar-container {
+               width: 100%;
+               display: block;
+               padding: 0;
+               /* Constraint the container */
+               max-width: 100%;
+               overflow: hidden;
           }
 
           /* Custom scrollbar */
@@ -1259,15 +1258,44 @@
 
           /* Add this CSS to fix the calendar display issue */
           .calendar-container {
-               position: relative;
-               z-index: 10;
-               background: white;
-               border-radius: 8px;
-               padding: 0;
-               /* Let flatpickr handle padding */
-               margin-top: 10px;
                width: 100%;
+               display: block;
                overflow: hidden;
+               /* Prevents overflow */
+               padding: 10px 0;
+          }
+
+          .flatpickr-calendar.inline {
+               width: 100% !important;
+               max-width: 100% !important;
+               min-width: 0 !important;
+               /* Allow shrinking */
+               box-shadow: none !important;
+               background: transparent !important;
+               margin: 0 auto !important;
+               padding: 0 !important;
+               top: 0 !important;
+          }
+
+          .flatpickr-innerContainer {
+               width: 100% !important;
+               display: block !important;
+          }
+
+          .flatpickr-rContainer {
+               width: 100% !important;
+               display: block !important;
+          }
+
+          .flatpickr-innerContainer,
+          .flatpickr-rContainer {
+               width: 100% !important;
+          }
+
+          .flatpickr-days {
+               width: 100% !important;
+               display: flex !important;
+               border: none !important;
           }
 
           @media (max-width: 480px) {
@@ -1297,6 +1325,15 @@
                min-width: 100% !important;
                max-width: 100% !important;
                padding: 5px !important;
+          }
+
+          .dayContainer {
+               width: 100% !important;
+               min-width: 100% !important;
+               max-width: 100% !important;
+               display: flex !important;
+               justify-content: space-between !important;
+               padding: 0 !important;
           }
 
           .calendar-container .flatpickr-day {
@@ -1342,7 +1379,6 @@
                .calendar-container .flatpickr-months .flatpickr-next-month,
                .calendar-container .flatpickr-months .flatpickr-prev-month {
                     height: 35px !important;
-                    padding: 5px 0 !important;
                }
           }
 
@@ -1373,15 +1409,17 @@
 
           .unavailable-dates-content:not(.hidden) {
                position: relative;
-               z-index: 100;
+               z-index: 1000;
+               /* Higher z-index */
                margin-bottom: 20px;
+               overflow: visible !important;
+               /* Allow calendar to extend */
           }
 
           /* Ensure room card doesn't interfere */
           .room-card {
                overflow: visible !important;
                position: relative;
-               z-index: 1;
           }
 
           /* When calendar is open, ensure proper stacking */
@@ -1773,14 +1811,12 @@
                                                                            </div>
                                                                       </div>
 
-                                                                      <div class="unavailable-dates-container mb-2">
+                                                                      <div class="unavailable-dates-calendar-container mb-2">
                                                                            <button
-                                                                                class="toggle-unavailable-dates text-sm text-primary font-medium flex items-center">
+                                                                                class="toggle-unavailable-dates text-sm text-red-600 font-medium flex items-center cursor-pointer">
                                                                                 <i class="fas fa-calendar mr-2"></i>
-                                                                                <a class="text-[10px] md:text-sm lg:text-md">View
-                                                                                     Calendar</a>
-                                                                                <i
-                                                                                     class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200"></i>
+                                                                                <a class="md:text-sm lg:text-md hover:underline">View Availability</a>
+                                                                                <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 animate-bounce"></i>
                                                                            </button>
 
                                                                            <div class="unavailable-dates-content hidden mt-2">
@@ -1791,7 +1827,7 @@
                                                                                      <span class="text-sm text-gray-700">Booked</span>
                                                                                 </div>
 
-                                                                                <div class="legend-item flex items-center gap-2 mb-2">
+                                                                                <div class="legend-item flex items-center gap-2">
                                                                                      <div class="legend-color w-4 h-4 rounded-sm"
                                                                                           style="background-color: #bdf4c8; border: 1px solid #aef1b5;">
                                                                                      </div>
@@ -1845,7 +1881,7 @@
                                                                                                : $activeDiscount->discount_value
                                                                                           )
                                                                                      )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }}
                                                                                                                                        </div>
 
                                                                                                                                        <!-- Discount icon + text -->
@@ -1991,7 +2027,7 @@
                          @endif
                     </div>
 
-          
+
 
                     <!-- Booking Summary Card -->
 
@@ -2001,12 +2037,16 @@
                               Booking Summary
                          </h2>
 
-                         <div id="cart-hold-warning" class="mb-4 p-4 bg-orange-50 border border-orange-400 rounded-lg flex items-start gap-3 hidden">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0">
-                                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                         <div id="cart-hold-warning"
+                              class="mb-4 p-4 bg-orange-50 border border-orange-400 rounded-lg flex items-start gap-3 hidden">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                   stroke="currentColor" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0">
+                                   <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                               </svg>
                               <p class="text-xs md:text-sm text-orange-800">
-                                   If a room is on hold, please <b>choose another date</b>, <b>select a different room</b>, <b>or wait 5–10 minutes</b>.
+                                   If a room is on hold, please <b>choose another date</b>, <b>select a different room</b>,
+                                   <b>or wait 10–15 minutes</b>.
                               </p>
                          </div>
 
@@ -2162,13 +2202,16 @@
                          try {
                               const response = await fetch("{{ route('booked.dates') }}");
                               if (!response.ok) throw new Error('Network response was not ok');
-                              
+
                               const data = await response.json();
                               this.processUnavailableDates(data);
                               this.refreshCalendars();
-                              
+
+                              //CRITICAL: Check if items currently in cart are still valid
+                              this.validateCartRealTime();
+
                               // If we have a selected room in the cart, re-validate availability
-                              if(this.cart.length > 0) {
+                              if (this.cart.length > 0) {
                                    this.validateCartAvailability();
                               }
 
@@ -2189,21 +2232,21 @@
                                    // Convert range to individual dates
                                    const start = new Date(range.checkin_date);
                                    const end = new Date(range.checkout_date);
-                                   
+
                                    // Logic: exclude checkout date from being "unavailable" for checkin
                                    // But include it for the visual calendar
                                    // Adjust based on your specific business logic (nightly vs daily)
                                    // Here we loop from start up to (but not including) end for booking logic
                                    // But usually, we block the specific nights.
-                                   
+
                                    let loopDate = new Date(start);
                                    // We subtract 1 day from end because checkout day is usually available for new checkin
-                                   const lastNight = new Date(end); 
-                                   lastNight.setDate(lastNight.getDate() - 1); 
+                                   const lastNight = new Date(end);
+                                   lastNight.setDate(lastNight.getDate() - 1);
 
                                    while (loopDate <= lastNight) {
-                                   datesArray.push(this.formatDate(loopDate));
-                                   loopDate.setDate(loopDate.getDate() + 1);
+                                        datesArray.push(this.formatDate(loopDate));
+                                        loopDate.setDate(loopDate.getDate() + 1);
                                    }
                               });
 
@@ -2220,15 +2263,15 @@
                          document.querySelectorAll('.calendar-container').forEach(el => {
                               const fp = el._flatpickr;
                               const roomId = el.closest('.room-card').dataset.roomId;
-                              
+
                               if (fp && this.bookedDates[roomId]) {
                                    // Update the disable configuration
                                    fp.set('disable', [
-                                   (date) => {
-                                        const dateStr = this.formatDate(date);
-                                        return this.bookedDates[roomId].includes(dateStr);
-                                   },
-                                   (date) => date < new Date().setHours(0,0,0,0)
+                                        (date) => {
+                                             const dateStr = this.formatDate(date);
+                                             return this.bookedDates[roomId].includes(dateStr);
+                                        },
+                                        (date) => date < new Date().setHours(0, 0, 0, 0)
                                    ]);
                                    fp.redraw();
                               }
@@ -2240,22 +2283,65 @@
                          // Currently keeping main pickers open, but validation happens on "Select Room".
                     }
 
+                    validateCartRealTime() {
+                         if (this.cart.length === 0) return;
+
+                         let hasConflict = false;
+                         let conflictRoomName = "";
+
+                         this.cart.forEach(item => {
+                              // Check availability against the LATEST bookedDates
+                              const isAvailable = this.isDateRangeAvailable(item.id, item.checkin, item.checkout);
+
+                              if (!isAvailable) {
+                                   hasConflict = true;
+                                   conflictRoomName = item.name;
+
+                                   // Visual indicator on the cart item
+                                   const removeBtn = document.querySelector(`.remove-btn[data-room="${item.id}"]`);
+                                   if (removeBtn) {
+                                        removeBtn.closest('.flex.justify-between').classList.add('bg-red-50');
+                                   }
+                              }
+                         });
+
+                         const checkoutBtn = document.getElementById('checkout-btn');
+                         const buttonText = document.getElementById('button-text');
+
+                         if (hasConflict) {
+                              // BLOCK THE USER
+                              checkoutBtn.disabled = true;
+                              checkoutBtn.classList.add('cursor-not-allowed', 'opacity-50');
+                              checkoutBtn.classList.remove('hover:-translate-y-0.5');
+                              buttonText.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ${conflictRoomName} is no longer available`;
+                         } else {
+                              // Restore button if conflict is resolved
+                              if (!this.isSubmitting) {
+                                   checkoutBtn.disabled = false;
+                                   checkoutBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+                                   checkoutBtn.classList.add('hover:-translate-y-0.5');
+                                   buttonText.textContent = 'Proceed to Your Details';
+                                   this.hideHoldStatus();
+                              }
+                         }
+                    }
+
                     validateCartAvailability() {
                          let hasConflict = false;
-                         
+
                          this.cart.forEach(item => {
                               const roomDates = this.bookedDates[item.id] || [];
-                              
+
                               // Simple intersection check
                               const isStillAvailable = this.isDateRangeAvailable(item.id, item.checkin, item.checkout);
-                              
+
                               if (!isStillAvailable) {
                                    hasConflict = true;
                                    // Visual indicator logic here (optional)
                               }
                          });
 
-                         if(hasConflict) {
+                         if (hasConflict) {
                               this.updateHoldStatus('Attention: One of your selected rooms has just been hold by another user.', 'error');
                          }
                     }
@@ -2318,16 +2404,25 @@
                               minDate: "today",
                               dateFormat: "Y-m-d",
                               onChange: function (selectedDates, dateStr) {
-                                   self.handleDateChange();
+                                   // self.handleDateChange(); // Removed this line to avoid double calculation
+
                                    if (selectedDates.length > 0) {
-                                        const nextDay = new Date(selectedDates[0]);
+                                        const checkInDate = new Date(selectedDates[0]);
+
+                                        // Calculate next day (Check-in + 1 day)
+                                        const nextDay = new Date(checkInDate);
                                         nextDay.setDate(nextDay.getDate() + 1);
+
+                                        // Update constraints
                                         self.checkoutPicker.set('minDate', nextDay);
 
-                                        // If checkout date is now invalid (before or same as new checkin), clear it
-                                        if (self.checkoutPicker.selectedDates[0] <= selectedDates[0]) {
-                                             self.checkoutPicker.clear();
-                                        }
+                                        // --- NEW LOGIC: Auto-fill Checkout ---
+                                        // We pass 'true' as the second argument to trigger the onChange event 
+                                        // of the checkout picker, which will run handleDateChange() automatically.
+                                        self.checkoutPicker.setDate(nextDay, true);
+                                   } else {
+                                        // If checkin is cleared, handle recalculation
+                                        self.handleDateChange();
                                    }
                               },
                               onDayCreate: function (dObj, dStr, fp, dayElem) {
@@ -2338,7 +2433,7 @@
                          });
 
                          this.checkoutPicker = flatpickr("#checkout", {
-                              minDate: new Date(Date.now() + 86400000),
+                              minDate: new Date(Date.now() + 86400000), // Default to tomorrow
                               dateFormat: "Y-m-d",
                               onChange: function (selectedDates, dateStr) {
                                    self.handleDateChange();
@@ -2355,17 +2450,9 @@
                          if (!roomId) return;
 
                          const bookedDates = this.bookedDates[roomId] || [];
-                         const disabledDates = bookedDates.map(dateStr => {
-                              const [year, month, day] = dateStr.split('-').map(Number);
-                              return new Date(year, month - 1, day);
-                         });
-
                          const disableFunction = (date) => {
-                              return disabledDates.some(disabledDate =>
-                                   date.getFullYear() === disabledDate.getFullYear() &&
-                                   date.getMonth() === disabledDate.getMonth() &&
-                                   date.getDate() === disabledDate.getDate()
-                              );
+                              const dateStr = this.formatDate(date);
+                              return bookedDates.includes(dateStr);
                          };
 
                          this.checkinPicker.set('disable', [disableFunction]);
@@ -2393,10 +2480,8 @@
                     // ==========================================
                     handleDateChange() {
                          this.hideHoldStatus();
-                         // 1. Calculate the visual text for nights
                          this.calculateNightsAndPrices();
 
-                         // 2. Get the newly selected dates
                          const checkinDate = this.checkinPicker.selectedDates[0];
                          const checkoutDate = this.checkoutPicker.selectedDates[0];
 
@@ -2404,7 +2489,6 @@
                               const newCheckin = this.formatDate(checkinDate);
                               const newCheckout = this.formatDate(checkoutDate);
 
-                              // 3. Update EVERY item currently in the cart with the new dates
                               if (this.cart.length > 0) {
                                    let hasUnavailable = false;
 
@@ -2413,21 +2497,21 @@
                                         item.checkout = newCheckout;
                                         item.nights = this.nights;
 
-                                        // Check if item is available for new dates
+                                        // Check new dates against known booked dates
                                         if (!this.isDateRangeAvailable(item.id, newCheckin, newCheckout)) {
                                              hasUnavailable = true;
-                                             // You might want to highlight this issue visually
                                         }
                                    });
 
-                                   // Warn user if new dates cause conflicts
-                                   if (hasUnavailable) {
-                                        showNotification("Warning: Some rooms in your cart are unavailable for the selected dates.", true);
-                                   }
-
-                                   // 4. Save and Update Display
                                    this.saveCartToStorage();
                                    this.updateCartDisplay();
+
+                                   // Immediately re-validate to block checkout if needed
+                                   this.validateCartRealTime();
+
+                                   if (hasUnavailable) {
+                                        showNotification("Warning: Some rooms are unavailable for these new dates.", true);
+                                   }
                               }
                          }
                     }
@@ -2436,7 +2520,9 @@
                          document.addEventListener('click', (e) => {
                               if (e.target.closest('.add-to-cart-btn')) {
                                    const button = e.target.closest('.add-to-cart-btn');
-                                   this.addToCart(button.dataset.room);
+                                   // Prevent double clicks
+                                   if (button.disabled) return;
+                                   this.addToCart(button.dataset.room, button);
                               }
                               if (e.target.closest('.remove-btn')) {
                                    const button = e.target.closest('.remove-btn');
@@ -2445,7 +2531,7 @@
                          });
 
                          const breakfastToggle = document.getElementById('breakfast-toggle');
-                         if(breakfastToggle) {
+                         if (breakfastToggle) {
                               breakfastToggle.addEventListener('change', (e) => {
                                    this.breakfastIncluded = e.target.checked;
                                    this.updateCartDisplay();
@@ -2474,9 +2560,17 @@
 
                               if (isOpening) {
                                    if (roomCard) roomCard.style.zIndex = "50";
-                                   setTimeout(() => {
-                                   this.initializeCalendarIfNeeded(content);
-                                   }, 10);
+
+                                   // Slight delay to allow the CSS transition 'hidden' to apply first
+                                   // so Flatpickr can read the container width correctly
+                                   requestAnimationFrame(() => {
+                                        this.initializeCalendarIfNeeded(content);
+                                        const cal = content.querySelector('.flatpickr-calendar');
+                                        if (cal) {
+                                             // Force flatpickr to re-calculate fluid width
+                                             cal.style.width = '100%';
+                                        }
+                                   });
                               } else {
                                    if (roomCard) setTimeout(() => roomCard.style.zIndex = "1", 300);
                               }
@@ -2508,44 +2602,54 @@
                               minDate: "today",
                               disable: [
                                    (date) => {
-                                   const dateStr = this.formatDate(date);
-                                   const dates = this.bookedDates[roomId] || [];
-                                   return dates.includes(dateStr);
+                                        const dateStr = this.formatDate(date);
+                                        const dates = this.bookedDates[roomId] || [];
+                                        return dates.includes(dateStr);
                                    },
                                    (date) => date < today
                               ],
-                              locale: { firstDayOfWeek: 1 },
-                              clickOpens: false,
-                              allowInput: false,
+                              locale: {
+                                   firstDayOfWeek: 1
+                              },
+                              clickOpens: true,
+                              allowInput: true,
                               enableTime: false,
-                              static: true, // Optimizes for mobile
-                              
-                              // Completely disable interaction
-                              onOpen: (selectedDates, dateStr, instance) => {
-                                   instance.isOpen = false;
-                                   instance._input.disabled = true;
+                              static: true,
+                              onChange: (selectedDates, dateStr, instance) => {
+                                   if (selectedDates.length > 0) {
+                                        const clickedDate = selectedDates[0];
+                                        // Update main pickers
+                                        this.checkinPicker.setDate(clickedDate, true);
+                                        const nextDay = new Date(clickedDate);
+                                        nextDay.setDate(nextDay.getDate() + 1);
+                                        this.checkoutPicker.setDate(nextDay, true);
+
+                                        // Try adding to cart
+                                        // We use the clicked room's ID
+                                        const btn = calendarEl.closest('.room-card').querySelector('.add-to-cart-btn');
+                                        if (btn) {
+                                             setTimeout(() => {
+                                                  this.addToCart(roomId, btn);
+                                             }, 100);
+                                        }
+                                   }
                               },
                               onDayCreate: (dObj, dStr, fp, dayElem) => {
-                                   dayElem.style.pointerEvents = 'none'; 
-                                   dayElem.style.cursor = 'default';
-                                   dayElem.tabIndex = -1;
-
                                    const dateObj = new Date(dayElem.dateObj).setHours(0, 0, 0, 0);
-                                   
-                                   // Visual Classes
                                    if (dayElem.classList.contains('flatpickr-disabled')) {
-                                   if (dateObj < today) {
-                                        dayElem.classList.add('past-day');
+                                        if (dateObj < today) {
+                                             dayElem.classList.add('past-day');
+                                        } else {
+                                             dayElem.classList.add('unavailable');
+                                        }
                                    } else {
-                                        dayElem.classList.add('unavailable');
-                                   }
-                                   } else {
-                                   dayElem.classList.add('available');
+                                        dayElem.classList.add('available');
+                                        dayElem.style.pointerEvents = 'auto';
+                                        dayElem.style.cursor = 'pointer';
                                    }
                               },
-                              onReady: (d,s,instance) => {
-                                   // Mobile width fix
-                                   setTimeout(() => instance.redraw(), 50); 
+                              onReady: (d, s, instance) => {
+                                   setTimeout(() => instance.redraw(), 50);
                               }
                          });
 
@@ -2562,39 +2666,28 @@
 
                     getCalendarStyles() {
                          return `
-                              .flatpickr-day.unavailable {
-                              background: #fee2e2 !important;
-                              color: #dc2626 !important;
-                              border-color: #fecaca !important;
-                              text-decoration: line-through;
-                              }
-                              .flatpickr-day.past-day {
-                              background: #f3f4f6 !important;
-                              color: #9ca3af !important;
-                              }
-                              .flatpickr-day.available {
-                              background: #dcfce7 !important;
-                              color: #16a34a !important;
-                              border-color: #bbf7d0 !important;
-                              }
-                              .flatpickr-calendar {
-                              box-shadow: none !important;
-                              width: 100% !important;
-                              }
-                              .flatpickr-days {
-                              width: 100% !important;
-                              }
-                              .dayContainer {
-                              width: 100% !important;
-                              min-width: 100% !important;
-                              max-width: 100% !important;
-                              }
-                         `;
+                                   .flatpickr-calendar.inline { width: 100% !important; max-width: 100% !important; box-shadow: none !important; }
+                                   .flatpickr-rContainer, .flatpickr-days, .dayContainer { width: 100% !important; }
+                                   .dayContainer { justify-content: space-around !important; }
+                                   .flatpickr-day { width: 14.28% !important; max-width: none !important; margin: 0 !important; height: 30px !important; line-height: 30px !important; font-size: 12px !important; border-radius: 4px !important; }
+                                   .flatpickr-day.unavailable { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fecaca !important; text-decoration: line-through; pointer-events: none !important; opacity: 0.7; }
+                                   .flatpickr-day.past-day { background: #f3f4f6 !important; color: #9ca3af !important; pointer-events: none !important; }
+                                   .flatpickr-day.available { background: #dcfce7 !important; color: #16a34a !important; border: 1px solid #bbf7d0 !important; cursor: pointer !important; pointer-events: auto !important; transition: all 0.2s ease; }
+                                   .flatpickr-day.available:hover { background: #2647dcff !important; color: white !important; border-color: #2647dcff !important; transform: scale(1.1); z-index: 10; }
+                                   .flatpickr-day.selected { background: #2647dcff !important; border-color: #2651dcff !important; color: white !important; }
+                              `;
                     }
 
                     validateCheckoutButton() {
                          const checkoutBtn = document.getElementById('checkout-btn');
-                         checkoutBtn.disabled = this.cart.length === 0;
+                         // Basic check: is cart empty?
+                         if (this.cart.length === 0) {
+                              checkoutBtn.disabled = true;
+                         } else {
+                              checkoutBtn.disabled = false;
+                         }
+                         // Trigger deeper validation
+                         this.validateCartRealTime();
                     }
 
                     formatDate(date) {
@@ -2702,15 +2795,28 @@
                          }
                     }
 
-                    addToCart(roomId) {
-
+                    async addToCart(roomId, buttonElement) {
                          this.hideHoldStatus();
+
+                         // UI Feedback: Loading
+                         if (buttonElement) {
+                              const originalHtml = buttonElement.innerHTML;
+                              buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+                              buttonElement.disabled = true;
+                         }
+
                          try {
+                              // 1. Force a refresh of data to be absolutely sure before adding
+                              await this.fetchRealTimeAvailability();
+
                               if (!this.roomsData[roomId]) throw new Error('Room not found');
 
                               // Check if already in cart
                               if (this.cart.some(item => item.id === roomId)) {
-                                   showNotification('This room is already in your cart', true);
+                                   if (buttonElement) {
+                                        buttonElement.innerHTML = 'Selected'; // Reset
+                                        buttonElement.disabled = false;
+                                   }
                                    return;
                               }
 
@@ -2719,6 +2825,7 @@
 
                               if (!checkinDate || !checkoutDate) {
                                    showNotification('Please select both check-in and check-out dates', true);
+                                   if (buttonElement) buttonElement.disabled = false;
                                    return;
                               }
 
@@ -2727,12 +2834,24 @@
 
                               if (new Date(checkin) >= new Date(checkout)) {
                                    showNotification('Check-out date must be after check-in date', true);
+                                   if (buttonElement) buttonElement.disabled = false;
                                    return;
                               }
 
+                              // 2. Perform the validation with fresh data
                               if (!this.isDateRangeAvailable(roomId, checkin, checkout)) {
                                    const roomName = this.roomsData[roomId].name;
-                                   showNotification(`${roomName} is not available on the selected dates.`, true);
+                                   showNotification(`Sorry! ${roomName} is not available for these dates.`, true);
+
+                                   if (buttonElement) {
+                                        buttonElement.innerHTML = 'Unavailable';
+                                        buttonElement.classList.add('bg-gray-400');
+                                        setTimeout(() => {
+                                             buttonElement.innerHTML = 'Select Room'; // Or original HTML
+                                             buttonElement.classList.remove('bg-gray-400');
+                                             buttonElement.disabled = false;
+                                        }, 2000);
+                                   }
                                    return;
                               }
 
@@ -2755,26 +2874,32 @@
                               this.updateDatePickerDisabledDates(roomId);
                               this.validateCheckoutButton();
 
-                              // UI Feedback
+                              // UI Feedback: Success
                               document.querySelectorAll('.room-card').forEach(card => {
                                    card.classList.toggle('selected', card.dataset.roomId === roomId);
                               });
 
-                              const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
-                              buttons.forEach(button => {
-                                   const originalHTML = button.innerHTML;
-                                   button.innerHTML = '<i class="fas fa-check mr-2"></i> Added!';
-                                   button.classList.replace('bg-primary', 'bg-green-500');
+                              if (buttonElement) {
+                                   const originalHTML = '<span class="flex items-center justify-center">Select Room <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></span>';
+                                   buttonElement.innerHTML = '<i class="fas fa-check mr-2"></i> Added!';
+                                   buttonElement.classList.replace('bg-primary', 'bg-green-500');
+                                   buttonElement.classList.replace('from-red-600', 'from-green-600'); // Gradient fix
+                                   buttonElement.classList.replace('to-red-700', 'to-green-700'); // Gradient fix
+
                                    setTimeout(() => {
-                                        button.innerHTML = originalHTML;
-                                        button.classList.replace('bg-green-500', 'bg-primary');
+                                        buttonElement.innerHTML = originalHTML;
+                                        buttonElement.classList.replace('bg-green-500', 'bg-primary');
+                                        buttonElement.classList.replace('from-green-600', 'from-red-600');
+                                        buttonElement.classList.replace('to-green-700', 'to-red-700');
+                                        buttonElement.disabled = false;
                                    }, 2000);
-                              });
+                              }
 
                               showNotification(`${room.name} added to your summary`);
 
                          } catch (error) {
                               showNotification(error.message || 'Failed to add room to cart', true);
+                              if (buttonElement) buttonElement.disabled = false;
                          }
                     }
 
@@ -2793,12 +2918,12 @@
                          const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
                          buttons.forEach(button => {
                               button.innerHTML = `
-                                                  <span class="flex items-center justify-center">
-                                                      Select Room 
-                                                      <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                                      </svg>
-                                                  </span>`;
+                                        <span class="flex items-center justify-center">
+                                        Select Room 
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                        </span>`;
                               button.classList.remove('bg-green-500', 'bg-primary');
                               button.classList.add('bg-primary');
                               button.disabled = false;
@@ -2812,10 +2937,10 @@
                          this.validateCheckoutButton();
                          showNotification(`${room.name} removed from your summary`);
                     }
-                    
+
                     hideHoldStatus() {
                          const statusDiv = document.getElementById('hold-status-message');
-                         if(statusDiv) {
+                         if (statusDiv) {
                               statusDiv.classList.add('hidden');
                               statusDiv.classList.remove('active');
                          }
@@ -2838,12 +2963,12 @@
                               checkoutBtn.disabled = true;
                               if (breakfastSummary) breakfastSummary.classList.add('hidden');
                               // NEW: Hide the warning when cart is empty
-                              if(warningMsg) warningMsg.classList.add('hidden');
+                              if (warningMsg) warningMsg.classList.add('hidden');
                               return;
                          }
 
                          // NEW: Show the warning when cart has items
-                         if(warningMsg) warningMsg.classList.remove('hidden');
+                         if (warningMsg) warningMsg.classList.remove('hidden');
 
                          checkoutBtn.disabled = false;
                          let subtotal = 0;
@@ -2853,23 +2978,23 @@
                               const itemTotal = item.price * this.nights;
                               subtotal += itemTotal;
                               html += `
-                                                  <div class="flex justify-between items-start border-b border-gray-100 pb-4">
-                                                      <div class="flex items-start">
-                                                          <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
-                                                          <div>
-                                                              <h4 class="font-medium text-dark">${item.name}</h4>
-                                                              <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toLocaleString()}</div>
-                                                              <div class="text-xs text-gray-400 mt-1">${item.checkin} to ${item.checkout}</div>
-                                                          </div>
-                                                      </div>
-                                                      <div class="text-right">
-                                                          <div class="font-medium">₱${itemTotal.toLocaleString()}</div>
-                                                          <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
-                                                              <i class="far fa-trash-alt mr-1"></i> Remove
-                                                          </button>
-                                                      </div>
-                                                  </div>
-                                              `;
+                                                       <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                                                           <div class="flex items-start">
+                                                               <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
+                                                               <div>
+                                                                   <h4 class="font-medium text-dark">${item.name}</h4>
+                                                                   <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toLocaleString()}</div>
+                                                                   <div class="text-xs text-gray-400 mt-1">${item.checkin} to ${item.checkout}</div>
+                                                               </div>
+                                                           </div>
+                                                           <div class="text-right">
+                                                               <div class="font-medium">₱${itemTotal.toLocaleString()}</div>
+                                                               <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
+                                                                   <i class="far fa-trash-alt mr-1"></i> Remove
+                                                               </button>
+                                                           </div>
+                                                       </div>
+                                                   `;
                          });
 
                          container.innerHTML = html;
@@ -2977,7 +3102,7 @@
                                              roomId: item.id,
                                              name: item.name,
                                              // --- MODIFIED LINE: Capture the dates sent from controller ---
-                                             conflictDates: data.conflict_dates || null, 
+                                             conflictDates: data.conflict_dates || null,
                                              message: data.message || 'Room unavailable'
                                         };
                                    }
@@ -3152,7 +3277,7 @@
                          notification.classList.remove('show');
                          setTimeout(() => {
                               notification.classList.add('hidden');
-                         }, 300); 
+                         }, 300);
                     }, 5000);
                }
           </script>

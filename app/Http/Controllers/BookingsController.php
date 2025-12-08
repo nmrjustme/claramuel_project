@@ -57,7 +57,7 @@ class BookingsController extends Controller
 
         if (!empty($unavailableRooms)) {
             $firstHold = reset($holdDetails);
-            $message = "This room is temporarily on hold from {$firstHold['date_from']} to {$firstHold['date_to']} for 5–10 minutes. Someone else is currently booking it. Please try again later or choose another date.";
+            $message = "This room is temporarily on hold from {$firstHold['date_from']} to {$firstHold['date_to']} for 10–15 minutes. Someone else is currently booking it. Please try again later or choose another date.";
 
             return response()->json([
                 'success' => false,
@@ -299,6 +299,7 @@ class BookingsController extends Controller
             
             // Only confirmed bookings that are paid (or remove payment check if needed)
             ->where('fac_log.status', '!=', 'cancelled')
+            ->where('fac_log.status', '!=', 'checked_out')
             ->whereNotNull('payments.amount')
             
             // Filter out old bookings

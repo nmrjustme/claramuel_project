@@ -115,7 +115,7 @@ class RoomHoldController extends Controller
                 'date_from' => $dateFrom,
                 'date_to' => $dateTo,
                 'session_id' => $currentSessionId,
-                'expires_at' => now()->addMinutes(10),
+                'expires_at' => now()->addMinutes(15),
                 'status' => 'pending'
             ]);
 
@@ -265,19 +265,6 @@ class RoomHoldController extends Controller
         ]);
     }
 
-    public function releaseHold($holdId)
-    {
-        $hold = RoomHold::where('session_id', session()->getId())
-            ->where('id', $holdId)
-            ->first();
-
-        if ($hold) {
-            $hold->delete();
-            return response()->json(['success' => true]);
-        }
-
-        return response()->json(['success' => false], 404);
-    }
 
     public function releaseAllHolds()
     {
