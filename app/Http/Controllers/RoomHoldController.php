@@ -29,18 +29,6 @@ class RoomHoldController extends Controller
             DB::beginTransaction();
 
             $roomId = $request->room_id;
-
-            // ---------------------------------------------------------
-            // 🛑 CRITICAL FIX: Lock the Room first
-            // This forces any other request for this specific room 
-            // to WAIT here until this transaction finishes.
-            // ---------------------------------------------------------
-            $room = Facility::where('id', $roomId)->lockForUpdate()->first();
-            // If the room somehow doesn't exist (edge case)
-            if (!$room) {
-                 throw new \Exception("Room not found");
-            }
-
             
             $dateFrom = $request->date_from;
             $dateTo = $request->date_to;
