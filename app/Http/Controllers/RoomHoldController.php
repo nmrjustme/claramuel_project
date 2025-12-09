@@ -26,11 +26,18 @@ class RoomHoldController extends Controller
         ]);
 
         try {
+            // Start the transaction
             DB::beginTransaction();
 
             $roomId = $request->room_id;
             $dateFrom = $request->date_from;
             $dateTo = $request->date_to;
+
+            // ---------------------------------------------------------
+            // 🛑 FIX: Lock the Room Row
+            // This stops other requests for this room until we Commit or Rollback
+            // ---------------------------------------------------------
+            $room = Facility::where('id', $roomId)->lockForUpdate()->first();
 
             // Get current session ID
             $currentSessionId = session()->getId();
@@ -51,7 +58,7 @@ class RoomHoldController extends Controller
             \Log::info('Current session room holds:', $roomHolds);
 
             // Check if room is already on hold by someone else (in database)
-            // UPDATED LOGIC: Allows checkout date to overlap with checkin date
+            // Since we locked the Facility row above, this check is now "Thread Safe"
             $existingHold = RoomHold::active()
                 ->where('facility_id', $roomId)
                 ->where('session_id', '!=', $currentSessionId)
@@ -66,8 +73,6 @@ class RoomHoldController extends Controller
                 'existing_hold' => $existingHold ? $existingHold->toArray() : null
             ]);
 
-            // In RoomHoldController.php -> createHold()
-
             if ($existingHold) {
                 \Log::warning('Room already on hold:', [
                     'room_id' => $roomId,
@@ -75,19 +80,17 @@ class RoomHoldController extends Controller
                     'current_session' => $currentSessionId
                 ]);
 
-                // --- UPDATED LOGIC START ---
                 $startDate = $existingHold->date_from;
                 $lastNight = Carbon::parse($existingHold->date_to)->subDay();
 
-                // Check if it's a single night (start date is same as last night)
                 if ($startDate->format('Y-m-d') === $lastNight->format('Y-m-d')) {
-                    // Output: "Dec 14"
                     $dateRange = $startDate->format('M d');
                 } else {
-                    // Output: "Dec 14 - Dec 15"
                     $dateRange = $startDate->format('M d') . ' - ' . $lastNight->format('M d');
                 }
-                // --- UPDATED LOGIC END ---
+
+                // 🛑 IMPORTANT: We must Rollback to release the lock before returning
+                DB::rollBack();
 
                 return response()->json([
                     'success' => false,
@@ -109,7 +112,6 @@ class RoomHoldController extends Controller
             \Log::info('Deleted old holds:', ['count' => $deleted]);
 
             // Create new hold in database
-            // Note: We still save the full date_to here for records
             $hold = RoomHold::create([
                 'facility_id' => $roomId,
                 'date_from' => $dateFrom,
@@ -138,6 +140,7 @@ class RoomHoldController extends Controller
             \Log::info('Created new hold:', $hold->toArray());
             \Log::info('Session room holds after creation:', session('room_holds'));
 
+            // Commit transaction (Releases the Lock)
             DB::commit();
 
             return response()->json([
