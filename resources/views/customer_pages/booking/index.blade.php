@@ -2190,7 +2190,7 @@
                          this.setupScrollArrows();
                          this.setupUnavailableDatesToggle();
                          this.initializeCart();
-                         
+
                          await this.fetchRealTimeAvailability();
 
                          // 🟢 CORRECT: Start the recursive poll
@@ -3169,7 +3169,7 @@
                                    this.updateHoldStatus(`Availability changed! ${errorDetails} has been placed on hold for a minute by another guest.`, 'error');
 
                                    // --- MODIFIED CODE END ---
-                                   document.getElementById('checkout-btn-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                   document.getElementById('booking-summary').scrollIntoView({ behavior: 'smooth', block: 'center' });
                                    
                                    button.disabled = false;
                                    this.isSubmitting = false;
