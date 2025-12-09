@@ -2190,10 +2190,11 @@
                          this.setupScrollArrows();
                          this.setupUnavailableDatesToggle();
                          this.initializeCart();
+                         
+                         await this.fetchRealTimeAvailability();
 
-                         this.fetchRealTimeAvailability().then(() => {
-                              this.pollAvailability(); // Start the loop
-                         });
+                         // 🟢 CORRECT: Start the recursive poll
+                         this.pollAvailability();
                     }
 
                     pollAvailability() {
