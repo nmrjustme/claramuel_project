@@ -12,13 +12,6 @@ class RoomHoldController extends Controller
 {
     public function createHold(Request $request)
     {
-        \Log::info('Room Hold Request:', [
-            'request_data' => $request->all(),
-            'session_id' => session()->getId(),
-            'session_exists' => session()->has('_token'),
-            'all_session_data' => session()->all()
-        ]);
-
         $request->validate([
             'room_id' => 'required|exists:facilities,id',
             'date_from' => 'required|date|after_or_equal:today',
@@ -26,33 +19,30 @@ class RoomHoldController extends Controller
         ]);
 
         try {
+            // 1. Start the Transaction
             DB::beginTransaction();
 
             $roomId = $request->room_id;
-            
             $dateFrom = $request->date_from;
             $dateTo = $request->date_to;
-
-            // Get current session ID
             $currentSessionId = session()->getId();
 
-            // Initialize room holds in session if not exists
+            // =================================================================
+            // 🛑 CRITICAL FIX: Lock the Facility Row
+            // This forces Device B to PAUSE right here until Device A finishes.
+            // =================================================================
+            $facility = Facility::where('id', $roomId)->lockForUpdate()->first();
+
+            // 2. Clean up expired holds from session (Housekeeping)
             if (!session()->has('room_holds')) {
                 session(['room_holds' => []]);
             }
-
-            // Get current room holds from session
             $roomHolds = session('room_holds', []);
-
-            // Clean up expired holds from session
             $roomHolds = array_filter($roomHolds, function ($hold) {
                 return strtotime($hold['expires_at']) > time();
             });
 
-            \Log::info('Current session room holds:', $roomHolds);
-
-            // Check if room is already on hold by someone else (in database)
-            // UPDATED LOGIC: Allows checkout date to overlap with checkin date
+            // 3. Check availability (Now Thread-Safe because of the lock above)
             $existingHold = RoomHold::active()
                 ->where('facility_id', $roomId)
                 ->where('session_id', '!=', $currentSessionId)
@@ -62,33 +52,20 @@ class RoomHoldController extends Controller
                 })
                 ->first();
 
-            \Log::info('Existing Hold Check:', [
-                'exists' => !empty($existingHold),
-                'existing_hold' => $existingHold ? $existingHold->toArray() : null
-            ]);
-
-            // In RoomHoldController.php -> createHold()
-
+            // 4. If Conflict Found
             if ($existingHold) {
-                \Log::warning('Room already on hold:', [
-                    'room_id' => $roomId,
-                    'existing_hold_session' => $existingHold->session_id,
-                    'current_session' => $currentSessionId
-                ]);
-
-                // --- UPDATED LOGIC START ---
-                $startDate = $existingHold->date_from;
+                // Calculate display string for the error message
+                $startDate = Carbon::parse($existingHold->date_from);
                 $lastNight = Carbon::parse($existingHold->date_to)->subDay();
 
-                // Check if it's a single night (start date is same as last night)
                 if ($startDate->format('Y-m-d') === $lastNight->format('Y-m-d')) {
-                    // Output: "Dec 14"
                     $dateRange = $startDate->format('M d');
                 } else {
-                    // Output: "Dec 14 - Dec 15"
                     $dateRange = $startDate->format('M d') . ' - ' . $lastNight->format('M d');
                 }
-                // --- UPDATED LOGIC END ---
+
+                // IMPORTANT: Rollback acts as the "unlock" mechanism so Device B can move on
+                DB::rollBack();
 
                 return response()->json([
                     'success' => false,
@@ -97,20 +74,17 @@ class RoomHoldController extends Controller
                 ], 409);
             }
 
-            // Remove any existing holds for this session and room (both database and session)
-            $deleted = RoomHold::where('session_id', $currentSessionId)
+            // 5. Remove OLD holds for *this* user/room to prevent duplicates
+            RoomHold::where('session_id', $currentSessionId)
                 ->where('facility_id', $roomId)
                 ->delete();
 
-            // Also remove from session
+            // Remove from session array
             $roomHolds = array_filter($roomHolds, function ($hold) use ($roomId) {
                 return $hold['facility_id'] != $roomId;
             });
 
-            \Log::info('Deleted old holds:', ['count' => $deleted]);
-
-            // Create new hold in database
-            // Note: We still save the full date_to here for records
+            // 6. Create the New Hold
             $hold = RoomHold::create([
                 'facility_id' => $roomId,
                 'date_from' => $dateFrom,
@@ -120,7 +94,7 @@ class RoomHoldController extends Controller
                 'status' => 'pending'
             ]);
 
-            // Store hold in session
+            // 7. Update Session
             $holdData = [
                 'id' => $hold->id,
                 'facility_id' => $roomId,
@@ -132,13 +106,9 @@ class RoomHoldController extends Controller
 
             $roomHolds[] = $holdData;
             session(['room_holds' => $roomHolds]);
-
-            // Save session immediately
             session()->save();
 
-            \Log::info('Created new hold:', $hold->toArray());
-            \Log::info('Session room holds after creation:', session('room_holds'));
-
+            // 8. Commit Transaction (This releases the Lock)
             DB::commit();
 
             return response()->json([

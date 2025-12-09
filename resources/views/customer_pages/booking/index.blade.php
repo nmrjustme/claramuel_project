@@ -2194,8 +2194,20 @@
 
                          await this.fetchRealTimeAvailability();
 
-                         // 4. Start Polling (Real-time updates every 10 seconds)
-                         setInterval(() => this.fetchRealTimeAvailability(), 10000);
+                         this.fetchRealTimeAvailability().then(() => {
+                              this.pollAvailability(); // Start the loop
+                         });
+                    }
+
+                    pollAvailability() {
+                         setTimeout(async () => {
+                              // Only fetch if tab is active to save battery
+                              if (!document.hidden) {
+                                   await this.fetchRealTimeAvailability();
+                              }
+                              // Call self again ONLY after the request finished
+                              this.pollAvailability();
+                         }, 10000);
                     }
 
                     async fetchRealTimeAvailability() {
@@ -3158,7 +3170,7 @@
 
                                    this.updateHoldStatus(`Availability changed! ${errorDetails} has been placed on hold for a minute by another guest.`, 'error');
                                    // --- MODIFIED CODE END ---
-
+                                   document.getElementById('checkout-btn-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
                                    button.disabled = false;
                                    this.isSubmitting = false;
                                    buttonText.textContent = 'Proceed to Your Details';
