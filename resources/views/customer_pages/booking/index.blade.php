@@ -2191,9 +2191,6 @@
                          this.setupUnavailableDatesToggle();
                          this.initializeCart();
 
-
-                         await this.fetchRealTimeAvailability();
-
                          this.fetchRealTimeAvailability().then(() => {
                               this.pollAvailability(); // Start the loop
                          });
@@ -3169,8 +3166,10 @@
                                    }).join(', ');
 
                                    this.updateHoldStatus(`Availability changed! ${errorDetails} has been placed on hold for a minute by another guest.`, 'error');
+
                                    // --- MODIFIED CODE END ---
                                    document.getElementById('checkout-btn-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                   
                                    button.disabled = false;
                                    this.isSubmitting = false;
                                    buttonText.textContent = 'Proceed to Your Details';
