@@ -1,430 +1,254 @@
-<aside
-    class="fixed inset-y-0 left-0 z-40 w-64 text-white shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out bg-gradient-to-b from-red-900 to-red-800"
-    id="sidebar">
-    <div class="relative flex flex-col h-full">
-        <!-- Close button (mobile only) -->
-        <button
-            class="md:hidden absolute top-4 right-4 text-white hover:text-red-200 focus:outline-none z-50 transition-colors duration-200"
-            id="sidebar-close" aria-label="Close sidebar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
+
+    <div class="flex items-center gap-3 px-6 py-5 border-b border-red-700/50 shrink-0">
+        {{-- If you have a logo component --}}
+        {{-- <x-logo-icon size="xl" class="text-white" /> --}}
+        <div class="p-2 bg-white/10 rounded-lg">
+            <i class="fas fa-mountain text-xl"></i>
+        </div>
+        <div>
+            <span class="block font-bold text-lg tracking-wide leading-none">Mt. Claramuel</span>
+            <span class="text-[10px] text-red-200 uppercase tracking-wider font-semibold">Admin Panel</span>
+        </div>
+
+        <button id="sidebar-close" class="md:hidden ml-auto text-white/70 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
+    </div>
 
-        <!-- Logo & Title -->
-        <div class="flex items-center space-x-3 px-6 py-6 border-b border-red-700">
-            <x-logo-icon size="xl" />
-            <span class="font-bold text-xl tracking-wide">Mt.Claramuel</span>
-        </div>
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1 custom-scrollbar">
 
-        <!-- Navigation Links -->
-        <nav class="flex-1 overflow-y-auto py-4 px-2">
-            <ul class="space-y-1">
-                <!-- Dashboard -->
-                <li>
-                    <a href="{{ route('admin.dashboard') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'dashboard' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="{{ $active === 'dashboard' ? '2' : '1.5' }}"
-                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
+        {{-- Dashboard --}}
+        <a href="{{ route('admin.dashboard') }}"
+            class="flex items-center py-2.5 px-4 rounded-lg transition-all duration-200 group {{ $active === 'dashboard' ? 'bg-red-700 text-white font-medium shadow-md' : 'text-red-100 hover:bg-white/10 hover:text-white' }}">
+            <svg class="w-5 h-5 mr-3 {{ $active === 'dashboard' ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            Dashboard
+        </a>
 
-                <!-- Manage Bookings Dropdown -->
-                <li>
-                    <div class="relative">
-                        <button
-                            class="flex items-center justify-between w-full py-3 px-4 rounded-lg transition-all duration-200 {{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}"
-                            id="manage-bookings-dropdown" aria-expanded="false">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="{{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? '2' : '1.5' }}"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                                <span>Manage Bookings</span>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+        {{-- Section Label --}}
+        <div class="pt-4 pb-2 px-4 text-xs font-bold text-red-300 uppercase tracking-wider">Operations</div>
 
-                        <!-- Dropdown Menu -->
-                        <div class="mt-1 ml-4 overflow-hidden transition-all duration-300 ease-in-out max-h-0"
-                            id="manage-bookings-menu">
-                            <ul class="space-y-1">
-                                <!-- Bookings -->
-                                <li>
-                                    <a href="{{ route('admin.bookings') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'bookings' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'bookings' ? '2' : '1.5' }}"
-                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                        </svg>
-                                        <span>Bookings</span>
-                                    </a>
-                                </li>
-
-                                <!-- Arrivals -->
-                                <li>
-                                    <a href="{{ route('incoming.list') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'arrivals' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'arrivals' ? '2' : '1.5' }}"
-                                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 10.5l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
-                                        </svg>
-                                        <span>Arrivals</span>
-                                    </a>
-                                </li>
-
-                                <!-- Calendar -->
-                                <li>
-                                    <a href="{{ route('admin.calendar') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'calendar' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'calendar' ? '2' : '1.5' }}"
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <span>Calendar</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </li>
-
-                <!-- Accounting & Analytics Dropdown -->
-                <li>
-                    <div class="relative">
-                        <button
-                            class="flex items-center justify-between w-full py-3 px-4 rounded-lg transition-all duration-200 {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}"
-                            id="accounting-analytics-dropdown" aria-expanded="false">
-                            <div class="flex items-center">
-
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="{{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? '2' : '1.5' }}"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-
-                                </svg>
-
-                                <span>Revenue Reports</span>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-
-                        <!-- Dropdown Menu -->
-                        <div class="mt-1 ml-4 overflow-hidden transition-all duration-300 ease-in-out max-h-0"
-                            id="accounting-analytics-menu">
-                            <ul class="space-y-1">
-                                <!-- Accounting Dashboard -->
-                                <li>
-                                    <a href="{{ route('admin.accounting.index') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'accounting' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'accounting' ? '2' : '1.5' }}"
-                                                d="M2.25 6.75h19.5v10.5H2.25zM6 9h.008v.008H6V9zm12 0h.008v.008H18V9zm-6 2.25a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" />
-                                        </svg>
-                                        <span>Accounting Dashboard</span>
-                                    </a>
-                                </li>
-
-                                <!-- Expenses -->
-                                <li>
-                                    <a href="{{ route('admin.expenses.index') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'expenses' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'expenses' ? '2' : '1.5' }}"
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                                        </svg>
-                                        <span>Expenses</span>
-                                    </a>
-                                </li>
-
-                                <!-- Earnings Chart -->
-                                <li>
-                                    <a href="{{ route('earnings.chart') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'earnings' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'earnings' ? '2' : '1.5' }}"
-                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                        </svg>
-                                        <span>Room Earnings</span>
-                                    </a>
-                                </li>
-
-                                <!-- Day-Tour Chart -->
-                                <li>
-                                    <a href="{{ route('day_tour.earnings') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'daytour-earnings' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'daytour-earnings' ? '2' : '1.5' }}"
-                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                        </svg>
-                                        <span>Day Tour Earnings</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </li>
-
-                <!--Day Tour -->
-                <li>
-                    <a href="{{ route('admin.daytour.logs') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'day_tour' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="{{ $active === 'day_tour' ? '2' : '1.5' }}"
-                                    d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M6.05 17.95l-1.414-1.414M18.364 18.364l-1.414-1.414M6.05 6.05L4.636 7.464M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                            </svg>
-                            <span>Day Tour Logs</span>
-                        </div>
-                    </a>
-                </li>
-
-                <!-- Facility Monitoring -->
-                <li>
-                    <a href="{{ route('admin.daytour.facility_monitoring') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'facility_monitoring' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}"
-                                    d="M3 9.75L12 4l9 5.75V19a2 2 0 01-2 2H5a2 2 0 01-2-2V9.75z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="{{ $active === 'facility_monitoring' ? '2' : '1.5' }}"
-                                    d="M9 22V12h6v10" />
-                            </svg>
-                            <span>Facility Monitoring</span>
-                        </div>
-                    </a>
-                </li>
-
-                <!-- Facilities Management Dropdown -->
-                <li>
-                    <div class="relative">
-                        <button
-                            class="flex items-center justify-between w-full py-3 px-4 rounded-lg transition-all duration-200 {{ in_array($active, ['facilities', 'day-tour facilities']) ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}"
-                            id="facilities-management-dropdown" aria-expanded="false">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="{{ in_array($active, ['facilities', 'day-tour facilities']) ? '2' : '1.5' }}"
-                                        d="M3 10h18M3 6h18M3 14h18M3 18h18" />
-                                </svg>
-                                <span>Facility Mgmt</span>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-
-                        <!-- Dropdown Menu -->
-                        <div class="mt-1 ml-4 overflow-hidden transition-all duration-300 ease-in-out max-h-0"
-                            id="facilities-management-menu">
-                            <ul class="space-y-1">
-                                <!-- Room Facilities -->
-                                <li>
-                                    <a href="{{ route('admin.facilities.index') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'facilities' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'facilities' ? '2' : '1.5' }}"
-                                                d="M3 10h18M3 6h18M3 14h18M3 18h18" />
-                                        </svg>
-                                        <span>Room Facilities</span>
-                                    </a>
-                                </li>
-
-                                <!-- Day-Tour Facilities -->
-                                <li>
-                                    <a href="{{ route('admin.day-tour-facilities.index') }}"
-                                        class="flex items-center py-2 px-4 rounded-lg transition-all duration-200 {{ $active === 'day-tour facilities' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="{{ $active === 'day-tour facilities' ? '2' : '1.5' }}"
-                                                d="M3 10h18M3 6h18M3 14h18M3 18h18" />
-                                        </svg>
-                                        <span>Day Tour Facilities</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </li>
-
-                <!-- Admin -->
-                <li>
-                    <a href="{{ route('admin.list.management') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'admin' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="{{ $active === 'admin' ? '2' : '1.5' }}"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span>Admin</span>
-                    </a>
-                </li>
-
-                <!-- Gallery Management -->
-                <li>
-                    <a href="{{ route('admin.galleries.index') }}"
-                        class="flex items-center py-3 px-4 rounded-lg transition-all duration-200 {{ $active === 'gallery' ? 'bg-red-700 font-medium' : 'hover:bg-red-700/50' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="{{ $active === 'gallery' ? '2' : '1.5' }}"
-                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3h-1a2 2 0 00-2 2v1m-4 0H7a2 2 0 00-2 2v1m0 4v1a2 2 0 002 2h1m4 0h1a2 2 0 002-2v-1m0-4V7a2 2 0 00-2-2h-1m-4 0V5a2 2 0 012-2h1m4 0h1a2 2 0 012 2v1" />
-                        </svg>
-                        <span>Gallery Management</span>
-                    </a>
-                </li>
-                
-            </ul>
-        </nav>
-
-        <!-- User Section -->
-        <div class="p-4 border-t border-red-900 bg-red-900/30">
-            <div class="flex items-center space-x-3">
-                <div
-                    class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border border-white/20">
-                    @if(Auth::user()->profile_img)
-                        <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}"
-                            alt="{{ Auth::user()->firstname }}" class="w-full h-full object-cover">
-                    @else
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                    @endif
-                </div>
-
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium truncate">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}
-                    </p>
-                    <p class="text-xs text-white/80 truncate">{{ Auth::user()->email }}</p>
-                </div>
-
-                <a href="{{ route('logout') }}" class="p-1.5 rounded-full hover:bg-white/10 transition-all duration-200"
-                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        {{-- Manage Bookings Dropdown --}}
+        <div class="relative">
+            <button
+                class="sidebar-dropdown-toggle flex items-center justify-between w-full py-2.5 px-4 rounded-lg transition-all duration-200 group {{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? 'bg-red-700/50 text-white' : 'text-red-100 hover:bg-white/10' }}"
+                aria-expanded="{{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? 'true' : 'false' }}">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-3 {{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                    @csrf
-                </form>
+                    <span>Bookings</span>
+
+                    {{-- Notification Badge Placeholder --}}
+                    <span id="inquiries-badge"
+                        class="hidden ml-2 px-1.5 py-0.5 bg-yellow-400 text-red-900 text-[10px] font-bold rounded-full animate-pulse">
+                        New
+                    </span>
+                </div>
+                <svg class="w-4 h-4 transition-transform duration-200 transform {{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? 'rotate-180' : '' }}"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            <div
+                class="sidebar-submenu overflow-hidden transition-all duration-300 ease-in-out {{ in_array($active, ['bookings', 'arrivals', 'calendar']) ? 'max-h-96' : 'max-h-0' }}">
+                <ul class="pt-1 pb-2 pl-12 pr-2 space-y-1">
+                    <li><a href="{{ route('admin.bookings') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'bookings' ? 'text-white font-medium' : 'text-red-200' }}">All
+                            Bookings</a></li>
+                    <li><a href="{{ route('incoming.list') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'arrivals' ? 'text-white font-medium' : 'text-red-200' }}">Arrivals</a>
+                    </li>
+                    <li><a href="{{ route('admin.calendar') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'calendar' ? 'text-white font-medium' : 'text-red-200' }}">Calendar</a>
+                    </li>
+                </ul>
             </div>
         </div>
-    </div>
-</aside>
 
-<!-- JavaScript for dropdown functionality -->
+        {{-- Day Tour Logs --}}
+        <a href="{{ route('admin.daytour.logs') }}"
+            class="flex items-center py-2.5 px-4 rounded-lg transition-all duration-200 group {{ $active === 'day_tour' ? 'bg-red-700 text-white font-medium shadow-md' : 'text-red-100 hover:bg-white/10 hover:text-white' }}">
+            <svg class="w-5 h-5 mr-3 {{ $active === 'day_tour' ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Day Tour Logs
+        </a>
+
+        {{-- Facility Monitoring --}}
+        <a href="{{ route('admin.daytour.facility_monitoring') }}"
+            class="flex items-center py-2.5 px-4 rounded-lg transition-all duration-200 group {{ $active === 'facility_monitoring' ? 'bg-red-700 text-white font-medium shadow-md' : 'text-red-100 hover:bg-white/10 hover:text-white' }}">
+            <svg class="w-5 h-5 mr-3 {{ $active === 'facility_monitoring' ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Facility Monitoring
+        </a>
+
+        <div class="pt-4 pb-2 px-4 text-xs font-bold text-red-300 uppercase tracking-wider">Reports & Config</div>
+
+        {{-- Revenue Reports Dropdown --}}
+        <div class="relative">
+            <button
+                class="sidebar-dropdown-toggle flex items-center justify-between w-full py-2.5 px-4 rounded-lg transition-all duration-200 group {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'bg-red-700/50 text-white' : 'text-red-100 hover:bg-white/10' }}"
+                aria-expanded="{{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'true' : 'false' }}">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-3 {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span>Revenue & Expenses</span>
+                </div>
+                <svg class="w-4 h-4 transition-transform duration-200 transform {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'rotate-180' : '' }}"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            <div
+                class="sidebar-submenu overflow-hidden transition-all duration-300 ease-in-out {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'max-h-96' : 'max-h-0' }}">
+                <ul class="pt-1 pb-2 pl-12 pr-2 space-y-1">
+                    <li><a href="{{ route('admin.accounting.index') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'accounting' ? 'text-white font-medium' : 'text-red-200' }}">Accounting</a>
+                    </li>
+                    <li><a href="{{ route('admin.earnings.chart') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'earnings' ? 'text-white font-medium' : 'text-red-200' }}">Room
+                            Earnings</a></li>
+                    <li><a href="{{ route('day_tour.earnings') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'daytour-earnings' ? 'text-white font-medium' : 'text-red-200' }}">Day
+                            Tour Earnings</a></li>
+                    <li><a href="{{ route('admin.expenses.index') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'expenses' ? 'text-white font-medium' : 'text-red-200' }}">Expenses</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- Facilities Config Dropdown --}}
+        <div class="relative">
+            <button
+                class="sidebar-dropdown-toggle flex items-center justify-between w-full py-2.5 px-4 rounded-lg transition-all duration-200 group {{ in_array($active, ['facilities', 'day-tour facilities']) ? 'bg-red-700/50 text-white' : 'text-red-100 hover:bg-white/10' }}"
+                aria-expanded="{{ in_array($active, ['facilities', 'day-tour facilities']) ? 'true' : 'false' }}">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-3 {{ in_array($active, ['facilities', 'day-tour facilities']) ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span>Facility Settings</span>
+                </div>
+                <svg class="w-4 h-4 transition-transform duration-200 transform {{ in_array($active, ['facilities', 'day-tour facilities']) ? 'rotate-180' : '' }}"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            <div
+                class="sidebar-submenu overflow-hidden transition-all duration-300 ease-in-out {{ in_array($active, ['facilities', 'day-tour facilities']) ? 'max-h-96' : 'max-h-0' }}">
+                <ul class="pt-1 pb-2 pl-12 pr-2 space-y-1">
+                    <li><a href="{{ route('admin.facilities.index') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'facilities' ? 'text-white font-medium' : 'text-red-200' }}">Room
+                            Facilities</a></li>
+                    <li><a href="{{ route('admin.day-tour-facilities.index') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'day-tour facilities' ? 'text-white font-medium' : 'text-red-200' }}">Day
+                            Tour Facilities</a></li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- Admin Management --}}
+        <a href="{{ route('admin.list.management') }}"
+            class="flex items-center py-2.5 px-4 rounded-lg transition-all duration-200 group {{ $active === 'admin' ? 'bg-red-700 text-white font-medium shadow-md' : 'text-red-100 hover:bg-white/10 hover:text-white' }}">
+            <svg class="w-5 h-5 mr-3 {{ $active === 'admin' ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            User Management
+        </a>
+
+        {{-- Gallery --}}
+        <a href="{{ route('admin.galleries.index') }}"
+            class="flex items-center py-2.5 px-4 rounded-lg transition-all duration-200 group {{ $active === 'gallery' ? 'bg-red-700 text-white font-medium shadow-md' : 'text-red-100 hover:bg-white/10 hover:text-white' }}">
+            <svg class="w-5 h-5 mr-3 {{ $active === 'gallery' ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Gallery
+        </a>
+
+    </nav>
+
+    <div class="p-4 border-t border-red-700/50 bg-red-900/50 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}" alt="User"
+                    class="w-10 h-10 rounded-full object-cover border-2 border-red-200/30">
+                <span
+                    class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-red-900 rounded-full"></span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate">{{ Auth::user()->firstname }}</p>
+                <p class="text-xs text-red-200 truncate">Administrator</p>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                    class="p-2 text-red-200 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                    title="Logout">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Manage Bookings Dropdown
-        const bookingsDropdownButton = document.getElementById('manage-bookings-dropdown');
-        const bookingsDropdownMenu = document.getElementById('manage-bookings-menu');
+        // Generic Dropdown Toggle Logic
+        // Selects all buttons with the specific class
+        const toggles = document.querySelectorAll('.sidebar-dropdown-toggle');
 
-        // Accounting & Analytics Dropdown
-        const accountingDropdownButton = document.getElementById('accounting-analytics-dropdown');
-        const accountingDropdownMenu = document.getElementById('accounting-analytics-menu');
-
-        // Facilities Management Dropdown
-        const facilitiesDropdownButton = document.getElementById('facilities-management-dropdown');
-        const facilitiesDropdownMenu = document.getElementById('facilities-management-menu');
-
-        // Function to handle dropdown toggle
-        function setupDropdown(dropdownButton, dropdownMenu) {
-            dropdownButton.addEventListener('click', function () {
-                const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                this.setAttribute('aria-expanded', !isExpanded);
-
-                // Toggle the dropdown icon rotation
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', function (e) {
+                // Find the next sibling which is the submenu
+                const menu = this.nextElementSibling;
                 const icon = this.querySelector('svg:last-child');
-                icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
 
-                // Toggle the dropdown menu
+                // Close all other menus (Accordion style - optional)
+                document.querySelectorAll('.sidebar-submenu').forEach(otherMenu => {
+                    if (otherMenu !== menu) {
+                        otherMenu.style.maxHeight = '0';
+                        otherMenu.previousElementSibling.setAttribute('aria-expanded', 'false');
+                        otherMenu.previousElementSibling.querySelector('svg:last-child').classList.remove('rotate-180');
+                    }
+                });
+
+                // Toggle Current
                 if (isExpanded) {
-                    dropdownMenu.style.maxHeight = '0';
+                    menu.style.maxHeight = '0';
+                    this.setAttribute('aria-expanded', 'false');
+                    icon.classList.remove('rotate-180');
                 } else {
-                    dropdownMenu.style.maxHeight = dropdownMenu.scrollHeight + 'px';
+                    menu.style.maxHeight = menu.scrollHeight + "px";
+                    this.setAttribute('aria-expanded', 'true');
+                    icon.classList.add('rotate-180');
                 }
             });
-
-            // Auto-expand if current page is in the dropdown
-            if (dropdownMenu.querySelector('a.bg-red-700')) {
-                dropdownButton.setAttribute('aria-expanded', 'true');
-                dropdownButton.querySelector('svg:last-child').style.transform = 'rotate(180deg)';
-                dropdownMenu.style.maxHeight = dropdownMenu.scrollHeight + 'px';
-            }
-        }
-
-        // Initialize all dropdowns
-        setupDropdown(bookingsDropdownButton, bookingsDropdownMenu);
-        setupDropdown(accountingDropdownButton, accountingDropdownMenu);
-        setupDropdown(facilitiesDropdownButton, facilitiesDropdownMenu);
-
-        // Close other dropdown when one is opened
-        function closeOtherDropdowns(currentDropdown) {
-            const allDropdowns = [
-                { button: bookingsDropdownButton, menu: bookingsDropdownMenu },
-                { button: accountingDropdownButton, menu: accountingDropdownMenu },
-                { button: facilitiesDropdownButton, menu: facilitiesDropdownMenu }
-            ];
-
-            allDropdowns.forEach(dropdown => {
-                if (dropdown.button !== currentDropdown && dropdown.button.getAttribute('aria-expanded') === 'true') {
-                    dropdown.button.setAttribute('aria-expanded', 'false');
-                    dropdown.button.querySelector('svg:last-child').style.transform = 'rotate(0deg)';
-                    dropdown.menu.style.maxHeight = '0';
-                }
-            });
-        }
-
-        // Add click listeners to close other dropdowns
-        bookingsDropdownButton.addEventListener('click', () => closeOtherDropdowns(bookingsDropdownButton));
-        accountingDropdownButton.addEventListener('click', () => closeOtherDropdowns(accountingDropdownButton));
-        facilitiesDropdownButton.addEventListener('click', () => closeOtherDropdowns(facilitiesDropdownButton));
+        });
     });
 </script>

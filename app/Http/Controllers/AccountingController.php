@@ -8,11 +8,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Expense;
 use App\Models\Facility;
 use App\Models\FacilityBookingLog;
-use App\Models\FacilityBookingDetails;
-use App\Models\FacilitySummary;
-use App\Models\Payments;
+use App\Models\Payments; // Ensure this model is imported
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\DayTourLogDetails;
+use Illuminate\Support\Str;
 
 class AccountingController extends Controller
 {
@@ -22,63 +23,87 @@ class AccountingController extends Controller
     }
 
     /**
-     * Return aggregated income & expenses JSON for chart + table
-     * Accepts optional query params:
-     *  - period = daily|weekly|monthly (default monthly)
-     *  - from & to = YYYY-MM-DD (optional)
+     * API: Aggregated income & expenses based on filter choice
+     * Params: 
+     * - period: 'daily', 'monthly', 'yearly'
+     * - filter_value: 'YYYY-MM-DD', 'YYYY-MM', or 'YYYY'
      */
     public function monthlyIncomeApi(Request $request)
     {
-        $period = $request->query('period', 'monthly');
-        $from = $request->query('from');
-        $to = $request->query('to');
+        $periodType = $request->query('period', 'monthly');
+        $filterValue = $request->query('filter_value');
 
-        // FIXED: ROOM income using the UPDATED payment logic with refund deductions
-        $roomQ = $this->getRoomIncomeByPeriod($period, $from, $to);
+        // 1. Determine Date Range ($from, $to) and SQL Grouping Mode
+        $range = $this->calculateDateRange($periodType, $filterValue);
+        $from = $range['from'];
+        $to = $range['to'];
+        $groupingMode = $range['groupingMode']; // 'daily_single', 'daily_breakdown', or 'monthly_breakdown'
 
-        // FIXED: DAY TOUR income using the accurate logic from DayTourEarningsController
-        $dayTourQ = $this->getDayTourIncomeByPeriod($period, $from, $to);
+        // 2. Fetch Room Income (with refunds deducted)
+        $roomQ = $this->getRoomIncomeByPeriod($groupingMode, $from, $to);
 
-        // EXPENSES (unchanged)
+        // 3. Fetch Day Tour Income
+        $dayTourQ = $this->getDayTourIncomeByPeriod($groupingMode, $from, $to);
+
+        // 4. Fetch Expenses
         $expenseQ = collect();
         if (DB::getSchemaBuilder()->hasTable('expenses')) {
             $expenseQ = DB::table('expenses')
                 ->select(
-                    DB::raw($this->getLabelExpression('expense_date', $period) . " as label"),
-                    DB::raw($this->getKeyExpression('expense_date', $period) . " as period_key"),
+                    DB::raw($this->getLabelExpression('expense_date', $groupingMode) . " as label"),
+                    DB::raw($this->getKeyExpression('expense_date', $groupingMode) . " as period_key"),
                     DB::raw('SUM(amount) as total_expense')
                 )
-                ->when($from && $to, fn($q) => $q->whereBetween('expense_date', [$from, $to]))
+                ->whereBetween('expense_date', [$from, $to])
                 ->groupBy('period_key', 'label')
                 ->orderBy('period_key')
                 ->get()
-                ->map(fn($r) => ['label' => $r->label, 'expense' => (float)$r->total_expense]);
+                ->map(fn($r) => ['label' => $r->label, 'expense' => (float) $r->total_expense]);
         }
 
-        // Combine labels from all sources
+        // 5. Combine Data Sources
         $allLabels = collect(array_merge(
             $roomQ->pluck('label')->toArray(),
             $dayTourQ->pluck('label')->toArray(),
             $expenseQ->pluck('label')->toArray()
         ))->unique()->values()->toArray();
 
+        // Optional: Sort labels chronologically if needed (based on period_key logic)
+
         $combined = [];
         foreach ($allLabels as $label) {
             $room = $roomQ->firstWhere('label', $label)['income'] ?? 0;
             $daytour = $dayTourQ->firstWhere('label', $label)['income'] ?? 0;
             $expense = $expenseQ->firstWhere('label', $label)['expense'] ?? 0;
+
+            // Note: Total income is Room + Daytour
             $income = $room + $daytour;
             $net = $income - $expense;
+
             $combined[] = [
                 'label' => $label,
-                'room' => (float)$room,
-                'daytour' => (float)$daytour,
-                'expense' => (float)$expense,
-                'income' => (float)$income,
-                'net' => (float)$net,
+                'room' => (float) $room,
+                'daytour' => (float) $daytour,
+                'expense' => (float) $expense,
+                'income' => (float) $income,
+                'net' => (float) $net,
             ];
         }
 
+        // Handle case where specific day has no data
+        if ($periodType === 'daily' && empty($combined)) {
+            $dateLabel = $from ? Carbon::parse($from)->format('M d Y') : 'Selected Date';
+            $combined[] = [
+                'label' => $dateLabel,
+                'room' => 0,
+                'daytour' => 0,
+                'expense' => 0,
+                'income' => 0,
+                'net' => 0
+            ];
+        }
+
+        // 6. Calculate Summaries
         $totalIncome = collect($combined)->sum('income');
         $totalExpense = collect($combined)->sum('expense');
         $netTotal = $totalIncome - $totalExpense;
@@ -86,6 +111,7 @@ class AccountingController extends Controller
         $best = collect($combined)->sortByDesc('income')->first();
         $bestPeriod = ['label' => $best['label'] ?? 'N/A', 'income' => $best['income'] ?? 0];
 
+        // 7. Format for Chart.js
         $chartData = [
             'labels' => array_column($combined, 'label'),
             'datasets' => [
@@ -107,57 +133,148 @@ class AccountingController extends Controller
     }
 
     /**
-     * FIXED: Get room income using the UPDATED payment logic with refund deductions
+     * Logic to interpret filter_value into start/end dates
      */
-    private function getRoomIncomeByPeriod($period, $from, $to)
+    /**
+     * Logic to interpret filter_value into start/end dates
+     */
+    private function calculateDateRange($periodType, $filterValue)
+    {
+        // Defaults
+        $from = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $to = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $groupingMode = 'daily_breakdown';
+
+        if (!$filterValue) {
+            return compact('from', 'to', 'groupingMode');
+        }
+
+        try {
+            if ($periodType === 'daily') {
+                // User picked "2024-12-25". Range is exact day.
+                $from = $filterValue;
+
+                // --- FIX STARTS HERE ---
+                // We must set $to to the end of that day (23:59:59)
+                // Otherwise 'whereBetween' ignores everything after midnight
+                $to = Carbon::parse($filterValue)->endOfDay()->toDateTimeString();
+                // --- FIX ENDS HERE ---
+
+                $groupingMode = 'daily_single';
+            } elseif ($periodType === 'monthly') {
+                // User picked "2024-12". Range is Dec 1 to Dec 31. Breakdown by Day.
+                $date = Carbon::parse($filterValue);
+                $from = $date->startOfMonth()->format('Y-m-d');
+                $to = $date->endOfMonth()->format('Y-m-d');
+                $groupingMode = 'daily_breakdown';
+            } elseif ($periodType === 'yearly') {
+                // User picked "2024". Range is Jan 1 to Dec 31. Breakdown by Month.
+                $date = Carbon::createFromFormat('Y', $filterValue);
+                $from = $date->startOfYear()->format('Y-m-d');
+                $to = $date->endOfYear()->format('Y-m-d');
+                $groupingMode = 'monthly_breakdown';
+            }
+        } catch (\Exception $e) {
+            Log::error("Date calculation error: " . $e->getMessage());
+        }
+
+        return compact('from', 'to', 'groupingMode');
+    }
+
+    // --- HELPER FUNCTIONS FOR SQL GROUPING ---
+
+    private function getLabelExpression($column, $grouping)
+    {
+        switch ($grouping) {
+            case 'daily_single':
+            case 'daily_breakdown':
+                // Label: "Oct 25 2023"
+                return "DATE_FORMAT($column, '%b %d %Y')";
+            case 'monthly_breakdown':
+                // Label: "October 2023"
+                return "DATE_FORMAT($column, '%M %Y')";
+            default:
+                return "DATE_FORMAT($column, '%Y-%m-%d')";
+        }
+    }
+
+    private function getKeyExpression($column, $grouping)
+    {
+        switch ($grouping) {
+            case 'daily_single':
+            case 'daily_breakdown':
+                // Group by full date "2023-10-25"
+                return "DATE($column)";
+            case 'monthly_breakdown':
+                // Group by Month "2023-10"
+                return "DATE_FORMAT($column, '%Y-%m')";
+            default:
+                return "DATE($column)";
+        }
+    }
+
+    private function getPeriodKey($date, $grouping)
+    {
+        $d = Carbon::parse($date);
+        switch ($grouping) {
+            case 'daily_single':
+            case 'daily_breakdown':
+                return $d->format('Y-m-d');
+            case 'monthly_breakdown':
+                return $d->format('Y-m');
+            default:
+                return $d->format('Y-m-d');
+        }
+    }
+
+    private function getPeriodLabel($date, $grouping)
+    {
+        $d = Carbon::parse($date);
+        switch ($grouping) {
+            case 'daily_single':
+            case 'daily_breakdown':
+                return $d->format('M d Y');
+            case 'monthly_breakdown':
+                return $d->format('F Y');
+            default:
+                return $d->format('Y-m-d');
+        }
+    }
+
+    // --- DATA FETCHING ---
+
+    private function getRoomIncomeByPeriod($grouping, $from, $to)
     {
         try {
-            // Get all completed bookings with payment details using Eloquent
             $bookings = FacilityBookingLog::with(['payments', 'summaries.facility', 'details'])
-                ->whereHas('summaries.facility', function ($query) {
-                    $query->where('type', 'room');
-                })
+                ->whereHas('summaries.facility', fn($q) => $q->where('type', 'room'))
                 ->where('status', '!=', 'pending_confirmation')
-                ->when($from && $to, function ($query) use ($from, $to) {
-                    $query->whereHas('details', function ($q) use ($from, $to) {
-                        $q->whereBetween('checkin_date', [$from, $to]);
-                    });
-                })
+                ->whereHas('details', fn($q) => $q->whereBetween('checkin_date', [$from, $to]))
                 ->get();
 
             $periodEarnings = [];
 
             foreach ($bookings as $booking) {
-                // Get checkin date from details for period grouping
                 $checkinDate = $booking->details->first()->checkin_date ?? null;
-                if (!$checkinDate) {
+                if (!$checkinDate)
                     continue;
-                }
 
-                // Determine period key and label based on checkin date
-                $periodKey = $this->getPeriodKey($checkinDate, $period);
-                $label = $this->getPeriodLabel($checkinDate, $period);
+                $periodKey = $this->getPeriodKey($checkinDate, $grouping);
+                $label = $this->getPeriodLabel($checkinDate, $grouping);
 
-                // Calculate total booking price and payments
+                // Financial Calculations
                 $totalBookingPrice = $booking->details->sum('total_price');
                 $totalAmountPaid = $booking->payments->sum('amount');
                 $totalCheckinPaid = $booking->payments->sum('checkin_paid');
 
-                // Calculate earnings for EACH ROOM in this booking with refund deductions
                 foreach ($booking->summaries as $summary) {
-                    if ($summary->facility->type !== 'room') {
+                    if ($summary->facility->type !== 'room')
                         continue;
-                    }
 
-                    // Calculate per-room prices
-                    $perRoomFacilityPrice = $summary->facility_price;
-                    $perRoomBreakfastPrice = $summary->breakfast_price;
-                    $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
-
-                    // Calculate refunds for this booking that apply to this room
+                    $roomBasePrice = $summary->facility_price + $summary->breakfast_price;
                     $roomRefunds = $this->calculateRoomRefunds($booking, $summary->facility_id);
 
-                    // Apply payment logic per room
+                    // Apply Payment Rules (Full vs Half vs None)
                     $roomEarnings = $this->applyPaymentLogicPerRoom(
                         $roomBasePrice,
                         $totalBookingPrice,
@@ -165,161 +282,36 @@ class AccountingController extends Controller
                         $totalCheckinPaid
                     );
 
-                    // DEDUCT REFUNDS from room earnings (NET earnings)
+                    // Deduct Refunds
                     $roomNetEarnings = max(0, $roomEarnings - $roomRefunds);
 
-                    // Accumulate NET earnings by period
                     if (!isset($periodEarnings[$periodKey])) {
-                        $periodEarnings[$periodKey] = [
-                            'label' => $label,
-                            'income' => 0
-                        ];
+                        $periodEarnings[$periodKey] = ['label' => $label, 'income' => 0];
                     }
-
                     $periodEarnings[$periodKey]['income'] += $roomNetEarnings;
-
-                    Log::info('💰 Accounting Room Calculation with Refunds', [
-                        'booking_id' => $booking->id,
-                        'room_id' => $summary->facility_id,
-                        'period' => $periodKey,
-                        'room_base_price' => $roomBasePrice,
-                        'room_earnings_before_refunds' => $roomEarnings,
-                        'room_refunds' => $roomRefunds,
-                        'room_net_earnings' => $roomNetEarnings,
-                    ]);
                 }
             }
-
-            \Log::info('Room Income Calculation Complete with Refund Deductions', [
-                'period' => $period,
-                'from' => $from,
-                'to' => $to,
-                'total_periods' => count($periodEarnings),
-                'total_net_income' => collect($periodEarnings)->sum('income')
-            ]);
-
             return collect($periodEarnings)->values();
 
         } catch (\Exception $e) {
-            \Log::error('Error in getRoomIncomeByPeriod: ' . $e->getMessage());
+            Log::error('Error in room income: ' . $e->getMessage());
             return collect();
         }
     }
 
-    /**
-     * Calculate refunds that apply to a specific room in a booking
-     * (Same logic as RoomBookReportController)
-     */
-    private function calculateRoomRefunds($booking, $roomId)
-    {
-        try {
-            $totalRefunds = 0;
-            
-            // Get all refund payments for this booking
-            $refundPayments = $booking->payments->where('refund_amount', '>', 0);
-            
-            if ($refundPayments->isEmpty()) {
-                return 0;
-            }
-
-            $roomsInBooking = $booking->summaries->count();
-            $roomsInBooking = max($roomsInBooking, 1);
-
-            // Calculate total booking price for refund distribution
-            $totalBookingPrice = $booking->details->sum('total_price');
-            
-            // Get this room's base price
-            $roomSummary = $booking->summaries->where('facility_id', $roomId)->first();
-            if (!$roomSummary) {
-                return 0;
-            }
-            
-            $roomBasePrice = $roomSummary->facility_price + $roomSummary->breakfast_price;
-            
-            // Calculate room's share of total booking price
-            $roomShare = $totalBookingPrice > 0 ? ($roomBasePrice / $totalBookingPrice) : (1 / $roomsInBooking);
-
-            // Apply room's share to each refund
-            foreach ($refundPayments as $payment) {
-                $roomRefundAmount = $payment->refund_amount * $roomShare;
-                $totalRefunds += $roomRefundAmount;
-                
-                Log::info('💸 Accounting Room Refund Calculation', [
-                    'booking_id' => $booking->id,
-                    'room_id' => $roomId,
-                    'total_refund' => $payment->refund_amount,
-                    'room_share' => round($roomShare * 100, 2) . '%',
-                    'room_refund' => $roomRefundAmount,
-                    'refund_type' => $payment->refund_type
-                ]);
-            }
-
-            return $totalRefunds;
-        } catch (\Exception $e) {
-            Log::error('❌ Error calculating room refunds in accounting', [
-                'booking_id' => $booking->id,
-                'room_id' => $roomId,
-                'error' => $e->getMessage(),
-            ]);
-            return 0;
-        }
-    }
-
-    /**
-     * EXACT COPY from RoomBookReportController - This ensures consistent payment logic
-     */
-    private function applyPaymentLogicPerRoom($roomBasePrice, $bookingTotalPrice, $totalAmountPaid, $totalCheckinPaid)
-    {
-        if ($totalAmountPaid == 0) {
-            return 0;
-        }
-
-        $totalPaymentsReceived = $totalAmountPaid + $totalCheckinPaid;
-
-        Log::info('💳 Accounting Payment Rules', [
-            'room_base_price' => $roomBasePrice,
-            'booking_total_price' => $bookingTotalPrice,
-            'amount_paid' => $totalAmountPaid,
-            'checkin_paid' => $totalCheckinPaid,
-            'total_payments' => $totalPaymentsReceived
-        ]);
-
-        // Full payment
-        if ($totalPaymentsReceived >= $bookingTotalPrice) {
-            Log::info('✅ Full payment - room earns full price');
-            return $roomBasePrice;
-        }
-
-        // Half payment
-        if ($totalAmountPaid == ($bookingTotalPrice / 2) && $totalCheckinPaid == 0) {
-            Log::info('✅ Half payment - room earns half price');
-            return $roomBasePrice / 2;
-        }
-
-        Log::warning('❌ Payment amount does not match full or half price');
-        return 0;
-    }
-
-    /**
-     * Get day tour income using same logic as DayTourEarningsController
-     */
-    private function getDayTourIncomeByPeriod($period, $from, $to)
+    private function getDayTourIncomeByPeriod($grouping, $from, $to)
     {
         try {
             $query = DB::table('day_tour_log_details as dt')
                 ->select(
-                    DB::raw($this->getLabelExpression('dt.date_tour', $period) . " as label"),
-                    DB::raw($this->getKeyExpression('dt.date_tour', $period) . " as period_key"),
+                    DB::raw($this->getLabelExpression('dt.date_tour', $grouping) . " as label"),
+                    DB::raw($this->getKeyExpression('dt.date_tour', $grouping) . " as period_key"),
                     DB::raw('SUM(dt.total_price) as total_income')
                 )
-                ->where('dt.reservation_status', 'paid');
+                ->where('dt.reservation_status', 'paid')
+                ->whereBetween('dt.date_tour', [$from, $to]);
 
-            // Apply date filter
-            if ($from && $to) {
-                $query->whereBetween('dt.date_tour', [$from, $to]);
-            }
-
-            // Apply the same filtering logic as DayTourEarningsController
+            // Ensure it has valid guests
             $query->whereExists(function ($subQuery) {
                 $subQuery->select(DB::raw(1))
                     ->from('booking_guest_details as bgd')
@@ -329,552 +321,258 @@ class AccountingController extends Controller
                     ->where('bgd.quantity', '>', 0);
             });
 
-            $results = $query->groupBy('period_key', 'label')
+            return $query->groupBy('period_key', 'label')
                 ->orderBy('period_key')
                 ->get()
-                ->map(fn($r) => ['label' => $r->label, 'income' => (float)$r->total_income]);
-
-            \Log::info('Day Tour Income Calculation', [
-                'period' => $period,
-                'from' => $from,
-                'to' => $to,
-                'results_count' => $results->count(),
-                'total_income' => $results->sum('income')
-            ]);
-
-            return $results;
+                ->map(fn($r) => ['label' => $r->label, 'income' => (float) $r->total_income]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in getDayTourIncomeByPeriod: ' . $e->getMessage());
+            Log::error('Error in day tour income: ' . $e->getMessage());
             return collect();
         }
     }
 
-    /**
-     * Helper method to get period key based on date and period type
-     */
-    private function getPeriodKey($date, $period)
-    {
-        $carbonDate = Carbon::parse($date);
-        
-        switch ($period) {
-            case 'daily':
-                return $carbonDate->format('Y-m-d');
-            case 'weekly':
-                return $carbonDate->format('Y-W');
-            default: // monthly
-                return $carbonDate->format('Y-m');
-        }
-    }
+    // --- UTILITIES FOR FINANCIAL LOGIC ---
 
-    /**
-     * Helper method to get period label based on date and period type
-     */
-    private function getPeriodLabel($date, $period)
-    {
-        $carbonDate = Carbon::parse($date);
-        
-        switch ($period) {
-            case 'daily':
-                return $carbonDate->format('M d Y');
-            case 'weekly':
-                return 'W' . $carbonDate->week . ' ' . $carbonDate->year;
-            default: // monthly
-                return $carbonDate->format('F Y');
-        }
-    }
 
-    /**
-     * Helper method to get SQL label expression based on period
-     */
-    private function getLabelExpression($column, $period)
-    {
-        switch ($period) {
-            case 'daily':
-                return "DATE_FORMAT($column, '%b %d %Y')";
-            case 'weekly':
-                return "CONCAT('W', WEEK($column,1), ' ', YEAR($column))";
-            default: // monthly
-                return "DATE_FORMAT($column, '%M %Y')";
-        }
-    }
-
-    /**
-     * Helper method to get SQL key expression based on period
-     */
-    private function getKeyExpression($column, $period)
-    {
-        switch ($period) {
-            case 'daily':
-                return "DATE($column)";
-            case 'weekly':
-                return "YEARWEEK($column,1)";
-            default: // monthly
-                return "DATE_FORMAT($column, '%Y-%m')";
-        }
-    }
-
-    /**
-     * Top performers (rooms/day tours) - UPDATED with accurate room logic including refunds
-     */
-    public function topPerformersApi()
-    {
-        // FIXED: Top Rooms using UPDATED payment logic with refund deductions
-        $topRooms = $this->getTopRooms();
-
-        // FIXED: Top Day Tours using same logic as DayTourEarningsController
-        $topDayTours = $this->getTopDayTours();
-
-        return response()->json([
-            'rooms' => $topRooms,
-            'daytours' => $topDayTours,
-        ]);
-    }
-
-    /**
-     * FIXED: Get top rooms using UPDATED payment logic with refund deductions
-     */
-    private function getTopRooms()
+    private function calculateRoomRefunds($booking, $roomId)
     {
         try {
-            $rooms = Facility::where('type', 'room')->get();
-            $roomEarnings = [];
+            $totalRefunds = 0;
+            $refundPayments = $booking->payments->where('refund_amount', '>', 0);
 
-            foreach ($rooms as $room) {
-                // Use the UPDATED calculation logic with refund deductions
-                $earnings = $this->calculateRoomEarningsForAccounting($room->id);
-                
-                if ($earnings > 0) {
-                    $roomEarnings[] = [
-                        'facility' => $room->name,
-                        'total_income' => $earnings,
-                        'category' => $room->category
-                    ];
-                }
+            if ($refundPayments->isEmpty())
+                return 0;
+
+            $roomsInBooking = max($booking->summaries->count(), 1);
+            $totalBookingPrice = $booking->details->sum('total_price');
+
+            $roomSummary = $booking->summaries->where('facility_id', $roomId)->first();
+            if (!$roomSummary)
+                return 0;
+
+            $roomBasePrice = $roomSummary->facility_price + $roomSummary->breakfast_price;
+            $roomShare = $totalBookingPrice > 0 ? ($roomBasePrice / $totalBookingPrice) : (1 / $roomsInBooking);
+
+            foreach ($refundPayments as $payment) {
+                $totalRefunds += ($payment->refund_amount * $roomShare);
             }
 
-            // Sort by earnings descending and limit to top 10
-            usort($roomEarnings, function ($a, $b) {
-                return $b['total_income'] <=> $a['total_income'];
-            });
-
-            return collect(array_slice($roomEarnings, 0, 10));
-
+            return $totalRefunds;
         } catch (\Exception $e) {
-            \Log::error('Error in getTopRooms: ' . $e->getMessage());
-            return collect();
-        }
-    }
-
-    /**
-     * Calculate room earnings for accounting (UPDATED with refund deductions)
-     */
-    private function calculateRoomEarningsForAccounting($roomId)
-    {
-        try {
-            $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
-                ->whereHas('summaries', function ($query) use ($roomId) {
-                    $query->where('facility_id', $roomId);
-                })
-                ->where('status', '!=', 'pending_confirmation')
-                ->get();
-
-            $totalEarnings = 0;
-
-            foreach ($bookings as $booking) {
-                // Calculate total booking price
-                $totalBookingPrice = $booking->details->sum('total_price');
-
-                // Get payment totals
-                $totalAmountPaid = $booking->payments->sum('amount');
-                $totalCheckinPaid = $booking->payments->sum('checkin_paid');
-
-                // Get the specific facility summary for this room
-                $summary = $booking->summaries->where('facility_id', $roomId)->first();
-                if (!$summary) {
-                    continue;
-                }
-
-                // Calculate per-room prices
-                $perRoomFacilityPrice = $summary->facility_price;
-                $perRoomBreakfastPrice = $summary->breakfast_price;
-                $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
-
-                // Calculate refunds for this room
-                $roomRefunds = $this->calculateRoomRefunds($booking, $roomId);
-
-                // Apply the SAME payment logic
-                $roomEarnings = $this->applyPaymentLogicPerRoom(
-                    $roomBasePrice,
-                    $totalBookingPrice,
-                    $totalAmountPaid,
-                    $totalCheckinPaid
-                );
-
-                // DEDUCT REFUNDS to get NET earnings
-                $roomNetEarnings = max(0, $roomEarnings - $roomRefunds);
-
-                $totalEarnings += $roomNetEarnings;
-            }
-
-            return $totalEarnings;
-
-        } catch (\Exception $e) {
-            \Log::error("Error calculating room earnings for accounting (room $roomId): " . $e->getMessage());
             return 0;
         }
     }
 
-    /**
-     * Get top day tours using same logic as DayTourEarningsController
-     */
-    private function getTopDayTours()
+    private function applyPaymentLogicPerRoom($roomBasePrice, $bookingTotalPrice, $totalAmountPaid, $totalCheckinPaid)
     {
-        try {
-            return DB::table('day_tour_log_details as dt')
-                ->join('booking_guest_details as bgd', 'dt.id', '=', 'bgd.day_tour_log_details_id')
-                ->join('facilities', 'bgd.facility_id', '=', 'facilities.id')
-                ->where('dt.reservation_status', 'paid')
-                ->whereExists(function ($subQuery) {
-                    $subQuery->select(DB::raw(1))
-                        ->from('booking_guest_details as bgd2')
-                        ->join('guest_type as gt', 'bgd2.guest_type_id', '=', 'gt.id')
-                        ->whereColumn('bgd2.day_tour_log_details_id', 'dt.id')
-                        ->whereNull('bgd2.facility_id')
-                        ->where('bgd2.quantity', '>', 0);
-                })
-                ->select(
-                    'facilities.name as facility', 
-                    DB::raw('SUM(COALESCE(dt.total_price,0)) as total_income')
-                )
-                ->groupBy('facilities.name')
-                ->orderByDesc('total_income')
-                ->limit(10)
-                ->get();
+        if ($totalAmountPaid == 0)
+            return 0;
 
-        } catch (\Exception $e) {
-            \Log::error('Error in getTopDayTours: ' . $e->getMessage());
-            return collect();
-        }
-    }
+        $totalPaymentsReceived = $totalAmountPaid + $totalCheckinPaid;
 
-    /**
- * CSV export of combined report
- */
-public function export(Request $request)
-{
-    try {
-        $period = $request->query('period', 'monthly');
-        $from = $request->query('from');
-        $to = $request->query('to');
-
-        $data = $this->monthlyIncomeApi($request)->getData(true);
-        $combined = $data['combined'] ?? [];
-        $chartData = $data['chartData'] ?? [];
-
-        // Get top performers for additional insights
-        $topPerformers = $this->getTopPerformersForExport($from, $to);
-
-        $filename = 'accounting_report_' . ($period ? $period . '_' : '') . now()->format('Y_m_d_His') . '.csv';
-
-        $response = new StreamedResponse(function() use ($combined, $data, $period, $from, $to, $topPerformers) {
-            $handle = fopen('php://output', 'w');
-            
-            // Add UTF-8 BOM for Excel compatibility
-            fwrite($handle, "\xEF\xBB\xBF");
-            
-            // Report Header
-            fputcsv($handle, ['ACCOUNTING REPORT - FINANCIAL SUMMARY']);
-            fputcsv($handle, ['Report Period', $period]);
-            fputcsv($handle, ['Date Range', $from && $to ? "$from to $to" : 'All Time']);
-            fputcsv($handle, ['Generated', now()->format('Y-m-d H:i:s')]);
-            fputcsv($handle, []); // Empty row
-
-            // Summary Statistics
-            fputcsv($handle, ['SUMMARY STATISTICS']);
-            fputcsv($handle, ['Total Income', '₱' . number_format($data['totalIncome'] ?? 0, 2)]);
-            fputcsv($handle, ['Total Expenses', '₱' . number_format($data['totalExpense'] ?? 0, 2)]);
-            fputcsv($handle, ['Net Income', '₱' . number_format($data['netTotal'] ?? 0, 2)]);
-            fputcsv($handle, ['Average Net Income', '₱' . number_format($data['average'] ?? 0, 2)]);
-            fputcsv($handle, ['Best Period', ($data['best']['label'] ?? 'N/A') . ' (₱' . number_format($data['best']['income'] ?? 0, 2) . ')']);
-            fputcsv($handle, []); // Empty row
-
-            // Income Breakdown
-            fputcsv($handle, ['INCOME BREAKDOWN']);
-            fputcsv($handle, ['Period', 'Room Income (Net)', 'Day Tour Income', 'Total Income', 'Expenses', 'Net Income', 'Profit Margin']);
-            
-            foreach ($combined as $row) {
-                $profitMargin = $row['income'] > 0 ? ($row['net'] / $row['income']) * 100 : 0;
-                
-                fputcsv($handle, [
-                    $row['label'] ?? '',
-                    '₱' . number_format($row['room'] ?? 0, 2),
-                    '₱' . number_format($row['daytour'] ?? 0, 2),
-                    '₱' . number_format($row['income'] ?? 0, 2),
-                    '₱' . number_format($row['expense'] ?? 0, 2),
-                    '₱' . number_format($row['net'] ?? 0, 2),
-                    number_format($profitMargin, 1) . '%'
-                ]);
-            }
-            fputcsv($handle, []); // Empty row
-
-            // Top Performers Section
-            fputcsv($handle, ['TOP PERFORMING ROOMS']);
-            fputcsv($handle, ['Room', 'Category', 'Total Income']);
-            foreach ($topPerformers['rooms'] as $room) {
-                fputcsv($handle, [
-                    $room['facility'],
-                    $room['category'],
-                    '₱' . number_format($room['total_income'], 2)
-                ]);
-            }
-            fputcsv($handle, []); // Empty row
-
-            fputcsv($handle, ['TOP PERFORMING DAY TOUR FACILITIES']);
-            fputcsv($handle, ['Facility', 'Total Income']);
-            foreach ($topPerformers['daytours'] as $daytour) {
-                fputcsv($handle, [
-                    $daytour->facility ?? $daytour['facility'] ?? 'N/A',
-                    '₱' . number_format($daytour->total_income ?? $daytour['total_income'] ?? 0, 2)
-                ]);
-            }
-            fputcsv($handle, []); // Empty row
-
-            // Performance Analysis
-            fputcsv($handle, ['PERFORMANCE ANALYSIS']);
-            fputcsv($handle, ['Metric', 'Value']);
-            
-            $totalRoomIncome = array_sum(array_column($combined, 'room'));
-            $totalDayTourIncome = array_sum(array_column($combined, 'daytour'));
-            $totalIncome = $totalRoomIncome + $totalDayTourIncome;
-            
-            $roomPercentage = $totalIncome > 0 ? ($totalRoomIncome / $totalIncome) * 100 : 0;
-            $dayTourPercentage = $totalIncome > 0 ? ($totalDayTourIncome / $totalIncome) * 100 : 0;
-            
-            fputcsv($handle, ['Room Income Contribution', number_format($roomPercentage, 1) . '%']);
-            fputcsv($handle, ['Day Tour Income Contribution', number_format($dayTourPercentage, 1) . '%']);
-            fputcsv($handle, ['Expense to Income Ratio', $totalIncome > 0 ? number_format(($data['totalExpense'] / $totalIncome) * 100, 1) . '%' : '0%']);
-            
-            // Find best and worst performing periods
-            $bestPeriod = collect($combined)->sortByDesc('net')->first();
-            $worstPeriod = collect($combined)->sortBy('net')->first();
-            
-            fputcsv($handle, ['Best Performing Period', ($bestPeriod['label'] ?? 'N/A') . ' (Net: ₱' . number_format($bestPeriod['net'] ?? 0, 2) . ')']);
-            fputcsv($handle, ['Worst Performing Period', ($worstPeriod['label'] ?? 'N/A') . ' (Net: ₱' . number_format($worstPeriod['net'] ?? 0, 2) . ')']);
-
-            fclose($handle);
-        });
-
-        $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-        $response->headers->set('Pragma', 'no-cache');
-        $response->headers->set('Expires', '0');
-
-        return $response;
-
-    } catch (\Exception $e) {
-        Log::error('Error exporting accounting report: ' . $e->getMessage());
-        
-        // Fallback to simple export if detailed one fails
-        return $this->exportSimple($request);
-    }
-}
-
-/**
- * Simple fallback export
- */
-private function exportSimple(Request $request)
-{
-    $data = $this->monthlyIncomeApi($request)->getData(true);
-    $combined = $data['combined'] ?? [];
-
-    $response = new StreamedResponse(function() use ($combined) {
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, ['Period','Room Income (Net)','Day Tour Income','Total Income','Expenses','Net Income']);
-        foreach ($combined as $row) {
-            fputcsv($handle, [
-                $row['label'] ?? '',
-                $row['room'] ?? 0,
-                $row['daytour'] ?? 0,
-                $row['income'] ?? 0,
-                $row['expense'] ?? 0,
-                $row['net'] ?? 0,
-            ]);
-        }
-        fclose($handle);
-    });
-
-    $filename = 'accounting_report_simple_' . now()->format('Y_m_d_His') . '.csv';
-    $response->headers->set('Content-Type', 'text/csv');
-    $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-
-    return $response;
-}
-
-/**
- * Get top performers data for export
- */
-private function getTopPerformersForExport($from = null, $to = null)
-{
-    try {
-        // Get top rooms with date filtering
-        $roomQuery = Facility::where('type', 'room');
-        $rooms = $roomQuery->get();
-        $roomEarnings = [];
-
-        foreach ($rooms as $room) {
-            $earnings = $this->calculateRoomEarningsForExport($room->id, $from, $to);
-            
-            if ($earnings > 0) {
-                $roomEarnings[] = [
-                    'facility' => $room->name,
-                    'category' => $room->category,
-                    'total_income' => $earnings
-                ];
-            }
+        // Rule 1: Full Payment
+        if ($totalPaymentsReceived >= $bookingTotalPrice) {
+            return $roomBasePrice;
         }
 
-        // Sort by earnings descending and limit to top 10
-        usort($roomEarnings, function ($a, $b) {
-            return $b['total_income'] <=> $a['total_income'];
-        });
-        $topRooms = array_slice($roomEarnings, 0, 10);
-
-        // Get top day tours with date filtering
-        $dayTourQuery = DB::table('day_tour_log_details as dt')
-            ->join('booking_guest_details as bgd', 'dt.id', '=', 'bgd.day_tour_log_details_id')
-            ->join('facilities', 'bgd.facility_id', '=', 'facilities.id')
-            ->where('dt.reservation_status', 'paid')
-            ->whereExists(function ($subQuery) {
-                $subQuery->select(DB::raw(1))
-                    ->from('booking_guest_details as bgd2')
-                    ->join('guest_type as gt', 'bgd2.guest_type_id', '=', 'gt.id')
-                    ->whereColumn('bgd2.day_tour_log_details_id', 'dt.id')
-                    ->whereNull('bgd2.facility_id')
-                    ->where('bgd2.quantity', '>', 0);
-            });
-
-        if ($from && $to) {
-            $dayTourQuery->whereBetween('dt.date_tour', [$from, $to]);
+        // Rule 2: Exact Half Payment (Downpayment only)
+        // Note: Using epsilon for float comparison safety
+        if (abs($totalAmountPaid - ($bookingTotalPrice / 2)) < 1 && $totalCheckinPaid == 0) {
+            return $roomBasePrice / 2;
         }
 
-        $topDayTours = $dayTourQuery->select(
-                'facilities.name as facility', 
-                DB::raw('SUM(COALESCE(dt.total_price,0)) as total_income')
-            )
-            ->groupBy('facilities.name')
-            ->orderByDesc('total_income')
-            ->limit(10)
-            ->get();
-
-        return [
-            'rooms' => $topRooms,
-            'daytours' => $topDayTours
-        ];
-
-    } catch (\Exception $e) {
-        Log::error('Error getting top performers for export: ' . $e->getMessage());
-        return ['rooms' => [], 'daytours' => []];
-    }
-}
-
-/**
- * Calculate room earnings for export with date filtering
- */
-private function calculateRoomEarningsForExport($roomId, $from = null, $to = null)
-{
-    try {
-        $bookings = FacilityBookingLog::with(['payments', 'summaries', 'details'])
-            ->whereHas('summaries', function ($query) use ($roomId) {
-                $query->where('facility_id', $roomId);
-            })
-            ->where('status', '!=', 'pending_confirmation');
-
-        // Apply date filtering if provided
-        if ($from && $to) {
-            $bookings->whereHas('details', function ($query) use ($from, $to) {
-                $query->whereBetween('checkin_date', [$from, $to]);
-            });
-        }
-
-        $bookings = $bookings->get();
-        $totalEarnings = 0;
-
-        foreach ($bookings as $booking) {
-            $totalBookingPrice = $booking->details->sum('total_price');
-            $totalAmountPaid = $booking->payments->sum('amount');
-            $totalCheckinPaid = $booking->payments->sum('checkin_paid');
-
-            $summary = $booking->summaries->where('facility_id', $roomId)->first();
-            if (!$summary) {
-                continue;
-            }
-
-            $perRoomFacilityPrice = $summary->facility_price;
-            $perRoomBreakfastPrice = $summary->breakfast_price;
-            $roomBasePrice = $perRoomFacilityPrice + $perRoomBreakfastPrice;
-
-            $roomRefunds = $this->calculateRoomRefunds($booking, $roomId);
-            $roomEarnings = $this->applyPaymentLogicPerRoom(
-                $roomBasePrice,
-                $totalBookingPrice,
-                $totalAmountPaid,
-                $totalCheckinPaid
-            );
-
-            $roomNetEarnings = max(0, $roomEarnings - $roomRefunds);
-            $totalEarnings += $roomNetEarnings;
-        }
-
-        return $totalEarnings;
-
-    } catch (\Exception $e) {
-        Log::error("Error calculating room earnings for export (room $roomId): " . $e->getMessage());
         return 0;
     }
-}
 
-/**
- * PDF export (requires barryvdh/laravel-dompdf)
- */
-public function exportPdf(Request $request)
-{
-    try {
-        $period = $request->query('period', 'monthly');
-        $from = $request->query('from');
-        $to = $request->query('to');
+    // --- EXPORTS ---
 
-        $data = $this->monthlyIncomeApi($request)->getData(true);
-        $combined = $data['combined'] ?? [];
-        $summary = [
-            'totalIncome' => $data['totalIncome'] ?? 0,
-            'totalExpense' => $data['totalExpense'] ?? 0,
-            'netTotal' => $data['netTotal'] ?? 0,
-            'average' => $data['average'] ?? 0,
-            'best' => $data['best'] ?? ['label' => 'N/A', 'income' => 0],
-            'period' => $period,
-            'dateRange' => $from && $to ? "$from to $to" : 'All Time'
-        ];
+    // ... inside AccountingController class ...
 
-        // Get additional data for PDF
-        $topPerformers = $this->getTopPerformersForExport($from, $to);
+    private function getTransactionDetails($from, $to)
+    {
+        // 1. Fetch Room Income (From Payments Table)
+        $roomPayments = Payments::with(['booking.user', 'booking.summaries.facility'])
+            ->whereBetween('payment_date', [$from, $to])
+            ->where('status', 'paid')
+            ->get()
+            ->map(function ($payment) {
+                $facilityNames = $payment->booking ? $payment->booking->summaries->map(fn($s) => $s->facility->name ?? 'Unknown')->join(', ') : 'N/A';
 
-        if (!class_exists('\Barryvdh\DomPDF\Facade\Pdf')) {
-            return $this->export($request);
-        }
+                return [
+                    'timestamp' => Carbon::parse($payment->payment_date), // For sorting
+                    'date' => Carbon::parse($payment->payment_date)->format('M d, Y h:i A'),
+                    'type' => 'Room Income', // More specific label
+                    'reference' => $payment->reference_no ?? '-',
+                    'customer' => $payment->booking->user ? $payment->booking->user->firstname . ' ' . $payment->booking->user->lastname : 'Guest',
+                    'description' => 'Room: ' . Str::limit($facilityNames, 30),
+                    'method' => $payment->method ?? 'Cash',
+                    'amount' => (float) $payment->amount,
+                    'status' => ucfirst($payment->status),
+                    'color' => 'green' // UI helper
+                ];
+            });
 
-        $pdf = \PDF::loadView('admin.accounting.report_pdf', [
-            'combined' => $combined,
-            'summary' => $summary,
-            'topPerformers' => $topPerformers,
-            'generatedAt' => now()->format('Y-m-d H:i:s')
-        ])->setPaper('a4', 'landscape');
+        // 2. Fetch Day Tour Income (From DayTourLogDetails Table)
+        // Day Tours usually don't have a separate 'payments' table in your code, so we query the logs directly.
+        $dayTours = DayTourLogDetails::with(['user', 'bookingGuestDetails.guestType'])
+            ->whereBetween('date_tour', [$from, $to])
+            ->where('reservation_status', 'paid') // Only paid tours
+            ->get()
+            ->map(function ($dt) {
+                // Generate a description based on guests (e.g., "2 Adult (Pool), 1 Kid (Park)")
+                $desc = $dt->bookingGuestDetails->map(function ($detail) {
+                    return $detail->quantity . ' ' . ($detail->guestType->type ?? 'Guest');
+                })->join(', ');
 
-        return $pdf->download('accounting_report_' . now()->format('Y_m_d_His') . '.pdf');
+                return [
+                    'timestamp' => Carbon::parse($dt->date_tour), // For sorting
+                    'date' => Carbon::parse($dt->date_tour)->format('M d, Y'),
+                    'type' => 'Day Tour',
+                    'reference' => 'DT-' . str_pad($dt->id, 5, '0', STR_PAD_LEFT),
+                    'customer' => $dt->user ? $dt->user->firstname . ' ' . $dt->user->lastname : 'Guest',
+                    'description' => 'Day Tour: ' . Str::limit($desc, 30),
+                    'method' => 'Cash', // Default if not stored
+                    'amount' => (float) $dt->total_price,
+                    'status' => 'Paid',
+                    'color' => 'blue' // UI helper
+                ];
+            });
 
-    } catch (\Exception $e) {
-        Log::error('Error exporting PDF report: ' . $e->getMessage());
-        return $this->export($request); // Fallback to CSV
+        // 3. Fetch Expenses
+        $expenses = DB::table('expenses')
+            ->whereBetween('expense_date', [$from, $to])
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'timestamp' => Carbon::parse($expense->expense_date), // For sorting
+                    'date' => Carbon::parse($expense->expense_date)->format('M d, Y'),
+                    'type' => 'Expense',
+                    'reference' => '-',
+                    'customer' => '-',
+                    'description' => $expense->name ?? 'Operational Expense',
+                    'method' => '-',
+                    'amount' => -1 * abs((float) $expense->amount), // Negative for display logic
+                    'status' => 'Paid',
+                    'color' => 'red' // UI helper
+                ];
+            });
+
+        // Merge all three collections and sort by date descending
+        return $roomPayments
+            ->merge($dayTours)
+            ->merge($expenses)
+            ->sortByDesc('timestamp')
+            ->values();
     }
-}
+
+    public function export(Request $request)
+    {
+        try {
+            $periodType = $request->query('period', 'monthly');
+            $filterValue = $request->query('filter_value');
+
+            // 1. Get Summary Data (Aggregates)
+            $apiResponse = $this->monthlyIncomeApi($request);
+            $summaryData = $apiResponse->getData(true);
+            $combinedSummary = $summaryData['combined'] ?? [];
+
+            // 2. Get Detailed Data (Transactions)
+            $range = $this->calculateDateRange($periodType, $filterValue);
+            $transactions = $this->getTransactionDetails($range['from'], $range['to']);
+
+            $filename = 'financial_report_' . now()->format('Y_m_d_His') . '.csv';
+
+            $response = new StreamedResponse(function () use ($combinedSummary, $summaryData, $transactions, $periodType, $filterValue) {
+                $handle = fopen('php://output', 'w');
+                fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM
+
+                // --- SECTION 1: HEADER ---
+                fputcsv($handle, ['FINANCIAL REPORT']);
+                fputcsv($handle, ['Generated', now()->format('F d, Y h:i A')]);
+                fputcsv($handle, ['Period', ucfirst($periodType) . ' (' . ($filterValue ?: 'Current') . ')']);
+                fputcsv($handle, []);
+
+                // --- SECTION 2: EXECUTIVE SUMMARY ---
+                fputcsv($handle, ['EXECUTIVE SUMMARY']);
+                fputcsv($handle, ['Total Revenue', number_format($summaryData['totalIncome'], 2)]);
+                fputcsv($handle, ['Total Expenses', number_format($summaryData['totalExpense'], 2)]);
+                fputcsv($handle, ['Net Profit', number_format($summaryData['netTotal'], 2)]);
+                fputcsv($handle, []);
+
+                // --- SECTION 3: DAILY/MONTHLY BREAKDOWN ---
+                fputcsv($handle, ['PERIOD BREAKDOWN']);
+                fputcsv($handle, ['Period', 'Room Revenue', 'Day Tour Revenue', 'Total Revenue', 'Expenses', 'Net Profit']);
+                foreach ($combinedSummary as $row) {
+                    fputcsv($handle, [
+                        $row['label'],
+                        number_format($row['room'], 2),
+                        number_format($row['daytour'], 2),
+                        number_format($row['income'], 2),
+                        number_format($row['expense'], 2),
+                        number_format($row['net'], 2)
+                    ]);
+                }
+                fputcsv($handle, []);
+                fputcsv($handle, []);
+
+                // --- SECTION 4: DETAILED TRANSACTION LOG (Dynamic Scheme/User info) ---
+                fputcsv($handle, ['DETAILED TRANSACTION LOG']);
+                fputcsv($handle, ['Date', 'Type', 'Reference #', 'Customer / Payee', 'Description', 'Payment Scheme', 'Amount', 'Status']);
+
+                foreach ($transactions as $txn) {
+                    fputcsv($handle, [
+                        $txn['date'],
+                        $txn['type'],
+                        $txn['reference'],
+                        $txn['customer'],
+                        $txn['description'],
+                        $txn['method'], // Shows "Visa", "GCash", etc.
+                        number_format($txn['amount'], 2),
+                        $txn['status']
+                    ]);
+                }
+
+                fclose($handle);
+            });
+
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            return $response;
+
+        } catch (\Exception $e) {
+            Log::error("Export error: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Export failed');
+        }
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $periodType = $request->query('period', 'monthly');
+        $filterValue = $request->query('filter_value');
+
+        // 1. Get Summary Data
+        $apiResponse = $this->monthlyIncomeApi($request);
+        $summaryData = $apiResponse->getData(true);
+
+        // 2. Get Detailed Transactions
+        $range = $this->calculateDateRange($periodType, $filterValue);
+        $transactions = $this->getTransactionDetails($range['from'], $range['to']);
+
+        $pdf = Pdf::loadView('admin.accounting.report_pdf', [
+            'summary' => $summaryData,
+            'transactions' => $transactions,
+            'period' => $periodType,
+            'filterValue' => $filterValue,
+            'generatedAt' => now()
+        ])->setPaper('a4', 'landscape'); // Landscape allows more columns
+
+        return $pdf->download('financial_report.pdf');
+    }
+
+    public function topPerformersApi(Request $request)
+    {
+        // You can implement top rooms/daytours logic here if needed
+        return response()->json(['message' => 'Not implemented in this snippet']);
+    }
 }

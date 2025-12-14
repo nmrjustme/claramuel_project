@@ -6,383 +6,298 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- This title sets the Browser Tab Name --}}
     <title>@yield('title', 'Mt. Claramuel Resort & Events Place')</title>
 
-    <!-- Fonts and Styles -->
     <link rel="icon" href="{{ asset('/favicon.ico?v=2') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /* Smooth transitions for overlay */
-        #sidebar-overlay {
-            transition: opacity 0.3s ease;
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
         }
 
-        #sidebar {
-            transition: transform 0.3s ease;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        /* Ensure content doesn't shift when scrollbar appears/disappears */
-        html {
-            overflow-y: scroll;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(153, 27, 27, 0.5);
+            border-radius: 4px;
         }
 
-        .red-gradient-header {
-            background: linear-gradient(135deg, #ff0000, #cc0000);
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(153, 27, 27, 0.8);
         }
 
-        /* Loading state for badges */
-        .badge-loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
+        /* Loading Animation */
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        .badge-loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
         }
     </style>
 
     @yield('content_css')
 </head>
 
-<body class="bg-gray-200">
-    
-    
-    <!-- Mobile Header -->
-    <div
-        class="md:hidden mt-1 fixed top-0 left-0 right-0 bg-white shadow-md z-50 flex items-center justify-between p-4 h-16">
-        <button class="text-red-600 text-2xl focus:outline-none" id="toggleSidebarMobile" aria-label="Toggle sidebar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+<body class="font-sans antialiased h-screen overflow-hidden flex flex-col">
+
+    {{-- Mobile Header --}}
+    <header
+        class="md:hidden bg-white shadow-sm border-b border-gray-200 h-16 flex items-center justify-between px-4 z-30 relative shrink-0">
+        <button id="toggleSidebarMobile"
+            class="text-gray-600 hover:text-red-700 focus:outline-none p-2 rounded-md hover:bg-gray-100 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                </path>
             </svg>
         </button>
 
-        <div class="flex items-center space-x-2">
-            <span class="text-gray-800 font-semibold text-lg whitespace-nowrap truncate max-w-[160px]">
-                <a href="{{ route('index') }}"></a>
-            </span>
-        </div>
+        <a href="{{ route('index') }}" class="font-bold text-gray-800 text-lg">
+            Mt. Claramuel
+        </a>
 
         <div class="relative group">
             @auth
-            <button class="flex items-center gap-2 focus:outline-none" aria-label="User menu">
-                <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}"
-                    class="h-8 w-8 rounded-full object-cover border border-gray-200"
-                    alt="{{ Auth::user()->firstname }}'s profile picture">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            <div
-                class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200">
-                <a href="{{ route('profile.edit') }}"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                    Profile
-                </a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                        Logout
-                    </button>
-                </form>
-            </div>
+                <button class="flex items-center focus:outline-none">
+                    <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}"
+                        class="h-8 w-8 rounded-full object-cover border border-gray-200 shadow-sm" alt="Profile">
+                </button>
+                <div
+                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 border border-gray-100 invisible opacity-0 group-focus-within:visible group-focus-within:opacity-100 transition-all duration-200 transform origin-top-right z-50">
+                    <div class="px-4 py-2 border-b border-gray-100 bg-gray-50">
+                        <p class="text-xs font-semibold text-gray-500 uppercase">Account</p>
+                    </div>
+                    <a href="{{ route('profile.edit') }}"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+                    </form>
+                </div>
             @endauth
         </div>
-    </div>
+    </header>
 
-    <div class="md:hidden h-16"></div>
+    <div class="flex flex-1 h-[calc(100vh-4rem)] md:h-screen overflow-hidden relative">
 
-    @include('admin.sidebar')
+        <div id="sidebar-overlay"
+            class="fixed inset-0 bg-gray-900/60 z-30 transition-opacity duration-300 opacity-0 pointer-events-none md:hidden backdrop-blur-sm">
+        </div>
 
-    <!-- Mobile sidebar overlay -->
-    <div class="fixed inset-0 bg-black/50 z-30 md:hidden pointer-events-none opacity-0 transition-all duration-300"
-        id="sidebar-overlay"></div>
+        <aside id="sidebar"
+            class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-red-900 to-red-800 text-white shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full">
+            @include('admin.sidebar')
+        </aside>
 
-    <!-- Main Content Area -->
-    <div class="flex min-h-screen">
-        <div class="flex-1 flex flex-col md:ml-64">
-            <!-- Desktop Header -->
+        <main class="flex-1 flex flex-col min-w-0 bg-gray-200 h-full overflow-hidden relative">
             <header
-                class="hidden md:block bg-white text-gray-800 shadow-md sticky top-0 z-50">
-                <div class="px-6 py-6 flex justify-between items-center">
-                    <div class="flex items-center space-x-3">
-                        <span class="text-2xl font-bold">
-                            <a href="{{ route('index') }}"></a>
-                        </span>
-                    </div>
-
-                    <div class="flex items-center space-x-6">
-                        {{-- <!-- Email Icon with Badge -->
-                        <a href="{{ route('admin.email') }}"
-                            class="relative text-gray-800 hover:text-gray-600 transition-colors" title="Email Inbox">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            <span id="emailBadge"
-                                class="absolute -top-2 -right-2 bg-yellow-400 text-xs text-gray-900 font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                <span class="badge-loading"></span>
-                            </span>
-                        </a> --}}
-
-                        <!-- User Profile Dropdown -->
-                        <div class="relative group">
-                            @auth
-                            <button class="flex items-center gap-2 focus:outline-none">
+                class="hidden md:flex items-center justify-end bg-white h-16 px-6 shadow-sm border-b border-gray-200 sticky top-0 z-20 shrink-0">
+                <div class="flex items-center gap-6">
+                    <div class="relative group">
+                        @auth
+                            <button
+                                class="flex items-center gap-3 focus:outline-none hover:bg-gray-50 p-1.5 rounded-full pr-3 transition-colors border border-transparent hover:border-gray-200">
                                 <img src="{{ url('imgs/profiles/' . Auth::user()->profile_img) }}"
-                                    class="h-8 w-8 rounded-full object-cover" alt="Profile">
-                                <span class="text-sm font-medium text-gray-800">{{ Auth::user()->firstname }}</span>
-                                <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
+                                    class="h-8 w-8 rounded-full object-cover border border-gray-200" alt="Profile">
+                                <span class="text-sm font-medium text-gray-700">{{ Auth::user()->firstname }}</span>
+                                <i
+                                    class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 group-focus-within:rotate-180"></i>
                             </button>
 
                             <div
-                                class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200">
-                                <a href="{{ route('profile.edit') }}"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">Profile</a>
+                                class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-1 border border-gray-100 invisible opacity-0 group-focus-within:visible group-focus-within:opacity-100 transition-all duration-200 transform origin-top-right z-50">
+                                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                                    <p class="text-sm text-gray-900 font-bold">{{ Auth::user()->firstname }}
+                                        {{ Auth::user()->lastname }}</p>
+                                    <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                                </div>
+
+                                <div class="py-1">
+                                    <a href="{{ route('profile.edit') }}"
+                                        class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-700 transition-colors">
+                                        <i class="fas fa-user-cog w-5 text-gray-400 mr-2"></i> Profile Settings
+                                    </a>
+                                </div>
+
+                                <div class="border-t border-gray-100 my-1"></div>
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
-                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">Logout</button>
+                                        class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <i class="fas fa-sign-out-alt w-5 mr-2"></i> Sign out
+                                    </button>
                                 </form>
                             </div>
-                            @endauth
-                        </div>
+                        @endauth
                     </div>
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <main class="flex-1 p-2 md:p-2 overflow-x-hidden md:rounded-tl-lg">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth custom-scrollbar">
                 @yield('content')
-            </main>
-        </div>
+            </div>
+        </main>
     </div>
-    <audio id="notificationSound" src="{{ asset('sounds/notification/mixkit-software-interface-back-2575.wav') }}" preload="auto"></audio>
+
+    <audio id="notificationSound" src="{{ asset('sounds/notification/mixkit-software-interface-back-2575.wav') }}"
+        preload="auto"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 
     <script type="module">
-        // Global variables
         let notificationCooldown = false;
         let lastBookingId = null;
+        let lastEventId = null;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar toggle functionality
+        document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
-            const toggleSidebarMobile = document.getElementById('toggleSidebarMobile');
-            const sidebarClose = document.getElementById('sidebar-close');
-            const sidebarOverlay = document.getElementById('sidebar-overlay');
-            
+            const overlay = document.getElementById('sidebar-overlay');
+            const toggleBtn = document.getElementById('toggleSidebarMobile');
+
+            // --- Toggle Sidebar Function ---
             function toggleSidebar() {
-                sidebar.classList.toggle('-translate-x-full');
-                sidebarOverlay.classList.toggle('opacity-0');
-                sidebarOverlay.classList.toggle('pointer-events-none');
-                
-                if (sidebarOverlay.classList.contains('opacity-0')) {
-                    document.body.classList.remove('overflow-hidden');
+                const isClosed = sidebar.classList.contains('-translate-x-full');
+
+                if (isClosed) {
+                    // Open Sidebar
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
                 } else {
-                    document.body.classList.add('overflow-hidden');
+                    // Close Sidebar
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
                 }
             }
-            
-            // Event listeners for sidebar
-            if (toggleSidebarMobile) {
-                toggleSidebarMobile.addEventListener('click', toggleSidebar);
-            }
-            
-            if (sidebarClose) {
-                sidebarClose.addEventListener('click', toggleSidebar);
-            }
-            
-            if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', function() {
-                    if (!sidebarOverlay.classList.contains('opacity-0')) {
-                        toggleSidebar();
-                    }
+
+            // --- Event Listeners ---
+            if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
+            if (overlay) overlay.addEventListener('click', toggleSidebar);
+
+            // Close sidebar when clicking a link inside it (Mobile UX improvement)
+            sidebar.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) toggleSidebar();
                 });
-            }
-            
-            // Close sidebar when clicking nav links (mobile)
-            const sidebarLinks = document.querySelectorAll('#sidebar a');
-            if (sidebarLinks.length > 0) {
-                sidebarLinks.forEach(link => {
-                    link.addEventListener('click', () => {
-                        if (window.innerWidth < 768) toggleSidebar();
-                    });
-                });
-            }
-            
-            // Handle window resize
-            window.addEventListener('resize', function() {
+            });
+
+            // Handle Screen Resizing (Reset state if moving from mobile to desktop)
+            window.addEventListener('resize', () => {
                 if (window.innerWidth >= 768) {
+                    // Desktop: Sidebar always visible
                     sidebar.classList.remove('-translate-x-full');
-                    sidebarOverlay.classList.add('opacity-0');
-                    sidebarOverlay.classList.add('pointer-events-none');
-                    document.body.classList.remove('overflow-hidden');
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                } else {
+                    // Mobile: Ensure sidebar starts closed when resizing down
+                    sidebar.classList.add('-translate-x-full');
                 }
             });
-            
-            // Request notification permission
+
+            // --- Permission Request ---
             if ("Notification" in window && Notification.permission !== 'granted') {
-                Notification.requestPermission().then(permission => {
-                    console.log('Notification permission:', permission);
-                });
+                Notification.requestPermission();
             }
         });
 
+        // --- Notification Helpers ---
         function playNotificationSound() {
             const sound = document.getElementById('notificationSound');
-            if (!sound) return;
-            
-            try {
+            if (sound) {
                 sound.currentTime = 0;
-                sound.play().catch(err => {
-                    console.log("Sound play blocked:", err);
-                });
-            } catch (error) {
-                console.error("Error playing sound:", error);
+                sound.play().catch(e => console.log("Audio autoplay prevented"));
             }
         }
 
-        // Function to show notification with cooldown (for bookings only)
         function showBookingNotification(title, message) {
-            // Prevent notification spam
-            if (notificationCooldown) {
-                console.log("Notification cooldown active, skipping");
-                return;
-            }
-            
-            // Set cooldown
+            if (notificationCooldown) return;
+
             notificationCooldown = true;
-            setTimeout(() => {
-                notificationCooldown = false;
-            }, 3000); // 3 second cooldown
-            
-            // Play sound - only for booking notifications
+            setTimeout(() => { notificationCooldown = false; }, 3000);
+
             playNotificationSound();
-                                
-            // Show desktop notification
+
+            // Native Browser Notification
             if ("Notification" in window && Notification.permission === 'granted') {
-                try {
-                    new Notification(title, {
-                        body: message,
-                        icon: '/favicon.ico'
-                    });
-                } catch (error) {
-                    console.error("Error showing browser notification:", error);
-                }
+                new Notification(title, { body: message, icon: '/favicon.ico' });
             }
-            
-            // Show toast notification
+
+            // Toastr Notification
             if (typeof toastr !== 'undefined') {
                 toastr.info(message, title, {
                     timeOut: 5000,
                     closeButton: true,
                     progressBar: true,
-                    preventDuplicates: true // Prevent duplicate toasts
+                    preventDuplicates: true,
+                    positionClass: "toast-top-right"
                 });
             }
         }
 
-        // Real-time updates with debouncing and duplicate prevention
+        // --- Real-time Listeners (Echo) ---
+
+        // 1. Unread Counts (Debounced)
         let debounceTimer;
-        let lastEventId = null;
-        
-        window.Echo.channel('unread-counts')
-            .listen('.counts.updated', (e) => {
-                console.log('Real-time update received:', e);
-                
-                // Check for duplicate events
-                if (e.id && e.id === lastEventId) {
-                    console.log('Duplicate event detected, skipping');
-                    return;
-                }
-                lastEventId = e.id;
-                
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    updateAllBadges(e.counts);
-                }, 300); // 300ms debounce to prevent rapid updates
-            });
+        if (window.Echo) {
+            window.Echo.channel('unread-counts')
+                .listen('.counts.updated', (e) => {
+                    if (e.id && e.id === lastEventId) return;
+                    lastEventId = e.id;
 
-        // Booking notifications with duplicate prevention
-        window.Echo.channel('bookings')
-            .listen('.booking.created', (e) => {
-                console.log('New booking received:', e);
-                
-                // Check for duplicate events
-                if (e.booking.id && e.booking.id === lastBookingId) {
-                    console.log('Duplicate booking detected, skipping');
-                    return;
-                }
-                lastBookingId = e.booking.id;
-                
-                // Show notification with sound - only for new bookings
-                showBookingNotification(
-                    'New Booking', 
-                    `New booking from ${e.booking.user.firstname} ${e.booking.user.lastname} (ID: ${e.booking.id})`
-                );
-            });
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => { updateAllBadges(e.counts); }, 300);
+                });
 
-        // Function to update all badges
+            // 2. New Booking Alerts
+            window.Echo.channel('bookings')
+                .listen('.booking.created', (e) => {
+                    if (e.booking.id && e.booking.id === lastBookingId) return;
+                    lastBookingId = e.booking.id;
+
+                    showBookingNotification(
+                        'New Booking',
+                        `New booking from ${e.booking.user.firstname} (ID: ${e.booking.id})`
+                    );
+                });
+        }
+
+        // --- UI Updaters ---
         function updateAllBadges(counts) {
-            console.log('Updating badges with:', counts);
-            
-            // Update email badge
-            // const emailBadge = document.getElementById('emailBadge');
-            // if (emailBadge) {
-            //     if (counts.emailBadgeCount > 0) {
-            //         emailBadge.innerHTML = counts.emailBadgeCount;
-            //         emailBadge.classList.remove('hidden');
-            //     } else {
-            //         emailBadge.classList.add('hidden');
-            //     }
-            // }
-            
-            // Update sidebar badges
-            const inquiriesBadge = document.getElementById('inquiries-badge');
-            
-            if (inquiriesBadge) {
+            // Update "New" badge in sidebar
+            const badge = document.getElementById('inquiries-badge');
+            if (badge) {
                 if (counts.inquiriesCount > 0) {
-                    inquiriesBadge.innerHTML = `${counts.inquiriesCount} new`;
-                    inquiriesBadge.classList.remove('hidden');
+                    badge.innerHTML = `${counts.inquiriesCount} new`;
+                    badge.classList.remove('hidden');
                 } else {
-                    inquiriesBadge.classList.add('hidden');
+                    badge.classList.add('hidden');
                 }
             }
-            
             hideLoadingIndicators();
         }
 
-        // Loading state management
-        function showLoadingIndicators() {
-            document.querySelectorAll('.badge-loading').forEach(el => {
-                el.style.display = 'inline-block';
-            });
-        }
-
         function hideLoadingIndicators() {
-            document.querySelectorAll('.badge-loading').forEach(el => {
-                el.style.display = 'none';
-            });
+            document.querySelectorAll('.badge-loading').forEach(el => el.style.display = 'none');
         }
     </script>
 

@@ -255,16 +255,30 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/api/categories', [RoomBookReportController::class, 'getCategories'])->name('api.categories');
     // Route::get('/api/months', [RoomBookReportController::class, 'getAvailableMonths'])->name('api.months');
     // Route::get('/api/years', [RoomBookReportController::class, 'getAvailableYears'])->name('api.years');
-    
-    Route::get('/analytics', [RoomBookReportController::class, 'index'])->name('earnings.chart');
-    Route::get('/analytics/data', [RoomBookReportController::class, 'getEarningsData'])->name('earnings.data');
-    Route::get('/analytics/category-earnings', [RoomBookReportController::class, 'getCategoryEarnings'])->name('earnings.category');
-    Route::get('/analytics/comparison', [RoomBookReportController::class, 'getComparisonData'])->name('earnings.comparison');
-    Route::get('/analytics/export', [RoomBookReportController::class, 'exportEarningsData'])->name('earnings.export');
-    Route::get('/analytics/years', [RoomBookReportController::class, 'getAvailableYears'])->name('earnings.years');
-    Route::get('/analytics/cancellation-refund-data', [RoomBookReportController::class, 'getCancellationRefundData'])->name('earnings.cancellation-refund-data');
-    //========================
 
+    // Route::get('/analytics', [RoomBookReportController::class, 'index'])->name('earnings.chart');
+    // Route::get('/analytics/data', [RoomBookReportController::class, 'getEarningsData'])->name('earnings.data');
+    // Route::get('/analytics/category-earnings', [RoomBookReportController::class, 'getCategoryEarnings'])->name('earnings.category');
+    // Route::get('/analytics/comparison', [RoomBookReportController::class, 'getComparisonData'])->name('earnings.comparison');
+    // Route::get('/analytics/export', [RoomBookReportController::class, 'exportEarningsData'])->name('earnings.export');
+    // Route::get('/analytics/years', [RoomBookReportController::class, 'getAvailableYears'])->name('earnings.years');
+    // Route::get('/analytics/cancellation-refund-data', [RoomBookReportController::class, 'getCancellationRefundData'])->name('earnings.cancellation-refund-data');
+    //========================
+    Route::prefix('admin')->name('admin.')->group(function () {
+
+        // Analytics Page
+        Route::get('/room-analytics', [RoomBookReportController::class, 'index'])->name('earnings.chart');
+
+        // AJAX Data Endpoints
+        Route::get('/room-analytics/data', [RoomBookReportController::class, 'getEarningsData'])->name('earnings.data');
+        Route::get('/room-analytics/comparison', [RoomBookReportController::class, 'getComparisonData'])->name('earnings.comparison');
+        Route::get('/room-analytics/category', [RoomBookReportController::class, 'getCategoryEarnings'])->name('earnings.category');
+        Route::get('/room-analytics/cancellations', [RoomBookReportController::class, 'getCancellationRefundData'])->name('earnings.cancellations');
+
+        // Exports
+        Route::get('/room-analytics/export/csv', [RoomBookReportController::class, 'exportEarningsCsv'])->name('earnings.export.csv');
+        Route::get('/room-analytics/export/pdf', [RoomBookReportController::class, 'exportEarningsPdf'])->name('earnings.export.pdf');
+    });
     //========================
     // Sidebar Routes
     //========================
@@ -404,33 +418,58 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('admin.api.monthly-income');
     Route::get('/admin/api/top-performers', [AccountingController::class, 'topPerformersApi'])->name('admin.api.top-performers');
 
-// Update your existing route or add this new one
-Route::get('/admin/accounting/comprehensive-data', [AccountingController::class, 'comprehensiveIncomeApi'])->name('admin.api.comprehensive-income');
+    // Update your existing route or add this new one
+    Route::get('/admin/accounting/comprehensive-data', [AccountingController::class, 'comprehensiveIncomeApi'])->name('admin.api.comprehensive-income');
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Accounting Dashboard
-    Route::get('/dashboard/revenue', [AccountingController::class, 'index'])->name('accounting.index');
+    // Route::prefix('admin')->name('admin.')->group(function () {
+    //     // Accounting Dashboard
+    //     Route::get('/dashboard/revenue', [AccountingController::class, 'index'])->name('accounting.index');
 
-    // Data APIs (chart + filters)
-    Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('api.monthly-income');
-    Route::get('/api/top-performers', [AccountingController::class, 'top-performers'])->name('top-performers'); // optional
+    //     // Data APIs (chart + filters)
+    //     Route::get('/api/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('api.monthly-income');
+    //     Route::get('/api/top-performers', [AccountingController::class, 'top-performers'])->name('top-performers'); // optional
 
-    Route::get('/reports/pdf', [AccountingController::class, 'exportPdf'])->name('reports.pdf'); // PDF (optional)
+    //     Route::get('/reports/pdf', [AccountingController::class, 'exportPdf'])->name('reports.pdf'); // PDF (optional)
 
-    // Expenses CRUD
-    Route::get('/expenses', [ExpensesController::class, 'index'])->name('expenses.index');
-    Route::get('/expenses/create', [ExpensesController::class, 'create'])->name('expenses.create');
-    Route::post('/expenses', [ExpensesController::class, 'store'])->name('expenses.store');
-    Route::get('/expenses/{expense}/edit', [ExpensesController::class, 'edit'])->name('expenses.edit');
-    Route::put('/expenses/{expense}', [ExpensesController::class, 'update'])->name('expenses.update');
-    Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
+    //     // Expenses CRUD
+    //     Route::get('/expenses', [ExpensesController::class, 'index'])->name('expenses.index');
+    //     Route::get('/expenses/create', [ExpensesController::class, 'create'])->name('expenses.create');
+    //     Route::post('/expenses', [ExpensesController::class, 'store'])->name('expenses.store');
+    //     Route::get('/expenses/{expense}/edit', [ExpensesController::class, 'edit'])->name('expenses.edit');
+    //     Route::put('/expenses/{expense}', [ExpensesController::class, 'update'])->name('expenses.update');
+    //     Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
 
-    // API Recent expenses (AJAX)
-    Route::get('/api/expenses/recent', [ExpensesController::class, 'recentApi'])->name('api.expenses.recent');
-});
+    //     // API Recent expenses (AJAX)
+    //     Route::get('/api/expenses/recent', [ExpensesController::class, 'recentApi'])->name('api.expenses.recent');
+    // });
 
-// Backwards-compatible redirect (optional)
-Route::redirect('/dashboard/revenue', '/admin/dashboard/revenue');
+    Route::prefix('admin')->name('admin.')->group(function () {
+        
+        // --- Accounting Dashboard ---
+        Route::get('/accounting', [AccountingController::class, 'index'])->name('accounting.index');
+
+        // --- Accounting APIs (Data for Charts & Tables) ---
+        // This API now handles the 'filter_value' logic for Daily/Monthly/Yearly
+        Route::get('/api/accounting/monthly-income', [AccountingController::class, 'monthlyIncomeApi'])->name('api.monthly-incomes');
+        Route::get('/api/accounting/top-performers', [AccountingController::class, 'topPerformersApi'])->name('api.top-performer');
+
+        // --- Accounting Exports ---
+        Route::get('/accounting/export/csv', [AccountingController::class, 'export'])->name('reports.exports');
+        Route::get('/accounting/export/pdf', [AccountingController::class, 'exportPdf'])->name('reports.pdf');
+
+        // Expenses CRUD
+        Route::get('/expenses', [ExpensesController::class, 'index'])->name('expenses.index');
+        Route::get('/expenses/create', [ExpensesController::class, 'create'])->name('expenses.create');
+        Route::post('/expenses', [ExpensesController::class, 'store'])->name('expenses.store');
+        Route::get('/expenses/{expense}/edit', [ExpensesController::class, 'edit'])->name('expenses.edit');
+        Route::put('/expenses/{expense}', [ExpensesController::class, 'update'])->name('expenses.update');
+        Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
+        // API Recent expenses (AJAX)
+        Route::get('/api/expenses/recent', [ExpensesController::class, 'recentApi'])->name('api.expenses.recent');
+    });
+
+    // Backwards-compatible redirect (optional)
+    Route::redirect('/dashboard/revenue', '/admin/dashboard/revenue');
     //========================
 
 
@@ -471,45 +510,45 @@ Route::redirect('/dashboard/revenue', '/admin/dashboard/revenue');
     // Dynamic Gallery Routes
     // =======================
 
-// ==================== GALLERY MANAGEMENT ROUTES ====================
+    // ==================== GALLERY MANAGEMENT ROUTES ====================
 
-// In your web.php routes file
-Route::prefix('admin/galleries')->name('admin.galleries.')->group(function () {
-    // Gallery routes
-    Route::get('/', [GalleryController::class, 'index'])->name('index');
-    Route::get('/create', [GalleryController::class, 'create'])->name('create');
-    Route::post('/', [GalleryController::class, 'store'])->name('store');
-    Route::get('/{gallery}', [GalleryController::class, 'show'])->name('show');
-    Route::get('/{gallery}/edit', [GalleryController::class, 'edit'])->name('edit');
-    Route::put('/{gallery}', [GalleryController::class, 'update'])->name('update');
-    Route::delete('/{gallery}', [GalleryController::class, 'destroy'])->name('destroy');
-    
-    // Image management routes
-    Route::post('/upload', [GalleryController::class, 'uploadImages'])->name('upload');
-    
-    // Image routes - CORRECTED VERSION
-    Route::get('/images/all', [GalleryController::class, 'getAllImages'])->name('images.all');
-    Route::get('/images/{image}', [GalleryController::class, 'getImage'])->name('images.get');
-    Route::get('/images/{image}/edit', [GalleryController::class, 'editImage'])->name('images.edit');
-    Route::put('/images/{image}', [GalleryController::class, 'updateImage'])->name('images.update');
-    Route::delete('/images/{image}', [GalleryController::class, 'deleteImage'])->name('images.delete');
-    Route::post('/images/{image}/set-featured', [GalleryController::class, 'setFeatured'])->name('images.set-featured');
-    Route::post('/images/{image}/remove-featured', [GalleryController::class, 'removeFeatured'])->name('images.remove-featured');
-    Route::post('/bulk-operations', [GalleryController::class, 'bulkImageOperations'])->name('bulk-operations');
-    
-    // FIXED: Remove the duplicate /admin/galleries prefix
-    Route::post('/images/bulk-delete', [GalleryController::class, 'bulkDelete'])->name('images.bulk-delete');
-    Route::post('/images/reorder', [GalleryController::class, 'reorder'])->name('images.reorder');
-});
+    // In your web.php routes file
+    Route::prefix('admin/galleries')->name('admin.galleries.')->group(function () {
+        // Gallery routes
+        Route::get('/', [GalleryController::class, 'index'])->name('index');
+        Route::get('/create', [GalleryController::class, 'create'])->name('create');
+        Route::post('/', [GalleryController::class, 'store'])->name('store');
+        Route::get('/{gallery}', [GalleryController::class, 'show'])->name('show');
+        Route::get('/{gallery}/edit', [GalleryController::class, 'edit'])->name('edit');
+        Route::put('/{gallery}', [GalleryController::class, 'update'])->name('update');
+        Route::delete('/{gallery}', [GalleryController::class, 'destroy'])->name('destroy');
+
+        // Image management routes
+        Route::post('/upload', [GalleryController::class, 'uploadImages'])->name('upload');
+
+        // Image routes - CORRECTED VERSION
+        Route::get('/images/all', [GalleryController::class, 'getAllImages'])->name('images.all');
+        Route::get('/images/{image}', [GalleryController::class, 'getImage'])->name('images.get');
+        Route::get('/images/{image}/edit', [GalleryController::class, 'editImage'])->name('images.edit');
+        Route::put('/images/{image}', [GalleryController::class, 'updateImage'])->name('images.update');
+        Route::delete('/images/{image}', [GalleryController::class, 'deleteImage'])->name('images.delete');
+        Route::post('/images/{image}/set-featured', [GalleryController::class, 'setFeatured'])->name('images.set-featured');
+        Route::post('/images/{image}/remove-featured', [GalleryController::class, 'removeFeatured'])->name('images.remove-featured');
+        Route::post('/bulk-operations', [GalleryController::class, 'bulkImageOperations'])->name('bulk-operations');
+
+        // FIXED: Remove the duplicate /admin/galleries prefix
+        Route::post('/images/bulk-delete', [GalleryController::class, 'bulkDelete'])->name('images.bulk-delete');
+        Route::post('/images/reorder', [GalleryController::class, 'reorder'])->name('images.reorder');
+    });
 
 
-// API Routes (for AJAX calls)
-Route::prefix('api')->group(function () {
-    Route::get('/gallery/statistics', [GalleryController::class, 'getStatistics']);
-    Route::get('/gallery/categories', [GalleryController::class, 'getGalleryCategories']);
-    Route::get('/gallery/images/all', [GalleryController::class, 'getAllImages']);
-    // ... keep your existing API routes
-});
+    // API Routes (for AJAX calls)
+    Route::prefix('api')->group(function () {
+        Route::get('/gallery/statistics', [GalleryController::class, 'getStatistics']);
+        Route::get('/gallery/categories', [GalleryController::class, 'getGalleryCategories']);
+        Route::get('/gallery/images/all', [GalleryController::class, 'getAllImages']);
+        // ... keep your existing API routes
+    });
     // =======================
     // Facility Crud
     // =======================
@@ -541,25 +580,25 @@ Route::prefix('api')->group(function () {
     // Day-Tour Facilities Crud
     // =======================
 
-// Day-tour Facilities Routes
-Route::prefix('admin/day-tour-facilities')->group(function () {
-    Route::get('/api', [DayTourFacilitiesController::class, 'index'])->name('admin.day-tour-facilities.api');
-    Route::get('/', [DayTourFacilitiesController::class, 'daytourindex'])->name('admin.day-tour-facilities.index');
-    Route::post('/store', [DayTourFacilitiesController::class, 'store'])->name('admin.day-tour-facilities.store');
-    Route::get('/{id}', [DayTourFacilitiesController::class, 'show'])->name('admin.day-tour-facilities.show');
-    Route::get('/{id}/edit', [DayTourFacilitiesController::class, 'edit'])->name('admin.day-tour-facilities.edit');
-    Route::put('/{id}', [DayTourFacilitiesController::class, 'update'])->name('admin.day-tour-facilities.update');
-    Route::delete('/{id}', [DayTourFacilitiesController::class, 'destroy'])->name('admin.day-tour-facilities.destroy');
-    Route::get('/{id}/images', [DayTourFacilitiesController::class, 'getImages'])->name('admin.day-tour-facilities.images');
-    Route::delete('/images/{id}', [DayTourFacilitiesController::class, 'deleteImage'])->name('admin.day-tour-facilities.images.delete');
-    Route::post('/update-image-order', [DayTourFacilitiesController::class, 'updateImageOrder'])->name('admin.day-tour-facilities.images.order');
-    
-    // Discount routes
-    Route::get('/{facilityId}/discounts', [DayTourFacilitiesController::class, 'getDiscounts'])->name('admin.day-tour-facilities.discounts');
-    Route::post('/{facilityId}/discounts', [DayTourFacilitiesController::class, 'addDiscount'])->name('admin.day-tour-facilities.discounts.store');
-    Route::put('/discounts/{discountId}', [DayTourFacilitiesController::class, 'updateDiscount'])->name('admin.day-tour-facilities.discounts.update');
-    Route::delete('/discounts/{discountId}', [DayTourFacilitiesController::class, 'deleteDiscount'])->name('admin.day-tour-facilities.discounts.destroy');
-});
+    // Day-tour Facilities Routes
+    Route::prefix('admin/day-tour-facilities')->group(function () {
+        Route::get('/api', [DayTourFacilitiesController::class, 'index'])->name('admin.day-tour-facilities.api');
+        Route::get('/', [DayTourFacilitiesController::class, 'daytourindex'])->name('admin.day-tour-facilities.index');
+        Route::post('/store', [DayTourFacilitiesController::class, 'store'])->name('admin.day-tour-facilities.store');
+        Route::get('/{id}', [DayTourFacilitiesController::class, 'show'])->name('admin.day-tour-facilities.show');
+        Route::get('/{id}/edit', [DayTourFacilitiesController::class, 'edit'])->name('admin.day-tour-facilities.edit');
+        Route::put('/{id}', [DayTourFacilitiesController::class, 'update'])->name('admin.day-tour-facilities.update');
+        Route::delete('/{id}', [DayTourFacilitiesController::class, 'destroy'])->name('admin.day-tour-facilities.destroy');
+        Route::get('/{id}/images', [DayTourFacilitiesController::class, 'getImages'])->name('admin.day-tour-facilities.images');
+        Route::delete('/images/{id}', [DayTourFacilitiesController::class, 'deleteImage'])->name('admin.day-tour-facilities.images.delete');
+        Route::post('/update-image-order', [DayTourFacilitiesController::class, 'updateImageOrder'])->name('admin.day-tour-facilities.images.order');
+
+        // Discount routes
+        Route::get('/{facilityId}/discounts', [DayTourFacilitiesController::class, 'getDiscounts'])->name('admin.day-tour-facilities.discounts');
+        Route::post('/{facilityId}/discounts', [DayTourFacilitiesController::class, 'addDiscount'])->name('admin.day-tour-facilities.discounts.store');
+        Route::put('/discounts/{discountId}', [DayTourFacilitiesController::class, 'updateDiscount'])->name('admin.day-tour-facilities.discounts.update');
+        Route::delete('/discounts/{discountId}', [DayTourFacilitiesController::class, 'deleteDiscount'])->name('admin.day-tour-facilities.discounts.destroy');
+    });
 
 
     // =======================

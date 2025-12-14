@@ -131,7 +131,8 @@
 				gap: 0.25rem;
 			}
 
-			.btn-edit, .btn-delete {
+			.btn-edit,
+			.btn-delete {
 				padding: 0.25rem 0.5rem;
 				font-size: 0.7rem;
 			}
@@ -140,7 +141,7 @@
 @endsection
 
 @section('content')
-<div class="min-h-screen px-6 py-6">
+
 	<!-- Header with Stats -->
 	<div class="expenses-card mb-6 border-t-4 border-t-red-500">
 		<div class="expenses-card-header">
@@ -182,7 +183,8 @@
 
 		<div class="expenses-card-body">
 			@if(session('success'))
-				<div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
+				<div
+					class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
 					<i class="fas fa-check-circle"></i>
 					{{ session('success') }}
 				</div>
@@ -205,7 +207,8 @@
 								<tr>
 									<td class="font-medium">{{ $expense->expense_date->format('M d, Y') }}</td>
 									<td>
-										<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+										<span
+											class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
 											{{ $expense->category }}
 										</span>
 									</td>
@@ -220,7 +223,8 @@
 											<a href="{{ route('admin.expenses.edit', $expense) }}" class="btn-edit">
 												<i class="fas fa-edit mr-1"></i> Edit
 											</a>
-											<form action="{{ route('admin.expenses.destroy', $expense) }}" method="POST" class="inline">
+											<form action="{{ route('admin.expenses.destroy', $expense) }}" method="POST"
+												class="inline">
 												@csrf @method('DELETE')
 												<button type="button" onclick="confirmDelete(this)" class="btn-delete">
 													<i class="fas fa-trash mr-1"></i> Delete
@@ -237,7 +241,8 @@
 				<!-- Pagination -->
 				<div class="mt-6 flex items-center justify-between">
 					<div class="text-sm text-gray-600">
-						Showing {{ $expenses->firstItem() }} to {{ $expenses->lastItem() }} of {{ $expenses->total() }} results
+						Showing {{ $expenses->firstItem() }} to {{ $expenses->lastItem() }} of {{ $expenses->total() }}
+						results
 					</div>
 					<div class="flex gap-1">
 						{{ $expenses->links() }}
@@ -255,59 +260,60 @@
 			@endif
 		</div>
 	</div>
-</div>
 
-<!-- Delete Confirmation Modal -->
-<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden" id="deleteModal">
-	<div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
-		<div class="p-6">
-			<div class="flex items-center gap-3 mb-4">
-				<div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-					<i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+	<!-- Delete Confirmation Modal -->
+	<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden" id="deleteModal">
+		<div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+			<div class="p-6">
+				<div class="flex items-center gap-3 mb-4">
+					<div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+						<i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+					</div>
+					<div>
+						<h3 class="text-lg font-semibold text-gray-900">Delete Expense</h3>
+						<p class="text-gray-600 text-sm">This action cannot be undone.</p>
+					</div>
 				</div>
-				<div>
-					<h3 class="text-lg font-semibold text-gray-900">Delete Expense</h3>
-					<p class="text-gray-600 text-sm">This action cannot be undone.</p>
+				<div class="flex justify-end gap-3 mt-6">
+					<button type="button" onclick="closeDeleteModal()"
+						class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+						Cancel
+					</button>
+					<button type="button" id="confirmDeleteBtn"
+						class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+						Delete Expense
+					</button>
 				</div>
-			</div>
-			<div class="flex justify-end gap-3 mt-6">
-				<button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-					Cancel
-				</button>
-				<button type="button" id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-					Delete Expense
-				</button>
 			</div>
 		</div>
 	</div>
-</div>
 @endsection
 
 @section('content_js')
-<script>
-	let deleteForm = null;
+	<script>
+		let deleteForm = null;
 
-	function confirmDelete(button) {
-		deleteForm = button.closest('form');
-		document.getElementById('deleteModal').classList.remove('hidden');
-	}
-
-	function closeDeleteModal() {
-		document.getElementById('deleteModal').classList.add('hidden');
-		deleteForm = null;
-	}
-
-	document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-		if (deleteForm) {
-			deleteForm.submit();
+		function confirmDelete(button) {
+			deleteForm = button.closest('form');
+			document.getElementById('deleteModal').classList.remove('hidden');
 		}
-	});
 
-	// Close modal when clicking outside
-	document.getElementById('deleteModal').addEventListener('click', function(e) {
-		if (e.target === this) {
-			closeDeleteModal();
+		function closeDeleteModal() {
+			document.getElementById('deleteModal').classList.add('hidden');
+			deleteForm = null;
 		}
-	});
-</script>
+
+		document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+			if (deleteForm) {
+				deleteForm.submit();
+			}
+		});
+
+		// Close modal when clicking outside
+		document.getElementById('deleteModal').addEventListener('click', function (e) {
+			if (e.target === this) {
+				closeDeleteModal();
+			}
+		});
+	</script>
 @endsection
