@@ -100,26 +100,29 @@
         {{-- Revenue Reports Dropdown --}}
         <div class="relative">
             <button
-                class="sidebar-dropdown-toggle flex items-center justify-between w-full py-2.5 px-4 rounded-lg transition-all duration-200 group {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'bg-red-700/50 text-white' : 'text-red-100 hover:bg-white/10' }}"
-                aria-expanded="{{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'true' : 'false' }}">
+                class="sidebar-dropdown-toggle flex items-center justify-between w-full py-2.5 px-4 rounded-lg transition-all duration-200 group {{ in_array($active, ['reports', 'accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'bg-red-700/50 text-white' : 'text-red-100 hover:bg-white/10' }}"
+                aria-expanded="{{ in_array($active, ['reports', 'accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'true' : 'false' }}">
                 <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-3 {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
+                    <svg class="w-5 h-5 mr-3 {{ in_array($active, ['reports', 'accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'text-white' : 'text-red-300 group-hover:text-white' }}"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     <span>Revenue & Expenses</span>
                 </div>
-                <svg class="w-4 h-4 transition-transform duration-200 transform {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'rotate-180' : '' }}"
+                <svg class="w-4 h-4 transition-transform duration-200 transform {{ in_array($active, ['reports', 'accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'rotate-180' : '' }}"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
             <div
-                class="sidebar-submenu overflow-hidden transition-all duration-300 ease-in-out {{ in_array($active, ['accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'max-h-96' : 'max-h-0' }}">
+                class="sidebar-submenu overflow-hidden transition-all duration-300 ease-in-out {{ in_array($active, ['reports', 'accounting', 'expenses', 'earnings', 'daytour-earnings']) ? 'max-h-96' : 'max-h-0' }}">
                 <ul class="pt-1 pb-2 pl-12 pr-2 space-y-1">
+                    <li><a href="{{ route('admin.report.index') }}"
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'reports' ? 'text-white font-medium' : 'text-red-200' }}">Reports</a>
+                    </li>
                     <li><a href="{{ route('admin.accounting.index') }}"
-                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'accounting' ? 'text-white font-medium' : 'text-red-200' }}">Accounting</a>
+                            class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'accounting' ? 'text-white font-medium' : 'text-red-200' }}">Reports Graph</a>
                     </li>
                     <li><a href="{{ route('admin.earnings.chart') }}"
                             class="block py-2 px-2 rounded hover:text-white text-sm {{ $active === 'earnings' ? 'text-white font-medium' : 'text-red-200' }}">Room

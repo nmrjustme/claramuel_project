@@ -48,6 +48,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
 use App\Http\Controllers\DayTourFacilitiesController;
 use App\Models\FacilityBookingLog;
 use App\Services\InvoiceService; // adjust namespace if different
+use App\Http\Controllers\AccountingReportController;
 
 use App\Http\Controllers\RoomHoldController;
 
@@ -444,7 +445,7 @@ Route::middleware(['auth'])->group(function () {
     // });
 
     Route::prefix('admin')->name('admin.')->group(function () {
-        
+
         // --- Accounting Dashboard ---
         Route::get('/accounting', [AccountingController::class, 'index'])->name('accounting.index');
 
@@ -466,6 +467,22 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
         // API Recent expenses (AJAX)
         Route::get('/api/expenses/recent', [ExpensesController::class, 'recentApi'])->name('api.expenses.recent');
+    });
+
+    Route::prefix('admin')->name('admin.report.')->group(function () {
+
+        // 1. Main Accounting Dashboard Page
+        Route::get('/', [AccountingReportController::class, 'index'])->name('index');
+
+        // 2. API Endpoint (Fetches JSON data for the charts & tables)
+        Route::get('/api/data', [AccountingReportController::class, 'monthlyIncomeApi'])->name('api');
+
+        // 3. Export to CSV
+        Route::get('/export/csv', [AccountingReportController::class, 'export'])->name('export');
+
+        // 4. Export to PDF
+        Route::get('/export/pdf', [AccountingReportController::class, 'exportPdf'])->name('export_pdf');
+
     });
 
     // Backwards-compatible redirect (optional)

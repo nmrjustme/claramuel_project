@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Accounting Dashboard')
+@section('title', 'Reports Graph')
 
 @php
     $active = 'accounting';
@@ -144,7 +144,7 @@
 
             <div class="flex items-center gap-3">
                 <i class="fas fa-chart-pie text-purple-600 text-xl"></i>
-                <h1 class="text-blue-600 font-bold text-xl">Accounting Dashboard</h1>
+                <h1 class="text-blue-600 font-bold text-xl">Reports Graph</h1>
             </div>
         </div>
     </div>
@@ -259,20 +259,20 @@
                             <i class="fas fa-filter"></i> Apply
                         </button>
 
-                        <a href="{{ route('admin.earnings.chart') }}"
+                        <!-- <a href="{{ route('admin.earnings.chart') }}"
                             class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition-all duration-200">
                             <i class="fas fa-chart-bar"></i> Analytics
-                        </a>
+                        </a> -->
 
                         <!-- <a id="exportCsv" href="#" 
                                         class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition-all duration-200">
                                         <i class="fas fa-file-csv"></i> Export CSV
                                     </a> -->
 
-                        <a id="exportPdf" href="#"
+                        <!-- <a id="exportPdf" href="#"
                             class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition-all duration-200">
                             <i class="fas fa-file-pdf"></i> Export PDF
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -536,7 +536,7 @@
             }).toString();
 
             // $('#exportCsv').attr('href', "{{ route('admin.reports.exports') }}?" + params);
-            $('#exportPdf').attr('href', "{{ route('admin.reports.pdf') }}?" + params);
+            // $('#exportPdf').attr('href', "{{ route('admin.reports.pdf') }}?" + params);
         }
 
         function updateBreakdownTable(combinedData) {

@@ -768,327 +768,326 @@
 @endsection
 
 @section('content')
-    <div class="min-h-screen px-6 py-6">
-        <!-- Email Verification Alert -->
-        @if (empty(Auth::user()->email_verified_at))
-            <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div class="flex items-start">
-                    <!-- Icon -->
-                    <svg class="w-5 h-5 text-yellow-600 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 
-                                                            2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 
-                                                            0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
 
-                    <!-- Text & Button -->
-                    <div class="flex-1">
-                        <h3 class="text-lg font-medium text-yellow-800">Email Verification Required</h3>
-                        <p class="text-yellow-700 mt-1">
-                            Please verify your email address before performing any actions in booking.
-                            A verification link will be sent to your email.
-                        </p>
+    <!-- Email Verification Alert -->
+    @if (empty(Auth::user()->email_verified_at))
+        <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div class="flex items-start">
+                <!-- Icon -->
+                <svg class="w-5 h-5 text-yellow-600 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 
+                                                        2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 
+                                                        0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
 
-                        <form method="POST" action="{{ route('verification.send') }}" class="mt-2">
-                            @csrf
-                            <button type="submit"
-                                class="text-yellow-800 hover:text-yellow-900 underline text-sm font-medium cursor-pointer">
-                                Send Verification Email
-                            </button>
-                        </form>
+                <!-- Text & Button -->
+                <div class="flex-1">
+                    <h3 class="text-lg font-medium text-yellow-800">Email Verification Required</h3>
+                    <p class="text-yellow-700 mt-1">
+                        Please verify your email address before performing any actions in booking.
+                        A verification link will be sent to your email.
+                    </p>
 
-                        @if (session('status') == 'verification-link-sent')
-                            <div class="mt-2 flex items-center text-sm text-green-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 
-                                                                                        16zm3.707-9.293a1 1 0 00-1.414-1.414L9 
-                                                                                        10.586 7.707 9.293a1 1 0 00-1.414 
-                                                                                        1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Verification link sent!
-                            </div>
-                        @endif
-                    </div>
+                    <form method="POST" action="{{ route('verification.send') }}" class="mt-2">
+                        @csrf
+                        <button type="submit"
+                            class="text-yellow-800 hover:text-yellow-900 underline text-sm font-medium cursor-pointer">
+                            Send Verification Email
+                        </button>
+                    </form>
+
+                    @if (session('status') == 'verification-link-sent')
+                        <div class="mt-2 flex items-center text-sm text-green-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 
+                                                                                    16zm3.707-9.293a1 1 0 00-1.414-1.414L9 
+                                                                                    10.586 7.707 9.293a1 1 0 00-1.414 
+                                                                                    1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Verification link sent!
+                        </div>
+                    @endif
                 </div>
             </div>
-        @endif
+        </div>
+    @endif
 
 
-        <div class="flex flex-col mb-10">
-            <!-- Container -->
-            <div class="bg-white rounded-lg border border-lightgray">
+    <div class="flex flex-col mb-10">
+        <!-- Container -->
+        <div class="bg-white rounded-lg border border-lightgray">
 
-                <!-- Title -->
-                <div class="px-4 pt-6 pb-4 border-b border-gray-200">
-                    <h2 class="text-2xl font-bold text-gray-800">Check-in</h2>
-                    <p class="text-sm text-gray-600 mt-1">Search today's guest check-in</p>
+            <!-- Title -->
+            <div class="px-4 pt-6 pb-4 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800">Check-in</h2>
+                <p class="text-sm text-gray-600 mt-1">Search today's guest check-in</p>
+            </div>
+
+
+            <!-- Content -->
+            <div class="flex flex-col md:flex-row gap-8 p-8">
+
+                <!-- Manual Search Fields -->
+                <div class="flex flex-col md:flex-row md:items-end flex-wrap gap-6 flex-1">
+
+                    <div class="flex flex-col min-w-[200px] flex-1">
+                        <label for="search-firstname"
+                            class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">First Name</label>
+                        <input type="text" id="search-firstname" placeholder="Enter first name"
+                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                    </div>
+
+                    <div class="flex flex-col min-w-[200px] flex-1">
+                        <label for="search-lastname"
+                            class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Last Name</label>
+                        <input type="text" id="search-lastname" placeholder="Enter last name"
+                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                    </div>
+
+                    <div class="flex flex-col min-w-[200px] flex-1">
+                        <label for="search-date"
+                            class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Date <span
+                                class="text-xs text-gray-500 font-normal">(Adjust if needed)</span></label>
+                        <input type="date" id="search-date" value="{{ date('Y-m-d') }}"
+                            class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
+                    </div>
+
+                    <!-- Check-in/Check-out Toggle -->
+                    <div class="flex flex-col">
+                        <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Search
+                            Type</label>
+                        <div class="flex bg-gray-100 rounded-xl p-1 shadow-inner">
+                            <input type="radio" id="search-checkin" name="search-type" value="checkin"
+                                class="hidden peer/checkin" checked>
+                            <label for="search-checkin"
+                                class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkin:bg-red-600 peer-checked/checkin:text-white peer-checked/checkin:shadow-md">
+                                Check-in
+                            </label>
+
+                            <input type="radio" id="search-checkout" name="search-type" value="checkout"
+                                class="hidden peer/checkout">
+                            <label for="search-checkout"
+                                class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkout:bg-red-600 peer-checked/checkout:text-white peer-checked/checkout:shadow-md">
+                                Check-out
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Search and Clear Buttons -->
+                    <div class="flex flex-col md:flex-row md:items-end gap-3 mt-2 md:mt-0">
+                        <button id="search-button"
+                            class="px-6 py-2.5 bg-green-600 cursor-pointer text-white rounded-xl hover:bg-green-700 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
+                            Search
+                        </button>
+                        <button id="clear-button"
+                            class="px-6 py-2.5 bg-gray-200 cursor-pointer text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Divider with OR -->
+                <div class="flex items-center justify-center">
+                    <div class="hidden md:flex items-center h-12">
+                        <div class="border-t border-gray-300 w-10"></div>
+                        <span class="mx-3 text-sm font-semibold text-gray-500">OR</span>
+                        <div class="border-t border-gray-300 w-10"></div>
+                    </div>
+                </div>
+
+                <!-- QR Scanner Button -->
+                <div class="flex flex-col min-w-[220px]">
+                    <label class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Quick Access</label>
+                    <button id="qr-scanner-btn"
+                        class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 shadow-md transition hover:shadow-lg active:scale-95 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2m-10 0H5a2 2 0 01-2-2v-2" />
+                        </svg>
+                        Scan QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="flex flex-col lg:flex-row gap-4">
+        <!-- Main Content - Fixed width and overflow -->
+        <div class="main-content lg:w-1/2 w-full">
+
+            <div class="glass-card p-4 hover-scale bg-white rounded-lg border border-lightgray">
+
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                    <!-- Left: Title -->
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">
+                            Bookings Management
+                        </h2>
+                        <p class="text-gray-600 text-base md:text-lg mt-1">
+                            Manage all guest reservations with ease
+                        </p>
+                    </div>
+
+                    <!-- Right: Search + Filter + Refresh -->
+                    <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+
+                        <!-- Search Bar -->
+                        <div class="relative w-full md:w-64">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <input id="search-input" type="text"
+                                class="block w-full pl-9 pr-10 py-2 text-sm md:text-base border border-gray-300 rounded-lg bg-white/70 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                placeholder="Search reservations...">
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="flex items-center gap-2">
+                            <label for="status-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                Status:
+                            </label>
+                            <select id="status-filter"
+                                class="w-full md:w-auto pl-3 pr-10 py-2 text-sm cursor-pointer border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                                <option value="all" selected>All Statuses</option>
+                                <option value="pending_confirmation">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="checked_in">Checked In</option>
+                                <option value="checked_out">Checked Out</option>
+                            </select>
+                        </div>
+
+                        <!-- Refresh Button -->
+                        <button id="refreshBtn"
+                            class="flex items-center text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
                 </div>
 
 
-                <!-- Content -->
-                <div class="flex flex-col md:flex-row gap-8 p-8">
 
-                    <!-- Manual Search Fields -->
-                    <div class="flex flex-col md:flex-row md:items-end flex-wrap gap-6 flex-1">
+                <hr class="border-gray-300 my-3">
 
-                        <div class="flex flex-col min-w-[200px] flex-1">
-                            <label for="search-firstname"
-                                class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">First Name</label>
-                            <input type="text" id="search-firstname" placeholder="Enter first name"
-                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
-                        </div>
-
-                        <div class="flex flex-col min-w-[200px] flex-1">
-                            <label for="search-lastname"
-                                class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Last Name</label>
-                            <input type="text" id="search-lastname" placeholder="Enter last name"
-                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
-                        </div>
-
-                        <div class="flex flex-col min-w-[200px] flex-1">
-                            <label for="search-date"
-                                class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Date <span
-                                    class="text-xs text-gray-500 font-normal">(Adjust if needed)</span></label>
-                            <input type="date" id="search-date" value="{{ date('Y-m-d') }}"
-                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm hover:shadow-md">
-                        </div>
-
-                        <!-- Check-in/Check-out Toggle -->
-                        <div class="flex flex-col">
-                            <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Search
-                                Type</label>
-                            <div class="flex bg-gray-100 rounded-xl p-1 shadow-inner">
-                                <input type="radio" id="search-checkin" name="search-type" value="checkin"
-                                    class="hidden peer/checkin" checked>
-                                <label for="search-checkin"
-                                    class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkin:bg-red-600 peer-checked/checkin:text-white peer-checked/checkin:shadow-md">
-                                    Check-in
-                                </label>
-
-                                <input type="radio" id="search-checkout" name="search-type" value="checkout"
-                                    class="hidden peer/checkout">
-                                <label for="search-checkout"
-                                    class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 peer-checked/checkout:bg-red-600 peer-checked/checkout:text-white peer-checked/checkout:shadow-md">
-                                    Check-out
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Search and Clear Buttons -->
-                        <div class="flex flex-col md:flex-row md:items-end gap-3 mt-2 md:mt-0">
-                            <button id="search-button"
-                                class="px-6 py-2.5 bg-green-600 cursor-pointer text-white rounded-xl hover:bg-green-700 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
-                                Search
-                            </button>
-                            <button id="clear-button"
-                                class="px-6 py-2.5 bg-gray-200 cursor-pointer text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 text-base font-semibold shadow-md hover:shadow-lg active:scale-95">
-                                Reset
-                            </button>
-                        </div>
+                <!-- Booking Table - Fixed container -->
+                <div class="table-container mt-4">
+                    <div class="overflow-x-auto custom-scroll">
+                        <table class="w-full divide-y divide-gray-200 compact-table">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                        ID
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                        Status
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                        Guest
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                        Check-in
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="bookings-table-body">
+                                <!-- Loading state -->
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div
+                                                class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mb-3">
+                                            </div>
+                                            <p class="text-gray-600 font-medium">Loading bookings...</p>
+                                            <p class="text-sm text-gray-500 mt-1">Please wait while we fetch your data
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- Divider with OR -->
-                    <div class="flex items-center justify-center">
-                        <div class="hidden md:flex items-center h-12">
-                            <div class="border-t border-gray-300 w-10"></div>
-                            <span class="mx-3 text-sm font-semibold text-gray-500">OR</span>
-                            <div class="border-t border-gray-300 w-10"></div>
-                        </div>
-                    </div>
-
-                    <!-- QR Scanner Button -->
-                    <div class="flex flex-col min-w-[220px]">
-                        <label class="mb-2 text-sm font-semibold text-gray-700 uppercase tracking-wide">Quick Access</label>
-                        <button id="qr-scanner-btn"
-                            class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 shadow-md transition hover:shadow-lg active:scale-95 cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2m-10 0H5a2 2 0 01-2-2v-2" />
+                </div>
+                <!-- Pagination -->
+                <div class="flex flex-col lg:flex-row justify-between items-center mt-4 gap-3">
+                    <div id="pagination-info" class="text-sm text-gray-600"></div>
+                    <div class="flex gap-1">
+                        <button id="prev-page"
+                            class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
                             </svg>
-                            Scan QR Code
+                        </button>
+                        <button id="next-page"
+                            class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Booking Summary Sidebar - REMOVED STICKY BEHAVIOR -->
+        <div class="summary-container lg:w-1/2 w-full">
+            <!-- Simple container without sticky positioning -->
+            <div class="summary-sidebar">
+                <!-- Booking Summary -->
+                <div
+                    class="glass-card booking-summary-card bg-white rounded-lg border border-lightgray overflow-hidden hover-scale w-full">
+                    <div class="bg-gradient-to-r from-red-600 to-red-800 p-3 text-white">
+                        <h2 class="text-lg font-bold flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
 
-
-        <div class="flex flex-col lg:flex-row gap-4">
-            <!-- Main Content - Fixed width and overflow -->
-            <div class="main-content lg:w-1/2 w-full">
-
-                <div class="glass-card p-4 hover-scale bg-white rounded-lg border border-lightgray">
-
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                        <!-- Left: Title -->
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-800">
-                                Bookings Management
-                            </h2>
-                            <p class="text-gray-600 text-base md:text-lg mt-1">
-                                Manage all guest reservations with ease
-                            </p>
-                        </div>
-
-                        <!-- Right: Search + Filter + Refresh -->
-                        <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-
-                            <!-- Search Bar -->
-                            <div class="relative w-full md:w-64">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                </div>
-                                <input id="search-input" type="text"
-                                    class="block w-full pl-9 pr-10 py-2 text-sm md:text-base border border-gray-300 rounded-lg bg-white/70 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    placeholder="Search reservations...">
-                            </div>
-
-                            <!-- Status Filter -->
-                            <div class="flex items-center gap-2">
-                                <label for="status-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">
-                                    Status:
-                                </label>
-                                <select id="status-filter"
-                                    class="w-full md:w-auto pl-3 pr-10 py-2 text-sm cursor-pointer border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
-                                    <option value="all" selected>All Statuses</option>
-                                    <option value="pending_confirmation">Pending</option>
-                                    <option value="confirmed">Confirmed</option>
-                                    <option value="checked_in">Checked In</option>
-                                    <option value="checked_out">Checked Out</option>
-                                </select>
-                            </div>
-
-                            <!-- Refresh Button -->
-                            <button id="refreshBtn"
-                                class="flex items-center text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Refresh
-                            </button>
-                        </div>
+                            BOOKING DETAILS
+                        </h2>
                     </div>
-
-
-
-                    <hr class="border-gray-300 my-3">
-
-                    <!-- Booking Table - Fixed container -->
-                    <div class="table-container mt-4">
-                        <div class="overflow-x-auto custom-scroll">
-                            <table class="w-full divide-y divide-gray-200 compact-table">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                            ID
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                            Status
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                            Guest
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                            Check-in
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                            Action
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200" id="bookings-table-body">
-                                    <!-- Loading state -->
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-8 text-center">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div
-                                                    class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mb-3">
-                                                </div>
-                                                <p class="text-gray-600 font-medium">Loading bookings...</p>
-                                                <p class="text-sm text-gray-500 mt-1">Please wait while we fetch your data
-                                                </p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <!-- Pagination -->
-                    <div class="flex flex-col lg:flex-row justify-between items-center mt-4 gap-3">
-                        <div id="pagination-info" class="text-sm text-gray-600"></div>
-                        <div class="flex gap-1">
-                            <button id="prev-page"
-                                class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                            <button id="next-page"
-                                class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
+                    <div class="p-0 fade-in w-full" id="booking-summary">
+                        <div class="text-center py-6 px-3 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-3 text-gray-300"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <p class="text-lg">Select a booking to view details</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Booking Summary Sidebar - REMOVED STICKY BEHAVIOR -->
-            <div class="summary-container lg:w-1/2 w-full">
-                <!-- Simple container without sticky positioning -->
-                <div class="summary-sidebar">
-                    <!-- Booking Summary -->
-                    <div
-                        class="glass-card booking-summary-card bg-white rounded-lg border border-lightgray overflow-hidden hover-scale w-full">
-                        <div class="bg-gradient-to-r from-red-600 to-red-800 p-3 text-white">
-                            <h2 class="text-lg font-bold flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-
-                                BOOKING DETAILS
-                            </h2>
-                        </div>
-                        <div class="p-0 fade-in w-full" id="booking-summary">
-                            <div class="text-center py-6 px-3 text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-3 text-gray-300"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                                <p class="text-lg">Select a booking to view details</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
             </div>
         </div>
     </div>
