@@ -28,7 +28,8 @@ class RoomBookReportController extends Controller
         $category = $request->category;
 
         $roomsQuery = Facility::where('type', 'room');
-        if ($category) $roomsQuery->where('category', $category);
+        if ($category)
+            $roomsQuery->where('category', $category);
         $rooms = $roomsQuery->get();
 
         $earningsData = [];
@@ -44,12 +45,13 @@ class RoomBookReportController extends Controller
         foreach ($rooms as $room) {
             $e = $this->calculateRoomEarnings($room->id, $dates['start'], $dates['end']);
             $b = $this->calculateRoomBookings($room->id, $dates['start'], $dates['end']);
-            
+
             $earningsData[] = $e;
             $labels[] = $room->name;
             $totalEarnings += $e;
             $totalBookings += $b;
-            if ($e > 0) $roomsBooked++;
+            if ($e > 0)
+                $roomsBooked++;
 
             // Accumulate category earnings
             if (!isset($categoryTotals[$room->category])) {
@@ -110,18 +112,20 @@ class RoomBookReportController extends Controller
             ->where('payments.refund_amount', '>', 0)
             ->whereBetween('payments.refund_date', [$dates['start'], $dates['end']]);
 
-        if ($cat) $refundQuery->where('facilities.category', $cat);
+        if ($cat)
+            $refundQuery->where('facilities.category', $cat);
 
         $totalRefunds = (clone $refundQuery)->sum('payments.refund_amount');
         $fullRefunds = (clone $refundQuery)->where('payments.refund_type', 'full')->count();
-        $partialRefunds = (clone $refundQuery)->where(function($q) {
+        $partialRefunds = (clone $refundQuery)->where(function ($q) {
             $q->where('payments.refund_type', 'half')->orWhere('payments.refund_type', 'partial');
         })->count();
 
         $cancelledBookings = FacilityBookingLog::where('status', 'cancelled')
-            ->whereHas('summaries.facility', function($q) use ($cat) {
+            ->whereHas('summaries.facility', function ($q) use ($cat) {
                 $q->where('type', 'room');
-                if($cat) $q->where('category', $cat);
+                if ($cat)
+                    $q->where('category', $cat);
             })
             ->whereHas('details', fn($q) => $q->whereBetween('checkin_date', [$dates['start'], $dates['end']]))
             ->count();
@@ -138,7 +142,7 @@ class RoomBookReportController extends Controller
             ->latest('payments.refund_date')
             ->limit(5)
             ->get()
-            ->map(function($p) {
+            ->map(function ($p) {
                 return [
                     'booking_id' => $p->code,
                     'room_name' => $p->room,
@@ -168,7 +172,7 @@ class RoomBookReportController extends Controller
     {
         $cat = $request->category;
         $currentYear = now()->year;
-        
+
         if ($request->period == 'yearly' && $request->filter_value) {
             $currentYear = $request->filter_value;
         } elseif ($request->period == 'monthly' && $request->filter_value) {
@@ -182,9 +186,9 @@ class RoomBookReportController extends Controller
         }
 
         return response()->json([
-            'success' => true, 
-            'data' => $data, 
-            'labels' => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+            'success' => true,
+            'data' => $data,
+            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         ]);
     }
 
@@ -192,15 +196,17 @@ class RoomBookReportController extends Controller
     {
         $dates = $this->getDateRange($request);
         $categories = Facility::where('type', 'room')->distinct()->pluck('category');
-        
+
         $data = [];
         foreach ($categories as $cat) {
             $sum = 0;
             $rooms = Facility::where('type', 'room')->where('category', $cat)->pluck('id');
-            foreach($rooms as $rid) $sum += $this->calculateRoomEarnings($rid, $dates['start'], $dates['end']);
-            if($sum > 0) $data[$cat] = $sum;
+            foreach ($rooms as $rid)
+                $sum += $this->calculateRoomEarnings($rid, $dates['start'], $dates['end']);
+            if ($sum > 0)
+                $data[$cat] = $sum;
         }
-        
+
         return response()->json(['categoryEarnings' => $data]);
     }
 
@@ -211,7 +217,7 @@ class RoomBookReportController extends Controller
         $data = $this->prepareExportData($request);
         $filename = 'room_report_' . now()->format('Ymd_His') . '.csv';
 
-        $response = new StreamedResponse(function() use ($data, $request) {
+        $response = new StreamedResponse(function () use ($data, $request) {
             $handle = fopen('php://output', 'w');
             fwrite($handle, "\xEF\xBB\xBF");
 
@@ -232,9 +238,12 @@ class RoomBookReportController extends Controller
             fputcsv($handle, ['Room Name', 'Category', 'Revenue', 'Bookings', 'Occupancy %', 'Avg Rate']);
             foreach ($data['rows'] as $row) {
                 fputcsv($handle, [
-                    $row['name'], $row['category'], 
-                    $row['earnings'], $row['bookings'], 
-                    $row['occupancy'] . '%', $row['adr']
+                    $row['name'],
+                    $row['category'],
+                    $row['earnings'],
+                    $row['bookings'],
+                    $row['occupancy'] . '%',
+                    $row['adr']
                 ]);
             }
             fclose($handle);
@@ -248,7 +257,7 @@ class RoomBookReportController extends Controller
     public function exportEarningsPdf(Request $request)
     {
         $data = $this->prepareExportData($request);
-        
+
         $pdf = Pdf::loadView('admin.room_earnings_report.pdf', [
             'data' => $data,
             'filter' => ucfirst($request->period) . ': ' . $request->filter_value,
@@ -292,7 +301,8 @@ class RoomBookReportController extends Controller
                 $dt = Carbon::createFromFormat('Y', $val);
                 return ['start' => $dt->copy()->startOfYear(), 'end' => $dt->copy()->endOfYear()];
             }
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         return ['start' => now()->startOfMonth(), 'end' => now()->endOfMonth()];
     }
@@ -318,71 +328,107 @@ class RoomBookReportController extends Controller
     {
         $logs = FacilityBookingLog::whereHas('summaries', fn($q) => $q->where('facility_id', $roomId))
             ->whereHas('details', fn($q) => $q->whereBetween('checkin_date', [$start, $end]))
-            ->where('status', '!=', 'pending_confirmation')
+
+            // ✅ ADD THIS BLOCK
+            ->where(function ($q) {
+                $q->where('status', '!=', 'cancelled')
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'cancelled')
+                            ->whereDoesntHave('payments', fn($q) => $q->whereNotNull('refund_amount'));
+                    });
+            })
+            // ✅ END ADD
+
             ->with(['payments', 'summaries', 'details'])
             ->get();
 
         $earnings = 0;
+
         foreach ($logs as $log) {
             $summary = $log->summaries->firstWhere('facility_id', $roomId);
-            if (!$summary) continue;
+            if (!$summary)
+                continue;
 
             $base = $summary->facility_price + $summary->breakfast_price;
             $paid = $log->payments->sum('amount') + $log->payments->sum('checkin_paid');
             $total = $log->details->sum('total_price');
 
             $contrib = 0;
-            if ($total > 0 && $paid >= $total - 1) $contrib = $base;
-            elseif ($total > 0 && abs($paid - ($total/2)) < 5) $contrib = $base / 2;
+            if ($total > 0 && $paid >= $total - 1) {
+                $contrib = $base;
+            } elseif ($total > 0 && abs($paid - ($total / 2)) < 5) {
+                $contrib = $base / 2;
+            }
 
             $refunds = $log->payments->where('refund_amount', '>', 0)->sum('refund_amount');
             if ($refunds > 0 && $total > 0) {
                 $ratio = $base / $total;
                 $contrib -= ($refunds * $ratio);
             }
-            
+
             $earnings += max(0, $contrib);
         }
+
         return $earnings;
     }
 
-    private function calculateRoomBookings($id, $s, $e) { 
-        return FacilityBookingLog::whereHas('summaries', fn($q)=>$q->where('facility_id',$id))
-            ->whereHas('details', fn($q)=>$q->whereBetween('checkin_date', [$s, $e]))
-            ->where('status', '!=', 'pending_confirmation')->count();
+
+    private function calculateRoomBookings($id, $s, $e)
+    {
+        return FacilityBookingLog::whereHas('summaries', fn($q) => $q->where('facility_id', $id))
+            ->whereHas('details', fn($q) => $q->whereBetween('checkin_date', [$s, $e]))
+
+            // ✅ ADD THIS BLOCK
+            ->where(function ($q) {
+                $q->where('status', '!=', 'cancelled')
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'cancelled')
+                            ->whereDoesntHave('payments', fn($q) => $q->whereNotNull('refund_amount'));
+                    });
+            })
+            // ✅ END ADD
+
+            ->count();
     }
-    
-    private function calculateRoomOccupancy($id, $s, $e) {
+
+    private function calculateRoomOccupancy($id, $s, $e)
+    {
         $details = FacilityBookingDetails::whereHas('bookingLog', fn($q) => $q->where('status', '!=', 'cancelled'))
             ->whereHas('facilitySummary', fn($q) => $q->where('facility_id', $id))
             ->whereBetween('checkin_date', [$s, $e])->get();
-        
+
         $booked = 0;
         foreach ($details as $d) {
             $checkin = Carbon::parse($d->checkin_date);
             $checkout = $d->checkout_date ? Carbon::parse($d->checkout_date) : $checkin->copy()->addDay();
             $booked += $checkin->diffInDays($checkout);
         }
-        
+
         $total = $s->diffInDays($e) + 1;
         return $total > 0 ? round(($booked / $total) * 100, 1) : 0;
     }
 
-    private function calculateGlobalOccupancy($s, $e, $cat) {
+    private function calculateGlobalOccupancy($s, $e, $cat)
+    {
         $rooms = Facility::where('type', 'room')->when($cat, fn($q) => $q->where('category', $cat))->get();
-        if ($rooms->isEmpty()) return 0;
+        if ($rooms->isEmpty())
+            return 0;
         $totalOcc = 0;
-        foreach ($rooms as $r) $totalOcc += $this->calculateRoomOccupancy($r->id, $s, $e);
+        foreach ($rooms as $r)
+            $totalOcc += $this->calculateRoomOccupancy($r->id, $s, $e);
         return round($totalOcc / $rooms->count(), 1);
     }
 
-    private function getYearlyMonthlyData($y, $c) {
+    private function getYearlyMonthlyData($y, $c)
+    {
         $data = [];
-        for($m=1; $m<=12; $m++) {
-            $s = Carbon::create($y, $m, 1)->startOfMonth(); $e = $s->copy()->endOfMonth();
-            $rooms = Facility::where('type', 'room')->when($c, fn($q)=>$q->where('category', $c))->get();
+        for ($m = 1; $m <= 12; $m++) {
+            $s = Carbon::create($y, $m, 1)->startOfMonth();
+            $e = $s->copy()->endOfMonth();
+            $rooms = Facility::where('type', 'room')->when($c, fn($q) => $q->where('category', $c))->get();
             $sum = 0;
-            foreach($rooms as $r) $sum += $this->calculateRoomEarnings($r->id, $s, $e);
+            foreach ($rooms as $r)
+                $sum += $this->calculateRoomEarnings($r->id, $s, $e);
             $data[] = $sum;
         }
         return $data;
@@ -392,7 +438,7 @@ class RoomBookReportController extends Controller
     {
         $diffDays = $startDate->diffInDays($endDate);
         $groupBy = $diffDays > 32 ? 'month' : 'day';
-        
+
         $query = Payments::query()
             ->join('facility_booking_log as log', 'payments.facility_log_id', '=', 'log.id')
             ->join('facility_summary as summary', 'log.id', '=', 'summary.facility_booking_log_id')
@@ -401,12 +447,14 @@ class RoomBookReportController extends Controller
             ->where('payments.refund_amount', '>', 0)
             ->whereBetween('payments.refund_date', [$startDate, $endDate]);
 
-        if ($category) $query->where('facilities.category', $category);
+        if ($category)
+            $query->where('facilities.category', $category);
 
         if ($groupBy === 'day') {
             $data = $query->select(DB::raw('DATE(payments.refund_date) as date'), DB::raw('SUM(payments.refund_amount) as total'))
                 ->groupBy('date')->orderBy('date')->get();
-            $chartData = []; $labels = [];
+            $chartData = [];
+            $labels = [];
             $curr = $startDate->copy();
             while ($curr <= $endDate) {
                 $d = $curr->format('Y-m-d');

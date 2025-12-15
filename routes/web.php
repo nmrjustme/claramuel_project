@@ -469,21 +469,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/api/expenses/recent', [ExpensesController::class, 'recentApi'])->name('api.expenses.recent');
     });
 
-    Route::prefix('admin')->name('admin.report.')->group(function () {
-
-        // 1. Main Accounting Dashboard Page
+    Route::prefix('reports')->name('admin.report.')->group(function () {
         Route::get('/', [AccountingReportController::class, 'index'])->name('index');
-
-        // 2. API Endpoint (Fetches JSON data for the charts & tables)
-        Route::get('/api/data', [AccountingReportController::class, 'monthlyIncomeApi'])->name('api');
-
-        // 3. Export to CSV
-        Route::get('/export/csv', [AccountingReportController::class, 'export'])->name('export');
-
-        // 4. Export to PDF
-        Route::get('/export/pdf', [AccountingReportController::class, 'exportPdf'])->name('export_pdf');
-
+        Route::get('/api-data', [AccountingReportController::class, 'getReportData'])->name('api');
+        Route::get('/export-csv', [AccountingReportController::class, 'exportCsv'])->name('export');
+        Route::get('/export-pdf', [AccountingReportController::class, 'exportPdf'])->name('export_pdf');
     });
+
+
 
     // Backwards-compatible redirect (optional)
     Route::redirect('/dashboard/revenue', '/admin/dashboard/revenue');

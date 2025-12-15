@@ -2,125 +2,45 @@
 
 @section('title', 'Financial Report | Mt. Claramuel Resort')
 @php
-	$active = 'reports';
+	$active = 'reports'; // Make sure this matches your sidebar logic
 @endphp
 
 @section('content_css')
 	<style>
-		/* PRINT STYLES - ALL COVERED FIX */
+		/* PRINT STYLES */
 		@media print {
-			@page {
-				size: auto;
-				margin: 5mm;
-				/* Small margins to fit more content */
-			}
-
-			/* Hide UI Elements */
-			.no-print,
-			nav,
-			aside,
-			.sidebar,
-			header,
-			.filter-section,
-			button,
-			#loadingOverlay {
-				display: none !important;
-			}
-
-			/* Reset Body */
-			body {
-				background-color: white !important;
-				font-size: 10pt;
-				/* Slightly smaller for better fit */
-				color: black;
-				margin: 0;
-				padding: 0;
-				width: 100%;
-				-webkit-print-color-adjust: exact !important;
-				print-color-adjust: exact !important;
-			}
-
-			/* Main Container Expansion */
-			.report-container {
-				box-shadow: none !important;
-				border: none !important;
-				margin: 0 !important;
-				padding: 0 !important;
-				width: 100% !important;
-				max-width: 100% !important;
-				min-height: auto !important;
-				/* Allow height to collapse/expand */
-			}
-
-			/* CRITICAL: Override Scrollbars/Overflow for Printing */
-			/* This ensures the full table prints, not just the scrollable area */
-			.overflow-x-auto,
-			.overflow-hidden {
-				overflow: visible !important;
-				height: auto !important;
-				display: block !important;
-			}
-
-			/* Table Management */
-			table {
-				width: 100% !important;
-				table-layout: auto;
-				border-collapse: collapse;
-				page-break-inside: auto;
-			}
-
-			thead {
-				display: table-header-group;
-				/* Repeats header on new page */
-			}
-
-			tr {
-				page-break-inside: avoid;
-				page-break-after: auto;
-			}
-
-			/* Reveal Truncated Text on Print */
-			.truncate {
-				white-space: normal !important;
-				overflow: visible !important;
-				text-overflow: clip !important;
-				max-width: none !important;
-			}
-
-			/* Specific Adjustments for Layout */
-			.grid {
-				display: flex !important;
-				/* Grid often behaves weirdly in print, flex is safer */
-				flex-direction: row;
-				flex-wrap: wrap;
-			}
-
-			.md\:grid-cols-4>div {
-				width: 25%;
-				border: 1px solid #eee;
-			}
-
-			/* Remove shadows/borders that look bad on paper */
-			.shadow-lg,
-			.shadow-sm {
-				box-shadow: none !important;
-			}
+			@page { size: auto; margin: 5mm; }
+			.no-print, nav, aside, .sidebar, header, .filter-section, button, #loadingOverlay { display: none !important; }
+			body { background-color: white !important; font-size: 10pt; color: black; margin: 0; padding: 0; width: 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+			.report-container { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; min-height: auto !important; }
+			.overflow-x-auto, .overflow-hidden { overflow: visible !important; height: auto !important; display: block !important; }
+			table { width: 100% !important; table-layout: auto; border-collapse: collapse; page-break-inside: auto; }
+			thead { display: table-header-group; }
+			tr { page-break-inside: avoid; page-break-after: auto; }
+			.truncate { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; max-width: none !important; }
+			.grid { display: flex !important; flex-direction: row; flex-wrap: wrap; }
+			.md\:grid-cols-4>div { width: 25%; border: 1px solid #eee; }
+			.shadow-lg, .shadow-sm { box-shadow: none !important; }
 		}
+
+		.loading-spinner {
+			display: inline-block; width: 1rem; height: 1rem; border: 2px solid #f3f4f6; border-radius: 50%;
+			border-top-color: #3b82f6; animation: spin 1s ease-in-out infinite;
+		}
+		@keyframes spin { to { transform: rotate(360deg); } }
 	</style>
 @endsection
 
 @section('content')
 
-	{{-- CONTROLS BAR (Hidden when printing) --}}
+	{{-- CONTROLS BAR --}}
 	<div class="filter-section mb-6 flex flex-col md:flex-row justify-end items-center no-print">
-		<div
-			class="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-200 w-full md:w-auto">
+		<div class="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-200 w-full md:w-auto">
 
 			{{-- 1. Filter Type Selector --}}
 			<div class="flex flex-col">
-				<label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Period Type</label>
-				<select id="periodType"
-					class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 min-w-[120px]">
+				<label for="periodType" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Period Type</label>
+				<select id="periodType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 min-w-[120px]">
 					<option value="daily">Daily</option>
 					<option value="monthly" selected>Monthly</option>
 					<option value="yearly">Yearly</option>
@@ -129,13 +49,16 @@
 
 			{{-- 2. Dynamic Inputs --}}
 			<div class="flex flex-col">
-				<label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Select Date</label>
-				<input type="date" id="dailyInput"
-					class="filter-input hidden bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
-				<input type="month" id="monthlyInput"
-					class="filter-input bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
-				<select id="yearlyInput"
-					class="filter-input hidden bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40"></select>
+				<span class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Select Date</span>
+				<div id="dailyInputGroup" class="filter-input-group hidden">
+					<input type="date" id="dailyInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
+				</div>
+				<div id="monthlyInputGroup" class="filter-input-group">
+					<input type="month" id="monthlyInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
+				</div>
+				<div id="yearlyInputGroup" class="filter-input-group hidden">
+					<select id="yearlyInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40"></select>
+				</div>
 			</div>
 
 			{{-- Divider --}}
@@ -143,71 +66,56 @@
 
 			{{-- Buttons --}}
 			<div class="flex items-end gap-2 h-full pb-0.5">
-				<button onclick="fetchFinancialData()"
-					class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors shadow-sm">
+				<button id="applyFilters" class="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors shadow-sm">
 					<i class="fas fa-filter mr-1"></i> Apply
 				</button>
-				<button onclick="window.print()"
-					class="text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors">
+				<button onclick="window.print()" class="cursor-pointer text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors">
 					<i class="fas fa-print mr-1"></i> Print
 				</button>
-				<button onclick="exportReport('pdf')"
-					class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
+				<button onclick="exportReport('pdf')" class="cursor-pointer text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
 					<i class="fas fa-file-pdf mr-1"></i> PDF
+				</button>
+                <button onclick="exportReport('csv')" class="cursor-pointer text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
+					<i class="fas fa-file-csv mr-1"></i> CSV
 				</button>
 			</div>
 		</div>
 	</div>
 
-	{{-- REPORT "PAPER" CONTAINER --}}
-	<div
-		class="report-container bg-white shadow-lg rounded-none md:rounded-lg border border-gray-200 min-h-[800px] relative">
+	{{-- REPORT CONTAINER --}}
+	<div class="report-container bg-white shadow-lg rounded-none md:rounded-lg border border-gray-200 min-h-[800px] relative">
 
 		{{-- Loading Overlay --}}
-		<div id="loadingOverlay"
-			class="absolute inset-0 bg-white/80 z-20 flex items-center justify-center backdrop-blur-sm"
-			style="display: none;">
+		<div id="loadingOverlay" class="absolute inset-0 bg-white/80 z-20 flex items-center justify-center backdrop-blur-sm" style="display: none;">
 			<div class="text-center">
-				<div
-					class="inline-block animate-spin w-10 h-10 border-4 border-gray-300 border-t-red-600 rounded-full mb-2">
-				</div>
+				<div class="inline-block animate-spin w-10 h-10 border-4 border-gray-300 border-t-red-600 rounded-full mb-2"></div>
 				<p class="text-sm text-gray-500 font-medium">Generating Financial Data...</p>
 			</div>
 		</div>
 
 		<div class="p-8 md:p-10 font-sans text-gray-800">
-
-			{{-- HEADER SECTION --}}
+			{{-- HEADER --}}
 			<div class="border-b-2 border-blue-600 pb-4 mb-6 flex justify-between items-end">
 				<div>
 					<h1 class="text-3xl font-extrabold text-blue-800 tracking-tight">FINANCIAL REPORT</h1>
-					<p class="text-xs text-gray-500 mt-1 uppercase tracking-wide">
-						{{ config('app.name') }}
-					</p>
+					<p class="text-xs text-gray-500 mt-1 uppercase tracking-wide">{{ config('app.name', 'Mt. Claramuel Resort') }}</p>
 				</div>
 				<div class="text-right">
-					<p class="text-xs text-gray-500">Generated: <span
-							id="generatedDate">{{ now()->format('M d, Y h:i A') }}</span></p>
-					<p class="text-sm font-bold text-gray-800 mt-1">
-						Period: <span id="activeFilterLabel" class="text-blue-600">Loading...</span>
-					</p>
+					<p class="text-xs text-gray-500">Generated: <span id="generatedDate">{{ now()->format('M d, Y h:i A') }}</span></p>
+					<p class="text-sm font-bold text-gray-800 mt-1">Period: <span id="activeFilterLabel" class="text-blue-600">Loading...</span></p>
 				</div>
 			</div>
 
 			{{-- SUMMARY CARDS --}}
 			<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
 				<div class="grid grid-cols-1 md:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-					{{-- Total Revenue --}}
 					<div class="text-center px-2">
-						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Total Revenue
-						</div>
-						<div class="text-2xl font-bold text-emerald-600" id="displayTotalIncome">₱0.00</div>
+						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Total Revenue</div>
+						<div class="text-2xl font-bold text-emerald-600" id="displayTotalIncome"><span class="loading-spinner"></span></div>
 						<div class="text-[10px] text-gray-400 mt-1">Gross Income</div>
 					</div>
-					{{-- Breakdown --}}
 					<div class="px-2 pt-4 md:pt-0">
-						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-2 text-center">
-							Revenue Sources</div>
+						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-2 text-center">Revenue Sources</div>
 						<div class="flex flex-col gap-1">
 							<div class="text-xs flex justify-between px-2">
 								<span class="text-gray-500">Day Tours:</span>
@@ -219,17 +127,14 @@
 							</div>
 						</div>
 					</div>
-					{{-- Expenses --}}
 					<div class="text-center px-2 pt-4 md:pt-0">
-						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Total Expenses
-						</div>
-						<div class="text-2xl font-bold text-red-600" id="displayTotalExpense">₱0.00</div>
+						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Total Expenses</div>
+						<div class="text-2xl font-bold text-red-600" id="displayTotalExpense"><span class="loading-spinner"></span></div>
 						<div class="text-[10px] text-gray-400 mt-1">Operational Costs</div>
 					</div>
-					{{-- Net Profit --}}
 					<div class="text-center px-2 pt-4 md:pt-0">
 						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Net Profit</div>
-						<div class="text-2xl font-bold text-gray-800" id="displayNetProfit">₱0.00</div>
+						<div class="text-2xl font-bold text-gray-800" id="displayNetProfit"><span class="loading-spinner"></span></div>
 						<div class="text-[10px] text-gray-400 mt-1">Income - Expenses</div>
 					</div>
 				</div>
@@ -241,7 +146,6 @@
 					<div class="w-1 h-4 bg-blue-600 mr-2"></div>
 					<h3 class="text-xs font-bold text-gray-700 uppercase">Summary Breakdown</h3>
 				</div>
-
 				<div class="overflow-hidden border border-gray-200 rounded-sm">
 					<table class="w-full text-xs text-left">
 						<thead class="bg-blue-600 text-white uppercase font-semibold">
@@ -254,9 +158,7 @@
 								<th class="px-4 py-2 text-right">Net Profit</th>
 							</tr>
 						</thead>
-						<tbody id="breakdownTableBody" class="divide-y divide-gray-200">
-							{{-- JS Populated --}}
-						</tbody>
+						<tbody id="breakdownTableBody" class="divide-y divide-gray-200"></tbody>
 						<tfoot class="bg-gray-100 font-bold border-t-2 border-gray-400">
 							<tr>
 								<td class="px-4 py-2">GRAND TOTAL</td>
@@ -277,8 +179,6 @@
 					<div class="w-1 h-4 bg-blue-600 mr-2"></div>
 					<h3 class="text-xs font-bold text-gray-700 uppercase">Detailed Transaction Log</h3>
 				</div>
-
-				{{-- Note: 'overflow-x-auto' causes print cutoffs. The @media print override fixes this. --}}
 				<div class="overflow-x-auto border border-gray-200 rounded-sm">
 					<table class="w-full text-xs text-left">
 						<thead class="bg-gray-100 text-gray-600 uppercase font-semibold border-b border-gray-200">
@@ -293,17 +193,12 @@
 							</tr>
 						</thead>
 						<tbody id="transactionsTableBody" class="divide-y divide-gray-200">
-							<tr>
-								<td colspan="7" class="px-4 py-6 text-center text-gray-400 italic">
-									Loading transactions...
-								</td>
-							</tr>
+							<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400 italic">Loading...</td></tr>
 						</tbody>
 					</table>
 				</div>
 			</div>
 
-			{{-- Footer Metadata --}}
 			<div class="mt-8 pt-4 border-t border-gray-100 text-center text-[10px] text-gray-400">
 				System Generated Report | {{ config('app.name') }} | {{ now()->year }}
 			</div>
@@ -312,12 +207,20 @@
 @endsection
 
 @section('content_js')
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 	<script>
 		const moneyFormat = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 });
 
-		document.addEventListener('DOMContentLoaded', function () {
+		$(document).ready(function () {
 			initializeFilters();
-			fetchFinancialData();
+			loadData(); 
+
+			$('#periodType').change(handlePeriodChange);
+			$('#applyFilters').click(loadData);
+			$('#dailyInput, #monthlyInput, #yearlyInput').keypress(function (e) {
+				if (e.which === 13) loadData();
+			});
 		});
 
 		function initializeFilters() {
@@ -326,85 +229,77 @@
 			const month = String(today.getMonth() + 1).padStart(2, '0');
 			const day = String(today.getDate()).padStart(2, '0');
 
-			const yearSelect = document.getElementById('yearlyInput');
-			yearSelect.innerHTML = '';
+			const yearSelect = $('#yearlyInput');
+			yearSelect.empty();
 			for (let y = year + 2; y >= year - 5; y--) {
-				const option = document.createElement('option');
-				option.value = y;
-				option.text = y;
-				yearSelect.appendChild(option);
+				yearSelect.append(new Option(y, y));
 			}
-			yearSelect.value = year;
+			yearSelect.val(year);
 
-			document.getElementById('dailyInput').value = `${year}-${month}-${day}`;
-			document.getElementById('monthlyInput').value = `${year}-${month}`;
-			document.getElementById('periodType').addEventListener('change', handlePeriodChange);
+			$('#dailyInput').val(`${year}-${month}-${day}`);
+			$('#monthlyInput').val(`${year}-${month}`);
 			handlePeriodChange();
 		}
 
 		function handlePeriodChange() {
-			const period = document.getElementById('periodType').value;
-			document.getElementById('dailyInput').classList.add('hidden');
-			document.getElementById('monthlyInput').classList.add('hidden');
-			document.getElementById('yearlyInput').classList.add('hidden');
-
-			if (period === 'daily') document.getElementById('dailyInput').classList.remove('hidden');
-			else if (period === 'monthly') document.getElementById('monthlyInput').classList.remove('hidden');
-			else if (period === 'yearly') document.getElementById('yearlyInput').classList.remove('hidden');
+			const period = $('#periodType').val();
+			$('.filter-input-group').addClass('hidden');
+			if (period === 'daily') $('#dailyInputGroup').removeClass('hidden');
+			else if (period === 'monthly') $('#monthlyInputGroup').removeClass('hidden');
+			else if (period === 'yearly') $('#yearlyInputGroup').removeClass('hidden');
 		}
 
 		function getFilterValue() {
-			const period = document.getElementById('periodType').value;
-			if (period === 'daily') return document.getElementById('dailyInput').value;
-			if (period === 'monthly') return document.getElementById('monthlyInput').value;
-			if (period === 'yearly') return document.getElementById('yearlyInput').value;
+			const period = $('#periodType').val();
+			if (period === 'daily') return $('#dailyInput').val();
+			if (period === 'monthly') return $('#monthlyInput').val();
+			if (period === 'yearly') return $('#yearlyInput').val();
 			return '';
 		}
 
-		function getFormattedDateLabel(period, value) {
-			if (!value) return '-';
-			if (period === 'daily') return new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-			if (period === 'monthly') {
-				const [y, m] = value.split('-');
-				const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-				return `${months[parseInt(m) - 1]} ${y}`;
-			}
-			if (period === 'yearly') return `Year ${value}`;
-		}
-
-		function fetchFinancialData() {
-			const period = document.getElementById('periodType').value;
+		async function loadData() {
+			const period = $('#periodType').val();
 			const filterValue = getFilterValue();
-			const loader = document.getElementById('loadingOverlay');
 
 			if (!filterValue) { alert('Please select a valid date/month/year'); return; }
 
-			document.getElementById('activeFilterLabel').innerText = getFormattedDateLabel(period, filterValue);
-			document.getElementById('generatedDate').innerText = new Date().toLocaleString();
-			loader.style.display = 'flex';
+			const $btn = $('#applyFilters');
+			const originalBtnText = $btn.html();
+			$btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Loading...');
+			$('#loadingOverlay').fadeIn(200);
+			$('#activeFilterLabel').text(getLabelText(period, filterValue));
+			$('#generatedDate').text(new Date().toLocaleString());
 
+			// Updated Route Name to match new Controller
 			const url = `{{ route('admin.report.api') }}?period=${period}&filter_value=${filterValue}`;
 
-			fetch(url)
-				.then(response => response.json())
-				.then(data => {
-					updateSummaryCards(data);
-					updateBreakdownTable(data.combined);
-					updateTransactionsTable(data.transactions);
-				})
-				.catch(error => console.error('Error:', error))
-				.finally(() => loader.style.display = 'none');
+			try {
+				const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+				if (!response.ok) throw new Error('Failed to fetch data');
+				const data = await response.json();
+
+				updateSummaryCards(data);
+				updateBreakdownTable(data.combined);
+				updateTransactionsTable(data.transactions);
+
+			} catch (error) {
+				console.error('Error:', error);
+				alert('Failed to load data.');
+			} finally {
+				$btn.prop('disabled', false).html(originalBtnText);
+				$('#loadingOverlay').fadeOut(200);
+			}
 		}
 
 		function updateSummaryCards(data) {
 			const format = (val) => moneyFormat.format(val || 0);
 
-			document.getElementById('displayTotalIncome').innerText = format(data.totalIncome);
-			document.getElementById('displayTotalExpense').innerText = format(data.totalExpense);
+			$('#displayTotalIncome').text(format(data.totalIncome));
+			$('#displayTotalExpense').text(format(data.totalExpense));
 
-			const elNet = document.getElementById('displayNetProfit');
-			elNet.innerText = format(data.netTotal);
-			elNet.className = `text-2xl font-bold ${data.netTotal >= 0 ? 'text-emerald-600' : 'text-red-600'}`;
+			const $netEl = $('#displayNetProfit');
+			$netEl.text(format(data.netTotal));
+			$netEl.removeClass('text-emerald-600 text-red-600').addClass(data.netTotal >= 0 ? 'text-emerald-600' : 'text-red-600');
 
 			let roomTotal = 0, dayTourTotal = 0;
 			if (data.combined) {
@@ -414,50 +309,55 @@
 				});
 			}
 
-			document.getElementById('displayRoom').innerText = format(roomTotal);
-			document.getElementById('displayDayTour').innerText = format(dayTourTotal);
-			document.getElementById('footerRoom').innerText = format(roomTotal);
-			document.getElementById('footerDayTour').innerText = format(dayTourTotal);
-			document.getElementById('footerExpense').innerText = format(data.totalExpense);
-			document.getElementById('footerTotal').innerText = format(data.totalIncome);
-			document.getElementById('footerNet').innerText = format(data.netTotal);
-			document.getElementById('footerNet').className = `px-4 py-2 text-right font-bold ${data.netTotal >= 0 ? 'text-emerald-700' : 'text-red-600'}`;
+			$('#displayRoom').text(format(roomTotal));
+			$('#displayDayTour').text(format(dayTourTotal));
+			
+			// Footer totals
+			$('#footerRoom').text(format(roomTotal));
+			$('#footerDayTour').text(format(dayTourTotal));
+			$('#footerExpense').text(format(data.totalExpense));
+			$('#footerTotal').text(format(data.totalIncome));
+			const $footerNet = $('#footerNet');
+			$footerNet.text(format(data.netTotal));
+			$footerNet.removeClass('text-emerald-700 text-red-600').addClass(data.netTotal >= 0 ? 'text-emerald-700' : 'text-red-600');
 		}
 
 		function updateBreakdownTable(data) {
-			const tbody = document.getElementById('breakdownTableBody');
-			tbody.innerHTML = '';
+			const $tbody = $('#breakdownTableBody');
+			$tbody.empty();
+
 			if (!data || data.length === 0) {
-				tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-gray-400">No data found.</td></tr>';
+				$tbody.html('<tr><td colspan="6" class="px-4 py-4 text-center text-gray-400">No data found.</td></tr>');
 				return;
 			}
+
 			data.forEach((row, index) => {
-				const tr = document.createElement('tr');
-				tr.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+				const bgClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
 				const netClass = row.net >= 0 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold';
-				tr.innerHTML = `
+
+				$tbody.append(`
+					<tr class="${bgClass}">
 						<td class="px-4 py-2 font-medium text-gray-700">${row.label}</td>
 						<td class="px-4 py-2 text-right text-emerald-600">${moneyFormat.format(row.room)}</td>
 						<td class="px-4 py-2 text-right text-blue-600">${moneyFormat.format(row.daytour)}</td>
 						<td class="px-4 py-2 text-right text-red-500">${moneyFormat.format(row.expense)}</td>
 						<td class="px-4 py-2 text-right font-semibold text-gray-800">${moneyFormat.format(row.income)}</td>
 						<td class="px-4 py-2 text-right ${netClass}">${moneyFormat.format(row.net)}</td>
-					`;
-				tbody.appendChild(tr);
+					</tr>
+				`);
 			});
 		}
 
 		function updateTransactionsTable(transactions) {
-			const tbody = document.getElementById('transactionsTableBody');
-			tbody.innerHTML = '';
+			const $tbody = $('#transactionsTableBody');
+			$tbody.empty();
+
 			if (!transactions || transactions.length === 0) {
-				tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">No transactions found.</td></tr>';
+				$tbody.html('<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">No transactions found.</td></tr>');
 				return;
 			}
-			transactions.forEach(txn => {
-				const tr = document.createElement('tr');
-				tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0';
 
+			transactions.forEach(txn => {
 				let badgeClass = 'bg-gray-100 text-gray-800';
 				if (txn.color === 'green') badgeClass = 'bg-emerald-100 text-emerald-800';
 				else if (txn.color === 'blue') badgeClass = 'bg-blue-100 text-blue-800';
@@ -465,7 +365,8 @@
 
 				const amountClass = txn.amount < 0 ? 'text-red-600' : 'text-emerald-600';
 
-				tr.innerHTML = `
+				$tbody.append(`
+					<tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
 						<td class="px-3 py-2 text-gray-600 whitespace-nowrap">${txn.date}</td>
 						<td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${badgeClass}">${txn.type}</span></td>
 						<td class="px-3 py-2 font-mono text-gray-500 text-[10px]">${txn.reference}</td>
@@ -473,18 +374,34 @@
 						<td class="px-3 py-2 text-gray-500 truncate max-w-[200px]" title="${txn.description}">${txn.description}</td>
 						<td class="px-3 py-2 text-gray-600 text-[11px]">${txn.method}</td>
 						<td class="px-3 py-2 text-right font-bold ${amountClass}">${moneyFormat.format(Math.abs(txn.amount))}</td>
-					`;
-				tbody.appendChild(tr);
+					</tr>
+				`);
 			});
 		}
 
-		function exportReport(type) {
-			const period = document.getElementById('periodType').value;
-			const filterValue = getFilterValue();
-			if (type === 'pdf') {
-				const url = `{{ route('admin.report.export_pdf') }}?period=${period}&filter_value=${filterValue}`;
-				window.open(url, '_blank');
+		function getLabelText(period, value) {
+			if (!value) return '-';
+			if (period === 'daily') return new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+			if (period === 'monthly') {
+				const [y, m] = value.split('-');
+				const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+				return `${months[parseInt(m) - 1]} ${y}`;
 			}
+			if (period === 'yearly') return `Year ${value}`;
+			return '';
+		}
+
+		function exportReport(type) {
+			const period = $('#periodType').val();
+			const filterValue = getFilterValue();
+			let url = '';
+
+			if (type === 'pdf') {
+				url = `{{ route('admin.report.export_pdf') }}?period=${period}&filter_value=${filterValue}`;
+			} else if (type === 'csv') {
+				url = `{{ route('admin.report.export') }}?period=${period}&filter_value=${filterValue}`;
+			}
+			if(url) window.open(url, '_blank');
 		}
 	</script>
 @endsection
