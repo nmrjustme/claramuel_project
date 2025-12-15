@@ -138,26 +138,27 @@ class AccountingService
 
     public function calculateDateRange($periodType, $filterValue)
     {
-        $from = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $to = Carbon::now()->endOfMonth()->format('Y-m-d');
+        // Defaults
+        $from = Carbon::now()->startOfMonth()->format('Y-m-d H:i:s');
+        $to = Carbon::now()->endOfMonth()->endOfDay()->format('Y-m-d H:i:s');
         $groupingMode = 'daily_breakdown';
 
         if (!$filterValue) return compact('from', 'to', 'groupingMode');
 
         try {
             if ($periodType === 'daily') {
-                $from = $filterValue;
+                $from = Carbon::parse($filterValue)->startOfDay()->toDateTimeString();
                 $to = Carbon::parse($filterValue)->endOfDay()->toDateTimeString();
                 $groupingMode = 'daily_single';
             } elseif ($periodType === 'monthly') {
                 $date = Carbon::parse($filterValue);
-                $from = $date->startOfMonth()->format('Y-m-d');
-                $to = $date->endOfMonth()->format('Y-m-d');
+                $from = $date->startOfMonth()->startOfDay()->toDateTimeString();
+                $to = $date->endOfMonth()->endOfDay()->toDateTimeString(); // FIX: Ensures coverage until 23:59:59
                 $groupingMode = 'daily_breakdown';
             } elseif ($periodType === 'yearly') {
                 $date = Carbon::createFromFormat('Y', $filterValue);
-                $from = $date->startOfYear()->format('Y-m-d');
-                $to = $date->endOfYear()->format('Y-m-d');
+                $from = $date->startOfYear()->startOfDay()->toDateTimeString();
+                $to = $date->endOfYear()->endOfDay()->toDateTimeString(); // FIX: Ensures coverage until 23:59:59
                 $groupingMode = 'monthly_breakdown';
             }
         } catch (\Exception $e) {
@@ -196,7 +197,7 @@ class AccountingService
         if ($periodType === 'daily' && empty($combined)) {
             $dateLabel = $from ? Carbon::parse($from)->format('M d Y') : 'Selected Date';
             $combined[] = [
-                'label' => $dateLabel, 'room' => 0, 'daytour' => 0, 'expense' => 0, 'income' => 0, 'net' => 0
+                'label' => $dateLabel, 'room' => 0.00, 'daytour' => 0.00, 'expense' => 0.00, 'income' => 0.00, 'net' => 0.00
             ];
         }
 
