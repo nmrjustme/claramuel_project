@@ -9,25 +9,105 @@
 	<style>
 		/* PRINT STYLES */
 		@media print {
-			@page { size: auto; margin: 5mm; }
-			.no-print, nav, aside, .sidebar, header, .filter-section, button, #loadingOverlay { display: none !important; }
-			body { background-color: white !important; font-size: 10pt; color: black; margin: 0; padding: 0; width: 100%; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-			.report-container { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; min-height: auto !important; }
-			.overflow-x-auto, .overflow-hidden { overflow: visible !important; height: auto !important; display: block !important; }
-			table { width: 100% !important; table-layout: auto; border-collapse: collapse; page-break-inside: auto; }
-			thead { display: table-header-group; }
-			tr { page-break-inside: avoid; page-break-after: auto; }
-			.truncate { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; max-width: none !important; }
-			.grid { display: flex !important; flex-direction: row; flex-wrap: wrap; }
-			.md\:grid-cols-4>div { width: 25%; border: 1px solid #eee; }
-			.shadow-lg, .shadow-sm { box-shadow: none !important; }
+			@page {
+				size: auto;
+				margin: 5mm;
+			}
+
+			.no-print,
+			nav,
+			aside,
+			.sidebar,
+			header,
+			.filter-section,
+			button,
+			#loadingOverlay {
+				display: none !important;
+			}
+
+			body {
+				background-color: white !important;
+				font-size: 10pt;
+				color: black;
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				-webkit-print-color-adjust: exact !important;
+				print-color-adjust: exact !important;
+			}
+
+			.report-container {
+				box-shadow: none !important;
+				border: none !important;
+				margin: 0 !important;
+				padding: 0 !important;
+				width: 100% !important;
+				max-width: 100% !important;
+				min-height: auto !important;
+			}
+
+			.overflow-x-auto,
+			.overflow-hidden {
+				overflow: visible !important;
+				height: auto !important;
+				display: block !important;
+			}
+
+			table {
+				width: 100% !important;
+				table-layout: auto;
+				border-collapse: collapse;
+				page-break-inside: auto;
+			}
+
+			thead {
+				display: table-header-group;
+			}
+
+			tr {
+				page-break-inside: avoid;
+				page-break-after: auto;
+			}
+
+			.truncate {
+				white-space: normal !important;
+				overflow: visible !important;
+				text-overflow: clip !important;
+				max-width: none !important;
+			}
+
+			.grid {
+				display: flex !important;
+				flex-direction: row;
+				flex-wrap: wrap;
+			}
+
+			.md\:grid-cols-4>div {
+				width: 25%;
+				border: 1px solid #eee;
+			}
+
+			.shadow-lg,
+			.shadow-sm {
+				box-shadow: none !important;
+			}
 		}
 
 		.loading-spinner {
-			display: inline-block; width: 1rem; height: 1rem; border: 2px solid #f3f4f6; border-radius: 50%;
-			border-top-color: #3b82f6; animation: spin 1s ease-in-out infinite;
+			display: inline-block;
+			width: 1rem;
+			height: 1rem;
+			border: 2px solid #f3f4f6;
+			border-radius: 50%;
+			border-top-color: #3b82f6;
+			animation: spin 1s ease-in-out infinite;
 		}
-		@keyframes spin { to { transform: rotate(360deg); } }
+
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
+		}
 	</style>
 @endsection
 
@@ -35,12 +115,15 @@
 
 	{{-- CONTROLS BAR --}}
 	<div class="filter-section mb-6 flex flex-col md:flex-row justify-end items-center no-print">
-		<div class="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-200 w-full md:w-auto">
+		<div
+			class="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-200 w-full md:w-auto">
 
 			{{-- 1. Filter Type Selector --}}
 			<div class="flex flex-col">
-				<label for="periodType" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Period Type</label>
-				<select id="periodType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 min-w-[120px]">
+				<label for="periodType" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Period
+					Type</label>
+				<select id="periodType"
+					class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 min-w-[120px]">
 					<option value="daily">Daily</option>
 					<option value="monthly" selected>Monthly</option>
 					<option value="yearly">Yearly</option>
@@ -51,13 +134,16 @@
 			<div class="flex flex-col">
 				<span class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Select Date</span>
 				<div id="dailyInputGroup" class="filter-input-group hidden">
-					<input type="date" id="dailyInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
+					<input type="date" id="dailyInput"
+						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
 				</div>
 				<div id="monthlyInputGroup" class="filter-input-group">
-					<input type="month" id="monthlyInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
+					<input type="month" id="monthlyInput"
+						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40">
 				</div>
 				<div id="yearlyInputGroup" class="filter-input-group hidden">
-					<select id="yearlyInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40"></select>
+					<select id="yearlyInput"
+						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-40"></select>
 				</div>
 			</div>
 
@@ -66,16 +152,20 @@
 
 			{{-- Buttons --}}
 			<div class="flex items-end gap-2 h-full pb-0.5">
-				<button id="applyFilters" class="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors shadow-sm">
+				<button id="applyFilters"
+					class="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors shadow-sm">
 					<i class="fas fa-filter mr-1"></i> Apply
 				</button>
-				<button onclick="window.print()" class="cursor-pointer text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors">
+				<button onclick="window.print()"
+					class="cursor-pointer text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors">
 					<i class="fas fa-print mr-1"></i> Print
 				</button>
-				<button onclick="exportReport('pdf')" class="cursor-pointer text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
+				<button onclick="exportReport('pdf')"
+					class="cursor-pointer text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
 					<i class="fas fa-file-pdf mr-1"></i> PDF
 				</button>
-                <button onclick="exportReport('csv')" class="cursor-pointer text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
+				<button onclick="exportReport('csv')"
+					class="cursor-pointer text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
 					<i class="fas fa-file-csv mr-1"></i> CSV
 				</button>
 			</div>
@@ -83,12 +173,17 @@
 	</div>
 
 	{{-- REPORT CONTAINER --}}
-	<div class="report-container bg-white shadow-lg rounded-none md:rounded-lg border border-gray-200 min-h-[800px] relative">
+	<div
+		class="report-container bg-white shadow-lg rounded-none md:rounded-lg border border-gray-200 min-h-[800px] relative">
 
 		{{-- Loading Overlay --}}
-		<div id="loadingOverlay" class="absolute inset-0 bg-white/80 z-20 flex items-center justify-center backdrop-blur-sm" style="display: none;">
+		<div id="loadingOverlay"
+			class="absolute inset-0 bg-white/80 z-20 flex items-center justify-center backdrop-blur-sm"
+			style="display: none;">
 			<div class="text-center">
-				<div class="inline-block animate-spin w-10 h-10 border-4 border-gray-300 border-t-red-600 rounded-full mb-2"></div>
+				<div
+					class="inline-block animate-spin w-10 h-10 border-4 border-gray-300 border-t-red-600 rounded-full mb-2">
+				</div>
 				<p class="text-sm text-gray-500 font-medium">Generating Financial Data...</p>
 			</div>
 		</div>
@@ -98,53 +193,82 @@
 			<div class="border-b-2 border-blue-600 pb-4 mb-6 flex justify-between items-end">
 				<div>
 					<h1 class="text-3xl font-extrabold text-blue-800 tracking-tight">FINANCIAL REPORT</h1>
-					<p class="text-xs text-gray-500 mt-1 uppercase tracking-wide">{{ config('app.name', 'Mt. Claramuel Resort') }}</p>
+					<p class="text-xs text-gray-500 mt-1 uppercase tracking-wide">
+						{{ config('app.name', 'Mt. Claramuel Resort') }}
+					</p>
 				</div>
 				<div class="text-right">
-					<p class="text-xs text-gray-500">Generated: <span id="generatedDate">{{ now()->format('M d, Y h:i A') }}</span></p>
-					<p class="text-sm font-bold text-gray-800 mt-1">Period: <span id="activeFilterLabel" class="text-blue-600">Loading...</span></p>
+					<p class="text-xs text-gray-500">Generated: <span
+							id="generatedDate">{{ now()->format('M d, Y h:i A') }}</span></p>
+					<p class="text-sm font-bold text-gray-800 mt-1">Period: <span id="activeFilterLabel"
+							class="text-blue-600">Loading...</span></p>
 				</div>
 			</div>
 
 			{{-- SUMMARY CARDS --}}
-			<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-					<div class="text-center px-2">
-						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Total Revenue</div>
-						<div class="text-2xl font-bold text-emerald-600" id="displayTotalIncome"><span class="loading-spinner"></span></div>
+			<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6 mb-8">
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 
+				 divide-y sm:divide-y-0 sm:divide-x divide-gray-300">
+
+					<!-- Total Revenue -->
+					<div class="flex flex-col items-center text-center px-2 py-3">
+						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">
+							Total Revenue
+						</div>
+						<div class="text-xl sm:text-2xl font-bold text-emerald-600" id="displayTotalIncome">
+							<span class="loading-spinner"></span>
+						</div>
 						<div class="text-[10px] text-gray-400 mt-1">Gross Income</div>
 					</div>
-					<div class="px-2 pt-4 md:pt-0">
-						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-2 text-center">Revenue Sources</div>
-						<div class="flex flex-col gap-1">
-							<div class="text-xs flex justify-between px-2">
-								<span class="text-gray-500">Day Tours:</span>
+
+					<!-- Revenue Sources -->
+					<div class="px-2 py-3">
+						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-2 text-center">
+							Revenue Sources
+						</div>
+						<div class="flex flex-col gap-2">
+							<div class="text-xs flex justify-between">
+								<span class="text-gray-500">Day Tours</span>
 								<span class="font-bold text-blue-700" id="displayDayTour">₱0.00</span>
 							</div>
-							<div class="text-xs flex justify-between px-2">
-								<span class="text-gray-500">Rooms:</span>
+							<div class="text-xs flex justify-between">
+								<span class="text-gray-500">Rooms</span>
 								<span class="font-bold text-emerald-700" id="displayRoom">₱0.00</span>
 							</div>
 						</div>
 					</div>
-					<div class="text-center px-2 pt-4 md:pt-0">
-						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Total Expenses</div>
-						<div class="text-2xl font-bold text-red-600" id="displayTotalExpense"><span class="loading-spinner"></span></div>
+
+					<!-- Total Expenses -->
+					<div class="flex flex-col items-center text-center px-2 py-3">
+						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">
+							Total Expenses
+						</div>
+						<div class="text-xl sm:text-2xl font-bold text-red-600" id="displayTotalExpense">
+							<span class="loading-spinner"></span>
+						</div>
 						<div class="text-[10px] text-gray-400 mt-1">Operational Costs</div>
 					</div>
-					<div class="text-center px-2 pt-4 md:pt-0">
-						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">Net Profit</div>
-						<div class="text-2xl font-bold text-gray-800" id="displayNetProfit"><span class="loading-spinner"></span></div>
-						<div class="text-[10px] text-gray-400 mt-1">Income - Expenses</div>
+
+					<!-- Net Profit -->
+					<div class="flex flex-col items-center text-center px-2 py-3">
+						<div class="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1">
+							Net Profit
+						</div>
+						<div class="text-xl sm:text-2xl font-bold text-gray-800" id="displayNetProfit">
+							<span class="loading-spinner"></span>
+						</div>
+						<div class="text-[10px] text-gray-400 mt-1">Income − Expenses</div>
 					</div>
+
 				</div>
 			</div>
+
 
 			{{-- SECTION 1: PERIOD BREAKDOWN --}}
 			<div class="mb-8 break-inside-avoid">
 				<div class="flex items-center mb-3">
 					<div class="w-1 h-4 bg-blue-600 mr-2"></div>
-					<h3 class="text-xs font-bold text-gray-700 uppercase">Summary Breakdown</h3>
+					<h3 class="text-xs font-bold text-gray-700 uppercase">Period Summary Breakdown</h3>
 				</div>
 				<div class="overflow-hidden border border-gray-200 rounded-sm">
 					<table class="w-full text-xs text-left">
@@ -193,7 +317,9 @@
 							</tr>
 						</thead>
 						<tbody id="transactionsTableBody" class="divide-y divide-gray-200">
-							<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400 italic">Loading...</td></tr>
+							<tr>
+								<td colspan="7" class="px-4 py-6 text-center text-gray-400 italic">Loading...</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -214,7 +340,7 @@
 
 		$(document).ready(function () {
 			initializeFilters();
-			loadData(); 
+			loadData();
 
 			$('#periodType').change(handlePeriodChange);
 			$('#applyFilters').click(loadData);
@@ -311,7 +437,7 @@
 
 			$('#displayRoom').text(format(roomTotal));
 			$('#displayDayTour').text(format(dayTourTotal));
-			
+
 			// Footer totals
 			$('#footerRoom').text(format(roomTotal));
 			$('#footerDayTour').text(format(dayTourTotal));
@@ -336,15 +462,15 @@
 				const netClass = row.net >= 0 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold';
 
 				$tbody.append(`
-					<tr class="${bgClass}">
-						<td class="px-4 py-2 font-medium text-gray-700">${row.label}</td>
-						<td class="px-4 py-2 text-right text-emerald-600">${moneyFormat.format(row.room)}</td>
-						<td class="px-4 py-2 text-right text-blue-600">${moneyFormat.format(row.daytour)}</td>
-						<td class="px-4 py-2 text-right text-red-500">${moneyFormat.format(row.expense)}</td>
-						<td class="px-4 py-2 text-right font-semibold text-gray-800">${moneyFormat.format(row.income)}</td>
-						<td class="px-4 py-2 text-right ${netClass}">${moneyFormat.format(row.net)}</td>
-					</tr>
-				`);
+							<tr class="${bgClass}">
+								<td class="px-4 py-2 font-medium text-gray-700">${row.label}</td>
+								<td class="px-4 py-2 text-right text-emerald-600">${moneyFormat.format(row.room)}</td>
+								<td class="px-4 py-2 text-right text-blue-600">${moneyFormat.format(row.daytour)}</td>
+								<td class="px-4 py-2 text-right text-red-500">${moneyFormat.format(row.expense)}</td>
+								<td class="px-4 py-2 text-right font-semibold text-gray-800">${moneyFormat.format(row.income)}</td>
+								<td class="px-4 py-2 text-right ${netClass}">${moneyFormat.format(row.net)}</td>
+							</tr>
+						`);
 			});
 		}
 
@@ -366,16 +492,16 @@
 				const amountClass = txn.amount < 0 ? 'text-red-600' : 'text-emerald-600';
 
 				$tbody.append(`
-					<tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
-						<td class="px-3 py-2 text-gray-600 whitespace-nowrap">${txn.date}</td>
-						<td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${badgeClass}">${txn.type}</span></td>
-						<td class="px-3 py-2 font-mono text-gray-500 text-[10px]">${txn.reference}</td>
-						<td class="px-3 py-2 font-medium text-gray-800 truncate max-w-[150px]" title="${txn.customer}">${txn.customer}</td>
-						<td class="px-3 py-2 text-gray-500 truncate max-w-[200px]" title="${txn.description}">${txn.description}</td>
-						<td class="px-3 py-2 text-gray-600 text-[11px]">${txn.method}</td>
-						<td class="px-3 py-2 text-right font-bold ${amountClass}">${moneyFormat.format(Math.abs(txn.amount))}</td>
-					</tr>
-				`);
+							<tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+								<td class="px-3 py-2 text-gray-600 whitespace-nowrap">${txn.date}</td>
+								<td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${badgeClass}">${txn.type}</span></td>
+								<td class="px-3 py-2 font-mono text-gray-500 text-[10px]">${txn.reference}</td>
+								<td class="px-3 py-2 font-medium text-gray-800 truncate max-w-[150px]" title="${txn.customer}">${txn.customer}</td>
+								<td class="px-3 py-2 text-gray-500 truncate max-w-[200px]" title="${txn.description}">${txn.description}</td>
+								<td class="px-3 py-2 text-gray-600 text-[11px]">${txn.method}</td>
+								<td class="px-3 py-2 text-right font-bold ${amountClass}">${moneyFormat.format(Math.abs(txn.amount))}</td>
+							</tr>
+						`);
 			});
 		}
 
@@ -401,7 +527,7 @@
 			} else if (type === 'csv') {
 				url = `{{ route('admin.report.export') }}?period=${period}&filter_value=${filterValue}`;
 			}
-			if(url) window.open(url, '_blank');
+			if (url) window.open(url, '_blank');
 		}
 	</script>
 @endsection
