@@ -129,7 +129,8 @@
                                 class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-1 border border-gray-100 invisible opacity-0 group-focus-within:visible group-focus-within:opacity-100 transition-all duration-200 transform origin-top-right z-50">
                                 <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
                                     <p class="text-sm text-gray-900 font-bold">{{ Auth::user()->firstname }}
-                                        {{ Auth::user()->lastname }}</p>
+                                        {{ Auth::user()->lastname }}
+                                    </p>
                                     <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
                                 </div>
 
@@ -175,6 +176,7 @@
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             const toggleBtn = document.getElementById('toggleSidebarMobile');
+            const closeBtn = document.getElementById('sidebar-close'); // 1. Select the close button
 
             // --- Toggle Sidebar Function ---
             function toggleSidebar() {
@@ -194,6 +196,7 @@
             // --- Event Listeners ---
             if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
             if (overlay) overlay.addEventListener('click', toggleSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', toggleSidebar); // 2. Add the listener here
 
             // Close sidebar when clicking a link inside it (Mobile UX improvement)
             sidebar.querySelectorAll('a').forEach(link => {
