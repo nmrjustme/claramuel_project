@@ -424,7 +424,7 @@ $active = 'dashboard';
 
 @section('content')
 
-<div class="min-h-screen px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
+
      <!-- Header with animated gradient -->
      <div class="rounded-lg mb-4 sm:mb-6 overflow-hidden">
           <div class="bg-gradient-to-r from-red-800 to-red-700 p-4 sm:p-6 md:p-8 text-white rounded-lg relative overflow-hidden">
@@ -743,7 +743,7 @@ $active = 'dashboard';
 
           @include('admin.inquirers.recent_inquirers')
      </div>
-</div>
+
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection

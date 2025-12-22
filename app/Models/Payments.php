@@ -56,4 +56,9 @@ class Payments extends Model
     {
         return $this->belongsTo(FacilityBookingLog::class, 'facility_log_id');
     }
+
+    public function booking()
+    {
+        return $this->belongsTo(FacilityBookingLog::class, 'facility_log_id');
+    }
 }

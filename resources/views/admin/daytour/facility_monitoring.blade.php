@@ -23,7 +23,7 @@
 
 
 @section('content')
-<div x-data="{ activeTab: 'all', loading: false }" class="min-h-screen p-6 bg-gray-50">
+<div x-data="{ activeTab: 'all', loading: false }" class="min-h-screen p-6">
     {{-- FontAwesome, AlpineJS & Flatpickr --}}
    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -33,7 +33,7 @@
     {{-- Header --}}
     <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
         <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Facility Monitoring</h1>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">Facility Monitoring</h1>
             <p class="mt-1 text-gray-600 text-sm">
                 Overview for <time datetime="{{ $date }}" class="font-semibold text-red-600">{{ \Carbon\Carbon::parse($date)->format('F d, Y') }}</time>
             </p>

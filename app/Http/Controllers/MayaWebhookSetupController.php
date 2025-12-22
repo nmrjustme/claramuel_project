@@ -23,6 +23,7 @@ use App\Mail\PaymentFailed;
 use Illuminate\Support\Facades\Log;
 use App\Services\InvoiceService;
 use App\Mail\AdminNotification;
+use App\Models\RoomHold;
 
 class MayaWebhookSetupController extends Controller
 {
@@ -80,6 +81,15 @@ class MayaWebhookSetupController extends Controller
         $order->save();
 
         if ($status == 'paid') {
+            $existingBooking = FacilityBookingLog::where('token', $order->token)->first();
+
+            if ($existingBooking) {
+                // Delete the order token associated with this booking
+                Order::where('token', $order->token)->delete();
+
+                throw new \Exception('Reservation already exists. Order token has been cleaned up.');
+            }
+
             $this->storeBookingInDatabase($order->token, $orderId, $amount, $paymentScheme);
 
         } else if ($status == 'expired' || $status == 'failed' || $status == 'cancelled') {
@@ -97,13 +107,6 @@ class MayaWebhookSetupController extends Controller
 
     private function storeBookingInDatabase($token, $orderId, $amount, $paymentScheme)
     {
-        $existingBooking = FacilityBookingLog::where('token', $token)->first();
-        if ($existingBooking) {
-            // Delete the order token associated with this booking
-            Order::where('token', $token)->delete();
-            throw new \Exception('Reservation already exists. Order token has been cleaned up.');
-        }
-
         $bookingData = Cache::get('booking_confirmation_' . $token);
         // Start database transaction
         DB::beginTransaction();
@@ -228,6 +231,11 @@ class MayaWebhookSetupController extends Controller
                 'payment_date' => now(),
             ]);
 
+
+            // This remove the room holds, means permanently booked
+            $this->releaseHolds($bookingData);
+
+
             // Commit transaction
             DB::commit();
 
@@ -248,7 +256,7 @@ class MayaWebhookSetupController extends Controller
 
             event(new BookingNew($bookingLog)); // Event listener for new booking list
             $this->sendEmailAdmin($bookingLog);
-            
+
             // Send email with PDF attachment
             Mail::to($bookingData['email'])->send(new ReservationReceived(
                 $bookingLog,
@@ -259,6 +267,20 @@ class MayaWebhookSetupController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e; // Re-throw to handle in the controller
+        }
+    }
+
+    private function releaseHolds($bookingData)
+    {
+        try {
+            foreach ($bookingData['facilities'] as $facilityData) {
+                RoomHold::where('facility_id', $facilityData['facility_id'])
+                    ->where('date_from', $bookingData['checkin_date']) // Matches the string format saved in hold
+                    ->where('date_to', $bookingData['checkout_date'])
+                    ->delete();
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to clean up room holds via webhook: ' . $e->getMessage());
         }
     }
 
