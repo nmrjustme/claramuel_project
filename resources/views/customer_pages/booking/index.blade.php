@@ -2256,7 +2256,7 @@
                          });
 
                          if(hasConflict) {
-                              this.updateHoldStatus('Attention: One of your selected rooms has just been hold by another user.', 'error');
+                              this.updateHoldStatus('Attention: One of your selected rooms has just been booked by another user.', 'error');
                          }
                     }
 
@@ -2392,7 +2392,6 @@
                     //  THE FIX IS HERE
                     // ==========================================
                     handleDateChange() {
-                         this.hideHoldStatus();
                          // 1. Calculate the visual text for nights
                          this.calculateNightsAndPrices();
 
@@ -2703,8 +2702,6 @@
                     }
 
                     addToCart(roomId) {
-
-                         this.hideHoldStatus();
                          try {
                               if (!this.roomsData[roomId]) throw new Error('Room not found');
 
@@ -2779,7 +2776,6 @@
                     }
 
                     removeFromCart(roomId) {
-                         this.hideHoldStatus();
                          const room = this.roomsData[roomId];
                          this.cart = this.cart.filter(item => item.id !== roomId);
 
@@ -2811,14 +2807,6 @@
 
                          this.validateCheckoutButton();
                          showNotification(`${room.name} removed from your summary`);
-                    }
-                    
-                    hideHoldStatus() {
-                         const statusDiv = document.getElementById('hold-status-message');
-                         if(statusDiv) {
-                              statusDiv.classList.add('hidden');
-                              statusDiv.classList.remove('active');
-                         }
                     }
 
                     updateCartDisplay() {
@@ -2976,8 +2964,6 @@
                                              success: false,
                                              roomId: item.id,
                                              name: item.name,
-                                             // --- MODIFIED LINE: Capture the dates sent from controller ---
-                                             conflictDates: data.conflict_dates || null, 
                                              message: data.message || 'Room unavailable'
                                         };
                                    }
@@ -3024,18 +3010,12 @@
                               // 3. Handle Failures
                               if (failedHolds.length > 0) {
                                    await this.releaseSessionHolds();
-
-                                   // --- MODIFIED CODE START ---
-                                   // Create a string like: "Deluxe Room (Dec 14 - Dec 15)"
-                                   const errorDetails = failedHolds.map(f => {
-                                        return f.conflictDates ? `${f.name} (${f.conflictDates})` : f.name;
-                                   }).join(', ');
-
-                                   this.updateHoldStatus(`Availability changed! ${errorDetails} has been placed on hold for a minute by another guest.`, 'error');
-                                   // --- MODIFIED CODE END ---
+                                   const roomNames = failedHolds.map(f => f.name).join(', ');
+                                   this.updateHoldStatus(`Availability changed! ${roomNames} has been placed on hold for a minute by another guest.`, 'error');
 
                                    button.disabled = false;
                                    this.isSubmitting = false;
+                                   // spinner.classList.add('hidden');
                                    buttonText.textContent = 'Proceed to Your Details';
                                    return;
                               }
