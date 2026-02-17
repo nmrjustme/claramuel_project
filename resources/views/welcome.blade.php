@@ -1515,12 +1515,8 @@ body.lightbox-open #back-to-top {
                 <p class="text-gray-500 text-sm mb-4 md:mb-0 animate-fadeInUp">
                     © 2025 Mt. ClaRamuel Resort. All rights reserved.
                 </p>
-                <div class="flex gap-6 animate-fadeInUp" style="animation-delay: 0.2s;">
-                    <a href="#" class="text-gray-500 hover:text-accent transition text-sm">Privacy Policy</a>
-                    <a href="#" class="text-gray-500 hover:text-accent transition text-sm">Terms of Service</a>
-                    <a href="#" class="text-gray-500 hover:text-accent transition text-sm">Sitemap</a>
-                </div>
             </div>
+
         </div>
     </footer>
 
