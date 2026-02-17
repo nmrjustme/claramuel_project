@@ -1815,8 +1815,10 @@
                                                                            <button
                                                                                 class="toggle-unavailable-dates text-sm text-red-600 font-medium flex items-center cursor-pointer">
                                                                                 <i class="fas fa-calendar mr-2"></i>
-                                                                                <a class="md:text-sm lg:text-md hover:underline">View Availability</a>
-                                                                                <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 animate-bounce"></i>
+                                                                                <a class="md:text-sm lg:text-md hover:underline">View
+                                                                                     Availability</a>
+                                                                                <i
+                                                                                     class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 animate-bounce"></i>
                                                                            </button>
 
                                                                            <div class="unavailable-dates-content hidden mt-2">
@@ -1881,7 +1883,7 @@
                                                                                                : $activeDiscount->discount_value
                                                                                           )
                                                                                      )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }}
                                                                                                                                        </div>
 
                                                                                                                                        <!-- Discount icon + text -->
@@ -2471,15 +2473,15 @@
 
                     setDefaultDates() {
                          const today = new Date();
-                         const tomorrow = new Date(today);
-                         tomorrow.setDate(tomorrow.getDate() + 1);
+                         const tomorrow = new Date();
+                         tomorrow.setDate(today.getDate() + 1);
 
-                         // Only set defaults if inputs are empty
-                         if (!document.getElementById('checkin').value) {
-                              this.checkinPicker.setDate(today);
+                         // Set the actual dates in the pickers so the internal 'selectedDates' array isn't empty
+                         if (!this.checkinPicker.selectedDates.length) {
+                              this.checkinPicker.setDate(today, true);
                          }
-                         if (!document.getElementById('checkout').value) {
-                              this.checkoutPicker.setDate(tomorrow);
+                         if (!this.checkoutPicker.selectedDates.length) {
+                              this.checkoutPicker.setDate(tomorrow, true);
                          }
 
                          this.calculateNightsAndPrices();
@@ -2676,16 +2678,16 @@
 
                     getCalendarStyles() {
                          return `
-                                   .flatpickr-calendar.inline { width: 100% !important; max-width: 100% !important; box-shadow: none !important; }
-                                   .flatpickr-rContainer, .flatpickr-days, .dayContainer { width: 100% !important; }
-                                   .dayContainer { justify-content: space-around !important; }
-                                   .flatpickr-day { width: 14.28% !important; max-width: none !important; margin: 0 !important; height: 30px !important; line-height: 30px !important; font-size: 12px !important; border-radius: 4px !important; }
-                                   .flatpickr-day.unavailable { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fecaca !important; text-decoration: line-through; pointer-events: none !important; opacity: 0.7; }
-                                   .flatpickr-day.past-day { background: #f3f4f6 !important; color: #9ca3af !important; pointer-events: none !important; }
-                                   .flatpickr-day.available { background: #dcfce7 !important; color: #16a34a !important; border: 1px solid #bbf7d0 !important; cursor: pointer !important; pointer-events: auto !important; transition: all 0.2s ease; }
-                                   .flatpickr-day.available:hover { background: #2647dcff !important; color: white !important; border-color: #2647dcff !important; transform: scale(1.1); z-index: 10; }
-                                   .flatpickr-day.selected { background: #2647dcff !important; border-color: #2651dcff !important; color: white !important; }
-                              `;
+                                        .flatpickr-calendar.inline { width: 100% !important; max-width: 100% !important; box-shadow: none !important; }
+                                        .flatpickr-rContainer, .flatpickr-days, .dayContainer { width: 100% !important; }
+                                        .dayContainer { justify-content: space-around !important; }
+                                        .flatpickr-day { width: 14.28% !important; max-width: none !important; margin: 0 !important; height: 30px !important; line-height: 30px !important; font-size: 12px !important; border-radius: 4px !important; }
+                                        .flatpickr-day.unavailable { background: #fee2e2 !important; color: #dc2626 !important; border-color: #fecaca !important; text-decoration: line-through; pointer-events: none !important; opacity: 0.7; }
+                                        .flatpickr-day.past-day { background: #f3f4f6 !important; color: #9ca3af !important; pointer-events: none !important; }
+                                        .flatpickr-day.available { background: #dcfce7 !important; color: #16a34a !important; border: 1px solid #bbf7d0 !important; cursor: pointer !important; pointer-events: auto !important; transition: all 0.2s ease; }
+                                        .flatpickr-day.available:hover { background: #2647dcff !important; color: white !important; border-color: #2647dcff !important; transform: scale(1.1); z-index: 10; }
+                                        .flatpickr-day.selected { background: #2647dcff !important; border-color: #2651dcff !important; color: white !important; }
+                                   `;
                     }
 
                     validateCheckoutButton() {
@@ -2928,12 +2930,12 @@
                          const buttons = document.querySelectorAll(`.add-to-cart-btn[data-room="${roomId}"]`);
                          buttons.forEach(button => {
                               button.innerHTML = `
-                                        <span class="flex items-center justify-center">
-                                        Select Room 
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                        </span>`;
+                                             <span class="flex items-center justify-center">
+                                             Select Room 
+                                             <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                             </svg>
+                                             </span>`;
                               button.classList.remove('bg-green-500', 'bg-primary');
                               button.classList.add('bg-primary');
                               button.disabled = false;
@@ -2988,23 +2990,23 @@
                               const itemTotal = item.price * this.nights;
                               subtotal += itemTotal;
                               html += `
-                                                       <div class="flex justify-between items-start border-b border-gray-100 pb-4">
-                                                           <div class="flex items-start">
-                                                               <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
-                                                               <div>
-                                                                   <h4 class="font-medium text-dark">${item.name}</h4>
-                                                                   <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toLocaleString()}</div>
-                                                                   <div class="text-xs text-gray-400 mt-1">${item.checkin} to ${item.checkout}</div>
-                                                               </div>
-                                                           </div>
-                                                           <div class="text-right">
-                                                               <div class="font-medium">₱${itemTotal.toLocaleString()}</div>
-                                                               <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
-                                                                   <i class="far fa-trash-alt mr-1"></i> Remove
-                                                               </button>
-                                                           </div>
-                                                       </div>
-                                                   `;
+                                                            <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                                                                <div class="flex items-start">
+                                                                    <img src="${item.mainImage}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg mr-3" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">
+                                                                    <div>
+                                                                        <h4 class="font-medium text-dark">${item.name}</h4>
+                                                                        <div class="text-sm text-gray-600">${this.nights} night${this.nights !== 1 ? 's' : ''} × ₱${item.price.toLocaleString()}</div>
+                                                                        <div class="text-xs text-gray-400 mt-1">${item.checkin} to ${item.checkout}</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="text-right">
+                                                                    <div class="font-medium">₱${itemTotal.toLocaleString()}</div>
+                                                                    <button class="text-red-500 text-sm hover:text-red-700 transition remove-btn" data-room="${item.id}">
+                                                                        <i class="far fa-trash-alt mr-1"></i> Remove
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        `;
                          });
 
                          container.innerHTML = html;
@@ -3170,7 +3172,7 @@
 
                                    // --- MODIFIED CODE END ---
                                    document.getElementById('booking-summary').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                   
+
                                    button.disabled = false;
                                    this.isSubmitting = false;
                                    buttonText.textContent = 'Proceed to Your Details';
