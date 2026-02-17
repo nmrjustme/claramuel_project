@@ -2471,15 +2471,15 @@
 
                     setDefaultDates() {
                          const today = new Date();
-                         const tomorrow = new Date(today);
+                         const tomorrow = new Date();
                          tomorrow.setDate(tomorrow.getDate() + 1);
 
                          // Only set defaults if inputs are empty
                          if (!document.getElementById('checkin').value) {
-                              this.checkinPicker.setDate(today);
+                              this.checkinPicker.setDate(today, true);
                          }
                          if (!document.getElementById('checkout').value) {
-                              this.checkoutPicker.setDate(tomorrow);
+                              this.checkoutPicker.setDate(tomorrow, true);
                          }
 
                          this.calculateNightsAndPrices();
