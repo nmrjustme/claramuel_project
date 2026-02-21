@@ -178,192 +178,191 @@
     </style>
 
 
-<style>
+    <style>
+        /* Lightbox styles matching gallery page */
+        .lightbox-control {
+            background: rgba(0, 0, 0, 0.7) !important;
+            backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.2s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
 
-/* Lightbox styles matching gallery page */
-.lightbox-control {
-    background: rgba(0, 0, 0, 0.7) !important;
-    backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-    transition: all 0.2s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
+        .lightbox-control:hover {
+            background: rgba(0, 0, 0, 0.9) !important;
+            transform: scale(1.1) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
 
-.lightbox-control:hover {
-    background: rgba(0, 0, 0, 0.9) !important;
-    transform: scale(1.1) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-}
+        /* Ensure consistent button sizes */
+        #lightbox-prev,
+        #lightbox-next {
+            width: 44px !important;
+            height: 44px !important;
+        }
 
-/* Ensure consistent button sizes */
-#lightbox-prev,
-#lightbox-next {
-    width: 44px !important;
-    height: 44px !important;
-}
+        #lightbox-close,
+        #toggle-caption {
+            width: 40px !important;
+            height: 40px !important;
+        }
 
-#lightbox-close,
-#toggle-caption {
-    width: 40px !important;
-    height: 40px !important;
-}
+        .zoom-controls .lightbox-control {
+            width: 40px !important;
+            height: 40px !important;
+        }
 
-.zoom-controls .lightbox-control {
-    width: 40px !important;
-    height: 40px !important;
-}
+        /* Mobile-specific lightbox adjustments */
+        @media (max-width: 768px) {
+            .lightbox-control-mobile {
+                padding: 0.75rem !important;
+            }
 
-/* Mobile-specific lightbox adjustments */
-@media (max-width: 768px) {
-    .lightbox-control-mobile {
-        padding: 0.75rem !important;
-    }
-    
-    #lightbox-prev,
-    #lightbox-next {
-        width: 48px !important;
-        height: 48px !important;
-    }
-    
-    #lightbox-prev {
-        left: 12px !important;
-    }
-    
-    #lightbox-next {
-        right: 12px !important;
-    }
-    
-    #lightbox-close,
-    #toggle-caption {
-        width: 44px !important;
-        height: 44px !important;
-    }
-    
-    .zoom-controls .lightbox-control {
-        width: 44px !important;
-        height: 44px !important;
-    }
-    
-    .lightbox-image-mobile {
-        max-width: 95vw !important;
-        max-height: 70vh !important;
-    }
-    
-    .lightbox-caption-mobile {
-        max-width: 90vw !important;
-        padding: 0.75rem !important;
-        margin: 0 1rem !important;
-    }
-}
+            #lightbox-prev,
+            #lightbox-next {
+                width: 48px !important;
+                height: 48px !important;
+            }
 
-/* Landscape orientation fixes */
-@media (max-height: 500px) and (orientation: landscape) {
-    #lightbox {
-        padding: 10px !important;
-    }
-    
-    #lightbox-container {
-        max-height: 90vh !important;
-        padding: 0 !important;
-    }
-    
-    .lightbox-image-mobile {
-        max-height: 85vh !important;
-    }
-    
-    /* Move zoom controls to avoid blocking navigation */
-    .zoom-controls {
-        bottom: 60px !important;
-        right: 90px !important;
-    }
-    
-    /* Adjust navigation buttons for landscape */
-    #lightbox-prev {
-        left: 20px !important;
-    }
-    
-    #lightbox-next {
-        right: 20px !important;
-    }
-    
-    /* Adjust caption panel for landscape */
-    .lightbox-caption-mobile {
-        bottom: 10px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: auto !important;
-        min-width: 300px !important;
-        max-width: 80vw !important;
-    }
-    
-    /* Adjust top buttons for landscape */
-    #lightbox-close {
-        top: 10px !important;
-        right: 10px !important;
-    }
-    
-    #toggle-caption {
-        top: 10px !important;
-        left: 10px !important;
-    }
-}
+            #lightbox-prev {
+                left: 12px !important;
+            }
 
-/* Extra small landscape */
-@media (max-height: 400px) and (orientation: landscape) {
-    .zoom-controls {
-        bottom: 50px !important;
-        right: 50px !important;
-        transform: scale(0.9);
-    }
-    
-    #lightbox-prev,
-    #lightbox-next {
-        transform: translateY(-50%) scale(0.9);
-    }
-    
-    .lightbox-caption-mobile {
-        padding: 8px !important;
-        font-size: 0.7rem !important;
-    }
-}
+            #lightbox-next {
+                right: 12px !important;
+            }
 
-@media (max-width: 640px) {
-    .lightbox-control-mobile {
-        padding: 0.5rem !important;
-    }
-    
-    #lightbox-prev,
-    #lightbox-next {
-        width: 44px !important;
-        height: 44px !important;
-    }
-    
-    #lightbox-prev {
-        left: 8px !important;
-    }
-    
-    #lightbox-next {
-        right: 8px !important;
-    }
-    
-    #lightbox-close,
-    #toggle-caption {
-        width: 40px !important;
-        height: 40px !important;
-    }
-    
-    .lightbox-caption-mobile {
-        padding: 0.5rem !important;
-    }
-}
+            #lightbox-close,
+            #toggle-caption {
+                width: 44px !important;
+                height: 44px !important;
+            }
 
-/* Hide back to top button when lightbox is open */
-body.lightbox-open #back-to-top {
-    display: none !important;
-}
+            .zoom-controls .lightbox-control {
+                width: 44px !important;
+                height: 44px !important;
+            }
+
+            .lightbox-image-mobile {
+                max-width: 95vw !important;
+                max-height: 70vh !important;
+            }
+
+            .lightbox-caption-mobile {
+                max-width: 90vw !important;
+                padding: 0.75rem !important;
+                margin: 0 1rem !important;
+            }
+        }
+
+        /* Landscape orientation fixes */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #lightbox {
+                padding: 10px !important;
+            }
+
+            #lightbox-container {
+                max-height: 90vh !important;
+                padding: 0 !important;
+            }
+
+            .lightbox-image-mobile {
+                max-height: 85vh !important;
+            }
+
+            /* Move zoom controls to avoid blocking navigation */
+            .zoom-controls {
+                bottom: 60px !important;
+                right: 90px !important;
+            }
+
+            /* Adjust navigation buttons for landscape */
+            #lightbox-prev {
+                left: 20px !important;
+            }
+
+            #lightbox-next {
+                right: 20px !important;
+            }
+
+            /* Adjust caption panel for landscape */
+            .lightbox-caption-mobile {
+                bottom: 10px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: auto !important;
+                min-width: 300px !important;
+                max-width: 80vw !important;
+            }
+
+            /* Adjust top buttons for landscape */
+            #lightbox-close {
+                top: 10px !important;
+                right: 10px !important;
+            }
+
+            #toggle-caption {
+                top: 10px !important;
+                left: 10px !important;
+            }
+        }
+
+        /* Extra small landscape */
+        @media (max-height: 400px) and (orientation: landscape) {
+            .zoom-controls {
+                bottom: 50px !important;
+                right: 50px !important;
+                transform: scale(0.9);
+            }
+
+            #lightbox-prev,
+            #lightbox-next {
+                transform: translateY(-50%) scale(0.9);
+            }
+
+            .lightbox-caption-mobile {
+                padding: 8px !important;
+                font-size: 0.7rem !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .lightbox-control-mobile {
+                padding: 0.5rem !important;
+            }
+
+            #lightbox-prev,
+            #lightbox-next {
+                width: 44px !important;
+                height: 44px !important;
+            }
+
+            #lightbox-prev {
+                left: 8px !important;
+            }
+
+            #lightbox-next {
+                right: 8px !important;
+            }
+
+            #lightbox-close,
+            #toggle-caption {
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            .lightbox-caption-mobile {
+                padding: 0.5rem !important;
+            }
+        }
+
+        /* Hide back to top button when lightbox is open */
+        body.lightbox-open #back-to-top {
+            display: none !important;
+        }
 
         /* Loading animation */
         @keyframes spin {
@@ -380,12 +379,12 @@ body.lightbox-open #back-to-top {
             animation: spin 1s linear infinite;
         }
 
-/* Remove old lightbox styles that might conflict */
-#caption-hint,
-#nav-hint {
-    display: none !important;
-}
-</style>
+        /* Remove old lightbox styles that might conflict */
+        #caption-hint,
+        #nav-hint {
+            display: none !important;
+        }
+    </style>
 
 </head>
 
@@ -409,6 +408,7 @@ body.lightbox-open #back-to-top {
                 <a href="#services" class="hover:text-gray-300  transition duration-300 font-medium">Services</a>
                 <a href="#gallery" class="hover:text-gray-300  transition duration-300 font-medium">Gallery</a>
                 <a href="#contact" class="hover:text-gray-300  transition duration-300 font-medium">Contact</a>
+                <a href="#tutorial" class="hover:text-gray-300 transition duration-300 font-medium">Tutorial</a>
                 <a href="{{ route('login') }}" class="hover:text-gray-300 transition duration-300 font-medium">Login</a>
                 <a href="{{ route('dashboard.bookings') }}"
                     class="bg-accent hover:bg-darkAccent text-white px-5 py-2 rounded-sm transition duration-300 font-medium flex items-center btn-pulse">
@@ -435,6 +435,8 @@ body.lightbox-open #back-to-top {
                 class="text-white hover:text-gray-300  text-lg transition border-b border-gray-700 pb-3">Gallery</a>
             <a href="#contact"
                 class="text-white hover:text-gray-300  text-lg transition border-b border-gray-700 pb-3">Contact</a>
+            <a href="#tutorial"
+                class="text-white hover:text-gray-300 text-lg transition border-b border-gray-700 pb-3">Tutorial</a>
             <a href="{{ route('login') }}"
                 class="text-white hover:text-gray-300  text-lg transition border-b border-gray-700 pb-3">Login</a>
             <a href="{{ route('dashboard.bookings') }}"
@@ -565,6 +567,45 @@ body.lightbox-open #back-to-top {
             </div>
         </div>
     </div>
+
+    <section id="tutorial" class="py-16 md:py-24 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10 md:mb-16">
+                <h2 class="text-3xl md:text-5xl text-darkAccent mb-4 font-serif font-light animate-fadeInUp">
+                    How to Book Your Stay
+                </h2>
+                <div class="w-24 h-1 bg-accent mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto text-sm md:text-lg animate-fadeInUp"
+                    style="animation-delay: 0.1s;">
+                    Watch our quick step-by-step guide on how to use our booking system for a seamless experience.
+                </p>
+            </div>
+
+            <div class="max-w-5xl mx-auto group animate-fadeInUp" style="animation-delay: 0.2s;">
+                <div class="relative p-2 md:p-4 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden bg-white">
+                    <div class="relative pb-[56.25%] h-0 bg-black rounded-xl overflow-hidden shadow-inner">
+                        <video
+                            class="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+                            controls playsinline poster="{{ url('imgs/tutorial/thumbnail.jpg') }}">
+                            <source src="{{ url('video/tutorial_phone.mp4') }}" type="video/mp4">
+                            <track label="English" kind="subtitles" srclang="en" src="captions.vtt" default>
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <div
+                        class="absolute top-6 right-6 hidden md:flex items-center space-x-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 text-white text-xs font-medium">
+                        <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        <span>TUTORIAL GUIDE</span>
+                    </div>
+                </div>
+
+                <p class="text-center text-gray-400 text-xs mt-4 md:hidden italic">
+                    <i class="fas fa-expand mr-1"></i> Tap video to play in full screen
+                </p>
+            </div>
+        </div>
+    </section>
 
     <!-- About Section -->
     <section id="about" class="py-20 bg-white">
@@ -1179,111 +1220,117 @@ body.lightbox-open #back-to-top {
         </div>
     </section>
 
-<!-- Enhanced Lightbox - Consistent with Gallery Page -->
-<div id="lightbox" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
-    <div class="relative w-full h-full flex items-center justify-center">
-        <!-- Close Button - Fixed Position -->
-        <button onclick="closeLightbox()" 
+    <!-- Enhanced Lightbox - Consistent with Gallery Page -->
+    <div id="lightbox"
+        class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <!-- Close Button - Fixed Position -->
+            <button onclick="closeLightbox()"
                 class="fixed top-4 sm:top-6 right-4 sm:right-6 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-2 sm:p-3 lightbox-control-mobile"
                 title="Close (Esc)">
-            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-        
-        <!-- Navigation Arrows - FIXED POSITIONS -->
-        <button id="lightbox-prev" 
-                onclick="navigateLightbox(-1)"
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Navigation Arrows - FIXED POSITIONS -->
+            <button id="lightbox-prev" onclick="navigateLightbox(-1)"
                 class="fixed left-4 sm:left-6 top-1/2 transform -translate-y-1/2 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-3 sm:p-4 lightbox-control-mobile"
                 title="Previous (←)">
-            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-        </button>
-        
-        <button id="lightbox-next" 
-                onclick="navigateLightbox(1)"
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
+            <button id="lightbox-next" onclick="navigateLightbox(1)"
                 class="fixed right-4 sm:right-6 top-1/2 transform -translate-y-1/2 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-3 sm:p-4 lightbox-control-mobile"
                 title="Next (→)">
-            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </button>
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
 
-        <!-- Toggle Caption Button -->
-        <button id="toggle-caption" 
-                onclick="toggleCaption()"
+            <!-- Toggle Caption Button -->
+            <button id="toggle-caption" onclick="toggleCaption()"
                 class="fixed top-4 sm:top-6 left-4 sm:left-6 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-2 sm:p-3 lightbox-control-mobile"
                 title="Toggle caption (C)">
-            <svg id="caption-show-icon" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <svg id="caption-hide-icon" class="w-4 h-4 sm:w-5 sm:h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-        </button>
+                <svg id="caption-show-icon" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <svg id="caption-hide-icon" class="w-4 h-4 sm:w-5 sm:h-5 hidden" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </button>
 
-        <!-- Image Container -->
-        <div id="lightbox-container" class="relative flex items-center justify-center max-w-[95vw] sm:max-w-[90vw] max-h-[80vh] sm:max-h-[85vh]">
-            <!-- Loading Spinner -->
-            <div id="lightbox-loading" class="absolute inset-0 flex items-center justify-center z-10 hidden">
-                <div class="animate-spin rounded-full h-8 sm:h-12 w-8 sm:w-12 border-b-2 border-white"></div>
-            </div>
-            
-            <!-- Main Image -->
-            <img id="lightbox-image" 
-                 src="" 
-                 alt="" 
-                 class="max-w-[90vw] sm:max-w-[85vw] max-h-[75vh] sm:max-h-[80vh] w-auto h-auto rounded-lg shadow-2xl transition-all duration-300 cursor-zoom-in lightbox-image-mobile"
-                 style="object-fit: contain;"
-                 onload="handleImageLoad(this)"
-                 onerror="handleImageError(this)">
-        </div>
-        
-        <!-- Caption Panel -->
-        <div id="lightbox-caption-panel" class="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 max-w-2xl w-full mx-2 sm:mx-4 transition-all duration-300 opacity-100 border border-white/10 lightbox-caption-mobile">
-            <h3 id="lightbox-title" class="text-white text-base sm:text-lg md:text-xl font-semibold mb-1 sm:mb-2 text-center"></h3>
-            <p id="lightbox-caption" class="text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed text-center"></p>
-            
-            <!-- Image Info -->
-            <div class="flex justify-center items-center mt-2 sm:mt-3 text-gray-400 text-xs md:text-sm space-x-2 sm:space-x-4">
-                <span id="image-dimensions" class="flex items-center">
-                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/>
-                    </svg>
-                    <span id="dimension-text" class="text-xs sm:text-sm">Loading...</span>
-                </span>
-                <span>•</span>
-                <span id="image-index" class="font-medium text-xs sm:text-sm"></span>
-                <span>•</span>
-                <span id="image-orientation" class="capitalize text-xs sm:text-sm"></span>
-            </div>
-        </div>
+            <!-- Image Container -->
+            <div id="lightbox-container"
+                class="relative flex items-center justify-center max-w-[95vw] sm:max-w-[90vw] max-h-[80vh] sm:max-h-[85vh]">
+                <!-- Loading Spinner -->
+                <div id="lightbox-loading" class="absolute inset-0 flex items-center justify-center z-10 hidden">
+                    <div class="animate-spin rounded-full h-8 sm:h-12 w-8 sm:w-12 border-b-2 border-white"></div>
+                </div>
 
-        <!-- Zoom Controls - ADJUSTED FOR LANDSCAPE -->
-        <div class="fixed bottom-16 sm:bottom-20 right-4 sm:right-6 flex flex-col space-y-1 sm:space-y-2 z-50 zoom-controls">
-            <button id="zoom-in" onclick="zoomImage(0.1)"
+                <!-- Main Image -->
+                <img id="lightbox-image" src="" alt=""
+                    class="max-w-[90vw] sm:max-w-[85vw] max-h-[75vh] sm:max-h-[80vh] w-auto h-auto rounded-lg shadow-2xl transition-all duration-300 cursor-zoom-in lightbox-image-mobile"
+                    style="object-fit: contain;" onload="handleImageLoad(this)" onerror="handleImageError(this)">
+            </div>
+
+            <!-- Caption Panel -->
+            <div id="lightbox-caption-panel"
+                class="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 max-w-2xl w-full mx-2 sm:mx-4 transition-all duration-300 opacity-100 border border-white/10 lightbox-caption-mobile">
+                <h3 id="lightbox-title"
+                    class="text-white text-base sm:text-lg md:text-xl font-semibold mb-1 sm:mb-2 text-center"></h3>
+                <p id="lightbox-caption"
+                    class="text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed text-center"></p>
+
+                <!-- Image Info -->
+                <div
+                    class="flex justify-center items-center mt-2 sm:mt-3 text-gray-400 text-xs md:text-sm space-x-2 sm:space-x-4">
+                    <span id="image-dimensions" class="flex items-center">
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                        </svg>
+                        <span id="dimension-text" class="text-xs sm:text-sm">Loading...</span>
+                    </span>
+                    <span>•</span>
+                    <span id="image-index" class="font-medium text-xs sm:text-sm"></span>
+                    <span>•</span>
+                    <span id="image-orientation" class="capitalize text-xs sm:text-sm"></span>
+                </div>
+            </div>
+
+            <!-- Zoom Controls - ADJUSTED FOR LANDSCAPE -->
+            <div
+                class="fixed bottom-16 sm:bottom-20 right-4 sm:right-6 flex flex-col space-y-1 sm:space-y-2 z-50 zoom-controls">
+                <button id="zoom-in" onclick="zoomImage(0.1)"
                     class="lightbox-control text-white rounded-full p-2 sm:p-3 lightbox-control-mobile"
                     title="Zoom In (+)">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-            </button>
-            <button id="zoom-out" onclick="zoomImage(-0.1)"
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </button>
+                <button id="zoom-out" onclick="zoomImage(-0.1)"
                     class="lightbox-control text-white rounded-full p-2 sm:p-3 lightbox-control-mobile"
                     title="Zoom Out (-)">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"/>
-                </svg>
-            </button>
-            <button id="reset-zoom" onclick="resetZoom()"
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
+                    </svg>
+                </button>
+                <button id="reset-zoom" onclick="resetZoom()"
                     class="lightbox-control text-white rounded-full p-2 sm:p-3 text-xs font-medium lightbox-control-mobile"
                     title="Reset Zoom (0)">
-                1:1
-            </button>
+                    1:1
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Main section with wavy lines -->
     <section class="relative py-20 md:py-80 text-white overflow-hidden">
@@ -1336,7 +1383,6 @@ body.lightbox-open #back-to-top {
             </svg>
         </div>
     </section>
-
 
     <!-- Contact Section -->
     <section id="contact" class="py-20 bg-white">
@@ -1470,23 +1516,24 @@ body.lightbox-open #back-to-top {
                                 class="text-gray-400 hover:text-accent transition">Gallery</a></li>
                         <li class="animate-fadeInUp" style="animation-delay: 0.9s;"><a href="#contact"
                                 class="text-gray-400 hover:text-accent transition">Contact</a></li>
+                        <li class="animate-fadeInUp" style="animation-delay: 0.85s;"><a href="#tutorial"
+                                class="text-gray-400 hover:text-accent transition">Tutorial</a></li>
                     </ul>
                 </div>
 
                 <div>
                     <h3 class="text-lg font-semibold mb-6 border-b border-gray-700 pb-2 animate-fadeInUp"
-                        style="animation-delay: 0.4s;">Services</h3>
-                    <ul class="space-y-3">
-                        <li class="animate-fadeInUp" style="animation-delay: 0.5s;"><a href="#"
-                                class="text-gray-400 hover:text-accent transition">Accommodations</a></li>
-                        <li class="animate-fadeInUp" style="animation-delay: 0.6s;"><a href="#"
-                                class="text-gray-400 hover:text-accent transition">Event Hosting</a></li>
-                        <li class="animate-fadeInUp" style="animation-delay: 0.7s;"><a href="#"
-                                class="text-gray-400 hover:text-accent transition">Recreational Activities</a></li>
-                        <li class="animate-fadeInUp" style="animation-delay: 0.8s;"><a href="#"
-                                class="text-gray-400 hover:text-accent transition">Dining</a></li>
-                        <li class="animate-fadeInUp" style="animation-delay: 0.9s;"><a href="#"
-                                class="text-gray-400 hover:text-accent transition">Special Packages</a></li>
+                        style="animation-delay: 0.4s;">
+                        Services
+                    </h3>
+
+                    <ul class="space-y-3 list-disc list-inside">
+                        <li class="animate-fadeInUp text-gray-400" style="animation-delay: 0.5s;">Accommodations</li>
+                        <li class="animate-fadeInUp text-gray-400" style="animation-delay: 0.6s;">Event Hosting</li>
+                        <li class="animate-fadeInUp text-gray-400" style="animation-delay: 0.7s;">Recreational
+                            Activities</li>
+                        <li class="animate-fadeInUp text-gray-400" style="animation-delay: 0.8s;">Dining</li>
+                        <li class="animate-fadeInUp text-gray-400" style="animation-delay: 0.9s;">Special Packages</li>
                     </ul>
                 </div>
 
@@ -1598,7 +1645,6 @@ body.lightbox-open #back-to-top {
             });
         });
 
-        // Back to top button
         const backToTopButton = document.getElementById('back-to-top');
         window.addEventListener('scroll', () => {
             if (window.pageYOffset > 300) {
@@ -1683,54 +1729,54 @@ body.lightbox-open #back-to-top {
             }).filter(item => item !== null);
         }
 
-function openLightbox(src, title, caption, clickedIndex) {
-    // Always reinitialize to get current visible images
-    initLightbox();
-    
-    // Find the clicked image in the current visible images
-    currentIndex = currentImages.findIndex(img => img.src === src);
-    
-    // Fallback: if not found, use the first image
-    if (currentIndex === -1) {
-        currentIndex = 0;
-    }
-    
-    const image = currentImages[currentIndex];
-    
-    if (!image) {
-        console.error('No image found to display');
-        return;
-    }
-    
-    resetZoom();
-    showCaption();
-    
-    isLoading = true;
-    document.getElementById('lightbox-loading').classList.remove('hidden');
-    
-    document.getElementById('lightbox-title').textContent = image.title;
-    document.getElementById('lightbox-caption').textContent = image.caption || 'No description available';
-    document.getElementById('image-index').textContent = `${currentIndex + 1} of ${currentImages.length}`;
-    
-    document.getElementById('lightbox').classList.remove('hidden');
-    document.getElementById('lightbox').classList.add('flex');
-    document.body.style.overflow = 'hidden';
-    
-    // Hide back to top button when lightbox is open
-    document.body.classList.add('lightbox-open');
-    
-    // Auto-hide caption after 3 seconds
-    clearTimeout(captionTimeout);
-    captionTimeout = setTimeout(() => {
-        if (isCaptionVisible) {
-            hideCaption();
+        function openLightbox(src, title, caption, clickedIndex) {
+            // Always reinitialize to get current visible images
+            initLightbox();
+
+            // Find the clicked image in the current visible images
+            currentIndex = currentImages.findIndex(img => img.src === src);
+
+            // Fallback: if not found, use the first image
+            if (currentIndex === -1) {
+                currentIndex = 0;
+            }
+
+            const image = currentImages[currentIndex];
+
+            if (!image) {
+                console.error('No image found to display');
+                return;
+            }
+
+            resetZoom();
+            showCaption();
+
+            isLoading = true;
+            document.getElementById('lightbox-loading').classList.remove('hidden');
+
+            document.getElementById('lightbox-title').textContent = image.title;
+            document.getElementById('lightbox-caption').textContent = image.caption || 'No description available';
+            document.getElementById('image-index').textContent = `${currentIndex + 1} of ${currentImages.length}`;
+
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+
+            // Hide back to top button when lightbox is open
+            document.body.classList.add('lightbox-open');
+
+            // Auto-hide caption after 3 seconds
+            clearTimeout(captionTimeout);
+            captionTimeout = setTimeout(() => {
+                if (isCaptionVisible) {
+                    hideCaption();
+                }
+            }, 3000);
+
+            const lightboxImage = document.getElementById('lightbox-image');
+            lightboxImage.src = image.src;
+            lightboxImage.alt = image.title;
         }
-    }, 3000);
-    
-    const lightboxImage = document.getElementById('lightbox-image');
-    lightboxImage.src = image.src;
-    lightboxImage.alt = image.title;
-}
 
         function handleImageLoad(img) {
             isLoading = false;
@@ -1850,19 +1896,19 @@ function openLightbox(src, title, caption, clickedIndex) {
             openLightbox(image.src, image.title, image.caption, currentIndex);
         }
 
-function closeLightbox() {
-    document.getElementById('lightbox').classList.add('hidden');
-    document.getElementById('lightbox').classList.remove('flex');
-    document.body.style.overflow = 'auto';
-    isLoading = false;
-    resetZoom();
-    clearTimeout(captionTimeout);
-    
-    // Show back to top button again
-    document.body.classList.remove('lightbox-open');
-    
-    showCaption();
-}
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.getElementById('lightbox').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+            isLoading = false;
+            resetZoom();
+            clearTimeout(captionTimeout);
+
+            // Show back to top button again
+            document.body.classList.remove('lightbox-open');
+
+            showCaption();
+        }
 
         // Event listeners
         document.addEventListener('keydown', function (e) {
