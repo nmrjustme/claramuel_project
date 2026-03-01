@@ -4,645 +4,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery</title>
+    <title>Premium Image Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Animation classes */
-        .slide-in-right {
-            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
 
-        .slide-in-left {
-            animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .zoom-in {
-            animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideInLeft {
-            from {
-                transform: translateX(-30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes zoomIn {
-            from {
-                transform: scale(0.95);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* Gallery item hover effect */
+        /* Smooth dynamic transitions */
         .gallery-item {
-            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-            transform-origin: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .gallery-item:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        .gallery-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 40%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1;
+        /* Glassmorphism UI */
+        .glass-ui {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .gallery-item:hover::before {
-            opacity: 1;
+        /* Navigation Button Hover */
+        .nav-button {
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
         }
 
-        /* Fullscreen image transition */
+        /* Fullscreen Image Behavior */
         #fullscreenImage {
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            will-change: transform, opacity;
         }
 
         #fullscreenImage.zoomed {
-            transform: scale(1.5);
+            transform: scale(2);
             cursor: zoom-out;
         }
 
-        /* Loading spinner */
-        .spinner {
-            animation: spin 1s linear infinite;
+        /* Active Thumbnail Styling */
+        .thumb-active {
+            border-color: #3b82f6 !important;
+            opacity: 1 !important;
+            transform: scale(1.1);
         }
 
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Thumbnail strip */
-        .thumbnail-container {
-            scrollbar-width: thin;
-            scrollbar-color: #888 #f1f1f1;
+        /* Modern Loading Bar */
+        .progress-bar {
+            height: 2px;
+            background: #3b82f6;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
 
-<body class="bg-gray-50 p-4 md:p-8">
-    <div class="container mx-auto">
-        <!-- Back button and title -->
-        <div class="flex items-center mb-6 md:mb-8">
-            <button onclick="window.history.back()"
-                class="flex items-center text-blue-600 hover:text-blue-800 transition-colors mr-4 group">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 mr-1 group-hover:-translate-x-1 transition-transform" viewBox="0 0 20 20"
-                    fill="currentColor">
-                    <path fill-rule="evenodd"
-                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span
-                    class="group-hover:underline transform transition-all duration-200 ease-in-out font-normal text-gray-500 hover:text-gray-800 cursor-pointer hover:scale-105">
-                    Back
-                </span>
-            </button>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">{{ $name->name }}</h1>
+<body class="bg-gray-50 text-gray-900">
+    <div class="container mx-auto px-4 py-12 max-w-7xl">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+            <div class="flex items-center space-x-6">
+                <button onclick="window.history.back()" 
+                    class="h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-all group">
+                    <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                </button>
+                <div>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">{{ $name->name }}</h1>
+                </div>
+            </div>
+            
+            @if(count($images) > 0)
+            <div class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold">
+                <i class="far fa-image mr-2"></i> {{ count($images) }} Photos
+            </div>
+            @endif
         </div>
 
-        <!-- Gallery Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @forelse ($images as $image)
-                <!-- Gallery Item -->
-                <div class="gallery-item relative overflow-hidden rounded-xl shadow-md cursor-pointer group"
+                <div class="gallery-item group relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-200 cursor-pointer"
                     onclick="openFullscreen('{{ asset('imgs/facility_img/' . $image->image) }}', {{ $loop->index }})">
-                    <img src="{{ asset('imgs/facility_img/' . $image->image) }}" alt="Gallery image"
-                        class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                    
+                    <img src="{{ asset('imgs/facility_img/' . $image->image) }}" 
+                        alt="Facility Gallery"
+                        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy">
-                    <div
-                        class="absolute inset-0 flex items-end p-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span class="text-white text-sm font-medium bg-black bg-opacity-50 px-3 py-1 rounded-full">
-                            <i class="fas fa-search-plus mr-2"></i>View
-                        </span>
+                    
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div class="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                            <span class="bg-white/90 text-black px-5 py-2 rounded-full text-sm font-bold shadow-xl">
+                                <i class="fas fa-expand mr-2"></i> View Large
+                            </span>
+                        </div>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-12 text-center">
-                    <div class="text-gray-400 mb-4">
-                        <i class="fas fa-images text-5xl"></i>
+                <div class="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200">
+                    <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-camera-retro text-3xl text-gray-300"></i>
                     </div>
-                    <p class="text-gray-500 text-lg">No images available</p>
-                    <p class="text-gray-400 text-sm mt-2">Upload some images to get started</p>
+                    <h3 class="text-lg font-medium text-gray-900">No images found</h3>
+                    <p class="text-gray-500">This facility hasn't uploaded any photos yet.</p>
                 </div>
             @endforelse
         </div>
-
-        <!-- Image count -->
-        @if(count($images) > 0)
-            <div class="mt-6 text-right text-gray-500 text-sm">
-                Showing {{ count($images) }} image{{ count($images) > 1 ? 's' : '' }}
-            </div>
-        @endif
     </div>
 
-    <!-- Fullscreen Modal -->
-    <div id="fullscreenModal"
-        class="fixed inset-0 bg-black bg-opacity-95 z-50 hidden flex flex-col items-center justify-center p-4">
-        <!-- Top controls -->
-        <div class="w-full flex justify-between items-center mb-4 z-50">
-            <!-- Close Button -->
-            <button onclick="closeFullscreen()"
-                class="text-white hover:bg-white hover:bg-opacity-10 rounded-full p-2 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+    <div id="fullscreenModal" class="fixed inset-0 bg-black/95 z-[100] hidden flex flex-col items-center justify-center opacity-0 transition-opacity duration-300">
+        <div id="loadingBar" class="progress-bar" style="width: 0%"></div>
+
+        <div id="modalUI" class="absolute top-0 inset-x-0 p-6 flex items-center justify-between z-[110] transition-opacity duration-300">
+            <button onclick="closeFullscreen()" class="h-12 w-12 flex items-center justify-center rounded-full glass-ui text-white hover:bg-white hover:text-black transition-all">
+                <i class="fas fa-times text-xl"></i>
             </button>
 
-            <!-- Image Counter -->
-            <div class="bg-black bg-opacity-50 text-white px-4 py-2 rounded-full">
-                <span id="currentIndex">1</span> / <span id="totalImages">0</span>
+            <div class="flex items-center space-x-2 glass-ui px-4 py-2 rounded-2xl text-white font-medium text-sm">
+                <span id="currentIndex" class="text-blue-400 font-bold">1</span>
+                <span class="opacity-40">/</span>
+                <span id="totalImages">0</span>
             </div>
 
-            <!-- Download Button -->
-            <button id="downloadButton"
-                class="text-white hover:bg-white hover:bg-opacity-10 rounded-full p-2 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-            </button>
+            <div class="flex items-center space-x-3">
+                <button id="downloadButton" class="h-12 w-12 flex items-center justify-center rounded-full glass-ui text-white hover:bg-white hover:text-black transition-all" title="Download (D)">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
         </div>
 
-        <!-- Main image container -->
-        <div class="relative flex-1 w-full flex items-center justify-center overflow-hidden">
-            <!-- Loading spinner -->
-            <div id="loadingSpinner" class="absolute inset-0 flex items-center justify-center hidden">
-                <div class="spinner border-4 border-white border-t-transparent rounded-full h-12 w-12"></div>
-            </div>
+        <button id="prevButton" class="absolute left-6 top-1/2 -translate-y-1/2 h-16 w-16 rounded-full flex items-center justify-center text-white z-[110] nav-button opacity-0 sm:opacity-100">
+            <i class="fas fa-chevron-left text-2xl"></i>
+        </button>
+        <button id="nextButton" class="absolute right-6 top-1/2 -translate-y-1/2 h-16 w-16 rounded-full flex items-center justify-center text-white z-[110] nav-button opacity-0 sm:opacity-100">
+            <i class="fas fa-chevron-right text-2xl"></i>
+        </button>
 
-            <!-- Current Image Container -->
-            <div class="relative w-full h-full flex items-center justify-center">
-                <img id="fullscreenImage" src="" alt="Fullscreen"
-                    class="max-w-full max-h-full object-contain cursor-zoom-in" onclick="toggleZoom()">
-            </div>
-
-            <!-- Navigation Arrows -->
-            <button id="prevButton"
-                class="absolute left-4 text-white hover:bg-white hover:bg-opacity-10 rounded-full p-3 transition-all nav-button">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-            <button id="nextButton"
-                class="absolute right-4 text-white hover:bg-white hover:bg-opacity-10 rounded-full p-3 transition-all nav-button">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
+        <div class="w-full h-full flex items-center justify-center p-4 md:p-12 overflow-hidden select-none" onclick="handleBackgroundClick(event)">
+            <img id="fullscreenImage" src="" alt="Fullscreen View" 
+                class="max-w-full max-h-full object-contain cursor-zoom-in drop-shadow-2xl shadow-black/50">
         </div>
 
-        <!-- Thumbnail strip -->
-        <div id="thumbnailContainer" class="w-full mt-4 py-2 overflow-x-auto thumbnail-container hidden">
-            <div class="flex space-x-2 px-4">
+        <div id="thumbUI" class="absolute bottom-0 inset-x-0 p-6 z-[110] transition-opacity duration-300">
+            <div id="thumbnailContainer" class="flex items-center justify-center space-x-3 overflow-x-auto pb-2 scrollbar-hide max-w-4xl mx-auto">
                 @foreach ($images as $image)
-                    <img src="{{ asset('imgs/facility_img/' . $image->image) }}" alt="Thumbnail"
-                        class="h-16 w-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-white transition-all opacity-70 hover:opacity-100"
-                        data-index="{{ $loop->index }}" onclick="navigateToThumbnail({{ $loop->index }})">
+                    <img src="{{ asset('imgs/facility_img/' . $image->image) }}" 
+                        class="h-14 w-14 md:h-20 md:w-20 object-cover rounded-lg cursor-pointer border-2 border-transparent opacity-40 hover:opacity-100 transition-all flex-shrink-0 thumb-nav-item"
+                        data-index="{{ $loop->index }}" 
+                        onclick="navigateToThumbnail({{ $loop->index }})">
                 @endforeach
             </div>
+        </div>
+
+        <div class="absolute bottom-4 left-4 text-[10px] text-white/30 hidden md:block uppercase tracking-widest">
+            Esc to close • Arrows to navigate • Space to zoom
         </div>
     </div>
 
     <script>
-        // Store all image URLs and current index
         let currentImageIndex = 0;
         let imageUrls = [];
         let isZoomed = false;
-        let touchStartX = 0;
-        let touchStartY = 0;
+        let inactivityTimeout;
 
-        // Get all image URLs from the gallery
-        document.addEventListener('DOMContentLoaded', function () {
-            const galleryItems = document.querySelectorAll('[onclick^="openFullscreen"]');
-            imageUrls = Array.from(galleryItems).map(item => {
-                return item.getAttribute('onclick').split("'")[1];
-            });
-
-            // Update total images count
+        document.addEventListener('DOMContentLoaded', () => {
+            // Collect all images
+            const images = document.querySelectorAll('.gallery-item img');
+            imageUrls = Array.from(images).map(img => img.src);
             document.getElementById('totalImages').textContent = imageUrls.length;
 
-            // Add event listeners for navigation
-            document.getElementById('prevButton').addEventListener('click', showPrevImage);
-            document.getElementById('nextButton').addEventListener('click', showNextImage);
-
-            // Add download functionality
-            document.getElementById('downloadButton').addEventListener('click', downloadCurrentImage);
-
-            // Show thumbnail strip if more than 1 image
-            if (imageUrls.length > 1) {
-                document.getElementById('thumbnailContainer').classList.remove('hidden');
-            }
-
-            // Add swipe support for touch devices
+            // Setup listeners
+            document.getElementById('prevButton').onclick = (e) => { e.stopPropagation(); showPrevImage(); };
+            document.getElementById('nextButton').onclick = (e) => { e.stopPropagation(); showNextImage(); };
+            document.getElementById('downloadButton').onclick = downloadCurrentImage;
+            
             setupSwipe();
-
-            // Preload adjacent images for better performance
-            if (imageUrls.length > 0) {
-                preloadAdjacentImages(0);
-            }
         });
 
-        function openFullscreen(imageUrl, index) {
+        function openFullscreen(url, index) {
             const modal = document.getElementById('fullscreenModal');
-            const fullscreenImage = document.getElementById('fullscreenImage');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-
-            // Show loading spinner
-            loadingSpinner.classList.remove('hidden');
-            fullscreenImage.classList.add('opacity-0');
-
-            // Find the index of the clicked image
+            const img = document.getElementById('fullscreenImage');
+            
             currentImageIndex = index;
-
-            // Reset zoom state
-            isZoomed = false;
-
-            // Set image source
-            fullscreenImage.onload = function () {
-                loadingSpinner.classList.add('hidden');
-                fullscreenImage.classList.remove('opacity-0');
-                fullscreenImage.classList.add('zoom-in');
-
-                // Remove zoom-in class after animation completes
-                setTimeout(() => {
-                    fullscreenImage.classList.remove('zoom-in');
-                }, 300);
-            };
-
-            fullscreenImage.src = imageUrl;
-
-            // Show modal
-            modal.classList.remove('hidden');
-            modal.classList.add('fade-in');
-
-            // Update counter and thumbnail selection
-            updateCounter();
-            updateThumbnailSelection();
-
-            // Preload adjacent images
-            preloadAdjacentImages(currentImageIndex);
-
-            document.body.style.overflow = 'hidden';
-
-            // Hide UI elements after 3 seconds of inactivity
-            startInactivityTimer();
-        }
-
-        function closeFullscreen() {
-            const modal = document.getElementById('fullscreenModal');
-            modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-
-            // Clear inactivity timer
-            clearInactivityTimer();
-        }
-
-        function showPrevImage() {
-            if (imageUrls.length === 0) return;
-
-            // Reset zoom state when navigating
             resetZoom();
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+            
+            loadImage(url);
+            updateUI();
+            document.body.style.overflow = 'hidden';
+            resetInactivityTimer();
+        }
 
-            const newIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
-            navigateToImage(newIndex, 'left');
+        function loadImage(url) {
+            const img = document.getElementById('fullscreenImage');
+            const bar = document.getElementById('loadingBar');
+            
+            bar.style.width = '30%';
+            img.style.opacity = '0';
+            img.style.transform = 'scale(0.95)';
+
+            const highRes = new Image();
+            highRes.src = url;
+            highRes.onload = () => {
+                bar.style.width = '100%';
+                img.src = url;
+                img.style.opacity = '1';
+                img.style.transform = 'scale(1)';
+                setTimeout(() => bar.style.width = '0%', 400);
+            };
         }
 
         function showNextImage() {
-            if (imageUrls.length === 0) return;
+            currentImageIndex = (currentImageIndex + 1) % imageUrls.length;
+            loadImage(imageUrls[currentImageIndex]);
+            updateUI();
+        }
 
-            // Reset zoom state when navigating
-            resetZoom();
+        function showPrevImage() {
+            currentImageIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
+            loadImage(imageUrls[currentImageIndex]);
+            updateUI();
+        }
 
-            const newIndex = (currentImageIndex + 1) % imageUrls.length;
-            navigateToImage(newIndex, 'right');
+        function updateUI() {
+            document.getElementById('currentIndex').textContent = currentImageIndex + 1;
+            
+            // Update Thumbnails
+            document.querySelectorAll('.thumb-nav-item').forEach((thumb, idx) => {
+                if (idx === currentImageIndex) {
+                    thumb.classList.add('thumb-active');
+                    thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    thumb.classList.remove('thumb-active');
+                }
+            });
+        }
+
+        function navigateToThumbnail(idx) {
+            currentImageIndex = idx;
+            loadImage(imageUrls[idx]);
+            updateUI();
+        }
+
+        function toggleZoom() {
+            isZoomed = !isZoomed;
+            const img = document.getElementById('fullscreenImage');
+            img.classList.toggle('zoomed', isZoomed);
+            img.classList.toggle('cursor-zoom-out', isZoomed);
+            img.classList.toggle('cursor-zoom-in', !isZoomed);
         }
 
         function resetZoom() {
             isZoomed = false;
-            document.getElementById('fullscreenImage').classList.remove('zoomed');
+            const img = document.getElementById('fullscreenImage');
+            img.classList.remove('zoomed', 'cursor-zoom-out');
+            img.classList.add('cursor-zoom-in');
         }
 
-        function navigateToImage(newIndex, direction) {
-            const fullscreenImage = document.getElementById('fullscreenImage');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-
-            // Show loading spinner
-            loadingSpinner.classList.remove('hidden');
-            fullscreenImage.classList.add('opacity-0');
-
-            // Set appropriate animation class based on direction
-            fullscreenImage.classList.remove('slide-in-left', 'slide-in-right');
-            fullscreenImage.classList.add(direction === 'left' ? 'slide-in-left' : 'slide-in-right');
-
-            // Update image source
-            fullscreenImage.onload = function () {
-                loadingSpinner.classList.add('hidden');
-                fullscreenImage.classList.remove('opacity-0');
-
-                // Remove animation class after animation completes
-                setTimeout(() => {
-                    fullscreenImage.classList.remove('slide-in-left', 'slide-in-right');
-                }, 400);
-            };
-
-            fullscreenImage.src = imageUrls[newIndex];
-
-            // Update current index
-            currentImageIndex = newIndex;
-
-            // Update counter and thumbnail selection
-            updateCounter();
-            updateThumbnailSelection();
-
-            // Preload adjacent images
-            preloadAdjacentImages(newIndex);
-
-            // Reset inactivity timer
-            startInactivityTimer();
-        }
-
-        function navigateToThumbnail(index) {
-            if (index === currentImageIndex) return;
-
-            const direction = index > currentImageIndex ? 'right' : 'left';
-            navigateToImage(index, direction);
-        }
-
-        function updateCounter() {
-            document.getElementById('currentIndex').textContent = currentImageIndex + 1;
-        }
-
-        function updateThumbnailSelection() {
-            const thumbnails = document.querySelectorAll('#thumbnailContainer img');
-            thumbnails.forEach((thumb, index) => {
-                if (index === currentImageIndex) {
-                    thumb.classList.add('border-white', 'opacity-100');
-                    thumb.classList.remove('border-transparent', 'opacity-70');
-
-                    // Scroll thumbnail into view
-                    thumb.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'nearest',
-                        inline: 'center'
-                    });
-                } else {
-                    thumb.classList.remove('border-white', 'opacity-100');
-                    thumb.classList.add('border-transparent', 'opacity-70');
-                }
-            });
-        }
-
-        function toggleZoom() {
-            const fullscreenImage = document.getElementById('fullscreenImage');
-            isZoomed = !isZoomed;
-
-            if (isZoomed) {
-                fullscreenImage.classList.add('zoomed');
-            } else {
-                fullscreenImage.classList.remove('zoomed');
-            }
-
-            // Reset inactivity timer when zooming
-            startInactivityTimer();
-        }
-
-        function setupSwipe() {
+        function closeFullscreen() {
             const modal = document.getElementById('fullscreenModal');
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let touchEndX = 0;
-            let touchEndY = 0;
+            modal.classList.remove('opacity-100');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+            document.body.style.overflow = 'auto';
+            clearTimeout(inactivityTimeout);
+        }
 
-            modal.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-                touchStartY = e.changedTouches[0].screenY;
-            }, false);
-
-            modal.addEventListener('touchmove', (e) => {
-                // Prevent scrolling when zoomed
-                if (isZoomed) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-
-            modal.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                touchEndY = e.changedTouches[0].screenY;
-                handleSwipe();
-            }, false);
-
-            function handleSwipe() {
-                // Only handle horizontal swipes when not zoomed
-                if (isZoomed) return;
-
-                const xDiff = touchStartX - touchEndX;
-                const yDiff = touchStartY - touchEndY;
-
-                // Only consider horizontal swipes with minimal vertical movement
-                if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 50) {
-                    if (xDiff > 0) {
-                        // Swipe left - next image
-                        showNextImage();
-                    } else {
-                        // Swipe right - previous image
-                        showPrevImage();
-                    }
-                }
+        function handleBackgroundClick(e) {
+            if (e.target.id === 'fullscreenImage' && !isZoomed) {
+                toggleZoom();
+            } else if (isZoomed) {
+                resetZoom();
             }
         }
 
-        function downloadCurrentImage() {
-            if (imageUrls.length === 0) return;
-
-            const link = document.createElement('a');
-            link.href = imageUrls[currentImageIndex];
-            link.download = `image-${currentImageIndex + 1}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function preloadAdjacentImages(currentIndex) {
-            // Preload next and previous images for smoother navigation
-            const preloadIndices = [
-                (currentIndex - 1 + imageUrls.length) % imageUrls.length,
-                (currentIndex + 1) % imageUrls.length
-            ];
-
-            preloadIndices.forEach(index => {
-                const img = new Image();
-                img.src = imageUrls[index];
-            });
-        }
-
-        // UI visibility timeout
-        let inactivityTimer;
-
-        function startInactivityTimer() {
-            clearInactivityTimer();
-
-            // Only start timer if not zoomed
+        // Inactivity Timer
+        function resetInactivityTimer() {
+            const uiElements = [document.getElementById('modalUI'), document.getElementById('thumbUI'), document.getElementById('prevButton'), document.getElementById('nextButton')];
+            uiElements.forEach(el => el.classList.remove('opacity-0'));
+            
+            clearTimeout(inactivityTimeout);
             if (!isZoomed) {
-                inactivityTimer = setTimeout(() => {
-                    hideUIElements();
+                inactivityTimeout = setTimeout(() => {
+                    uiElements.forEach(el => el.classList.add('opacity-0'));
                 }, 3000);
             }
         }
 
-        function clearInactivityTimer() {
-            if (inactivityTimer) {
-                clearTimeout(inactivityTimer);
-            }
-            showUIElements();
-        }
+        document.getElementById('fullscreenModal').addEventListener('mousemove', resetInactivityTimer);
 
-        function hideUIElements() {
-            const modal = document.getElementById('fullscreenModal');
-            modal.querySelectorAll('button, #thumbnailContainer, #currentIndex').forEach(el => {
-                el.classList.add('opacity-0');
-            });
-        }
-
-        function showUIElements() {
-            const modal = document.getElementById('fullscreenModal');
-            modal.querySelectorAll('button, #thumbnailContainer, #currentIndex').forEach(el => {
-                el.classList.remove('opacity-0');
-            });
-        }
-
-        // Close modal when clicking outside the image
-        document.getElementById('fullscreenModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeFullscreen();
-            } else {
-                // Show UI elements when interacting with modal
-                clearInactivityTimer();
-            }
-        });
-
-        // Handle keyboard events
-        document.addEventListener('keydown', function (e) {
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
             const modal = document.getElementById('fullscreenModal');
             if (modal.classList.contains('hidden')) return;
 
-            switch (e.key) {
-                case 'Escape':
-                    closeFullscreen();
-                    break;
-                case 'ArrowLeft':
-                    showPrevImage();
-                    break;
-                case 'ArrowRight':
-                    showNextImage();
-                    break;
-                case ' ':
-                    e.preventDefault();
-                    toggleZoom();
-                    break;
-                case 'd':
-                    downloadCurrentImage();
-                    break;
-                case 't':
-                    // Toggle thumbnail strip
-                    document.getElementById('thumbnailContainer').classList.toggle('hidden');
-                    break;
-                case 'h':
-                    // Toggle UI visibility
-                    if (document.querySelector('#fullscreenModal button:first-child').classList.contains('opacity-0')) {
-                        showUIElements();
-                        startInactivityTimer();
-                    } else {
-                        hideUIElements();
-                        clearInactivityTimer();
-                    }
-                    break;
-            }
+            if (e.key === 'ArrowRight') showNextImage();
+            if (e.key === 'ArrowLeft') showPrevImage();
+            if (e.key === 'Escape') closeFullscreen();
+            if (e.key === ' ') { e.preventDefault(); toggleZoom(); }
+            if (e.key.toLowerCase() === 'd') downloadCurrentImage();
         });
 
-        // Mouse movement detection for UI visibility
-        document.getElementById('fullscreenModal').addEventListener('mousemove', () => {
-            if (!isZoomed) {
-                showUIElements();
-                startInactivityTimer();
-            }
-        });
+        function downloadCurrentImage() {
+            const a = document.createElement('a');
+            a.href = imageUrls[currentImageIndex];
+            a.download = `Facility-${currentImageIndex + 1}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function setupSwipe() {
+            let startX = 0;
+            const modal = document.getElementById('fullscreenModal');
+            
+            modal.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+            modal.addEventListener('touchend', e => {
+                if (isZoomed) return;
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                if (Math.abs(diff) > 50) {
+                    diff > 0 ? showNextImage() : showPrevImage();
+                }
+            });
+        }
     </script>
 </body>
-
 </html>
