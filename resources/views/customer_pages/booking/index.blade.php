@@ -9,7 +9,7 @@
                margin-bottom: 3rem;
                position: relative;
           }
-
+          
           .category-title {
                color: #1F2937;
                padding-left: 0;

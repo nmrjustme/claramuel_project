@@ -586,8 +586,8 @@
                     <div class="relative pb-[56.25%] h-0 bg-black rounded-xl overflow-hidden shadow-inner">
                         <video
                             class="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
-                            controls playsinline poster="{{ url('imgs/tutorial/thumbnail_1.jpg') }}">
-                            <source src="{{ url('video/commercial.mp4') }}" type="video/mp4">
+                            controls playsinline poster="{{ url('imgs/tutorial/thumbnail.jpg') }}">
+                            <source src="{{ url('video/tutorial_phone.mp4') }}" type="video/mp4">
                             <track label="English" kind="subtitles" srclang="en" src="captions.vtt" default>
                             Your browser does not support the video tag.
                         </video>
