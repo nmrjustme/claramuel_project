@@ -52,6 +52,18 @@ use App\Http\Controllers\AccountingReportController;
 use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\RoomHoldController;
 
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/run-optimize', function() {
+    Artisan::call('optimize');
+    return "Optimization complete!";
+});
+
+Route::get('/run-migrate', function() {
+    Artisan::call('migrate --force');
+    return "Migrations complete!";
+});
+
 Route::get('/test-invoice/{id}', function ($id) {
     $booking = FacilityBookingLog::findOrFail($id);
 
