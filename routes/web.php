@@ -53,6 +53,12 @@ use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\RoomHoldController;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+
+// Automatically clear expired password reset tokens and old logs weekly
+Schedule::command('auth:clear-resets')->weekly();
+Schedule::command('logs:clear')->daily(); // Requires a custom command or package
+Schedule::command('telescope:prune')->daily(); // If using Laravel Telescope
 
 Route::get('/run-optimize', function() {
     Artisan::call('optimize');
@@ -68,7 +74,7 @@ Route::get('/clear-everything', function() {
     // This runs optimize:clear
     Artisan::call('optimize:clear');
     
-    return '<h1>System Cleared</h1><pre>' . Artisan::output() . '</pre>';
+    return "Optimization complete!";
 });
 
 Route::get('/test-invoice/{id}', function ($id) {
