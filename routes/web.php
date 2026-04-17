@@ -64,6 +64,13 @@ Route::get('/run-migrate', function() {
     return "Migrations complete!";
 });
 
+Route::get('/clear-everything', function() {
+    // This runs optimize:clear
+    Artisan::call('optimize:clear');
+    
+    return '<h1>System Cleared</h1><pre>' . Artisan::output() . '</pre>';
+});
+
 Route::get('/test-invoice/{id}', function ($id) {
     $booking = FacilityBookingLog::findOrFail($id);
 
