@@ -1729,7 +1729,7 @@
 
                                         <div class="relative" style="overflow: visible; position: relative; margin-top: 40px;">
 
-
+               
                                              <div class="scroll-arrows">
                                                   <button class="scroll-arrow scroll-left"
                                                        data-target="scroll-{{ $loop->index }}">
