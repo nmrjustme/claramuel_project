@@ -453,8 +453,8 @@
             <video id="hero-video" autoplay loop muted playsinline
                 class="absolute inset-0 w-full h-full object-cover z-0" poster="{{ url('imgs/video-backup.jpg') }}"
                 onerror="handleVideoError()" onloadstart="checkVideoLoad()">
-                <source src="{{ url('video/welcomeVideo.mp4') }}" type="video/mp4">
-                <source src="{{ url('video/welcomeVideo.webm') }}" type="video/webm">
+                <source src="{{ url('video/commercials.mp4') }}" type="video/mp4">
+                <source src="{{ url('video/commercials.webm') }}" type="video/webm">
                 Your browser does not support the video tag.
             </video>
             <div id="video-fallback" class="absolute inset-0 w-full h-full z-0 hidden">
