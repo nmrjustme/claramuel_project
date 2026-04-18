@@ -256,7 +256,7 @@ class MayaWebhookSetupController extends Controller
 
             event(new BookingNew($bookingLog)); // Event listener for new booking list
             $this->sendEmailAdmin($bookingLog);
-
+            
             // Send email with PDF attachment
             Mail::to($bookingData['email'])->send(new ReservationReceived(
                 $bookingLog,
