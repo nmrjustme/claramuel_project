@@ -5,17 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Storage;
 
 class GalleryImage extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'gallery_id',
         'title',
@@ -28,11 +22,6 @@ class GalleryImage extends Model
         'is_active'
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'is_featured' => 'boolean',
         'is_active' => 'boolean',
@@ -41,11 +30,6 @@ class GalleryImage extends Model
         'updated_at' => 'datetime',
     ];
 
-    /**
-     * Default attribute values.
-     *
-     * @var array<string, mixed>
-     */
     protected $attributes = [
         'is_featured' => false,
         'is_active' => true,
@@ -53,86 +37,46 @@ class GalleryImage extends Model
         'category' => 'any',
     ];
 
-    /**
-     * Get the gallery that owns the image.
-     */
     public function gallery(): BelongsTo
     {
         return $this->belongsTo(Gallery::class);
     }
-    
 
-    /**
-     * Get the full URL for the image.
-     */
     public function getImageUrlAttribute(): string
     {
-        return $this->image_path ? asset('storage/' . $this->image_path) : '';
+        // REFACTORED: Removed 'storage/' prefix
+        return $this->image_path ? asset($this->image_path) : '';
     }
 
-    /**
-     * Get the image dimensions (placeholder).
-     */
     public function getDimensionsAttribute(): string
     {
-        return '1920x1080'; // Placeholder - you can implement actual dimensions later
+        return '1920x1080';
     }
 
-    /**
-     * Get file size (if file exists).
-     */
     public function getFileSizeAttribute(): string
     {
-        if ($this->image_path && Storage::disk('public')->exists($this->image_path)) {
-            $size = Storage::disk('public')->size($this->image_path);
+        // REFACTORED: Use native PHP filesize instead of Laravel Storage
+        if ($this->image_path && file_exists(public_path($this->image_path))) {
+            $size = filesize(public_path($this->image_path));
             return $this->formatBytes($size);
         }
         return 'Unknown';
     }
 
-    /**
-     * Format bytes to human readable format.
-     */
     private function formatBytes($bytes, $precision = 2): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
-        
         $bytes /= pow(1024, $pow);
-        
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
 
-    /**
-     * Scope a query to only include active images.
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
+    public function scopeActive($query) { return $query->where('is_active', true); }
+    public function scopeFeatured($query) { return $query->where('is_featured', true)->where('is_active', true); }
+    public function scopeOrdered($query) { return $query->orderBy('sort_order')->orderBy('created_at', 'desc'); }
 
-    /**
-     * Scope a query to only include featured images.
-     */
-    public function scopeFeatured($query)
-    {
-        return $query->where('is_featured', true)->where('is_active', true);
-    }
-
-    /**
-     * Scope a query to order by sort order.
-     */
-    public function scopeOrdered($query)
-    {
-        return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
-    }
-
-    /**
-     * Scope a query to filter by category.
-     */
     public function scopeByCategory($query, $category)
     {
         if ($category && $category !== 'all') {
@@ -141,9 +85,6 @@ class GalleryImage extends Model
         return $query;
     }
 
-    /**
-     * Scope a query to filter by gallery.
-     */
     public function scopeByGallery($query, $galleryId)
     {
         if ($galleryId) {
@@ -152,23 +93,12 @@ class GalleryImage extends Model
         return $query;
     }
 
-    /**
-     * Check if image is the only featured image in its gallery.
-     */
     public function getIsOnlyFeaturedAttribute(): bool
     {
-        if (!$this->is_featured) {
-            return false;
-        }
-
-        return !$this->gallery->featuredImages()
-            ->where('id', '!=', $this->id)
-            ->exists();
+        if (!$this->is_featured) return false;
+        return !$this->gallery->featuredImages()->where('id', '!=', $this->id)->exists();
     }
 
-    /**
-     * Get all unique categories from images.
-     */
     public static function getCategories(): array
     {
         return self::distinct()
@@ -178,14 +108,10 @@ class GalleryImage extends Model
             ->toArray();
     }
 
-    /**
-     * Boot method for handling model events.
-     */
     protected static function boot()
     {
         parent::boot();
 
-        // Set default sort order before creating
         static::creating(function ($image) {
             if (is_null($image->sort_order)) {
                 $maxOrder = static::where('gallery_id', $image->gallery_id)->max('sort_order');
@@ -193,10 +119,10 @@ class GalleryImage extends Model
             }
         });
 
-        // Delete image file when model is deleted
+        // REFACTORED: Delete physical file using native PHP unlink
         static::deleting(function ($image) {
-            if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
-                Storage::disk('public')->delete($image->image_path);
+            if ($image->image_path && file_exists(public_path($image->image_path))) {
+                unlink(public_path($image->image_path));
             }
         });
     }

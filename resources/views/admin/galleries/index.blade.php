@@ -879,7 +879,6 @@ $active = 'gallery';
 
 @section('content')
 <div class="min-h-screen px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
-    <!-- Enhanced Header -->
     <div class="page-header mb-4 sm:mb-6">
         <div class="p-4 sm:p-6 md:p-8 text-white relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-white/0"></div>
@@ -906,7 +905,6 @@ $active = 'gallery';
         </div>
     </div>
 
-    <!-- Statistics Cards -->
     <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
         <div class="status-card total-galleries">
             <div class="card-content">
@@ -965,13 +963,11 @@ $active = 'gallery';
         </div>
     </div>
 
-    <!-- Tabs -->
     <div class="tabs">
         <button class="tab active" onclick="switchTab('galleries')">Galleries</button>
         <button class="tab" onclick="switchTab('images')">All Images</button>
     </div>
 
-    <!-- Filter Bar -->
     <div class="filter-bar">
         <div class="search-box">
             <input type="text" id="search-input" class="search-input" placeholder="Search galleries..." onkeyup="filterGalleries()">
@@ -992,7 +988,6 @@ $active = 'gallery';
         </select>
     </div>
 
-    <!-- Galleries Tab Content -->
     <div id="galleries-tab" class="tab-content">
         <div id="galleries-container">
             @if($galleries->count() > 0)
@@ -1004,7 +999,7 @@ $active = 'gallery';
                     @endphp
                     <div class="gallery-card" data-gallery-id="{{ $gallery->id }}">
                         <div class="gallery-card-header">
-                            <img src="{{ $firstImage ? asset('storage/' . $firstImage->image_path) : '/images/default-gallery.jpg' }}" 
+                            <img src="{{ $firstImage ? asset($firstImage->image_path) : '/images/default-gallery.jpg' }}" 
                                  alt="{{ $firstImage ? ($firstImage->image_alt ?? $firstImage->title) : 'No image' }}" 
                                  class="gallery-card-image"
                                  onerror="this.src='/images/default-gallery.jpg'">
@@ -1056,7 +1051,6 @@ $active = 'gallery';
                     @endforeach
                 </div>
                 
-                <!-- Pagination -->
                 @if($galleries->hasPages())
                 <div class="mt-6 flex justify-center">
                     {{ $galleries->links() }}
@@ -1075,7 +1069,6 @@ $active = 'gallery';
         </div>
     </div>
 
-    <!-- Images Tab Content -->
     <div id="images-tab" class="tab-content" style="display: none;">
         <div id="images-container">
             <div class="loading">
@@ -1086,7 +1079,6 @@ $active = 'gallery';
     </div>
 </div>
 
-<!-- Enhanced Upload Modal (Consistent with Show Blade) -->
 <div id="upload-modal" class="modal">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 animate-slide-up">
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
@@ -1123,7 +1115,6 @@ $active = 'gallery';
                         <input type="text" id="upload-category" name="category" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm" placeholder="Enter category (e.g., nature, portrait, event)">
                     </div>
                     
-                    <!-- File Preview & Edit Section -->
                     <div id="upload-preview" class="hidden">
                         <p class="text-sm font-semibold text-gray-900 mb-4">Image Preview & Edit:</p>
                         <div id="preview-container" class="space-y-4 max-h-96 overflow-y-auto p-4 border border-gray-200 rounded-xl bg-gray-50"></div>
@@ -1142,7 +1133,6 @@ $active = 'gallery';
     </div>
 </div>
 
-<!-- Delete Gallery Confirmation Modal -->
 <div id="delete-gallery-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1172,10 +1162,8 @@ $active = 'gallery';
     </div>
 </div>
 
-<!-- Image Edit Modal -->
 <div id="image-edit-modal" class="modal">
-    <!-- This will be populated by JavaScript -->
-</div>
+    </div>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
@@ -1273,7 +1261,8 @@ $active = 'gallery';
         let html = '<div class="image-grid">';
         
         data.forEach(image => {
-            const imagePath = image.image_path ? `/storage/${image.image_path}` : '/images/default-image.jpg';
+            // FIX 2: Removed '/storage' prefix here
+            const imagePath = image.image_path ? `/${image.image_path}` : '/images/default-image.jpg';
             const imageAlt = image.image_alt || image.title || 'Gallery Image';
             const galleryTitle = image.gallery?.title || 'No Gallery';
             
@@ -1370,7 +1359,7 @@ $active = 'gallery';
             html += `
                 <div class="gallery-card" data-gallery-id="${gallery.id}">
                     <div class="gallery-card-header">
-                        <img src="${firstImage ? '/storage/' + firstImage.image_path : '/images/default-gallery.jpg'}" 
+                        <img src="${firstImage ? '/' + firstImage.image_path : '/images/default-gallery.jpg'}" 
                              alt="${firstImage ? (firstImage.image_alt || firstImage.title) : 'No image'}" 
                              class="gallery-card-image"
                              onerror="this.src='/images/default-gallery.jpg'">
@@ -1793,7 +1782,7 @@ $active = 'gallery';
                 <div class="form-group">
                     <label class="form-label">Current Image</label>
                     <div class="mt-2 border rounded-lg p-4 bg-gray-50">
-                        <img src="/storage/${image.image_path}" 
+                        <img src="/${image.image_path}" 
                              alt="${image.image_alt || image.title}" 
                              class="max-w-full h-auto max-h-40 mx-auto rounded-lg shadow-sm"
                              onerror="this.src='/images/default-image.jpg'">

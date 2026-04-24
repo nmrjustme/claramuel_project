@@ -509,7 +509,6 @@ body.lightbox-open #back-to-top {
 </head>
 
 <body class="bg-white text-gray-700">
-    <!-- Header -->
     <header id="main-header"
         class="bg-gradient-to-r from-red-900 to-red-600 text-white fixed w-full shadow-lg z-50 transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
@@ -540,7 +539,6 @@ body.lightbox-open #back-to-top {
         </div>
     </header>
 
-    <!-- Mobile Menu -->
     <div id="mobile-menu"
         class="lg:hidden fixed top-0 left-0 w-full h-full bg-gray-800/95 z-40 pt-20 px-4 sm:px-6 transform translate-x-full transition-transform duration-300 backdrop-blur-sm">
         <div class="flex flex-col space-y-5 py-6">
@@ -563,7 +561,6 @@ body.lightbox-open #back-to-top {
         </div>
     </div>
 
-    <!-- Hero Section -->
     <section class="pt-28 sm:pt-32 pb-16 sm:pb-20 bg-gradient-to-r from-red-900 to-red-600 text-white">
         <div class="container mx-auto px-4 sm:px-6 text-center">
             <h1 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 font-serif animate-fadeInUp hero-title-mobile">
@@ -582,10 +579,8 @@ body.lightbox-open #back-to-top {
         </div>
     </section>
 
-    <!-- Gallery Section -->
     <section class="py-12 sm:py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 container-mobile-padding">
-            <!-- Page Header -->
             <div class="text-center mb-12 sm:mb-16 animate-fadeInUp">
                 <h2 class="text-xl sm:text-2xl md:text-4xl text-darkAccent mb-4 sm:mb-6 font-serif font-light gallery-section-title">
                     𝐸𝓍𝓅𝓁𝑜𝓇𝑒 𝑜𝓊𝓇 𝒷𝓇𝑒𝒶𝓉𝒽𝓉𝒶𝓀𝒾𝓃𝑔 𝓈𝓅𝒶𝒸𝑒𝓈
@@ -595,8 +590,7 @@ body.lightbox-open #back-to-top {
                 </p>
             </div>
 
-            <!-- Alternative: Better multi-row layout -->
-<div class="mb-8 sm:mb-12 animate-fadeInUp" style="animation-delay: 0.2s;">
+            <div class="mb-8 sm:mb-12 animate-fadeInUp" style="animation-delay: 0.2s;">
     <div class="flex flex-wrap justify-center gap-2 sm:gap-3 max-h-32 overflow-y-auto py-2 px-4 hide-scrollbar">
         <button class="filter-btn active px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-darkAccent text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium filter-btn-mobile whitespace-nowrap" 
                 data-category="all">
@@ -614,11 +608,9 @@ body.lightbox-open #back-to-top {
     </div>
 </div>
 
-            <!-- Full Gallery Sections -->
             <div class="space-y-12 sm:space-y-20" id="full-gallery">
                 @foreach($galleries as $gallery)
                 <div class="gallery-section animate-fadeInUp" data-category="{{ $gallery->category }}">
-                    <!-- Gallery Header -->
                     <div class="text-center mb-8 sm:mb-12">
                         <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif text-darkAccent mb-3 sm:mb-4 gallery-section-title">{{ $gallery->title }}</h2>
                         @if($gallery->description)
@@ -627,24 +619,20 @@ body.lightbox-open #back-to-top {
                         <div class="w-20 sm:w-24 h-1 bg-gradient-to-r from-darkAccent to-amber-400 mx-auto mt-4 sm:mt-6 rounded-full"></div>
                     </div>
 
-                    <!-- Images Grid - UPDATED FOR MOBILE -->
                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 gallery-grid-mobile">
                         @foreach($gallery->images as $image)
                         <div class="group relative overflow-hidden rounded-lg sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:scale-[1.02] bg-gray-100 gallery-item gallery-item-mobile"
                              data-category="{{ $gallery->category }}"
-                             onclick="openLightbox('{{ asset('storage/' . $image->image_path) }}', '{{ addslashes($image->title) }}', '{{ addslashes($image->caption ?? '') }}', {{ $loop->index + 8 }})">
+                             onclick="openLightbox('{{ asset($image->image_path) }}', '{{ addslashes($image->title) }}', '{{ addslashes($image->caption ?? '') }}', {{ $loop->index + 8 }})">
                             
-                            <!-- Fixed aspect ratio container -->
                             <div class="aspect-container aspect-4-3">
-                                <img src="{{ asset('storage/' . $image->image_path) }}" 
+                                <img src="{{ asset($image->image_path) }}" 
                                      alt="{{ $image->image_alt ?? $image->title }}"
                                      class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                                      loading="lazy">
                             </div>
                             
-                            <!-- Gradient Overlay - SIMPLIFIED FOR MOBILE -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-between p-3 sm:p-4 md:p-6 gallery-overlay-mobile">
-                                <!-- Top Badges - SCALED DOWN FOR MOBILE -->
                                 <div class="flex justify-between items-start gallery-badges-mobile">
                                     @if($image->is_featured)
                                     <span class="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm">
@@ -656,7 +644,6 @@ body.lightbox-open #back-to-top {
                                     </span>
                                 </div>
                                 
-                                <!-- Bottom Content - SIMPLIFIED FOR MOBILE -->
                                 <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                                     <h3 class="text-white font-semibold text-sm sm:text-lg mb-1 sm:mb-2 drop-shadow-2xl line-clamp-1 gallery-title-mobile">{{ $image->title }}</h3>
                                     @if($image->caption)
@@ -675,7 +662,6 @@ body.lightbox-open #back-to-top {
                     </div>
 
                     @if($gallery->images->isEmpty())
-                    <!-- Empty Gallery State -->
                     <div class="text-center py-12 sm:py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl sm:rounded-2xl border-2 border-dashed border-gray-300">
                         <i class="fas fa-camera text-gray-400 text-4xl sm:text-5xl mb-3 sm:mb-4"></i>
                         <h3 class="text-lg sm:text-xl font-semibold text-gray-500 mb-1 sm:mb-2">Coming Soon</h3>
@@ -686,7 +672,6 @@ body.lightbox-open #back-to-top {
                 @endforeach
 
                 @if($galleries->isEmpty())
-                <!-- Empty State -->
                 <div class="text-center py-12 sm:py-20 animate-fadeInUp">
                     <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl sm:rounded-3xl p-6 sm:p-12 max-w-2xl mx-auto border-2 border-dashed border-gray-300">
                         <i class="fas fa-camera text-gray-400 text-4xl sm:text-6xl mb-4 sm:mb-6"></i>
@@ -705,7 +690,6 @@ body.lightbox-open #back-to-top {
                 @endif
             </div>
 
-            <!-- Back to Top -->
             <div class="text-center mt-12 sm:mt-16 animate-fadeInUp">
                 <button onclick="scrollToTop()" 
                         class="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 border-2 border-darkAccent text-darkAccent rounded-full hover:bg-darkAccent hover:text-white transition-all duration-300 transform hover:scale-105 font-medium group text-sm sm:text-base">
@@ -716,17 +700,14 @@ body.lightbox-open #back-to-top {
         </div>
     </section>
 
-    <!-- Enhanced Lightbox - EXACTLY like landing page -->
     <div id="lightbox" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
         <div class="relative w-full h-full flex items-center justify-center">
-            <!-- Close Button - Fixed Position -->
             <button onclick="closeLightbox()" 
                     class="fixed top-4 sm:top-6 right-4 sm:right-6 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-2 sm:p-3 lightbox-control-mobile"
                     title="Close (Esc)">
                 <i class="fas fa-times text-sm sm:text-base"></i>
             </button>
             
-            <!-- Navigation Arrows - Fixed Positions -->
             <button id="lightbox-prev" 
                     onclick="navigateLightbox(-1)"
                     class="fixed left-2 sm:left-6 top-1/2 transform -translate-y-1/2 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-2 sm:p-4 lightbox-control-mobile"
@@ -741,7 +722,6 @@ body.lightbox-open #back-to-top {
                 <i class="fas fa-chevron-right text-sm sm:text-base"></i>
             </button>
 
-            <!-- Toggle Caption Button -->
             <button id="toggle-caption" 
                     onclick="toggleCaption()"
                     class="fixed top-4 sm:top-6 left-4 sm:left-6 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-2 sm:p-3 lightbox-control-mobile"
@@ -750,14 +730,11 @@ body.lightbox-open #back-to-top {
                 <i id="caption-hide-icon" class="fas fa-eye-slash hidden text-sm sm:text-base"></i>
             </button>
 
-            <!-- Image Container -->
             <div id="lightbox-container" class="relative flex items-center justify-center max-w-[95vw] sm:max-w-[90vw] max-h-[80vh] sm:max-h-[85vh]">
-                <!-- Loading Spinner -->
                 <div id="lightbox-loading" class="absolute inset-0 flex items-center justify-center z-10 hidden">
                     <div class="animate-spin rounded-full h-8 sm:h-12 w-8 sm:w-12 border-b-2 border-white"></div>
                 </div>
                 
-                <!-- Main Image -->
                 <img id="lightbox-image" 
                      src="" 
                      alt="" 
@@ -767,12 +744,10 @@ body.lightbox-open #back-to-top {
                      onerror="handleImageError(this)">
             </div>
             
-            <!-- Caption Panel -->
             <div id="lightbox-caption-panel" class="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 max-w-2xl w-full mx-2 sm:mx-4 transition-all duration-300 opacity-100 border border-white/10 lightbox-caption-mobile">
                 <h3 id="lightbox-title" class="text-white text-base sm:text-lg md:text-xl font-semibold mb-1 sm:mb-2 text-center"></h3>
                 <p id="lightbox-caption" class="text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed text-center"></p>
                 
-                <!-- Image Info -->
                 <div class="flex justify-center items-center mt-2 sm:mt-3 text-gray-400 text-xs md:text-sm space-x-2 sm:space-x-4">
                     <span id="image-dimensions" class="flex items-center">
                         <i class="fas fa-expand-arrows-alt mr-1"></i>
@@ -785,7 +760,6 @@ body.lightbox-open #back-to-top {
                 </div>
             </div>
 
-            <!-- Zoom Controls - Make sure they have the zoom-controls class -->
             <div class="fixed bottom-16 sm:bottom-24 right-4 sm:right-6 flex flex-col space-y-1 sm:space-y-2 z-50 zoom-controls">
                 <button id="zoom-in" onclick="zoomImage(0.1)"
                         class="lightbox-control text-white rounded-full p-2 sm:p-3 lightbox-control-mobile"
@@ -806,7 +780,6 @@ body.lightbox-open #back-to-top {
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 text-white pt-12 sm:pt-16 pb-6 sm:pb-8">
         <div class="container mx-auto px-4 sm:px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12 footer-grid-mobile">
@@ -901,7 +874,6 @@ body.lightbox-open #back-to-top {
         </div>
     </footer>
 
-    <!-- Back to Top Button -->
     <button id="back-to-top"
         class="fixed bottom-6 sm:bottom-8 right-6 sm:right-8 bg-accent text-white p-3 sm:p-4 rounded-full shadow-lg opacity-0 invisible transition-all duration-300 z-50 hover:bg-red-600 back-to-top-mobile">
         <i class="fas fa-arrow-up text-sm sm:text-base"></i>

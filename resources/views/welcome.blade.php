@@ -389,7 +389,6 @@
 </head>
 
 <body class="bg-white text-gray-700">
-    <!-- Header -->
     <header id="main-header"
         class="bg-gradient-to-r from-red-900 to-red-600 text-white fixed w-full shadow-lg z-50 transition-all duration-300">
         <div class="container mx-auto px-6 py-3 flex justify-between items-center">
@@ -421,7 +420,6 @@
         </div>
     </header>
 
-    <!-- Mobile Menu -->
     <div id="mobile-menu"
         class="lg:hidden fixed top-0 left-0 w-full h-full bg-gray-800/95 z-40 pt-20 px-6 transform translate-x-full transition-transform duration-300 backdrop-blur-sm">
         <div class="flex flex-col space-y-5 py-6">
@@ -446,15 +444,14 @@
         </div>
     </div>
 
-    <!-- Hero Section with Highlights Bar -->
     <div class="hero-container">
         <section id="home"
             class="pt-32 pb-20 relative h-full flex items-center justify-center text-center overflow-hidden">
             <video id="hero-video" autoplay loop muted playsinline
                 class="absolute inset-0 w-full h-full object-cover z-0" poster="{{ url('imgs/video-backup.jpg') }}"
                 onerror="handleVideoError()" onloadstart="checkVideoLoad()">
-                <source src="{{ url('video/welcomeVideo.mp4') }}" type="video/mp4">
-                <source src="{{ url('video/welcomeVideo.webm') }}" type="video/webm">
+                <source src="{{ url('video/commercials.mp4') }}" type="video/mp4">
+                <source src="{{ url('video/commercials.webm') }}" type="video/webm">
                 Your browser does not support the video tag.
             </video>
             <div id="video-fallback" class="absolute inset-0 w-full h-full z-0 hidden">
@@ -484,7 +481,6 @@
                 </div>
             </div>
 
-            <!-- Video sound toggle -->
             <div class="video-controls">
                 <button id="sound-toggle"
                     class="bg-black/50 text-white p-3 rounded-full shadow-lg transition hover:bg-black/70">
@@ -492,7 +488,6 @@
                 </button>
             </div>
 
-            <!-- Scroll indicator -->
             <div class="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
                 <a href="#about" class="text-white">
                     <i class="fas fa-chevron-down text-2xl"></i>
@@ -500,7 +495,6 @@
             </div>
         </section>
 
-        <!-- Highlights Bar -->
         <div class="highlights-bar">
             <div class="bg-gray-800 text-white py-4 md:py-8 lg:py-12">
                 <div class="container mx-auto px-4 sm:px-6">
@@ -607,7 +601,6 @@
         </div>
     </section>
 
-    <!-- About Section -->
     <section id="about" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="flex flex-col lg:flex-row items-center gap-12">
@@ -676,7 +669,6 @@
         </div>
     </section>
 
-    <!-- Services Section -->
     <section id="services" class="py-20 bg-gray-50">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
@@ -687,7 +679,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Accommodations -->
                 <div class="service-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp"
                     style="animation-delay: 0.1s;">
                     <div class="h-64 overflow-hidden">
@@ -728,7 +719,6 @@
                     </div>
                 </div>
 
-                <!-- Event Hosting -->
                 <div class="service-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp"
                     style="animation-delay: 0.2s;">
                     <div class="h-64 overflow-hidden">
@@ -768,7 +758,6 @@
                     </div>
                 </div>
 
-                <!-- Recreational Activities -->
                 <div class="service-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fadeInUp"
                     style="animation-delay: 0.3s;">
                     <div class="h-64 overflow-hidden">
@@ -811,10 +800,8 @@
         </div>
     </section>
 
-    <!-- Symmetrical Gallery Section -->
     <section id="gallery" class="py-20 bg-white">
         <div class="container mx-auto px-6">
-            <!-- Section Header -->
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-5xl text-darkAccent mb-6 font-serif font-light">
                     𝔼𝕩𝕡𝕖𝕣𝕚𝕖𝕟𝕔𝕖 𝕆𝕦𝕣 𝕎𝕠𝕣𝕝𝕕
@@ -839,15 +826,13 @@
             @endphp
 
             @if($featuredImages->count() > 0)
-                <!-- Perfectly Symmetrical Grid (only if we have 8+ images) -->
                 @if($hasEnoughImages)
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                        <!-- Row 1: 2 large images -->
                         @if(isset($featuredImages[0]))
                             <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
-                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[0]->image_path) }}', '{{ addslashes($featuredImages[0]->title) }}', '{{ addslashes($featuredImages[0]->caption ?? '') }}', 0)">
+                                onclick="openLightbox('{{ asset($featuredImages[0]->image_path) }}', '{{ addslashes($featuredImages[0]->title) }}', '{{ addslashes($featuredImages[0]->caption ?? '') }}', 0)">
                                 <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                                    <img src="{{ asset('storage/' . $featuredImages[0]->image_path) }}"
+                                    <img src="{{ asset($featuredImages[0]->image_path) }}"
                                         alt="{{ $featuredImages[0]->image_alt ?? $featuredImages[0]->title }}"
                                         class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                                 </div>
@@ -874,9 +859,9 @@
 
                         @if(isset($featuredImages[1]))
                             <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
-                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[1]->image_path) }}', '{{ addslashes($featuredImages[1]->title) }}', '{{ addslashes($featuredImages[1]->caption ?? '') }}', 1)">
+                                onclick="openLightbox('{{ asset($featuredImages[1]->image_path) }}', '{{ addslashes($featuredImages[1]->title) }}', '{{ addslashes($featuredImages[1]->caption ?? '') }}', 1)">
                                 <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                                    <img src="{{ asset('storage/' . $featuredImages[1]->image_path) }}"
+                                    <img src="{{ asset($featuredImages[1]->image_path) }}"
                                         alt="{{ $featuredImages[1]->image_alt ?? $featuredImages[1]->title }}"
                                         class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                                 </div>
@@ -901,13 +886,12 @@
                             </div>
                         @endif
 
-                        <!-- Row 2: 4 square images -->
                         @for($i = 2; $i < 6; $i++)
                             @if(isset($featuredImages[$i]))
                                 <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
-                                    onclick="openLightbox('{{ asset('storage/' . $featuredImages[$i]->image_path) }}', '{{ addslashes($featuredImages[$i]->title) }}', '{{ addslashes($featuredImages[$i]->caption ?? '') }}', {{ $i }})">
+                                    onclick="openLightbox('{{ asset($featuredImages[$i]->image_path) }}', '{{ addslashes($featuredImages[$i]->title) }}', '{{ addslashes($featuredImages[$i]->caption ?? '') }}', {{ $i }})">
                                     <div class="aspect-square w-full overflow-hidden bg-gray-100">
-                                        <img src="{{ asset('storage/' . $featuredImages[$i]->image_path) }}"
+                                        <img src="{{ asset($featuredImages[$i]->image_path) }}"
                                             alt="{{ $featuredImages[$i]->image_alt ?? $featuredImages[$i]->title }}"
                                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                                     </div>
@@ -933,12 +917,11 @@
                             @endif
                         @endfor
 
-                        <!-- Row 3: 2 wide images -->
                         @if(isset($featuredImages[6]))
                             <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
-                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[6]->image_path) }}', '{{ addslashes($featuredImages[6]->title) }}', '{{ addslashes($featuredImages[6]->caption ?? '') }}', 6)">
+                                onclick="openLightbox('{{ asset($featuredImages[6]->image_path) }}', '{{ addslashes($featuredImages[6]->title) }}', '{{ addslashes($featuredImages[6]->caption ?? '') }}', 6)">
                                 <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                                    <img src="{{ asset('storage/' . $featuredImages[6]->image_path) }}"
+                                    <img src="{{ asset($featuredImages[6]->image_path) }}"
                                         alt="{{ $featuredImages[6]->image_alt ?? $featuredImages[6]->title }}"
                                         class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                                 </div>
@@ -965,9 +948,9 @@
 
                         @if(isset($featuredImages[7]))
                             <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
-                                onclick="openLightbox('{{ asset('storage/' . $featuredImages[7]->image_path) }}', '{{ addslashes($featuredImages[7]->title) }}', '{{ addslashes($featuredImages[7]->caption ?? '') }}', 7)">
+                                onclick="openLightbox('{{ asset($featuredImages[7]->image_path) }}', '{{ addslashes($featuredImages[7]->title) }}', '{{ addslashes($featuredImages[7]->caption ?? '') }}', 7)">
                                 <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
-                                    <img src="{{ asset('storage/' . $featuredImages[7]->image_path) }}"
+                                    <img src="{{ asset($featuredImages[7]->image_path) }}"
                                         alt="{{ $featuredImages[7]->image_alt ?? $featuredImages[7]->title }}"
                                         class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                                 </div>
@@ -993,13 +976,12 @@
                         @endif
                     </div>
                 @else
-                    <!-- Responsive Grid for fewer than 8 images -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         @foreach($featuredImages as $index => $image)
                             <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
-                                onclick="openLightbox('{{ asset('storage/' . $image->image_path) }}', '{{ addslashes($image->title) }}', '{{ addslashes($image->caption ?? '') }}', {{ $index }})">
+                                onclick="openLightbox('{{ asset($image->image_path) }}', '{{ addslashes($image->title) }}', '{{ addslashes($image->caption ?? '') }}', {{ $index }})">
                                 <div class="aspect-square w-full overflow-hidden bg-gray-100">
-                                    <img src="{{ asset('storage/' . $image->image_path) }}"
+                                    <img src="{{ asset($image->image_path) }}"
                                         alt="{{ $image->image_alt ?? $image->title }}"
                                         class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                                 </div>
@@ -1026,7 +1008,6 @@
                     </div>
                 @endif
             @else
-                <!-- Symmetrical Fallback Layout -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                     @php
                         $fallbackImages = [
@@ -1041,7 +1022,6 @@
                         ];
                     @endphp
 
-                    <!-- Row 1: 2 large images -->
                     <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 md:row-span-2 cursor-pointer gallery-item"
                         onclick="openLightbox('/imgs/gallery/1.jpg', '{{ $fallbackImages[0]['title'] }}', 'Experience luxury accommodation', 0)">
                         <div class="aspect-[4/3] md:aspect-[2/1] w-full overflow-hidden bg-gray-200">
@@ -1094,7 +1074,6 @@
                         </div>
                     </div>
 
-                    <!-- Row 2: 4 square images -->
                     @for($i = 2; $i < 6; $i++)
                         <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer gallery-item"
                             onclick="openLightbox('/imgs/gallery/{{ $fallbackImages[$i]['img'] }}.jpg', '{{ $fallbackImages[$i]['title'] }}', 'Luxury experience', {{ $i }})">
@@ -1124,7 +1103,6 @@
                         </div>
                     @endfor
 
-                    <!-- Row 3: 2 wide images -->
                     <div class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 cursor-pointer gallery-item"
                         onclick="openLightbox('/imgs/gallery/7.jpg', '{{ $fallbackImages[6]['title'] }}', 'Fine dining experience', 6)">
                         <div class="aspect-[2/1] w-full overflow-hidden bg-gray-200">
@@ -1179,7 +1157,6 @@
                 </div>
             @endif
 
-            <!-- Stats Section -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-12 border-t border-gray-200">
                 <div class="text-center">
                     <div class="text-3xl md:text-4xl font-serif text-darkAccent font-light mb-2">50+</div>
@@ -1199,7 +1176,6 @@
                 </div>
             </div>
 
-            <!-- Call to Action -->
             <div class="text-center mt-12">
                 <a href="{{ route('public.gallery') }}"
                     class="inline-flex items-center px-8 py-4 bg-darkAccent text-white rounded-full hover:bg-opacity-90 transform hover:scale-105 transition-all duration-300 font-medium text-lg shadow-xl group">
@@ -1220,11 +1196,9 @@
         </div>
     </section>
 
-    <!-- Enhanced Lightbox - Consistent with Gallery Page -->
     <div id="lightbox"
         class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
         <div class="relative w-full h-full flex items-center justify-center">
-            <!-- Close Button - Fixed Position -->
             <button onclick="closeLightbox()"
                 class="fixed top-4 sm:top-6 right-4 sm:right-6 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-2 sm:p-3 lightbox-control-mobile"
                 title="Close (Esc)">
@@ -1233,7 +1207,6 @@
                 </svg>
             </button>
 
-            <!-- Navigation Arrows - FIXED POSITIONS -->
             <button id="lightbox-prev" onclick="navigateLightbox(-1)"
                 class="fixed left-4 sm:left-6 top-1/2 transform -translate-y-1/2 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-3 sm:p-4 lightbox-control-mobile"
                 title="Previous (←)">
@@ -1250,7 +1223,6 @@
                 </svg>
             </button>
 
-            <!-- Toggle Caption Button -->
             <button id="toggle-caption" onclick="toggleCaption()"
                 class="fixed top-4 sm:top-6 left-4 sm:left-6 z-50 text-white hover:text-gray-300 transition-all duration-200 lightbox-control rounded-full p-2 sm:p-3 lightbox-control-mobile"
                 title="Toggle caption (C)">
@@ -1266,21 +1238,17 @@
                 </svg>
             </button>
 
-            <!-- Image Container -->
             <div id="lightbox-container"
                 class="relative flex items-center justify-center max-w-[95vw] sm:max-w-[90vw] max-h-[80vh] sm:max-h-[85vh]">
-                <!-- Loading Spinner -->
                 <div id="lightbox-loading" class="absolute inset-0 flex items-center justify-center z-10 hidden">
                     <div class="animate-spin rounded-full h-8 sm:h-12 w-8 sm:w-12 border-b-2 border-white"></div>
                 </div>
 
-                <!-- Main Image -->
                 <img id="lightbox-image" src="" alt=""
                     class="max-w-[90vw] sm:max-w-[85vw] max-h-[75vh] sm:max-h-[80vh] w-auto h-auto rounded-lg shadow-2xl transition-all duration-300 cursor-zoom-in lightbox-image-mobile"
                     style="object-fit: contain;" onload="handleImageLoad(this)" onerror="handleImageError(this)">
             </div>
 
-            <!-- Caption Panel -->
             <div id="lightbox-caption-panel"
                 class="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 max-w-2xl w-full mx-2 sm:mx-4 transition-all duration-300 opacity-100 border border-white/10 lightbox-caption-mobile">
                 <h3 id="lightbox-title"
@@ -1288,7 +1256,6 @@
                 <p id="lightbox-caption"
                     class="text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed text-center"></p>
 
-                <!-- Image Info -->
                 <div
                     class="flex justify-center items-center mt-2 sm:mt-3 text-gray-400 text-xs md:text-sm space-x-2 sm:space-x-4">
                     <span id="image-dimensions" class="flex items-center">
@@ -1305,7 +1272,6 @@
                 </div>
             </div>
 
-            <!-- Zoom Controls - ADJUSTED FOR LANDSCAPE -->
             <div
                 class="fixed bottom-16 sm:bottom-20 right-4 sm:right-6 flex flex-col space-y-1 sm:space-y-2 z-50 zoom-controls">
                 <button id="zoom-in" onclick="zoomImage(0.1)"
@@ -1332,9 +1298,7 @@
         </div>
     </div>
 
-    <!-- Main section with wavy lines -->
     <section class="relative py-20 md:py-80 text-white overflow-hidden">
-        <!-- Wavy line top -->
         <div class="wavy-line wavy-line-top">
             <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
                 preserveAspectRatio="none">
@@ -1344,12 +1308,9 @@
             </svg>
         </div>
 
-        <!-- Background Image with Overlay -->
         <div class="absolute inset-0 z-0">
-            <!-- Background image -->
             <div class="bg-[url('{{ url('imgs/contact_bg.jpg') }}')] bg-cover bg-center bg-no-repeat absolute inset-0">
             </div>
-            <!-- Dark overlay -->
             <div class="absolute inset-0 bg-gradient-to-r from-red-900/80 to-red-900/70"></div>
         </div>
 
@@ -1373,7 +1334,6 @@
             </div>
         </div>
 
-        <!-- Wavy line bottom -->
         <div class="wavy-line wavy-line-bottom">
             <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
                 preserveAspectRatio="none">
@@ -1384,7 +1344,6 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
     <section id="contact" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="flex flex-col lg:flex-row gap-12">
@@ -1473,7 +1432,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 text-white pt-16 pb-8">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
@@ -1567,7 +1525,6 @@
         </div>
     </footer>
 
-    <!-- Back to Top Button -->
     <button id="back-to-top"
         class="fixed bottom-8 right-8 bg-accent text-white p-4 rounded-full shadow-lg opacity-0 invisible transition-all duration-300 z-50 hover:bg-red-600">
         <i class="fas fa-arrow-up"></i>

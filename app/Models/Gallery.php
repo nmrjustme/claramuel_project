@@ -71,12 +71,14 @@ class Gallery extends Model
     }
 
     /**
-     * Get thumbnail URL for the gallery.
+     * REFACTORED: Get thumbnail URL for the gallery.
+     * Removed the 'storage/' prefix to work with direct uploads on Hostinger.
      */
     public function getThumbnailUrlAttribute(): ?string
     {
         $firstImage = $this->firstImage();
-        return $firstImage ? asset('storage/' . $firstImage->image_path) : null;
+        // Point directly to the path (e.g., uploads/gallery_images/filename.jpg)
+        return $firstImage ? asset($firstImage->image_path) : null;
     }
 
     /**
@@ -104,18 +106,17 @@ class Gallery extends Model
         return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
     }
     
-/**
- * Get the first uploaded (or first ordered) image in this gallery.
- */
-public function firstImage()
-{
-    return $this->images()
-        ->where('is_active', true)
-        ->orderBy('sort_order')
-        ->orderBy('created_at')
-        ->first();
-}
-
+    /**
+     * Get the first active image in this gallery based on sort order.
+     */
+    public function firstImage()
+    {
+        return $this->images()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('created_at')
+            ->first();
+    }
 
     /**
      * Scope a query to filter by category.

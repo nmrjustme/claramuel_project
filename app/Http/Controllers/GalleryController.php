@@ -6,8 +6,6 @@ use App\Models\Gallery;
 use App\Models\GalleryImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 
 class GalleryController extends Controller
 {
@@ -16,43 +14,43 @@ class GalleryController extends Controller
     /**
      * Display the admin gallery management dashboard
      */
-public function index()
-{
-    // SIMPLE: Just get galleries with their images
-    $galleries = Gallery::with(['images']) // This loads all images for each gallery
-        ->withCount('images') // This counts the images
-        ->orderBy('sort_order')
-        ->orderBy('created_at', 'desc')
-        ->paginate(12);
+    public function index()
+    {
+        // SIMPLE: Just get galleries with their images
+        $galleries = Gallery::with(['images']) // This loads all images for each gallery
+            ->withCount('images') // This counts the images
+            ->orderBy('sort_order')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
-    $totalGalleries = Gallery::count();
-    $activeGalleries = Gallery::where('is_active', true)->count();
-    $totalImages = GalleryImage::count();
-    $featuredImages = GalleryImage::where('is_featured', true)->where('is_active', true)->count();
-    $categories = Gallery::getCategories();
+        $totalGalleries = Gallery::count();
+        $activeGalleries = Gallery::where('is_active', true)->count();
+        $totalImages = GalleryImage::count();
+        $featuredImages = GalleryImage::where('is_featured', true)->where('is_active', true)->count();
+        $categories = Gallery::getCategories();
 
-    return view('admin.galleries.index', compact(
-        'galleries',
-        'totalGalleries',
-        'activeGalleries',
-        'totalImages',
-        'featuredImages',
-        'categories'
-    ));
-}
+        return view('admin.galleries.index', compact(
+            'galleries',
+            'totalGalleries',
+            'activeGalleries',
+            'totalImages',
+            'featuredImages',
+            'categories'
+        ));
+    }
 
-/**
- * Display a single gallery
- */
-public function show($id)
-{
-    // Get the gallery with its images ordered by sort_order
-    $gallery = Gallery::with(['images' => function($query) {
-        $query->orderBy('sort_order');
-    }])->findOrFail($id);
+    /**
+     * Display a single gallery
+     */
+    public function show($id)
+    {
+        // Get the gallery with its images ordered by sort_order
+        $gallery = Gallery::with(['images' => function($query) {
+            $query->orderBy('sort_order');
+        }])->findOrFail($id);
 
-    return view('admin.galleries.show', compact('gallery'));
-}
+        return view('admin.galleries.show', compact('gallery'));
+    }
 
     /**
      * Show the form for creating a new gallery
@@ -119,203 +117,219 @@ public function show($id)
      * Delete the specified gallery
      */
     public function destroy(Gallery $gallery)
-{
-    try {
-        // Delete associated images first if needed
-        $gallery->images()->delete();
-        
-        // Delete the gallery
-        $gallery->delete();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Gallery deleted successfully'
-        ]);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error deleting gallery: ' . $e->getMessage()
-        ], 500);
+    {
+        try {
+            DB::transaction(function () use ($gallery) {
+                // Delete physical images first
+                foreach ($gallery->images as $image) {
+                    if ($image->image_path && file_exists(public_path($image->image_path))) {
+                        @unlink(public_path($image->image_path));
+                    }
+                    $image->delete();
+                }
+                
+                // Delete the gallery
+                $gallery->delete();
+            });
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Gallery deleted successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting gallery: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
+
     /**
      * Upload images to gallery
      */
     public function uploadImages(Request $request)
-{
-    try {
-        $request->validate([
-            'gallery_id' => 'required|exists:galleries,id',
-            'images' => 'required|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'category' => 'nullable|string|max:100',
-            'titles' => 'sometimes|array',
-            'titles.*' => 'nullable|string|max:255',
-            'alt_texts' => 'sometimes|array',
-            'alt_texts.*' => 'nullable|string|max:255',
-            'active_status' => 'sometimes|array',
-            'active_status.*' => 'nullable|boolean'
-        ]);
+    {
+        try {
+            $request->validate([
+                'gallery_id' => 'required|exists:galleries,id',
+                'images' => 'required|array',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+                'category' => 'nullable|string|max:100',
+                'titles' => 'sometimes|array',
+                'titles.*' => 'nullable|string|max:255',
+                'alt_texts' => 'sometimes|array',
+                'alt_texts.*' => 'nullable|string|max:255',
+                'active_status' => 'sometimes|array',
+                'active_status.*' => 'nullable|boolean'
+            ]);
 
-        $gallery = Gallery::findOrFail($request->gallery_id);
-        $uploadedImages = [];
+            $gallery = Gallery::findOrFail($request->gallery_id);
+            $uploadedImages = [];
 
-        DB::transaction(function () use ($request, $gallery, &$uploadedImages) {
-            foreach ($request->file('images') as $index => $image) {
-                // Generate unique filename
-                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                
-                // Store original image
-                $imagePath = $image->storeAs('gallery_images', $filename, 'public');
-
-                // Get custom title if provided, otherwise use filename without extension
-                $customTitle = $request->titles[$index] ?? null;
-                $title = $customTitle ?: pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-                
-                // Get custom alt text if provided, otherwise use title
-                $customAlt = $request->alt_texts[$index] ?? null;
-                $altText = $customAlt ?: $title;
-
-                // Get active status (default to true if not provided)
-                $isActive = $request->active_status[$index] ?? true;
-                $isActive = filter_var($isActive, FILTER_VALIDATE_BOOLEAN);
-
-                // Get next sort order
-                $maxSortOrder = GalleryImage::where('gallery_id', $gallery->id)->max('sort_order') ?? 0;
-
-                $galleryImage = GalleryImage::create([
-                    'gallery_id' => $gallery->id,
-                    'title' => $title,
-                    'image_path' => $imagePath,
-                    'image_alt' => $altText,
-                    'category' => $request->category ?? 'any',
-                    'sort_order' => $maxSortOrder + 1,
-                    'is_active' => $isActive
-                ]);
-
-                $uploadedImages[] = $galleryImage;
+            // REFACTORED: Define direct public path
+            $destinationPath = public_path('uploads/gallery_images');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0775, true);
             }
-        });
 
-        return response()->json([
-            'message' => count($uploadedImages) . ' images uploaded successfully!',
-            'count' => count($uploadedImages)
-        ]);
+            DB::transaction(function () use ($request, $gallery, &$uploadedImages, $destinationPath) {
+                foreach ($request->file('images') as $index => $image) {
+                    // Generate unique filename
+                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    
+                    // REFACTORED: Move file directly to public_html/uploads
+                    $image->move($destinationPath, $filename);
+                    $imagePath = 'uploads/gallery_images/' . $filename;
 
-    } catch (\Exception $e) {
-        \Log::error('Upload error:', ['error' => $e->getMessage()]);
-        
-        return response()->json([
-            'message' => 'Upload failed: ' . $e->getMessage()
-        ], 500);
+                    // Get custom title if provided, otherwise use filename without extension
+                    $customTitle = $request->titles[$index] ?? null;
+                    $title = $customTitle ?: pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+                    
+                    // Get custom alt text if provided, otherwise use title
+                    $customAlt = $request->alt_texts[$index] ?? null;
+                    $altText = $customAlt ?: $title;
+
+                    // Get active status (default to true if not provided)
+                    $isActive = $request->active_status[$index] ?? true;
+                    $isActive = filter_var($isActive, FILTER_VALIDATE_BOOLEAN);
+
+                    // Get next sort order
+                    $maxSortOrder = GalleryImage::where('gallery_id', $gallery->id)->max('sort_order') ?? 0;
+
+                    $galleryImage = GalleryImage::create([
+                        'gallery_id' => $gallery->id,
+                        'title' => $title,
+                        'image_path' => $imagePath,
+                        'image_alt' => $altText,
+                        'category' => $request->category ?? 'any',
+                        'sort_order' => $maxSortOrder + 1,
+                        'is_active' => $isActive
+                    ]);
+
+                    $uploadedImages[] = $galleryImage;
+                }
+            });
+
+            return response()->json([
+                'message' => count($uploadedImages) . ' images uploaded successfully!',
+                'count' => count($uploadedImages)
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Upload error:', ['error' => $e->getMessage()]);
+            
+            return response()->json([
+                'message' => 'Upload failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     /**
      * Get all images for AJAX loading
      */
     public function getAllImages()
-{
-    try {
-        $images = GalleryImage::with(['gallery' => function($query) {
-            $query->select('id', 'title');
-        }])
-        ->orderBy('created_at', 'desc')
-        ->get()
-        ->map(function($image) {
-            return [
-                'id' => $image->id,
-                'title' => $image->title,
-                'caption' => $image->caption,
-                'image_path' => $image->image_path,
-                'image_alt' => $image->image_alt,
-                'is_featured' => $image->is_featured,
-                'is_active' => $image->is_active,
-                'sort_order' => $image->sort_order,
-                'category' => $image->category,
-                'gallery' => $image->gallery ? [
-                    'id' => $image->gallery->id,
-                    'title' => $image->gallery->title
-                ] : null,
-                'created_at' => $image->created_at,
-                'updated_at' => $image->updated_at
-            ];
-        });
+    {
+        try {
+            $images = GalleryImage::with(['gallery' => function($query) {
+                $query->select('id', 'title');
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($image) {
+                return [
+                    'id' => $image->id,
+                    'title' => $image->title,
+                    'caption' => $image->caption,
+                    'image_path' => $image->image_path,
+                    'image_alt' => $image->image_alt,
+                    'is_featured' => $image->is_featured,
+                    'is_active' => $image->is_active,
+                    'sort_order' => $image->sort_order,
+                    'category' => $image->category,
+                    'gallery' => $image->gallery ? [
+                        'id' => $image->gallery->id,
+                        'title' => $image->gallery->title
+                    ] : null,
+                    'created_at' => $image->created_at,
+                    'updated_at' => $image->updated_at
+                ];
+            });
 
-        return response()->json([
-            'success' => true,
-            'images' => $images,
-            'count' => $images->count()
-        ]);
+            return response()->json([
+                'success' => true,
+                'images' => $images,
+                'count' => $images->count()
+            ]);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to load images: ' . $e->getMessage(),
-            'images' => []
-        ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load images: ' . $e->getMessage(),
+                'images' => []
+            ], 500);
+        }
     }
-}
 
-public function setFeatured($id)
-{
-    try {
-        $image = GalleryImage::findOrFail($id);
-            
-        // Set this image as featured
-        $image->update(['is_featured' => true]);
+    public function setFeatured($id)
+    {
+        try {
+            $image = GalleryImage::findOrFail($id);
+                
+            // Set this image as featured
+            $image->update(['is_featured' => true]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Image set as featured successfully'
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error setting featured image: ' . $e->getMessage()
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Image set as featured successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error setting featured image: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
-public function removeFeatured($id)
-{
-    try {
-        $image = GalleryImage::findOrFail($id);
-        $image->update(['is_featured' => false]);
+    public function removeFeatured($id)
+    {
+        try {
+            $image = GalleryImage::findOrFail($id);
+            $image->update(['is_featured' => false]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Image removed from featured successfully'
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error removing featured image: ' . $e->getMessage()
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Image removed from featured successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error removing featured image: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     /**
- * Get image data for editing
- */
-public function getImage($id)
-{
-    $image = GalleryImage::with('gallery')->findOrFail($id);
-    return response()->json(['image' => $image]);
-}
+     * Get image data for editing
+     */
+    public function getImage($id)
+    {
+        $image = GalleryImage::with('gallery')->findOrFail($id);
+        return response()->json(['image' => $image]);
+    }
 
-/**
- * Show image edit form (if you want a separate page)
- */
-public function editImage($id)
-{
-    $image = GalleryImage::with('gallery')->findOrFail($id);
-    $galleries = Gallery::active()->get();
-    $categories = GalleryImage::getCategories();
-    
-    return view('admin.galleries.edit-image', compact('image', 'galleries', 'categories'));
-}
+    /**
+     * Show image edit form (if you want a separate page)
+     */
+    public function editImage($id)
+    {
+        $image = GalleryImage::with('gallery')->findOrFail($id);
+        $galleries = Gallery::active()->get();
+        $categories = GalleryImage::getCategories();
+        
+        return view('admin.galleries.edit-image', compact('image', 'galleries', 'categories'));
+    }
+
     // ==================== API METHODS (Keep your existing API methods) ====================
 
     /**
@@ -424,17 +438,18 @@ public function editImage($id)
         DB::transaction(function () use ($id) {
             $gallery = Gallery::findOrFail($id);
             
-            // Delete associated images
+            // REFACTORED: Delete physical image files
             foreach ($gallery->images as $image) {
-                // Delete physical image file
-                if (Storage::disk('public')->exists($image->image_path)) {
-                    Storage::disk('public')->delete($image->image_path);
+                if ($image->image_path && file_exists(public_path($image->image_path))) {
+                    @unlink(public_path($image->image_path));
                 }
-                // Delete thumbnail if exists
-                $thumbnailPath = 'thumbnails/' . basename($image->image_path);
-                if (Storage::disk('public')->exists($thumbnailPath)) {
-                    Storage::disk('public')->delete($thumbnailPath);
+                
+                // Delete thumbnail if exists (assuming format uploads/thumbnails/filename)
+                $thumbnailPath = 'uploads/thumbnails/' . basename($image->image_path);
+                if (file_exists(public_path($thumbnailPath))) {
+                    @unlink(public_path($thumbnailPath));
                 }
+                
                 $image->delete();
             }
             
@@ -489,13 +504,20 @@ public function editImage($id)
         $gallery = Gallery::findOrFail($galleryId);
         $uploadedImages = [];
 
-        DB::transaction(function () use ($request, $gallery, &$uploadedImages) {
+        // REFACTORED: Define direct public path
+        $destinationPath = public_path('uploads/gallery_images');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0775, true);
+        }
+
+        DB::transaction(function () use ($request, $gallery, &$uploadedImages, $destinationPath) {
             foreach ($request->file('images') as $image) {
                 // Generate unique filename
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 
-                // Store original image
-                $imagePath = $image->storeAs('gallery_images', $filename, 'public');
+                // REFACTORED: Move file directly to public_html/uploads
+                $image->move($destinationPath, $filename);
+                $imagePath = 'uploads/gallery_images/' . $filename;
                 
 
                 // Get next sort order
@@ -525,74 +547,66 @@ public function editImage($id)
      * Image Listing - Display images within galleries
      */
     public function getImages(Request $request, $galleryId = null)
-{
-    // Start with active images by default
-    $query = GalleryImage::with('gallery')->active();
+    {
+        // Start with active images by default
+        $query = GalleryImage::with('gallery')->active();
 
-    // Allow showing inactive images if explicitly requested
-    if ($request->has('include_inactive') && $request->boolean('include_inactive')) {
-        $query = GalleryImage::with('gallery');
+        // Allow showing inactive images if explicitly requested
+        if ($request->has('include_inactive') && $request->boolean('include_inactive')) {
+            $query = GalleryImage::with('gallery');
+        }
+
+        if ($galleryId) {
+            $query->where('gallery_id', $galleryId);
+        }
+
+        // Filter by category - use your model scope
+        if ($request->has('category') && $request->category !== 'all') {
+            $query->byCategory($request->category);
+        }
+
+        // Use model's ordered scope instead of manual ordering
+        $images = $query->ordered()->paginate($request->get('per_page', 24));
+
+        return response()->json(['images' => $images]);
     }
-
-    if ($galleryId) {
-        $query->where('gallery_id', $galleryId);
-    }
-
-    // Filter by category - use your model scope
-    if ($request->has('category') && $request->category !== 'all') {
-        $query->byCategory($request->category);
-    }
-
-    // Use model's ordered scope instead of manual ordering
-    $images = $query->ordered()->paginate($request->get('per_page', 24));
-
-    return response()->json(['images' => $images]);
-}
 
 
 
     /**
- * Edit Image Details - Update title, alt text, caption, category
- */
-public function updateImage(Request $request, $id)
-{
-    $image = GalleryImage::findOrFail($id);
+     * Edit Image Details - Update title, alt text, caption, category
+     */
+    public function updateImage(Request $request, $id)
+    {
+        $image = GalleryImage::findOrFail($id);
 
-    $request->validate([
-        'title' => 'nullable|string|max:255',
-        'image_alt' => 'nullable|string|max:255',
-        'caption' => 'nullable|string',
-        'category' => 'nullable|string|max:100',
-        'sort_order' => 'nullable|integer',
-        'is_featured' => 'nullable|boolean',
-        'is_active' => 'nullable|boolean'
-    ]);
+        $request->validate([
+            'title' => 'nullable|string|max:255',
+            'image_alt' => 'nullable|string|max:255',
+            'caption' => 'nullable|string',
+            'category' => 'nullable|string|max:100',
+            'sort_order' => 'nullable|integer',
+            'is_featured' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean'
+        ]);
 
-    // Log the incoming data for debugging
-    \Log::info('Updating image data:', [
-        'id' => $id,
-        'data' => $request->all(),
-        'is_featured' => $request->is_featured,
-        'is_active' => $request->is_active
-    ]);
+        // Handle checkbox values - ensure they are proper booleans
+        $data = $request->all();
+        
+        // Convert checkbox values to proper booleans
+        $data['is_featured'] = filter_var($data['is_featured'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $data['is_active'] = filter_var($data['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        
+        // Ensure sort_order is integer
+        $data['sort_order'] = intval($data['sort_order'] ?? 0);
 
-    // Handle checkbox values - ensure they are proper booleans
-    $data = $request->all();
-    
-    // Convert checkbox values to proper booleans
-    $data['is_featured'] = filter_var($data['is_featured'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $data['is_active'] = filter_var($data['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN);
-    
-    // Ensure sort_order is integer
-    $data['sort_order'] = intval($data['sort_order'] ?? 0);
+        $image->update($data);
 
-    $image->update($data);
-
-    return response()->json([
-        'message' => 'Image updated successfully',
-        'image' => $image->fresh()
-    ]);
-}
+        return response()->json([
+            'message' => 'Image updated successfully',
+            'image' => $image->fresh()
+        ]);
+    }
 
     /**
      * Delete Images - Remove individual images
@@ -601,15 +615,15 @@ public function updateImage(Request $request, $id)
     {
         $image = GalleryImage::findOrFail($id);
 
-        // Delete physical files
-        if (Storage::disk('public')->exists($image->image_path)) {
-            Storage::disk('public')->delete($image->image_path);
+        // REFACTORED: Delete physical files using native PHP
+        if ($image->image_path && file_exists(public_path($image->image_path))) {
+            @unlink(public_path($image->image_path));
         }
 
-        // Delete thumbnail
-        $thumbnailPath = 'thumbnails/' . basename($image->image_path);
-        if (Storage::disk('public')->exists($thumbnailPath)) {
-            Storage::disk('public')->delete($thumbnailPath);
+        // Delete thumbnail if it exists
+        $thumbnailPath = 'uploads/thumbnails/' . basename($image->image_path);
+        if (file_exists(public_path($thumbnailPath))) {
+            @unlink(public_path($thumbnailPath));
         }
 
         $image->delete();
@@ -644,8 +658,9 @@ public function updateImage(Request $request, $id)
             case 'delete':
                 $images = GalleryImage::whereIn('id', $imageIds)->get();
                 foreach ($images as $image) {
-                    if (Storage::disk('public')->exists($image->image_path)) {
-                        Storage::disk('public')->delete($image->image_path);
+                    // REFACTORED: Delete physical file
+                    if ($image->image_path && file_exists(public_path($image->image_path))) {
+                        @unlink(public_path($image->image_path));
                     }
                     $image->delete();
                 }
@@ -679,38 +694,38 @@ public function updateImage(Request $request, $id)
      * Display public gallery page
      */
     public function publicGallery()
-{
-    $galleries = Gallery::with(['activeImages' => function($query) {
-        $query->ordered(); // Use model scope
-    }])
-    ->active() // Use model scope instead of manual where
-    ->ordered() // Use model scope for consistent ordering
-    ->get();
-    
-    $categories = Gallery::active() // Use model scope
-        ->distinct()
-        ->pluck('category')
-        ->filter()
-        ->values();
-    
-    return view('gallery', compact('galleries', 'categories'));
-}
+    {
+        $galleries = Gallery::with(['activeImages' => function($query) {
+            $query->ordered(); // Use model scope
+        }])
+        ->active() // Use model scope instead of manual where
+        ->ordered() // Use model scope for consistent ordering
+        ->get();
+        
+        $categories = Gallery::active() // Use model scope
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values();
+        
+        return view('gallery', compact('galleries', 'categories'));
+    }
 
     /**
      * Display a single gallery with its images (public)
      */
     public function showGallery($id)
-{
-    $gallery = Gallery::with(['activeImages' => function($query) {
-            $query->ordered(); // Use model scope
-        }])
-        ->active() // Use model scope
-        ->findOrFail($id);
+    {
+        $gallery = Gallery::with(['activeImages' => function($query) {
+                $query->ordered(); // Use model scope
+            }])
+            ->active() // Use model scope
+            ->findOrFail($id);
 
-    $totalImages = GalleryImage::active()->count(); // Use model scope
+        $totalImages = GalleryImage::active()->count(); // Use model scope
 
-    return view('gallery-show', compact('gallery', 'totalImages'));
-}
+        return view('gallery-show', compact('gallery', 'totalImages'));
+    }
 
     /**
      * API endpoint to get featured images (for your landing page)
@@ -736,7 +751,7 @@ public function updateImage(Request $request, $id)
 
     // In your GalleryController
 
-  public function bulkDelete(Request $request)
+    public function bulkDelete(Request $request)
     {
         $request->validate([
             'image_ids' => 'required|array',
@@ -746,7 +761,18 @@ public function updateImage(Request $request, $id)
 
         try {
             $imageIds = $request->image_ids;
-            $deletedCount = GalleryImage::whereIn('id', $imageIds)->delete();
+            
+            // REFACTORED: Must retrieve them first to delete physical files!
+            $images = GalleryImage::whereIn('id', $imageIds)->get();
+            $deletedCount = 0;
+            
+            foreach ($images as $image) {
+                if ($image->image_path && file_exists(public_path($image->image_path))) {
+                    @unlink(public_path($image->image_path));
+                }
+                $image->delete();
+                $deletedCount++;
+            }
 
             return response()->json([
                 'success' => true,
@@ -760,7 +786,7 @@ public function updateImage(Request $request, $id)
         }
     }
 
-public function reorder(Request $request)
+    public function reorder(Request $request)
     {
         $request->validate([
             'updates' => 'required|array',
