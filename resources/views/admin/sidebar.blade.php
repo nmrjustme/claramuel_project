@@ -29,7 +29,7 @@
             </svg>
             Dashboard
         </a>
-
+        
         {{-- Section Label --}}
         <div class="pt-4 pb-2 px-4 text-xs font-bold text-red-300 uppercase tracking-wider">Operations</div>
 

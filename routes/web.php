@@ -49,7 +49,7 @@ use App\Http\Controllers\DayTourFacilitiesController;
 use App\Models\FacilityBookingLog;
 use App\Services\InvoiceService; // adjust namespace if different
 use App\Http\Controllers\AccountingReportController;
-
+use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\RoomHoldController;
 
 Route::get('/test-invoice/{id}', function ($id) {
@@ -248,8 +248,12 @@ Route::prefix('admin-management')->name('admin.')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/bookings/create', [AdminBookingController::class, 'create'])->name('admin.bookings.create');
+    
+    // AJAX Submission
+    Route::post('/bookings/submit-admin', [AdminBookingController::class, 'storeAdminBooking'])->name('submit.booking.admin');
     //========================
-    // Room Reports
+    // Room Reportsxckl
     //========================
     // Route::get('/earnings-chart', [RoomBookReportController::class, 'index'])->name('earnings.chart');
     // Route::get('/api/earnings-data', [RoomBookReportController::class, 'earningsByRoomCategory'])->name('api.earnings.data');

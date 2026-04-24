@@ -1111,7 +1111,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-
+            window.onpageshow = function(event) {
+                if (event.persisted) {
+                    window.location.reload(); 
+                }
+            };
             const termsLink = document.querySelector('a[href="#"]');
             const termsModal = document.getElementById('terms-modal');
             const closeModalBtn = document.getElementById('close-terms-modal');

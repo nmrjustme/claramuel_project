@@ -46,7 +46,7 @@ class MayaWebhookSetupController extends Controller
 
             case 'PAYMENT_EXPIRED':
                 return $this->updateOrder('expired', $request);
-
+            
             case 'PAYMENT_CANCELLED':
             case 'CHECKOUT_DROPOUT':
             case 'CHECKOUT_CANCELLED':
